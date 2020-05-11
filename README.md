@@ -27,6 +27,8 @@ userid@host portfoliomanager %  source ./venv/bin/activate
 ```
 * Start django server
 ```
+(venv) userid@host src % python manage.py makemigrations
+(venv) userid@host src % python manage.py migrate
 (venv) userid@host src % python manage.py runserver
 ```
 * Open homepage at http://127.0.0.1:8000/
