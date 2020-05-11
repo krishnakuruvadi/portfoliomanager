@@ -1,0 +1,16 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} Create PPF {% endblock viewname %}
+
+{% block content %}
+
+  <form action="." method="POST">
+    {% csrf_token %} {{ form.as_p }}
+    <input type="submit" value="Save" />
+  </form>
+
+{% endblock content %}

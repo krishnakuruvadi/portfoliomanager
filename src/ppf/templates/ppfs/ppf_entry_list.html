@@ -1,0 +1,32 @@
+{% extends 'base.html' %} 
+
+{% block viewname %} PPF Transactions {% endblock %} 
+
+{% block content %}
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+            <th scope="col">#</th>
+            <th scope="col">Transaction Date</th>
+            <th scope="col">Notes</th>
+            <th scope="col">Reference</th>
+            <th scope="col">Type</th>
+            <th scope="col">amount</th>
+            <th scope="col">Interest Component</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for instance in object_list %}
+                <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ instance.trans_date }}</td>
+                <td>{{ instance.notes }}</td>
+                <td>{{ instance.reference }}</td>
+                <td>{{ instance.entry_type }}</td>
+                <td>{{ instance.amount }}</td>
+                <td>{{ instance.interest_component }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

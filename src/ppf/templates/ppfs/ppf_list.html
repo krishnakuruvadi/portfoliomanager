@@ -1,0 +1,47 @@
+{% extends 'base.html' %} 
+
+{% block viewname %} PPFs {% endblock %} 
+
+{% block applicableactions %} 
+<div class="btn-toolbar mb-2 mb-md-0">
+  <div class="btn-group mr-2">
+    <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add PPF" style="font-size: 1.2em;"></i></a>
+  </div>
+</div>
+
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Number</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">User</th>
+        <th scope="col">Goal</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+
+        <td>
+          <a href="{{ instance.get_absolute_url }}">{{ instance.number }}</a>
+        </td>
+        <td>{{ instance.start_date }}</td>
+        <td>{{ instance.user }}</td>
+        <td>{{ instance.goal }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash-o fa-fw"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update"><i class="fa fa-pencil fa-fw"></i> </a>
+          <a href="{{ instance.get_absolute_url }}transactions"><i class="fa fa-file-text-o" aria-hidden="true"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
