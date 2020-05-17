@@ -1,0 +1,134 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+{% endblock applicableactions %} 
+{%block canvas %}
+
+{% endblock canvas %} 
+{% block content %} 
+  {% block viewname %} {{object.name }} {% endblock viewname %}
+  <table>
+    <tr>
+      <td>Number</td>
+      <td>{{ object.id }}</td>
+    </tr>
+    <tr>
+      <td>Name</td>
+      <td>{{ object.name }}</td>
+    </tr>
+    <tr>
+      <td>Start Date</td>
+      <td>{{ object.start_date }}</td>
+    </tr>
+    <tr>
+      <td>User</td>
+      <td>{{ object.user }}</td>
+    </tr>
+    <tr>
+      <td>Inflation</td>
+      <td>{{ object.inflation }}</td>
+    </tr>
+  </table>
+<br><br><br>
+<div class="row">
+  <div class='col-sm-3'>
+    <canvas id="classificationChart" width="200" height="200"></canvas>
+  </div>
+  <div class='col-sm-3'>
+    <canvas id="distributionChart" width="200" height="200"></canvas>
+  </div>
+  <div class='col-sm-3'>
+    <canvas id="statusChart" width="200" height="200"></canvas>
+  </div>
+</div>
+{% endblock content %}
+
+<script>
+  {% block jquery %}
+  var endpoint = '/goal/api/chart/data/{{ object.id }}'
+  var debt_equity = [0, 0]
+  var done_pending = [0, 0]
+  var debt_equity_labels = ['Debt', 'Equity']
+  var status_vals = [0, 0]
+  var status_labels = ['Achieved', 'Remaining']
+  var distribution_vals = [0, 0]
+  var distribution_labels = ['PPF', 'MF']
+  $.ajax({
+    method: "GET",
+    url: endpoint,
+    success: function(data){
+      console.log(data)
+      debt_equity = [data.debt, data.equity]
+      distribution_vals = [data.total_ppf, 0]
+      status_vals = [data.achieved, data.remaining]
+      console.log("debt_equity values")
+      console.log(debt_equity)
+      console.log("distribution_vals values")
+      console.log(distribution_vals)
+      console.log("status_vals values")
+      console.log(status_vals)
+      setChart()
+    },
+    error: function(error_data){
+      console.log("error")
+      console.log(error_data)
+    }
+  })
+  function setChart(){
+    var ctx = document.getElementById('classificationChart').getContext('2d');
+    var config = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: debt_equity,
+          backgroundColor: [
+            '#519463', '#a85b6a'
+          ],
+          label: 'Classification'
+        }],
+        labels: debt_equity_labels
+      },
+      options: {
+        responsive: true
+      }
+    };
+    var ctx2 = document.getElementById('distributionChart').getContext('2d');
+    var config2 = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: distribution_vals,
+          backgroundColor: [
+            '#519463', '#a85b6a'
+          ],
+          label: 'Distribution'
+        }],
+        labels: distribution_labels
+      },
+      options: {
+        responsive: true
+      }
+    };
+    var ctx3 = document.getElementById('statusChart').getContext('2d');
+    var config3 = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: status_vals,
+          backgroundColor: [
+            '#519463', '#a85b6a'
+          ],
+          label: 'Status'
+        }],
+        labels: status_labels
+      },
+      options: {
+        responsive: true
+      }
+    };
+    var classificationChart = new Chart(ctx,config);
+    var distributionChart = new Chart(ctx2, config2);
+    var statusChart = new Chart(ctx3, config3);
+  }
+  {% endblock jquery %}
+</script>

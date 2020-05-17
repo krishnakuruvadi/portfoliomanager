@@ -17,7 +17,7 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"
     />
 
     <title>Portfolio Manager</title>
@@ -38,16 +38,16 @@
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="/ppf">
-                  
-                  <img src="{% static 'media/ppf_1.png' %}" height="16" width="16" alt="PPF image">
-                  <span data-feather="file"></span>
+                  <!--img src="{% static 'media/ppf_1.png' %}" height="16" width="16" alt="PPF image"-->
+                  <!--span data-feather="file"></span-->
+                  <i class="fas fa-piggy-bank" aria-hidden="true" title="PPF" style="font-size: 1.2em;"></i>
                   PPF
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <span data-feather="shopping-cart"></span>
-                  Products
+                <a class="nav-link" href="/goal"> <i class="fas fa-bullseye" aria-hidden="true" title="Goal" style="font-size: 1.2em;"></i>
+                  <!--span data-feather="shopping-cart"></span-->
+                  Goals
                 </a>
               </li>
               <li class="nav-item">
@@ -107,13 +107,9 @@
           </div>
           
           {% block canvas %} 
-          <canvas
-            class="my-4 w-100"
-            id="myChart"
-            width="900"
-            height="380"
-          ></canvas>
+          <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
           {% endblock canvas %}
+          
           {% block content %} replace me {% endblock %}
         </main>
       </div>
@@ -139,5 +135,6 @@
         {% block jquery %}jquery data base{% endblock jquery %}
       })
     </script>
+    {% block javascript %}{% endblock %}
   </body>
 </html>

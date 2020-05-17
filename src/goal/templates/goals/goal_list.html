@@ -1,11 +1,11 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} PPFs {% endblock %} 
+{% block viewname %} Goals {% endblock %} 
 
 {% block applicableactions %} 
 <div class="btn-toolbar mb-2 mb-md-0">
   <div class="btn-group mr-2">
-    <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add PPF" style="font-size: 1.2em;"></i></a>
+    <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add Goal" style="font-size: 1.2em;"></i></a>
   </div>
 </div>
 
@@ -17,10 +17,12 @@
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
-        <th scope="col">Number</th>
+        <th scope="col">Name</th>
         <th scope="col">Start Date</th>
+        <th scope="col">Time Period</th>
+        <th scope="col">Final Value</th>
         <th scope="col">User</th>
-        <th scope="col">Goal</th>
+        <th scope="col">Notes</th>
         <th scope="col"></th>
       </tr>
     </thead>
@@ -30,15 +32,16 @@
         <th scope="row">{{ forloop.counter }}</th>
 
         <td>
-          <a href="{{ instance.get_absolute_url }}">{{ instance.number }}</a>
+          <a href="{{ instance.get_absolute_url }}">{{ instance.name }}</a>
         </td>
         <td>{{ instance.start_date }}</td>
+        <td>{{ instance.time_period }}</td>
+        <td>{{ instance.final_val }}</td>
         <td>{{ instance.user }}</td>
-        <td>{{ instance.goal }}</td>
+        <td>{{ instance.notes }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
           <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}transactions"><i class="far fa-file-alt" aria-hidden="true"></i></a>
         </td>
       </tr>
       {% endfor %}
