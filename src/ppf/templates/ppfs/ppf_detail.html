@@ -72,7 +72,8 @@ function setChart(){
     type:    'line',
     data:    {
       datasets: [
-        {label: "Balance",
+        {
+          label: "Balance",
           data: bal_values,
           fill: false,
           borderColor: 'green'
@@ -110,30 +111,30 @@ function setChart(){
       ]
     },
     options: {
-            responsive: true,
-            title:      {
-                display: true,
-                text:    "PPF"
-            },
-            scales:     {
-                xAxes: [{
-                    type:       "time",
-                    time:       {
-                        format: 'YYYY-MM-DD',
-                        tooltipFormat: 'll'
-                    },
-                    scaleLabel: {
-                        display:     true,
-                        labelString: 'Date'
-                    }
-                }],
-                yAxes: [{
-                    scaleLabel: {
-                        display:     true,
-                        labelString: 'Amount'
-                    }
-                }]
-            }
+      responsive: true,
+      title:      {
+        display: true,
+        text:    "PPF"
+      },
+      scales:     {
+        xAxes: [{
+          type:       "time",
+          time:       {
+            format: 'YYYY-MM-DD',
+            tooltipFormat: 'll'
+          },
+          scaleLabel: {
+            display:     true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display:     true,
+            labelString: 'Amount'
+          }
+        }]
+      }
     }
   };
   var myChart = new Chart(ctx,config); 

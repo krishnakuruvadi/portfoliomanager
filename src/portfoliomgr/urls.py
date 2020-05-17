@@ -21,6 +21,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('ppf/', include('ppf.urls')),
+    path('goal/', include('goal.urls')),
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),
 ]
