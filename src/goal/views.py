@@ -39,7 +39,7 @@ class GoalDeleteView(DeleteView):
         return get_object_or_404(Goal, id=id_)
 
     def get_success_url(self):
-        return reverse('ppfs:ppf-list')
+        return reverse('goals:goal-list')
 
 def add_goal(request):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
@@ -98,8 +98,8 @@ def add_retirement_goal(request):
             expense_period = Decimal(request.POST['expense_period'])
             post_returns = Decimal(request.POST['roi_corpus'])
             notes = request.POST['notes']
-            add_goal_entry(name, start_date, curr_val, time_period, inflation,
-                    final_val, user, recurring_pay_goal, expense_period,
+            add_goal_entry(name, start_date, curr_val, time_period*12, inflation,
+                    final_val, user, recurring_pay_goal, expense_period*12,
                     post_returns, notes)
         else:
             print("calculate button pressed")
@@ -111,9 +111,9 @@ def add_retirement_goal(request):
             inflation = Decimal(request.POST['inflation'])
             expense_period = Decimal(request.POST['expense_period'])
             post_returns = Decimal(request.POST['roi_corpus'])
-            corpus = get_corpus_to_be_saved(int(curr_val*12), float(inflation), int(time_period/12), int(expense_period/12), float(post_returns))
+            corpus = get_corpus_to_be_saved(int(curr_val), float(inflation), int(time_period), int(expense_period), float(post_returns))
             print("calculated value", corpus)
-            dates, corpus_vals, expense_vals = get_depletion_vals(corpus, int(curr_val*12), int(time_period/12), int(expense_period/12), float(inflation),  float(post_returns), start_date)
+            dates, corpus_vals, expense_vals = get_depletion_vals(corpus, int(curr_val), int(time_period), int(expense_period), float(inflation),  float(post_returns), start_date)
             print(json.dumps(dates))
             context = {'user':user, 'startdate':start_date, 'name': name,
                         'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':corpus,
