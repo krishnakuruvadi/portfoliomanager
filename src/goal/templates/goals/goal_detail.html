@@ -1,12 +1,12 @@
 {% extends 'base.html' %} 
 
-{% block applicableactions %}
-{% endblock applicableactions %} 
-{%block canvas %}
+{% block applicableactions %}{% endblock applicableactions %} 
 
-{% endblock canvas %} 
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} {{object.name }} {% endblock viewname %}
+
 {% block content %} 
-  {% block viewname %} {{object.name }} {% endblock viewname %}
   <table>
     <tr>
       <td>Number</td>

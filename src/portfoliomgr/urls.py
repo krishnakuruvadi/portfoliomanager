@@ -22,6 +22,7 @@ from django.conf import settings
 urlpatterns = [
     path('ppf/', include('ppf.urls')),
     path('goal/', include('goal.urls')),
+    path('fixed-deposit/', include('fixed_deposit.urls')),
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),
 ]
