@@ -6,11 +6,12 @@
     <a style="padding-left:25px;" href="add-transaction"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
   </div>
 {% endblock applicableactions %} 
-{%block canvas %}
 
-{% endblock canvas %} 
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} {{object.number }} {% endblock viewname %}
+
 {% block content %} 
-  {% block viewname %} {{object.number }} {% endblock viewname %}
   <table>
     <tr>
       <td>Number</td>

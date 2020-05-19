@@ -1,0 +1,57 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} Add Fixed Deposit {% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST">
+    {% csrf_token %} 
+    <label for="number">Number</label>
+    <input type="text" id="number" name="number" value="{{number}}"><br><br>
+    
+    <label for="bank_name">Bank Name</label>
+    <input type="text" id="bank_name" name="bank_name" value="{{bank_name}}"><br><br>
+    
+    <label for="start_date">Start Date</label>
+    <input type="date" id="start_date" name="start_date" value="{{start_date}}"><br><br>
+
+    <label for="user">User</label>
+    <input type="text" id="user" name="user" value="{{user}}"><br><br>
+
+    <label for="goal">Goal</label>
+    <input type="text" id="number" name="goal" value="{{goal}}"><br><br>
+
+    <label for="principal">Principal</label>
+    <input type="number" id="principal" name="principal" value="{{principal}}"> <br><br>
+
+    <label for="roi">Rate of Interest</label>
+    <input type="number" id="roi" name="roi" value="{{roi}}" placeholder="1.0" step="0.01" min="0" max="20"> <br><br>
+    
+    <label for="time_period_days">Time period (days)</label>
+    <input type="number" id="time_period_days" name="time_period_days" value="{{time_period_days}}"> <br><br>
+
+    <label for="final_val">Maturity Value</label>
+    <input type="number" id="final_val" name="final_val" value="{{final_val}}"> 
+    <button type="submit" class="btn btn-primary" name="calculate">Calculate</button>
+    <br><br>
+    <label for="mat_date">Maturity Date</label>
+    <input type="date" id="mat_date" name="mat_date" value="{{mat_date}}"><br><br>
+
+
+    <label for="notes">Notes:</label>
+
+    <textarea name="notes" rows="5" cols="20"></textarea> 
+    <br>
+    <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+  </form>
+
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+  </script>
+{% endblock %}

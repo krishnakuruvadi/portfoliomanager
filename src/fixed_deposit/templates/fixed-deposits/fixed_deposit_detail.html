@@ -1,0 +1,56 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} {{object.number }} {% endblock viewname %}
+
+{% block content %} 
+
+  <table>
+    <tr>
+      <td>Id</td>
+      <td>{{ object.id }}</td>
+    </tr>
+    <tr>
+      <td>Number</td>
+      <td>{{ object.number }}</td>
+    </tr>
+    <tr>
+      <td>Bank Name</td>
+      <td>{{ object.bank_name }}</td>
+    </tr>
+    <tr>
+      <td>Principal</td>
+      <td>{{ object.principal }}</td>
+    </tr>
+    <tr>
+      <td>Start Date</td>
+      <td>{{ object.start_date }}</td>
+    </tr>
+    <tr>
+      <td>Maturity Date</td>
+      <td>{{ object.mat_date }}</td>
+    </tr>
+    <tr>
+      <td>Maturity Value</td>
+      <td>{{ object.final_val }}</td>
+    </tr>
+    <tr>
+      <td>Goal</td>
+      <td>{{ object.goal }}</td>
+    </tr>
+    <tr>
+      <td>User</td>
+      <td>{{ object.user }}</td>
+    </tr>
+  </table>
+<br><br><br>
+{% endblock content %}
+
+<script>
+  {% block jquery %}
+
+  {% endblock jquery %}
+</script>
