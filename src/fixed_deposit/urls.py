@@ -4,7 +4,8 @@ from .views import (
     FixedDepositListView,
     FixedDepositDetailView,
     FixedDepositDeleteView,
-    add_fixed_deposit
+    add_fixed_deposit,
+    update_fixed_deposit
 )
 
 app_name = 'fixed-deposits'
@@ -14,4 +15,5 @@ urlpatterns = [
     path('create/', add_fixed_deposit, name='fixed-deposit-add'),
     path('<id>/', FixedDepositDetailView.as_view(), name='fixed-deposit-detail'),
     path('<id>/delete/', FixedDepositDeleteView.as_view(), name='fixed-deposit-delete'),
+    path('<id>/update/', update_fixed_deposit, name='fixed-deposit-update'),
 ]
