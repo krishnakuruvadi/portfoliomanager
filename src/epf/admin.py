@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Epf, EpfEntry
+
+
+admin.site.register(Epf)
+admin.site.register(EpfEntry)

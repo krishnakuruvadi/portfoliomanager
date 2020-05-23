@@ -123,88 +123,91 @@ class ChartData(APIView):
     permission_classes = []
 
     def get(self, request, format=None, id=None):
-        ppf_details = Ppf.objects.get(number=id)
-        projected_rate = 8
-        years_completed = relativedelta(datetime.date.today(), ppf_details.start_date).years
-        print("completed years", years_completed)
-        years_remaining = 15-years_completed-1
-        ppf_data_principal = list()
-        ppf_data_interest = list()
-        ppf_data_bal = list()
-        interest = 0
-        principal = 0
-        first_date = datetime.date.today()
-        for entry in PpfEntry.objects.filter(number=id):
-            #ppf_data_dates.append(entry.trans_date)
-            if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
-                if entry.interest_component:
-                    interest += entry.amount
+        try:
+            ppf_details = Ppf.objects.get(number=id)
+            projected_rate = 8
+            years_completed = relativedelta(datetime.date.today(), ppf_details.start_date).years
+            print("completed years", years_completed)
+            years_remaining = 15-years_completed-1
+            ppf_data_principal = list()
+            ppf_data_interest = list()
+            ppf_data_bal = list()
+            interest = 0
+            principal = 0
+            first_date = datetime.date.today()
+            for entry in PpfEntry.objects.filter(number=id):
+                #ppf_data_dates.append(entry.trans_date)
+                if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
+                    if entry.interest_component:
+                        interest += entry.amount
+                    else:
+                        principal += entry.amount
                 else:
-                    principal += entry.amount
-            else:
-                principal -= entry.amount
-                if principal < 0:
-                    interest += principal
-                    principal = 0
-            prin = dict()
-            inter = dict()
-            bal = dict()
-            prin['x'] = entry.trans_date.strftime("%Y-%m-%d")
-            prin['y'] = principal
-            inter['x'] = entry.trans_date.strftime("%Y-%m-%d")
-            inter['y'] = interest
-            bal['x'] = entry.trans_date.strftime("%Y-%m-%d")
-            bal['y'] = principal+interest
-            first_date = entry.trans_date
-            ppf_data_principal.append(prin)
-            ppf_data_interest.append(inter)
-            ppf_data_bal.append(bal)
-        
-        avg_principal = int(principal/years_completed)
-        print("average payment", avg_principal)
-        ppf_exp_bal = list()
-        ppf_exp_interest = list()
-        ppf_exp_principal = list()
-        first_entry_prin = dict()
-        first_entry_prin['x'] = first_date.strftime("%Y-%m-%d")
-        first_entry_prin['y'] = principal
-        ppf_exp_principal.append(first_entry_prin)
-        first_entry_int = dict()
-        first_entry_int['x'] = first_date.strftime("%Y-%m-%d")
-        first_entry_int['y'] = interest
-        ppf_exp_interest.append(first_entry_int)
-        first_entry_bal = dict()
-        first_entry_bal['x'] = first_date.strftime("%Y-%m-%d")
-        first_entry_bal['y'] = principal+interest
-        ppf_exp_bal.append(first_entry_bal)
+                    principal -= entry.amount
+                    if principal < 0:
+                        interest += principal
+                        principal = 0
+                prin = dict()
+                inter = dict()
+                bal = dict()
+                prin['x'] = entry.trans_date.strftime("%Y-%m-%d")
+                prin['y'] = principal
+                inter['x'] = entry.trans_date.strftime("%Y-%m-%d")
+                inter['y'] = interest
+                bal['x'] = entry.trans_date.strftime("%Y-%m-%d")
+                bal['y'] = principal+interest
+                first_date = entry.trans_date
+                ppf_data_principal.append(prin)
+                ppf_data_interest.append(inter)
+                ppf_data_bal.append(bal)
+            
+            avg_principal = int(principal/years_completed)
+            print("average payment", avg_principal)
+            ppf_exp_bal = list()
+            ppf_exp_interest = list()
+            ppf_exp_principal = list()
+            first_entry_prin = dict()
+            first_entry_prin['x'] = first_date.strftime("%Y-%m-%d")
+            first_entry_prin['y'] = principal
+            ppf_exp_principal.append(first_entry_prin)
+            first_entry_int = dict()
+            first_entry_int['x'] = first_date.strftime("%Y-%m-%d")
+            first_entry_int['y'] = interest
+            ppf_exp_interest.append(first_entry_int)
+            first_entry_bal = dict()
+            first_entry_bal['x'] = first_date.strftime("%Y-%m-%d")
+            first_entry_bal['y'] = principal+interest
+            ppf_exp_bal.append(first_entry_bal)
 
-        #new_date = datetime.date.today()
-        for i in range(years_remaining):
-            prin = dict()
-            inter = dict()
-            bal = dict()
-            first_date = first_date+relativedelta(years=+1)
-            prin['x'] = first_date.strftime("%Y-%m-%d")
-            inter['x'] = prin['x']
-            bal['x'] = prin['x']
-            principal = principal + avg_principal
-            prin['y'] = principal
-            interest = interest + int((prin['y'] + interest) *decimal.Decimal(projected_rate/100))
-            inter['y'] = interest
-            bal['y'] = prin['y'] + inter['y']
-            print("on ", prin['x'], prin['y'], inter['y'], bal['y'])
-            ppf_exp_principal.append(prin)
-            ppf_exp_interest.append(inter)
-            ppf_exp_bal.append(bal)
+            #new_date = datetime.date.today()
+            for i in range(years_remaining):
+                prin = dict()
+                inter = dict()
+                bal = dict()
+                first_date = first_date+relativedelta(years=+1)
+                prin['x'] = first_date.strftime("%Y-%m-%d")
+                inter['x'] = prin['x']
+                bal['x'] = prin['x']
+                principal = principal + avg_principal
+                prin['y'] = principal
+                interest = interest + int((prin['y'] + interest) *decimal.Decimal(projected_rate/100))
+                inter['y'] = interest
+                bal['y'] = prin['y'] + inter['y']
+                print("on ", prin['x'], prin['y'], inter['y'], bal['y'])
+                ppf_exp_principal.append(prin)
+                ppf_exp_interest.append(inter)
+                ppf_exp_bal.append(bal)
 
-        data = {
-            "id": id,
-            "ppf_trans_principal": ppf_data_principal,
-            "ppf_trans_interest": ppf_data_interest,
-            "ppf_trans_bal": ppf_data_bal,
-            "ppf_exp_principal": ppf_exp_principal,
-            "ppf_exp_interest": ppf_exp_interest,
-            "ppf_exp_bal": ppf_exp_bal,
-        }
-        print(data)
+            data = {
+                "id": id,
+                "ppf_trans_principal": ppf_data_principal,
+                "ppf_trans_interest": ppf_data_interest,
+                "ppf_trans_bal": ppf_data_bal,
+                "ppf_exp_principal": ppf_exp_principal,
+                "ppf_exp_interest": ppf_exp_interest,
+                "ppf_exp_bal": ppf_exp_bal,
+            }
+            print(data)
+        except Ppf.DoesNotExist:
+            data = {}
         return Response(data)

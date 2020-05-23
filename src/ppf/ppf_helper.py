@@ -12,12 +12,12 @@ def ppf_add_transactions(bank, file_locn):
 
 
 def insert_ppf_trans_entry(ppf_number, date, trans_type, amount, notes, reference, interest_component):
-    ppf_obj = Ppf.objects.get(number=ppf_number)
-    if not ppf_obj:
-        print("Couldnt find ppf object with number ", ppf_number)
-    else:
+    try:
+        ppf_obj = Ppf.objects.get(number=ppf_number)
         PpfEntry.objects.create(number=ppf_obj, trans_date=date, entry_type=trans_type,
                                 notes=notes, reference=reference, amount=amount, interest_component=interest_component)
+    except Ppf.DoesNotExist:
+        print("Couldnt find ppf object with number ", ppf_number)
 
 
     '''
