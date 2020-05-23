@@ -1,0 +1,171 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} {{object.number }} : {{object.company}} {% endblock viewname %}
+
+{% block content %} 
+    <form method="POST">
+        {% csrf_token %}
+        <div class="row">
+        <div class='col-sm-9'>
+            <div class="form-group row">
+                <label for="fy" class="col-sm-3 col-form-label text-right">FY</label>
+                <div class="col-sm-6">
+                    <div class="md-form mt-0">
+                        <select name="fy">
+                            {% for fy in fy_list %}
+                                {% if fy|stringformat:"s" == sel_fy|stringformat:"s" %}
+                                    <option value="{{fy}}" selected="selected">{{fy}}</option>
+                                {% else %}
+                                    <option value="{{fy}}">{{fy}}</option>
+
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary" name="fetch">Fetch</button>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+                <label for="apr" class="col-sm-2 col-form-label">April</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="apr_em" name="apr_em" value="{{apr_em}}" placeholder="Employee contribution">
+                        <input type="text" id="apr_er" name="apr_er" value="{{apr_er}}" placeholder="Employer contribution">
+                        <input type="text" id="apr_int" name="apr_int" value="{{apr_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="may" class="col-sm-2 col-form-label">May</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="may_em" name="may_em" value="{{may_em}}" placeholder="Employee contribution">
+                        <input type="text" id="may_er" name="may_er" value="{{may_er}}" placeholder="Employer contribution">
+                        <input type="text" id="may_int" name="may_int" value="{{may_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="jun" class="col-sm-2 col-form-label">June</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="jun_em" name="jun_em" value="{{jun_em}}" placeholder="Employee contribution">
+                        <input type="text" id="jun_er" name="jun_er" value="{{jun_er}}" placeholder="Employer contribution">
+                        <input type="text" id="jun_int" name="jun_int" value="{{jun_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="jul" class="col-sm-2 col-form-label">July</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="jul_em" name="jul_em" value="{{jul_em}}" placeholder="Employee contribution">
+                        <input type="text" id="jul_er" name="jul_er" value="{{jul_er}}" placeholder="Employer contribution">
+                        <input type="text" id="jul_int" name="jul_int" value="{{jul_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="aug" class="col-sm-2 col-form-label">August</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="aug_em" name="aug_em" value="{{aug_em}}" placeholder="Employee contribution">
+                        <input type="text" id="aug_er" name="aug_er" value="{{aug_er}}" placeholder="Employer contribution">
+                        <input type="text" id="aug_int" name="aug_int" value="{{aug_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="sep" class="col-sm-2 col-form-label">September</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="sep_em" name="sep_em" value="{{sep_em}}" placeholder="Employee contribution">
+                        <input type="text" id="sep_er" name="sep_er" value="{{sep_er}}" placeholder="Employer contribution">
+                        <input type="text" id="sep_int" name="sep_int" value="{{sep_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="oct" class="col-sm-2 col-form-label">October</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="oct_em" name="oct_em" value="{{oct_em}}" placeholder="Employee contribution">
+                        <input type="text" id="oct_er" name="oct_er" value="{{oct_er}}" placeholder="Employer contribution">
+                        <input type="text" id="oct_int" name="oct_int" value="{{oct_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="nov" class="col-sm-2 col-form-label">November</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="nov_em" name="nov_em" value="{{nov_em}}" placeholder="Employee contribution">
+                        <input type="text" id="nov_er" name="nov_er" value="{{nov_er}}" placeholder="Employer contribution">
+                        <input type="text" id="nov_int" name="nov_int" value="{{nov_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="dec" class="col-sm-2 col-form-label">December</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="dec_em" name="dec_em" value="{{dec_em}}" placeholder="Employee contribution">
+                        <input type="text" id="dec_er" name="dec_er" value="{{dec_er}}" placeholder="Employer contribution">
+                        <input type="text" id="dec_int" name="dec_int" value="{{dec_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="jan" class="col-sm-2 col-form-label">January</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="jan_em" name="jan_em" value="{{jan_em}}" placeholder="Employee contribution">
+                        <input type="text" id="jan_er" name="jan_er" value="{{jan_er}}" placeholder="Employer contribution">
+                        <input type="text" id="jan_int" name="jan_int" value="{{jan_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="feb" class="col-sm-2 col-form-label">February</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="feb_em" name="feb_em" value="{{feb_em}}" placeholder="Employee contribution">
+                        <input type="text" id="feb_er" name="feb_er" value="{{feb_er}}" placeholder="Employer contribution">
+                        <input type="text" id="feb_int" name="feb_int" value="{{feb_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="mar" class="col-sm-2 col-form-label">March</label>
+                <div class="col-sm-9">
+                    <div class="md-form mt-0">
+                        <input type="text" id="mar_em" name="mar_em" value="{{mar_em}}" placeholder="Employee contribution">
+                        <input type="text" id="mar_er" name="mar_er" value="{{mar_er}}" placeholder="Employer contribution">
+                        <input type="text" id="mar_int" name="mar_int" value="{{mar_int}}" placeholder="Interest">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-6">
+                    <div class="md-form mt-0">
+                        <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                        <a href="../" class="btn btn-info" role="button">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock content %}
+
+<script>
+{% block jquery %}
+
+{% endblock jquery %}
+</script>

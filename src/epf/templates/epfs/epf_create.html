@@ -1,0 +1,16 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} Create EPF {% endblock viewname %}
+
+{% block content %}
+
+  <form action="." method="POST">
+    {% csrf_token %} {{ form.as_p }}
+    <input type="submit" value="Save" class="btn btn-default"/><a href="../" class="btn btn-info" role="button">No</a>
+  </form>
+
+{% endblock content %}

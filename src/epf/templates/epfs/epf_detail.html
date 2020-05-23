@@ -1,0 +1,46 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+  <div class="btn-group mr-3">
+    <a style="padding-left:25px;" href="add-contribution"><i class="fa fa-plus" aria-hidden="true" title="Add Contribution" style="font-size: 1.2em;"></i></a>
+  </div>
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} {{object.number }} : {{object.company}} {% endblock viewname %}
+
+{% block content %} 
+  <table>
+    <tr>
+      <td>#</td>
+      <td>{{ object.id }}</td>
+    </tr>
+    <tr>
+      <td>Number</td>
+      <td>{{ object.number }}</td>
+    </tr>
+    <tr>
+      <td>Start Date</td>
+      <td>{{ object.start_date }}</td>
+    </tr>
+    <tr>
+      <td>User</td>
+      <td>{{ object.user }}</td>
+    </tr>
+    <tr>
+      <td>Goal</td>
+      <td>{{ object.goal }}</td>
+    </tr>
+  </table>
+
+  <div class='col-sm-6'>
+    <canvas id="myChart" width="400" height="400"></canvas>
+  </div>
+{% endblock content %}
+
+<script>
+{% block jquery %}
+
+{% endblock jquery %}
+</script>

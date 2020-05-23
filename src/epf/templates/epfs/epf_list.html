@@ -1,0 +1,49 @@
+{% extends 'base.html' %} 
+
+{% block viewname %} EPFs {% endblock %} 
+
+{% block applicableactions %} 
+<div class="btn-toolbar mb-2 mb-md-0">
+  <div class="btn-group mr-2">
+    <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add EPF" style="font-size: 1.2em;"></i></a>
+  </div>
+</div>
+
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Number</th>
+        <th scope="col">Company</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">User</th>
+        <th scope="col">Goal</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <th scope="row">{{ instance.id }}</th>
+
+        <td>
+          <a href="{{ instance.get_absolute_url }}">{{ instance.number }}</a>
+        </td>
+        <td>{{ instance.company }}</td>
+        <td>{{ instance.start_date }}</td>
+        <td>{{ instance.user }}</td>
+        <td>{{ instance.goal }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}transactions"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
