@@ -51,6 +51,18 @@ class EpfDetailView(DetailView):
         id_ = self.kwargs.get("id")
         return get_object_or_404(Epf, id=id_)
 
+class EpfUpdateView(UpdateView):
+    template_name = 'epfs/epf_create.html'
+    form_class = EpfModelForm
+
+    def get_object(self):
+        id_ = self.kwargs.get("id")
+        return get_object_or_404(Epf, id=id_)
+
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        return super().form_valid(form)
+
 def get_fy_details(fy):
     print('retrieving data for fy', fy)
     month_abbr = ['apr_', 'may_', 'jun_', 'jul_', 'aug_', 'sep_', 'oct_', 'nov_', 'dec_', 'jan_', 'feb_', 'mar_']
@@ -68,6 +80,43 @@ def get_fy_details(fy):
             pass
     return ret
 
+def show_contributions(request, id, year=None):
+    template = 'epfs/epf_show_contrib.html'
+    epf_obj = get_object_or_404(Epf, id=id)
+    epf_start_year = epf_obj.start_date.year
+    this_year = datetime.date.today().year if datetime.date.today().month < 4 else datetime.date.today().year+1
+
+    print(epf_start_year)
+    if not year:
+        year = epf_start_year
+    else:
+        year = epf_start_year+int(year)
+        if year > this_year:
+            year = this_year
+    start_date = str(year) + "-04-01"
+    end_date = str(year+1) + "-03-31"
+    fy = str(year) + '-' + str(year+1)[2:]
+    contribs = EpfEntry.objects.filter(trans_date__range=[start_date, end_date])
+    fy_trans = list()
+    for contrib in contribs:
+        entry = dict()
+        entry['period'] = contrib.trans_date
+        entry['em_contrib'] = contrib.employee_contribution
+        entry['er_contrib'] = contrib.employer_contribution
+        entry['interest'] = contrib.interest_contribution
+        fy_trans.append(entry)
+     
+    context = {'fy_trans':fy_trans, 'object': {'number':epf_obj.number, 'company':epf_obj.company, 'fy':fy}}
+    if epf_start_year < year:
+        context['prev_link'] = '../transactions/'+str(year-epf_start_year-1)
+    else:
+        context['prev_link'] = 'disabled'
+    context['curr_link'] = '../transactions/'+str(year-epf_start_year)
+    if year < this_year-1:
+        context['next_link'] = '../transactions/'+str(year-epf_start_year+1)
+    else:
+        context['next_link'] = 'disabled'
+    return render(request, template, context)
 
 def add_contribution(request, id):
     template = 'epfs/epf_add_contrib.html'

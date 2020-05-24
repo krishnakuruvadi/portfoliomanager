@@ -10,6 +10,7 @@ class EpfModelForm(forms.ModelForm):
             'number',
             'company',
             'start_date',
+            'end_date',
             'user',
             'goal',
         ]

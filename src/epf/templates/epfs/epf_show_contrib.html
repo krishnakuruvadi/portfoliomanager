@@ -1,0 +1,56 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+  <div class="btn-group mr-3">
+    <a style="padding-left:25px;" href="../add-contribution"><i class="fa fa-plus" aria-hidden="true" title="Add Contribution" style="font-size: 1.2em;"></i></a>
+  </div>
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} {{object.number }} : {{object.company}} : {{object.fy}} {% endblock viewname %}
+
+{% block content %} 
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Period</td>
+                <th>Employer Contribution</td>
+                <th>Employee Contribution</td>
+                <th>Interest</td>
+            </tr>
+        </thead>
+        <tbody>
+        {% for fy in fy_trans %}
+            <tr>
+                <td>{{fy.period}}</td>
+                <td>{{fy.em_contrib}}</td>
+                <td>{{fy.er_contrib}}</td>
+                <td>{{fy.interest}}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="d-flex justify-content-center align-items-center">
+        {% if prev_link|stringformat:"s" == 'disabled' %}
+            <a style="padding-right:20px;" href=""><i class="far fa-caret-square-left" style="font-size: 2.6em;color: grey;"></i></a>
+        {% else %}
+            <a style="padding-right:20px;" href="{{prev_link}}"><i class="far fa-caret-square-left" style="font-size: 2.6em;"></i></a>
+        {% endif %}
+        <a href="{{curr_link}}" class="btn btn-outline-info" role="button">{{object.fy}}</a>
+        {% if next_link|stringformat:"s" == 'disabled' %}
+            <a style="padding-left:20px;" href=""><i class="far fa-caret-square-right" style="font-size: 2.6em;color: grey;"></i></a>
+        {% else %}
+            <a style="padding-left:20px;" href="{{next_link}}"><i class="far fa-caret-square-right" style="font-size: 2.6em;"></i></a>
+        {% endif %}
+    </div>
+    <div class='col-sm-6'>
+        <canvas id="myChart" width="400" height="400"></canvas>
+    </div>
+{% endblock content %}
+
+<script>
+{% block jquery %}
+
+{% endblock jquery %}
+</script>
