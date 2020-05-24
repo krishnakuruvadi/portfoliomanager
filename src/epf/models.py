@@ -9,6 +9,7 @@ class Epf(models.Model):
     number = models.CharField(max_length=20)
     company = models.CharField(max_length=120)
     start_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
     user = models.CharField(max_length=20)
     goal =  models.IntegerField(null=True)
 
