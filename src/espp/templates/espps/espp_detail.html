@@ -1,0 +1,110 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+  <div class="btn-group mr-3">
+    <a style="padding-left:25px;" href="add-contribution"><i class="fa fa-plus" aria-hidden="true" title="Add Contribution" style="font-size: 1.2em;"></i></a>
+  </div>
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} {{object.symbol }} {% endblock viewname %}
+
+{% block content %} 
+  <table>
+    <tr>
+      <td>#</td>
+      <td>{{ object.id }}</td>
+    </tr>
+    <tr>
+      <td>Purchase Date</td>
+      <td>{{ object.purchase_date }}</td>
+    </tr>
+    <tr>
+      <td>Exchange</td>
+      <td>{{ object.exchange }}</td>
+    </tr>
+    <tr>
+      <td>Symbol</td>
+      <td>{{ object.symbol }}</td>
+    </tr>
+    <tr>
+      <td>Subscription FMV</td>
+      <td>{{ object.subscription_fmv }}</td>
+    </tr>
+    <tr>
+      <td>Purchase FMV</td>
+      <td>{{ object.purchase_fmv }}</td>
+    </tr>
+    <tr>
+      <td>Purchase Price</td>
+      <td>{{ object.purchase_price }}</td>
+    </tr>
+    <tr>
+      <td>Shares Purchased</td>
+      <td>{{ object.shares_purchased }}</td>
+    </tr>
+    <tr>
+      <td>Purchase Conversion Rate</td>
+      <td>{{ object.purchase_conversion_rate }}</td>
+    </tr>
+    <tr>
+      <td>Total Purchase Price</td>
+      <td>{{ object.total_purchase_price }}</td>
+    </tr>
+    <tr>
+      <td>Sell Date</td>
+      <td>{{ object.sell_date }}</td>
+    </tr>
+    <tr>
+      <td>Sell Price</td>
+      <td>{{ object.sell_price }}</td>
+    </tr>
+    <tr>
+      <td>Sell Conversion Rate</td>
+      <td>{{ object.sell_conversion_rate }}</td>
+    </tr>
+    <tr>
+      <td>Total Sell Price</td>
+      <td>{{ object.total_sell_price }}</td>
+    </tr>
+    <tr>
+      <td>Sell Price</td>
+      <td>{{ object.sell_price }}</td>
+    </tr>
+    <tr>
+      <td>User</td>
+      <td>{{ object.user }}</td>
+    </tr>
+    <tr>
+      <td>Goal</td>
+      <td>{{ object.goal }}</td>
+    </tr>
+    <tr>
+      <td>Latest Conversion Price</td>
+      <td>{{ object.latest_conversion_rate }}</td>
+    </tr>
+    <tr>
+      <td>Latest Price</td>
+      <td>{{ object.latest_price }}</td>
+    </tr>
+    <tr>
+      <td>As On Date</td>
+      <td>{{ object.as_on_date }}</td>
+    </tr>
+    <tr>
+      <td>Gain</td>
+      <td>{{ object.gain }}</td>
+    </tr>
+  </table>
+
+  <div class='col-sm-6'>
+    <canvas id="myChart" width="400" height="400"></canvas>
+  </div>
+{% endblock content %}
+
+<script>
+{% block jquery %}
+
+{% endblock jquery %}
+</script>

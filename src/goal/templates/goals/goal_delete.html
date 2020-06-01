@@ -11,7 +11,7 @@
 
 <form action="." method="POST">
   {% csrf_token %}
-  <h1>Do you want to delete the goal "{{ object.name }}"?</h1>
+  <h2>Do you want to delete the goal "{{ object.name }}"?</h2>
   <p><input type="submit" value="Yes" class="btn btn-danger"/> <a href="../" class="btn btn-info" role="button">No</a></p>
 </form>
 
