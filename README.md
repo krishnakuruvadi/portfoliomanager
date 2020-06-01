@@ -6,7 +6,11 @@ To build a portfolio manager which can track and provide insights into a individ
 
 ## What is supported
 
-* PPF
+* Goals
+* PPF (Public Provident Fund)
+* EPF (Employee Provident Fund)
+* Fixed Deposit
+* ESPP (Employee Stock Purchase Plan)
 
 
 ## How to start
@@ -24,6 +28,7 @@ userid@host portfoliomanager %  source ./venv/bin/activate
 (venv) userid@host portfoliomanager % pip install Django==2.1.5
 (venv) userid@host portfoliomanager % pip install djangorestframework==3.11.0
 (venv) userid@host portfoliomanager % pip install python-dateutil==2.8.1
+(venv) userid@host portfoliomanager % pip install requests==2.23.0
 ```
 * Start django server
 ```

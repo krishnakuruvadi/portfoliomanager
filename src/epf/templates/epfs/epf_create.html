@@ -4,7 +4,13 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} Create EPF {% endblock viewname %}
+{% block viewname %} 
+{% if object %}
+    Update EPF
+  {% else %}
+    Create EPF
+  {% endif %} 
+{% endblock viewname %}
 
 {% block content %}
 

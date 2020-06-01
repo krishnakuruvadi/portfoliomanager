@@ -1,0 +1,36 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  {% if object %}
+    Update ESPP
+  {% else %}
+    Create ESPP
+  {% endif %} 
+{% endblock viewname %}
+
+{% block content %}
+
+  <form action="." method="POST" class="form-horizontal">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group row">
+        {{ field.errors }}
+        <label class="control-label col-sm-2 col-form-label" for="id_{{ field.name }}">{{ field.label }}</label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            {{ field }}
+          </div>
+        </div>
+        {% if field.help_text %}
+          <p class="help">{{ field.help_text|safe }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <input type="submit" value="Save" class="btn btn-info"/>&nbsp;<a href="../" class="btn btn-danger" role="button">Cancel</a>
+  </form>
+
+{% endblock content %}

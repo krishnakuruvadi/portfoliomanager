@@ -118,6 +118,7 @@ def update_fixed_deposit(request, id):
     else:
         try:
             fd_obj = FixedDeposit.objects.get(id=id)
+            # Always put date in %Y-%m-%d for chrome to show things properly 
             context = {'user':fd_obj.user, 'number':fd_obj.number, 'start_date':fd_obj.start_date.strftime("%Y-%m-%d"), 'bank_name':fd_obj.bank_name,
                     'roi':fd_obj.roi, 'time_period_days': fd_obj.time_period, 'principal': fd_obj.principal, 'final_val':fd_obj.final_val,
                     'notes':fd_obj.notes, 'goal':fd_obj.goal, 'mat_date':fd_obj.mat_date.strftime("%Y-%m-%d"),
