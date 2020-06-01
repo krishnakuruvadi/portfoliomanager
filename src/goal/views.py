@@ -6,6 +6,7 @@ from django.views.generic import (
     DeleteView
 )
 from django.template import Context
+from django.http import HttpResponseRedirect
 from decimal import Decimal
 from .models import Goal
 from .goal_helper import one_time_pay_final_val, add_goal_entry, get_corpus_to_be_saved, get_depletion_vals
@@ -70,10 +71,11 @@ def add_goal(request):
             time_period = Decimal(request.POST['time_period'])
             curr_val = Decimal(request.POST['curr_val'])
             inflation = Decimal(request.POST['inflation'])
+            notes = request.POST['notes']
 
             val = one_time_pay_final_val(curr_val, inflation, time_period)
             print("calculated value", val)
-            context = {'user':user, 'startdate':start_date, 'name': name,
+            context = {'user':user, 'startdate':start_date, 'name': name, 'notes': notes,
                 'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val}
             return render(request, template, context=context)
     return render(request, template)
@@ -92,7 +94,6 @@ def add_retirement_goal(request):
             curr_val = Decimal(request.POST['curr_val'])
             inflation = Decimal(request.POST['inflation'])
             final_val = Decimal(request.POST['final_val'])
-            expense_period = Decimal(request.POST['expense_period'])
             post_returns = Decimal(request.POST['roi_corpus'])
             recurring_pay_goal = True
             expense_period = Decimal(request.POST['expense_period'])
@@ -111,16 +112,113 @@ def add_retirement_goal(request):
             inflation = Decimal(request.POST['inflation'])
             expense_period = Decimal(request.POST['expense_period'])
             post_returns = Decimal(request.POST['roi_corpus'])
+            notes = request.POST['notes']
             corpus = get_corpus_to_be_saved(int(curr_val), float(inflation), int(time_period), int(expense_period), float(post_returns))
             print("calculated value", corpus)
             dates, corpus_vals, expense_vals = get_depletion_vals(corpus, int(curr_val), int(time_period), int(expense_period), float(inflation),  float(post_returns), start_date)
             print(json.dumps(dates))
-            context = {'user':user, 'startdate':start_date, 'name': name,
+            context = {'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
                         'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':corpus,
                         'expense_period': expense_period, 'roi_corpus':post_returns, 'labels':json.dumps(dates), 
                         'corpus_vals': corpus_vals, 'expense_vals': expense_vals}
             return render(request, template, context=context)
     return render(request, template)
+
+def update_goal(request, id):
+    try:
+        goal_obj = Goal.objects.get(id=id)
+        if goal_obj.recurring_pay_goal:
+            template = 'goals/add_retirement_goal.html'
+            if request.method == 'POST':
+                print(request.POST)
+                if "submit" in request.POST:
+                    print("submit button pressed")
+                    goal_obj.name = request.POST['name']
+                    goal_obj.start_date = request.POST['startdate']
+                    goal_obj.user = request.POST['user']
+                    goal_obj.time_period = Decimal(request.POST['time_period'])*12
+                    goal_obj.curr_val = Decimal(request.POST['curr_val'])
+                    goal_obj.inflation = Decimal(request.POST['inflation'])
+                    goal_obj.final_val = Decimal(request.POST['final_val'])
+                    goal_obj.expense_period = Decimal(request.POST['expense_period'])*12
+                    goal_obj.post_returns = Decimal(request.POST['roi_corpus'])
+                    goal_obj.recurring_pay_goal = True
+                    goal_obj.post_returns = Decimal(request.POST['roi_corpus'])
+                    goal_obj.notes = request.POST['notes']
+                    goal_obj.save()
+                else:
+                    print("calculate button pressed")
+                    name = request.POST['name']
+                    start_date = request.POST['startdate']
+                    user = request.POST['user']
+                    time_period = Decimal(request.POST['time_period'])
+                    curr_val = Decimal(request.POST['curr_val'])
+                    inflation = Decimal(request.POST['inflation'])
+                    expense_period = Decimal(request.POST['expense_period'])
+                    post_returns = Decimal(request.POST['roi_corpus'])
+                    notes = request.POST['notes']
+                    corpus = get_corpus_to_be_saved(int(curr_val), float(inflation), int(time_period), int(expense_period), float(post_returns))
+                    print("calculated value", corpus)
+                    dates, corpus_vals, expense_vals = get_depletion_vals(corpus, int(curr_val), int(time_period), int(expense_period), float(inflation),  float(post_returns), start_date)
+                    print(json.dumps(dates))
+                    context = {'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
+                                'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':corpus,
+                                'expense_period': expense_period, 'roi_corpus':post_returns, 'labels':json.dumps(dates), 
+                                'corpus_vals': corpus_vals, 'expense_vals': expense_vals}
+                    return render(request, template, context=context)
+                return HttpResponseRedirect("../")
+            else:
+                dates, corpus_vals, expense_vals = get_depletion_vals(int(goal_obj.final_val), int(goal_obj.curr_val), int(goal_obj.time_period/12), int(goal_obj.expense_period/12), float(goal_obj.inflation),  float(goal_obj.post_returns), goal_obj.start_date.strftime("%Y-%m-%d"))
+                context = {'user':goal_obj.user, 'startdate':goal_obj.start_date.strftime("%Y-%m-%d"), 'name': goal_obj.name,
+                            'time_period': int(goal_obj.time_period/12), 'curr_val': goal_obj.curr_val,
+                            'inflation':goal_obj.inflation, 'final_val':goal_obj.final_val,
+                            'expense_period': int(goal_obj.expense_period/12), 'roi_corpus':goal_obj.post_returns,
+                            'notes':goal_obj.notes, 'recurring_pay_goal': goal_obj.recurring_pay_goal, 'labels':json.dumps(dates),
+                            'corpus_vals': corpus_vals, 'expense_vals': expense_vals}
+                return render(request, template, context=context) 
+        else:
+            template = 'goals/add_goal.html'
+            if request.method == 'POST':
+                print(request.POST)
+                if "submit" in request.POST:
+                    print("submit button pressed")
+                    goal_obj.name = request.POST['name']
+                    goal_obj.start_date = request.POST['startdate']
+                    goal_obj.user = request.POST['user']
+                    goal_obj.time_period = Decimal(request.POST['time_period'])
+                    goal_obj.curr_val = Decimal(request.POST['curr_val'])
+                    goal_obj.inflation = Decimal(request.POST['inflation'])
+                    goal_obj.final_val = Decimal(request.POST['final_val'])
+                    goal_obj.recurring_pay_goal = False
+                    goal_obj.expense_period = 0
+                    goal_obj.post_returns = 0
+                    goal_obj.notes = request.POST['notes']
+                    goal_obj.save()
+                else:
+                    print("calculate button pressed")
+                    name = request.POST['name']
+                    start_date = request.POST['startdate']
+                    user = request.POST['user']
+                    time_period = Decimal(request.POST['time_period'])
+                    curr_val = Decimal(request.POST['curr_val'])
+                    inflation = Decimal(request.POST['inflation'])
+                    notes = request.POST['notes']
+
+                    val = one_time_pay_final_val(curr_val, inflation, time_period)
+                    print("calculated value", val)
+                    context = {'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
+                        'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val}
+                    return render(request, template, context=context)
+                return HttpResponseRedirect("../")
+            else:
+                context = {'user':goal_obj.user, 'startdate':goal_obj.start_date.strftime("%Y-%m-%d"), 'name': goal_obj.name,
+                            'time_period': goal_obj.time_period, 'curr_val': goal_obj.curr_val,
+                            'inflation':goal_obj.inflation, 'final_val':goal_obj.final_val,
+                            'expense_period': goal_obj.expense_period, 'roi_corpus':goal_obj.post_returns,
+                            'notes':goal_obj.notes, 'recurring_pay_goal': goal_obj.recurring_pay_goal}
+                return render(request, template, context=context) 
+    except Goal.DoesNotExist:
+        pass
 
 class ChartData(APIView):
     authentication_classes = []

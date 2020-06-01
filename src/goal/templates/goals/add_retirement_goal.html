@@ -4,7 +4,13 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} Add Recurring Pay Goal {% endblock viewname %}
+{% block viewname %}
+    {% if name %}
+        Update Recurring Pay Goal
+    {% else %}
+        Add Recurring Pay Goal
+    {% endif %}
+{% endblock viewname %}
 
 {% block content %}
 
@@ -89,11 +95,12 @@
                 <label for="notes" class="col-sm-3 col-form-label">Notes:</label>
                 <div class="col-sm-3">
                     <div class="md-form mt-0">
-                        <textarea name="notes" rows="5" cols="20"></textarea>
+                        <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
                     </div>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+            <a href="../" class="btn btn-info" role="button">Cancel</a>
         </div>
         <div class='col-sm-6'>
             <canvas id="bar-chart-grouped" width="800" height="450"></canvas>
