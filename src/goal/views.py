@@ -16,6 +16,7 @@ from ppf.models import Ppf, PpfEntry
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import json
+from shared.handle_delete import delete_goal
 
 
 # Create your views here.
@@ -41,6 +42,10 @@ class GoalDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse('goals:goal-list')
+
+    def delete(self, request, *args, **kwargs):
+        delete_goal(kwargs['id'])
+        return super(DeleteView, self).delete(request, *args, **kwargs)
 
 def add_goal(request):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT

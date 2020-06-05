@@ -24,6 +24,7 @@ urlpatterns = [
     path('epf/', include('epf.urls')),
     path('espp/', include('espp.urls')),
     path('goal/', include('goal.urls')),
+    path('user/', include('users.urls')),
     path('fixed-deposit/', include('fixed_deposit.urls')),
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),

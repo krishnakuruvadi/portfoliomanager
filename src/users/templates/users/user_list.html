@@ -1,0 +1,46 @@
+{% extends 'base.html' %} 
+
+{% block viewname %} Users {% endblock %} 
+
+{% block applicableactions %} 
+<div class="btn-toolbar mb-2 mb-md-0">
+  <div class="btn-group mr-2">
+    <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add User" style="font-size: 1.2em;"></i></a>
+  </div>
+</div>
+
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Email</th>
+        <th scope="col">DOB</th>
+        <th scope="col">Notes</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+
+        <td>
+          <a href="{{ instance.get_absolute_url }}">{{ instance.name }}</a>
+        </td>
+        <td>{{ instance.email }}</td>
+        <td>{{ instance.dob }}</td>
+        <td>{{ instance.notes }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
