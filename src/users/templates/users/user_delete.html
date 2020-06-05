@@ -1,0 +1,18 @@
+{% extends 'base.html' %} 
+
+{% block viewname %} Delete User {% endblock %}
+
+
+{% block canvas %}{% endblock canvas %}
+
+{% block applicableactions %} {% endblock applicableactions %}
+
+{% block content %}
+
+<form action="." method="POST">
+  {% csrf_token %}
+  <h2>Do you want to delete the User "{{ object.name }}"?</h2>
+  <p><input type="submit" value="Yes" class="btn btn-danger"/> <a href="../" class="btn btn-info" role="button">No</a></p>
+</form>
+
+{% endblock %}
