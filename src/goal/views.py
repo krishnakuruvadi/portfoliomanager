@@ -17,6 +17,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 import json
 from shared.handle_delete import delete_goal
+from shared.handle_get import get_all_users_names_as_list
 
 
 # Create your views here.
@@ -80,10 +81,13 @@ def add_goal(request):
 
             val = one_time_pay_final_val(curr_val, inflation, time_period)
             print("calculated value", val)
-            context = {'user':user, 'startdate':start_date, 'name': name, 'notes': notes,
+            users_list = get_all_users_names_as_list()
+            context = {'users_list':users_list, 'user':user, 'startdate':start_date, 'name': name, 'notes': notes,
                 'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val}
             return render(request, template, context=context)
-    return render(request, template)
+    users_list = get_all_users_names_as_list()
+    context = {'users_list':users_list}
+    return render(request, template, context=context)
 
 def add_retirement_goal(request):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
@@ -122,12 +126,15 @@ def add_retirement_goal(request):
             print("calculated value", corpus)
             dates, corpus_vals, expense_vals = get_depletion_vals(corpus, int(curr_val), int(time_period), int(expense_period), float(inflation),  float(post_returns), start_date)
             print(json.dumps(dates))
-            context = {'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
+            users_list = get_all_users_names_as_list()
+            context = {'users_list':users_list, 'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
                         'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':corpus,
                         'expense_period': expense_period, 'roi_corpus':post_returns, 'labels':json.dumps(dates), 
                         'corpus_vals': corpus_vals, 'expense_vals': expense_vals}
             return render(request, template, context=context)
-    return render(request, template)
+    users_list = get_all_users_names_as_list()
+    context = {'users_list':users_list}
+    return render(request, template, context)
 
 def update_goal(request, id):
     try:
@@ -166,15 +173,17 @@ def update_goal(request, id):
                     print("calculated value", corpus)
                     dates, corpus_vals, expense_vals = get_depletion_vals(corpus, int(curr_val), int(time_period), int(expense_period), float(inflation),  float(post_returns), start_date)
                     print(json.dumps(dates))
-                    context = {'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
+                    users_list = get_all_users_names_as_list()
+                    context = {'users_list':users_list, 'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
                                 'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':corpus,
                                 'expense_period': expense_period, 'roi_corpus':post_returns, 'labels':json.dumps(dates), 
                                 'corpus_vals': corpus_vals, 'expense_vals': expense_vals}
                     return render(request, template, context=context)
                 return HttpResponseRedirect("../")
             else:
+                users_list = get_all_users_names_as_list()
                 dates, corpus_vals, expense_vals = get_depletion_vals(int(goal_obj.final_val), int(goal_obj.curr_val), int(goal_obj.time_period/12), int(goal_obj.expense_period/12), float(goal_obj.inflation),  float(goal_obj.post_returns), goal_obj.start_date.strftime("%Y-%m-%d"))
-                context = {'user':goal_obj.user, 'startdate':goal_obj.start_date.strftime("%Y-%m-%d"), 'name': goal_obj.name,
+                context = {'users_list':users_list, 'user':goal_obj.user, 'startdate':goal_obj.start_date.strftime("%Y-%m-%d"), 'name': goal_obj.name,
                             'time_period': int(goal_obj.time_period/12), 'curr_val': goal_obj.curr_val,
                             'inflation':goal_obj.inflation, 'final_val':goal_obj.final_val,
                             'expense_period': int(goal_obj.expense_period/12), 'roi_corpus':goal_obj.post_returns,
@@ -211,12 +220,14 @@ def update_goal(request, id):
 
                     val = one_time_pay_final_val(curr_val, inflation, time_period)
                     print("calculated value", val)
-                    context = {'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
+                    users_list = get_all_users_names_as_list()
+                    context = {'users_list':users_list, 'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
                         'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val}
                     return render(request, template, context=context)
                 return HttpResponseRedirect("../")
             else:
-                context = {'user':goal_obj.user, 'startdate':goal_obj.start_date.strftime("%Y-%m-%d"), 'name': goal_obj.name,
+                users_list = get_all_users_names_as_list()
+                context = {'users_list':users_list, 'user':goal_obj.user, 'startdate':goal_obj.start_date.strftime("%Y-%m-%d"), 'name': goal_obj.name,
                             'time_period': goal_obj.time_period, 'curr_val': goal_obj.curr_val,
                             'inflation':goal_obj.inflation, 'final_val':goal_obj.final_val,
                             'expense_period': goal_obj.expense_period, 'roi_corpus':goal_obj.post_returns,

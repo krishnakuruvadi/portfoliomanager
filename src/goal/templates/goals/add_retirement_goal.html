@@ -38,7 +38,7 @@
                 <label for="user" class="col-sm-3 col-form-label">User</label>
                 <div class="col-sm-3">
                     <div class="md-form mt-0">
-                        <input type="text" id="user" name="user" value="{{user}}">
+                        <select id="user" name="user" class="form-control"></select>
                     </div>
                 </div>
             </div>
@@ -110,31 +110,61 @@
 
 {% endblock content %}
 
-<script>
-{% block jquery %}
-console.log({{ labels|safe }})
-new Chart(document.getElementById("bar-chart-grouped"), {
-    type: 'bar',
-    data: {
-      labels: {{ labels|safe }},
-      datasets: [
-        {
-          label: "Corpus",
-          backgroundColor: "#3e95cd",
-          data: {{corpus_vals}}
-        }, {
-          label: "Expenses",
-          backgroundColor: "#8e5ea2",
-          data: {{expense_vals}}
+{% block javascript %}
+    <script>
+        var users_list = {{users_list|safe}}
+        var sel_user = '{{user|safe}}'
+        var userdropdown = document.getElementById('user');
+        var opt = document.createElement('option');
+        // create text node to add to option element (opt)
+        opt.appendChild( document.createTextNode('') );
+        // set value property of opt
+        opt.value = ''; 
+        // add opt to end of select box (sel)
+        userdropdown.appendChild(opt);
+        console.log(users_list);
+        for (var i = 0; i < users_list.length; ++i) {
+            // create new option element
+            var opt = document.createElement('option');
+            // create text node to add to option element (opt)
+            opt.appendChild( document.createTextNode(users_list[i]) );
+            // set value property of opt
+            opt.value = users_list[i];
+            if (opt.value == sel_user) {
+                opt.selected = true;
+            }
+            // add opt to end of select box (sel)
+            userdropdown.appendChild(opt);
         }
-      ]
-    },
-    options: {
-      title: {
-        display: true,
-        text: 'Corpus Depletion {{final_val}}'
-      }
-    }
-});
-{% endblock jquery %}
+    </script>
+{% endblock javascript %}
+
+<script>
+    {% block jquery %}
+    
+    console.log({{ labels|safe }})
+    new Chart(document.getElementById("bar-chart-grouped"), {
+        type: 'bar',
+        data: {
+        labels: {{ labels|safe }},
+        datasets: [
+            {
+            label: "Corpus",
+            backgroundColor: "#3e95cd",
+            data: {{corpus_vals}}
+            }, {
+            label: "Expenses",
+            backgroundColor: "#8e5ea2",
+            data: {{expense_vals}}
+            }
+        ]
+        },
+        options: {
+        title: {
+            display: true,
+            text: 'Corpus Depletion {{final_val}}'
+        }
+        }
+    });
+    {% endblock jquery %}
 </script>

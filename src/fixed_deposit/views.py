@@ -9,6 +9,7 @@ from django.template import Context
 from decimal import Decimal
 from .models import FixedDeposit
 from .fixed_deposit_helper import add_fd_entry, get_maturity_value
+from shared.handle_get import get_all_users_names_as_list
 
 # Create your views here.
 
@@ -67,11 +68,13 @@ def add_fixed_deposit(request):
             goal = Decimal(request.POST['goal'])
             mat_date, val = get_maturity_value(int(principal), start_date, float(roi), int(time_period_days))
             print("calculated value", val)
-            context = {'user':user, 'number':number, 'start_date':start_date, 'bank_name': bank_name, 'roi': roi,
+            users_list = get_all_users_names_as_list()
+            context = {'users_list':users_list,'user':user, 'number':number, 'start_date':start_date, 'bank_name': bank_name, 'roi': roi,
                 'time_period_days': time_period_days, 'principal': principal, 'final_val':val, 'notes': notes,
                 'goal':goal, 'mat_date':mat_date, 'operation': 'Add Fixed Deposit'}
             return render(request, template, context=context)
-    context = {'operation': 'Add Fixed Deposit'}
+    users_list = get_all_users_names_as_list()
+    context = {'users_list':users_list, 'operation': 'Add Fixed Deposit'}
     return render(request, template, context)
 
 
@@ -111,7 +114,8 @@ def update_fixed_deposit(request, id):
             goal = Decimal(request.POST['goal'])
             mat_date, val = get_maturity_value(int(principal), start_date, float(roi), int(time_period_days))
             print("calculated value", val)
-            context = {'user':user, 'number':number, 'start_date':start_date, 'bank_name': bank_name, 'roi': roi,
+            users_list = get_all_users_names_as_list()
+            context = {'users_list':users_list,'user':user, 'number':number, 'start_date':start_date, 'bank_name': bank_name, 'roi': roi,
                 'time_period_days': time_period_days, 'principal': principal, 'final_val':val, 'notes': notes,
                 'goal':goal, 'mat_date':mat_date, 'operation': 'Edit Fixed Deposit'}
             return render(request, template, context=context)
@@ -119,7 +123,8 @@ def update_fixed_deposit(request, id):
         try:
             fd_obj = FixedDeposit.objects.get(id=id)
             # Always put date in %Y-%m-%d for chrome to show things properly
-            context = {'user':fd_obj.user, 'number':fd_obj.number, 'start_date':fd_obj.start_date.strftime("%Y-%m-%d"), 'bank_name':fd_obj.bank_name,
+            users_list = get_all_users_names_as_list()
+            context = {'users_list':users_list,'user':fd_obj.user, 'number':fd_obj.number, 'start_date':fd_obj.start_date.strftime("%Y-%m-%d"), 'bank_name':fd_obj.bank_name,
                     'roi':fd_obj.roi, 'time_period_days': fd_obj.time_period, 'principal': fd_obj.principal, 'final_val':fd_obj.final_val,
                     'notes':fd_obj.notes, 'goal':fd_obj.goal, 'mat_date':fd_obj.mat_date.strftime("%Y-%m-%d"),
                     'operation': 'Edit Fixed Deposit'}
