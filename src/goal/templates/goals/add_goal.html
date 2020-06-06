@@ -13,7 +13,6 @@
 {% endblock viewname %}
 
 {% block content %}
-
   <form method="POST">
     {% csrf_token %}
     <div class="row">
@@ -23,7 +22,7 @@
           <label for="name" class="col-sm-3 col-form-label">Name</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="text" id="name" name="name" value="{{name}}"><br><br>
+              <input type="text" id="name" name="name" value="{{name}}">
             </div>
           </div>
         </div>
@@ -31,7 +30,7 @@
           <label for="startdate" class="col-sm-3 col-form-label">Start Date</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="date" id="startdate" name="startdate" value="{{startdate}}"><br><br>
+              <input type="date" id="startdate" name="startdate" value="{{startdate}}">
             </div>
           </div>
         </div>
@@ -39,7 +38,7 @@
           <label for="user" class="col-sm-3 col-form-label">User</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="text" id="user" name="user" value="{{user}}"><br><br>
+              <select id="user" name="user" class="form-control"></select>
             </div>
           </div>
         </div>
@@ -47,7 +46,7 @@
           <label for="curr_val" class="col-sm-3 col-form-label">Current Value</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="curr_val" name="curr_val" value="{{curr_val}}"> <br><br>
+              <input type="number" id="curr_val" name="curr_val" value="{{curr_val}}"> 
             </div>
           </div>
         </div>
@@ -55,7 +54,7 @@
           <label for="inflation" class="col-sm-3 col-form-label">Inflation</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="inflation" name="inflation" placeholder="1.0" step="0.01" min="0" max="10" value="{{inflation}}"><br><br>
+              <input type="number" id="inflation" name="inflation" placeholder="1.0" step="0.01" min="0" max="10" value="{{inflation}}">
             </div>
           </div>
         </div>
@@ -63,7 +62,7 @@
           <label for="time_period" class="col-sm-3 col-form-label">Time period (months)</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="time_period" name="time_period" value="{{time_period}}"> <br><br>
+              <input type="number" id="time_period" name="time_period" value="{{time_period}}"> 
             </div>
           </div>
         </div>
@@ -100,6 +99,30 @@
 
 {% block javascript %}
   <script>
+    var users_list = {{users_list|safe}}
+    var sel_user = '{{user|safe}}'
+    var userdropdown = document.getElementById('user');
+    var opt = document.createElement('option');
+    // create text node to add to option element (opt)
+    opt.appendChild( document.createTextNode('') );
+    // set value property of opt
+    opt.value = ''; 
+    // add opt to end of select box (sel)
+    userdropdown.appendChild(opt);
+    console.log(users_list);
+    for (var i = 0; i < users_list.length; ++i) {
+      // create new option element
+      var opt = document.createElement('option');
+      // create text node to add to option element (opt)
+      opt.appendChild( document.createTextNode(users_list[i]) );
+      // set value property of opt
+      opt.value = users_list[i];
+      if (opt.value == sel_user) {
+        opt.selected = true;
+      }
+      // add opt to end of select box (sel)
+      userdropdown.appendChild(opt);
+    }
     $("#id_username").change(function () {
       console.log( $(this).val() );
     });
