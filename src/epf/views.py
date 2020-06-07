@@ -12,6 +12,7 @@ from .forms import EpfModelForm
 from .models import Epf, EpfEntry
 import datetime
 from dateutil.relativedelta import relativedelta
+from shared.handle_get import get_goal_name_from_id, get_all_goals_id_to_name_mapping
 
 
 
@@ -33,6 +34,12 @@ class EpfListView(ListView):
     template_name = 'epfs/epf_list.html'
     queryset = Epf.objects.all() # <blog>/<modelname>_list.html
 
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        print(data)
+        data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
+        return data
+
 class EpfDeleteView(DeleteView):
     template_name = 'epfs/epf_delete.html'
     
@@ -50,6 +57,12 @@ class EpfDetailView(DetailView):
     def get_object(self):
         id_ = self.kwargs.get("id")
         return get_object_or_404(Epf, id=id_)
+    
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        print(data)
+        data['goal_str'] = get_goal_name_from_id(data['object'].goal)
+        return data
 
 class EpfUpdateView(UpdateView):
     template_name = 'epfs/epf_create.html'

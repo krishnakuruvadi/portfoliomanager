@@ -236,6 +236,28 @@ def update_goal(request, id):
     except Goal.DoesNotExist:
         pass
 
+
+class GoalNames(APIView):
+    authentication_classes = []
+    permission_classes = []
+    def get(self, request, format=None, user=None):
+        data = dict()
+        data['goal_list'] = list()
+        if not user:
+            return Response(data)
+        print('user is', user)
+        try:
+            goal_list = list()
+            goal_objs = Goal.objects.filter(user=user)
+            for goal_obj in goal_objs:
+                goal_list.append(goal_obj.name)
+            data['goal_list'] = goal_list
+        except Exception as e:
+            print(e)
+        finally:
+            print(data)
+            return Response(data)
+
 class ChartData(APIView):
     authentication_classes = []
     permission_classes = []
