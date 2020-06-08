@@ -9,13 +9,19 @@ from django.template import Context
 from decimal import Decimal
 from .models import FixedDeposit
 from .fixed_deposit_helper import add_fd_entry, get_maturity_value
-from shared.handle_get import get_all_users_names_as_list
+from shared.handle_get import get_all_users_names_as_list, get_all_goals_id_to_name_mapping, get_goal_id_from_name, get_goal_name_from_id
 
 # Create your views here.
 
 class FixedDepositListView(ListView):
     template_name = 'fixed-deposits/fixed_deposit_list.html'
     queryset = FixedDeposit.objects.all() # <blog>/<modelname>_list.html
+    
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        print(data)
+        data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
+        return data
 
 class FixedDepositDetailView(DetailView):
     template_name = 'fixed-deposits/fixed_deposit_detail.html'
@@ -24,6 +30,12 @@ class FixedDepositDetailView(DetailView):
     def get_object(self):
         id_ = self.kwargs.get("id")
         return get_object_or_404(FixedDeposit, id=id_)
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        print(data)
+        data['goal_str'] = get_goal_name_from_id(data['object'].goal)
+        return data
 
 class FixedDepositDeleteView(DeleteView):
     template_name = 'fixed-deposits/fixed_deposit_delete.html'
@@ -50,11 +62,13 @@ def add_fixed_deposit(request):
             roi = Decimal(request.POST['roi'])
             principal = Decimal(request.POST['principal'])
             final_val = Decimal(request.POST['final_val'])
-            goal = Decimal(request.POST['goal'])
+            goal = request.POST['goal']
+            if goal != '':
+                goal_id = get_goal_id_from_name(user, goal)
             notes = request.POST['notes']
             mat_date = request.POST['mat_date']
             add_fd_entry(number, bank_name, start_date, principal, time_period_days,
-                    final_val, user, notes, goal, roi, mat_date)
+                    final_val, user, notes, goal_id, roi, mat_date)
         else:
             print("calculate button pressed")
             number = request.POST['number']
@@ -65,7 +79,7 @@ def add_fixed_deposit(request):
             principal = Decimal(request.POST['principal'])
             roi = Decimal(request.POST['roi'])
             notes = request.POST['notes']
-            goal = Decimal(request.POST['goal'])
+            goal = request.POST['goal']
             mat_date, val = get_maturity_value(int(principal), start_date, float(roi), int(time_period_days))
             print("calculated value", val)
             users_list = get_all_users_names_as_list()

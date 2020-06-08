@@ -11,7 +11,7 @@
 <form action="." method="POST">
   {% csrf_token %}
   <h2>Do you want to delete the ESPP {{ object.purchase_date }} {{ object.symbol }}?</h2>
-  <p><input type="submit" value="Yes" class="btn btn-danger"/> <a href="../" class="btn btn-info" role="button">No</a></p>
+  <p><input type="submit" value="Submit" class="btn btn-danger"/>&nbsp;<a href="../" class="btn btn-info" role="button">Cancel</a></p>
 </form>
 
 {% endblock %}

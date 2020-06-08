@@ -43,7 +43,7 @@
           <label for="user" class="col-sm-3 col-form-label">User</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <select id="user" name="user" class="form-control"></select>
+              <select id="id_user" name="user" class="form-control"></select>
             </div>
           </div>
         </div>
@@ -52,7 +52,7 @@
           <label for="goal" class="col-sm-3 col-form-label">Goal</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="text" id="number" name="goal" value="{{goal}}">
+              <select id="id_goal" name="goal" class="form-control"></select>
             </div>
           </div>
         </div>
@@ -129,7 +129,7 @@
   <script>
     var users_list = {{users_list|safe}}
     var sel_user = '{{user|safe}}'
-    var userdropdown = document.getElementById('user');
+    var userdropdown = document.getElementById('id_user');
     var opt = document.createElement('option');
     // create text node to add to option element (opt)
     opt.appendChild( document.createTextNode('') );
@@ -138,6 +138,7 @@
     // add opt to end of select box (sel)
     userdropdown.appendChild(opt);
     console.log(users_list);
+    console.log(sel_user)
     for (var i = 0; i < users_list.length; ++i) {
       // create new option element
       var opt = document.createElement('option');
@@ -151,5 +152,60 @@
       // add opt to end of select box (sel)
       userdropdown.appendChild(opt);
     }
+    if (sel_user != '' && sel_user != 'AnonymousUser') {
+      var sel_goal = '{{goal|safe}}'
+      $.ajax({
+        url: '/goal/get-goals/'+sel_user,
+        success: function (response) {
+          console.log(response)
+          var  new_options = response.goal_list;
+          $('#id_goal').empty();
+          $('#id_goal')
+            .append($('<option>', { value : '' })
+            .text(''));
+          $.each(new_options, function(key, value) {
+              console.log(key,value)
+              if(sel_goal == value) {
+                $('#id_goal')
+                  .append($('<option>', { value : value })
+                  .text(value)
+                  .attr('selected',true));
+              } else {
+                $('#id_goal')
+                  .append($('<option>', { value : value })
+                  .text(value));
+              }
+          });
+        }
+      });
+    } else {
+      $('#id_goal').empty();
+    }
+
+    $("#id_user").change(function () {
+        var user = $(this).val();
+        console.log(user)
+        if (user != '') {
+          $.ajax({
+            url: '/goal/get-goals/'+user,
+            success: function (response) {
+              console.log(response)
+              var  new_options = response.goal_list;
+              $('#id_goal').empty();
+              $('#id_goal')
+                .append($('<option>', { value : '' })
+                .text(''));
+              $.each(new_options, function(key, value) {
+                  console.log(key,value)
+                  $('#id_goal')
+                    .append($('<option>', { value : value })
+                    .text(value)); 
+              });
+            }
+          });
+        } else {
+          $('#id_goal').empty();
+        }
+    });
   </script>
 {% endblock %}

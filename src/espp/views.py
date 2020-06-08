@@ -12,6 +12,7 @@ from .forms import EsppModelForm
 from .models import Espp
 from .espp_helper import get_latest_vals
 from django.http import HttpResponseRedirect
+from shared.handle_get import get_goal_name_from_id, get_all_goals_id_to_name_mapping
 
 class EsppCreateView(CreateView):
     template_name = 'espps/espp_create.html'
@@ -36,6 +37,12 @@ class EsppCreateView(CreateView):
 class EsppListView(ListView):
     template_name = 'espps/espp_list.html'
     queryset = Espp.objects.all() # <blog>/<modelname>_list.html
+    
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        print(data)
+        data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
+        return data
 
 class EsppDeleteView(DeleteView):
     template_name = 'espps/espp_delete.html'
@@ -54,6 +61,12 @@ class EsppDetailView(DetailView):
     def get_object(self):
         id_ = self.kwargs.get("id")
         return get_object_or_404(Espp, id=id_)
+    
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        print(data)
+        data['goal_str'] = get_goal_name_from_id(data['object'].goal)
+        return data
 
 class EsppUpdateView(UpdateView):
     template_name = 'espps/espp_create.html'
@@ -62,10 +75,17 @@ class EsppUpdateView(UpdateView):
     def get_object(self):
         id_ = self.kwargs.get("id")
         return get_object_or_404(Espp, id=id_)
-
+    '''
     def form_valid(self, form):
         print(form.cleaned_data)
         return super().form_valid(form)
+    '''
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
+        self.object.save()
+        form.save_m2m()
+        return HttpResponseRedirect(self.get_success_url())
 
 def refresh_espp_trans(request):
     template = '../../espp/'
