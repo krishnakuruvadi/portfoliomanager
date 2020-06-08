@@ -1,5 +1,5 @@
 {% extends 'base.html' %} 
-
+{% load template_filters %}
 {% block viewname %} PPFs {% endblock %} 
 
 {% block applicableactions %} 
@@ -34,7 +34,7 @@
         </td>
         <td>{{ instance.start_date }}</td>
         <td>{{ instance.user }}</td>
-        <td>{{ instance.goal }}</td>
+        <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
           <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>

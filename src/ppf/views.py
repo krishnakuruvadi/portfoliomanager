@@ -19,6 +19,7 @@ from .forms import PpfModelForm, PpfEntryModelForm
 from .models import Ppf, PpfEntry
 from .ppf_helper import ppf_add_transactions
 import decimal
+from shared.handle_get import get_goal_name_from_id, get_all_goals_id_to_name_mapping
 
 class PpfCreateView(CreateView):
     template_name = 'ppfs/ppf_create.html'
@@ -36,7 +37,12 @@ class PpfCreateView(CreateView):
 class PpfListView(ListView):
     template_name = 'ppfs/ppf_list.html'
     queryset = Ppf.objects.all() # <blog>/<modelname>_list.html
-
+    
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        print(data)
+        data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
+        return data
 
 class PpfDetailView(DetailView):
     template_name = 'ppfs/ppf_detail.html'
@@ -46,6 +52,11 @@ class PpfDetailView(DetailView):
         id_ = self.kwargs.get("id")
         return get_object_or_404(Ppf, number=id_)
 
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        print(data)
+        data['goal_str'] = get_goal_name_from_id(data['object'].goal)
+        return data
 
 class PpfUpdateView(UpdateView):
     template_name = 'ppfs/ppf_create.html'

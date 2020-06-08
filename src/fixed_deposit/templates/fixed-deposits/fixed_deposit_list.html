@@ -1,5 +1,5 @@
 {% extends 'base.html' %} 
-
+{% load template_filters %}
 {% block viewname %} Fixed Deposits {% endblock %} 
 
 {% block applicableactions %} 
@@ -42,7 +42,7 @@
         <td>{{ instance.time_period }}</td>
         <td>{{ instance.final_val }}</td>
         <td>{{ instance.mat_date }}</td>
-        <td>{{ instance.goal }}</td>
+        <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
         <td>{{ instance.user }}</td>
         <td>{{ instance.notes }}</td>
         <td>

@@ -15,6 +15,11 @@ class EpfModelForm(forms.ModelForm):
             'user',
             'goal'
         ]
+        # Always put date in %Y-%m-%d for chrome to show things properly 
+        widgets = {
+            'start_date': forms.DateInput(format=('%Y-%m-%d'), attrs={'placeholder':'Select a date', 'type':'date'}),
+            'end_date': forms.DateInput(format=('%Y-%m-%d'), attrs={'placeholder':'Select a date', 'type':'date'}),
+        }
     user = ChoiceField(required=True)
     goal = ChoiceField(required=False)
 
