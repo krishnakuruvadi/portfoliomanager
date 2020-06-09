@@ -18,6 +18,7 @@ from rest_framework.response import Response
 import json
 from shared.handle_delete import delete_goal
 from shared.handle_get import get_all_users_names_as_list
+from shared.handle_chart_data import get_goal_contributions
 
 
 # Create your views here.
@@ -266,23 +267,11 @@ class ChartData(APIView):
         data = dict()
         try:
             goal_obj = Goal.objects.get(id=id)
-            ppf_objs = Ppf.objects.filter(goal=id)
-            total_ppf = 0
-            for ppf_obj in ppf_objs:
-                ppf_num = ppf_obj.number
-                amt = 0
-                ppf_trans = PpfEntry.objects.filter(number=ppf_num)
-                for entry in ppf_trans:
-                    if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
-                        amt += entry.amount
-                    else:
-                        amt -= entry.amount
-                    if amt < 0:
-                        amt = 0
-                total_ppf += amt
-            debt = total_ppf
-            equity = 0
-            achieved = debt + equity
+            contrib = get_goal_contributions(id)
+            total_ppf = contrib['ppf']
+            debt = contrib['debt']
+            equity = contrib['equity']
+            achieved = contrib['total']
             target = goal_obj.final_val
             if target < 1:
                 target = 1
@@ -295,7 +284,9 @@ class ChartData(APIView):
                 "id": id,
                 "debt": debt,
                 "equity": equity,
-                "total_ppf": total_ppf,
+                "distrib_labels": contrib['distrib_labels'],
+                "distrib_vals": contrib['distrib_vals'],
+                "distrib_colors": contrib['distrib_colors'],
                 "achieved": achieved,
                 "remaining": remaining,
                 "remaining_per": remaining_per,

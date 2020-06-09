@@ -59,7 +59,9 @@
     success: function(data){
       console.log(data)
       debt_equity = [data.debt, data.equity]
-      distribution_vals = [data.total_ppf, 0]
+      distribution_vals = data.distrib_vals
+      distribution_labels = data.distrib_labels
+      distribution_colors = data.distrib_colors
       status_vals = [data.achieved, data.remaining]
       console.log("debt_equity values")
       console.log(debt_equity)
@@ -98,9 +100,7 @@
       data: {
         datasets: [{
           data: distribution_vals,
-          backgroundColor: [
-            '#519463', '#a85b6a'
-          ],
+          backgroundColor: distribution_colors,
           label: 'Distribution'
         }],
         labels: distribution_labels
