@@ -5,6 +5,7 @@ from django.views.generic import (
     DetailView,
     DeleteView
 )
+from django.http import HttpResponseRedirect
 from django.template import Context
 from decimal import Decimal
 from .models import FixedDeposit
@@ -109,7 +110,10 @@ def update_fixed_deposit(request, id):
                 fd_obj.roi = Decimal(request.POST['roi'])
                 fd_obj.principal = Decimal(request.POST['principal'])
                 fd_obj.final_val = Decimal(request.POST['final_val'])
-                fd_obj.goal = Decimal(request.POST['goal'])
+                goal = request.POST['goal']
+                if goal != '':
+                    goal_id = get_goal_id_from_name(fd_obj.user, goal)
+                    fd_obj.goal = goal_id
                 fd_obj.notes = request.POST['notes']
                 fd_obj.mat_date = request.POST['mat_date']
                 fd_obj.save()
@@ -125,7 +129,7 @@ def update_fixed_deposit(request, id):
             principal = Decimal(request.POST['principal'])
             roi = Decimal(request.POST['roi'])
             notes = request.POST['notes']
-            goal = Decimal(request.POST['goal'])
+            goal = request.POST['goal']
             mat_date, val = get_maturity_value(int(principal), start_date, float(roi), int(time_period_days))
             print("calculated value", val)
             users_list = get_all_users_names_as_list()
@@ -133,6 +137,7 @@ def update_fixed_deposit(request, id):
                 'time_period_days': time_period_days, 'principal': principal, 'final_val':val, 'notes': notes,
                 'goal':goal, 'mat_date':mat_date, 'operation': 'Edit Fixed Deposit'}
             return render(request, template, context=context)
+        return HttpResponseRedirect("../")
     else:
         try:
             fd_obj = FixedDeposit.objects.get(id=id)
