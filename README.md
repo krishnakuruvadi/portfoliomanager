@@ -11,6 +11,7 @@ To build a portfolio manager which can track and provide insights into a individ
 * EPF (Employee Provident Fund)
 * Fixed Deposit
 * ESPP (Employee Stock Purchase Plan)
+* Users
 
 
 ## How to start
