@@ -5,9 +5,12 @@ from django.views.generic import (
     DetailView,
     DeleteView
 )
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from django.http import HttpResponseRedirect
 from django.template import Context
 from shared.handle_delete import delete_user
+from shared.handle_chart_data import get_user_contributions
 from .models import User
 
 # Create your views here.
@@ -63,3 +66,41 @@ def update_user(request, id):
         return HttpResponseRedirect("../")
     except User.DoesNotExist:
         pass
+
+class ChartData(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, id=None):
+        data = dict()
+        try:
+            user_obj = User.objects.get(id=id)
+            contrib = get_user_contributions(id)
+            debt = contrib['debt']
+            equity = contrib['equity']
+            achieved = contrib['total']
+            target = contrib['target']
+            if target < 1:
+                target = 1
+            remaining = target - achieved
+            if remaining < 0:
+                remaining = 0
+            remaining_per = int(remaining*100/target)
+            achieve_per = int(achieved*100/target)
+            data = {
+                "id": id,
+                "debt": debt,
+                "equity": equity,
+                "distrib_labels": contrib['distrib_labels'],
+                "distrib_vals": contrib['distrib_vals'],
+                "distrib_colors": contrib['distrib_colors'],
+                "achieved": achieved,
+                "remaining": remaining,
+                "remaining_per": remaining_per,
+                "achieve_per": achieve_per,
+            }
+        except Exception as e:
+            print(e)
+        finally:
+            print(data)
+            return Response(data)
