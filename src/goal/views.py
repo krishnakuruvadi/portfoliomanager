@@ -268,7 +268,6 @@ class ChartData(APIView):
         try:
             goal_obj = Goal.objects.get(id=id)
             contrib = get_goal_contributions(id)
-            total_ppf = contrib['ppf']
             debt = contrib['debt']
             equity = contrib['equity']
             achieved = contrib['total']
