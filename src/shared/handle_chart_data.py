@@ -1,4 +1,5 @@
 from ppf.models import Ppf, PpfEntry
+from ssy.models import Ssy, SsyEntry
 from fixed_deposit.models import FixedDeposit
 from espp.models import Espp
 from epf.models import Epf, EpfEntry
@@ -21,6 +22,23 @@ def get_ppf_amount_for_goal(id):
             amt = 0
         total_ppf += amt
     return total_ppf
+
+def get_ssy_amount_for_goal(id):
+    ssy_objs = Ssy.objects.filter(goal=id)
+    total_ssy = 0
+    for ssy_obj in ssy_objs:
+        ssy_num = ssy_obj.number
+        amt = 0
+        ssy_trans = SsyEntry.objects.filter(number=ssy_num)
+        for entry in ssy_trans:
+            if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
+                amt += entry.amount
+            else:
+                amt -= entry.amount
+        if amt < 0:
+            amt = 0
+        total_ssy += amt
+    return total_ssy
 
 def get_fd_amount_for_goal(id):
     fd_objs = FixedDeposit.objects.filter(goal=id)
@@ -61,11 +79,12 @@ def get_goal_contributions(goal_id):
     contrib['espp'] = int(get_espp_amount_for_goal(goal_id))
     contrib['fd'] = int(get_fd_amount_for_goal(goal_id))
     contrib['ppf'] =int( get_ppf_amount_for_goal(goal_id))
+    contrib['ssy'] =int( get_ssy_amount_for_goal(goal_id))
     contrib['equity'] = contrib['espp']
-    contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf']
+    contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
     contrib['total'] = contrib['equity'] + contrib['debt']
-    contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF']
-    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf']]
+    contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY']
+    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy']]
     contrib['distrib_colors'] = ['#f15664', '#f9c5c6','#006f75','#92993c']
     print("contrib:", contrib)
     return contrib
@@ -86,6 +105,23 @@ def get_ppf_amount_for_user(name):
             amt = 0
         total_ppf += amt
     return total_ppf
+
+def get_ssy_amount_for_user(name):
+    ssy_objs = Ssy.objects.filter(user=name)
+    total_ssy = 0
+    for ssy_obj in ssy_objs:
+        ssy_num = ssy_obj.number
+        amt = 0
+        ssy_trans = SsyEntry.objects.filter(number=ssy_num)
+        for entry in ssy_trans:
+            if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
+                amt += entry.amount
+            else:
+                amt -= entry.amount
+        if amt < 0:
+            amt = 0
+        total_ssy += amt
+    return total_ssy
 
 def get_fd_amount_for_user(name):
     fd_objs = FixedDeposit.objects.filter(user=name)
@@ -137,11 +173,12 @@ def get_user_contributions(user_id):
         contrib['espp'] = int(get_espp_amount_for_user(user_name))
         contrib['fd'] = int(get_fd_amount_for_user(user_name))
         contrib['ppf'] =int( get_ppf_amount_for_user(user_name))
+        contrib['ssy'] =int( get_ssy_amount_for_user(user_name))
         contrib['equity'] = contrib['espp']
-        contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf']
+        contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
         contrib['total'] = contrib['equity'] + contrib['debt']
         contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF']
-        contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf']]
+        contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy']]
         contrib['distrib_colors'] = ['#f15664', '#f9c5c6','#006f75','#92993c']
         print("contrib:", contrib)
         return contrib

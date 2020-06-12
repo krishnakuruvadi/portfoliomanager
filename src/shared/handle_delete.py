@@ -1,4 +1,5 @@
 from ppf.models import Ppf
+from ssy.models import Ssy
 from epf.models import Epf
 from fixed_deposit.models import FixedDeposit
 from espp.models import Espp
@@ -11,6 +12,7 @@ def delete_user(id):
         print('name is', name)
         Epf.objects.filter(user=name).delete()
         Ppf.objects.filter(user=name).delete()
+        Ssy.objects.filter(user=name).delete()
         FixedDeposit.objects.filter(user=name).delete()
         Espp.objects.filter(user=name).delete()
         Goal.objects.filter(user=name).delete()
@@ -30,6 +32,11 @@ def delete_goal(id):
             print("inside delete ppf_obj")
             ppf_obj.goal = None
             ppf_obj.save()
+        ssy_objs = Ssy.objects.filter(goal=id)
+        for ssy_obj in ssy_objs:
+            print("inside delete ssy_obj")
+            ssy_obj.goal = None
+            ssy_obj.save()
         fixed_deposit_objs = FixedDeposit.objects.filter(goal=id)
         for fixed_deposit_obj in fixed_deposit_objs:
             fixed_deposit_obj.goal = None
