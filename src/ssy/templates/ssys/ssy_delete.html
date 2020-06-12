@@ -1,0 +1,17 @@
+{% extends 'base.html' %} 
+
+{% block viewname %} Delete SSY {% endblock %}
+
+
+{% block canvas %}{% endblock canvas %}
+
+{% block applicableactions %} {% endblock applicableactions %} 
+{% block content %}
+
+<form action="." method="POST">
+  {% csrf_token %}
+  <h2>Do you want to delete the Sukanya Samridhi Yojana "{{ object.number }}"?</h2>
+  <p><input type="submit" value="Submit" class="btn btn-danger"/>&nbsp;<a href="../" class="btn btn-info" role="button">Cancel</a></p>
+</form>
+
+{% endblock %}

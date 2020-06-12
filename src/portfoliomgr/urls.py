@@ -21,6 +21,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('ppf/', include('ppf.urls')),
+    path('ssy/', include('ssy.urls')),
     path('epf/', include('epf.urls')),
     path('espp/', include('espp.urls')),
     path('goal/', include('goal.urls')),
