@@ -5,6 +5,8 @@ from espp.models import Espp
 from epf.models import Epf, EpfEntry
 from goal.models import Goal
 from users.models import User
+import datetime
+from dateutil.relativedelta import relativedelta
 
 def get_ppf_amount_for_goal(id):
     ppf_objs = Ppf.objects.filter(goal=id)
@@ -85,7 +87,7 @@ def get_goal_contributions(goal_id):
     contrib['total'] = contrib['equity'] + contrib['debt']
     contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY']
     contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy']]
-    contrib['distrib_colors'] = ['#f15664', '#f9c5c6','#006f75','#92993c']
+    contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6']
     print("contrib:", contrib)
     return contrib
 
@@ -168,20 +170,77 @@ def get_user_contributions(user_id):
         user_obj = User.objects.get(id=user_id)
         user_name = user_obj.name
         contrib = dict()
-        contrib['target'] = get_goal_target_for_user(user_name)
+        contrib['target'] = int(get_goal_target_for_user(user_name))
         contrib['epf'] = int(get_epf_amount_for_user(user_name))
         contrib['espp'] = int(get_espp_amount_for_user(user_name))
         contrib['fd'] = int(get_fd_amount_for_user(user_name))
-        contrib['ppf'] =int( get_ppf_amount_for_user(user_name))
-        contrib['ssy'] =int( get_ssy_amount_for_user(user_name))
+        contrib['ppf'] =int(get_ppf_amount_for_user(user_name))
+        contrib['ssy'] =int(get_ssy_amount_for_user(user_name))
         contrib['equity'] = contrib['espp']
         contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
         contrib['total'] = contrib['equity'] + contrib['debt']
-        contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF']
+        contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY']
         contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy']]
-        contrib['distrib_colors'] = ['#f15664', '#f9c5c6','#006f75','#92993c']
+        contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6']
         print("contrib:", contrib)
         return contrib
     except User.DoesNotExist:
         print("User with id ", user_id, " does not exist" )
         pass
+
+def get_investment_data(start_date):
+    data_start_date = start_date+ relativedelta(months=-1)
+
+    epf_data = list()
+    ppf_data = list()
+    ssy_data = list()
+    total_data = list()
+
+    total_epf = 0
+    total_ppf = 0
+    total_ssy = 0
+    
+    while data_start_date < datetime.date.today():
+        total = 0
+        data_end_date = data_start_date + relativedelta(months=+1)
+        epf_entries = EpfEntry.objects.filter(trans_date__range=(data_start_date, data_end_date))
+        for epf_entry in epf_entries:
+            print("epf entry")
+            if epf_entry.entry_type.lower() == 'cr' or epf_entry.entry_type.lower() == 'credit':
+                total_epf += int(epf_entry.employee_contribution) + int(epf_entry.employer_contribution) + int(epf_entry.interest_contribution)
+            else:
+                total_epf -= int(epf_entry.employee_contribution) + int(epf_entry.employer_contribution) + int(epf_entry.interest_contribution)
+        if total_epf != 0:
+            epf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':total_epf})
+            total += total_epf
+        
+        ppf_entries = PpfEntry.objects.filter(trans_date__range=(data_start_date, data_end_date))
+        for ppf_entry in ppf_entries:
+            print("ppf entry")
+
+            if ppf_entry.entry_type.lower() == 'cr' or ppf_entry.entry_type.lower() == 'credit':
+                total_ppf += int(ppf_entry.amount)
+            else:
+                total_ppf -= int(ppf_entry.amount)
+        if total_ppf != 0:
+            ppf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':total_ppf})
+            total += total_ppf
+
+        ssy_entries = SsyEntry.objects.filter(trans_date__year=data_start_date.year, trans_date__month=data_start_date.month)
+        for ssy_entry in ssy_entries:
+            if ssy_entry.entry_type.lower() == 'cr' or ssy_entry.entry_type.lower() == 'credit':
+                total_ssy += int(ssy_entry.amount)
+            else:
+                total_ssy -= int(ssy_entry.amount)
+        if total_ssy != 0:
+            ssy_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':total_ssy})
+            total += total_ssy
+        
+        if total != 0:
+            total_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':total})
+        
+        data_start_date  = data_start_date+relativedelta(months=+1)
+
+    return {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'total':total_data}
+        
+
