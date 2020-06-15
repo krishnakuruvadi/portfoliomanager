@@ -1,4 +1,201 @@
-{% extends "base.html" %} 
-{% block content %} 
-This is the home page 
-{% endblock %}
+{% extends "base.html" %}
+
+{% block viewname %}Dashboard{% endblock viewname %}
+
+{% block content %}
+    All
+    <hr>
+    <div class="row">
+        <div class='col-sm-3'>
+            <canvas id="all_classificationChart" width="300" height="200"></canvas>
+        </div>
+        <div class='col-sm-4'>
+            <canvas id="all_distributionChart" width="300" height="150"></canvas>
+        </div>
+        <div class='col-sm-3'>
+            <canvas id="all_statusChart" width="300" height="200"></canvas>
+        </div>
+    </div>
+    <br><br>
+    {% for key, value in users.items %}
+        {{value.name}}
+        <hr>
+        <div class="row">
+            <div class='col-sm-3'>
+                <canvas id="{{key}}_classificationChart" width="300" height="200"></canvas>
+            </div>
+            <div class='col-sm-4'>
+                <canvas id="{{key}}_distributionChart" width="300" height="150"></canvas>
+            </div>
+            <div class='col-sm-3'>
+                <canvas id="{{key}}_statusChart" width="300" height="200"></canvas>
+            </div>
+        </div>
+        <br><br>
+    {% endfor %}
+{% endblock content %}
+
+<script>
+  {% block jquery %}
+    
+    var debt_equity_labels = ['Debt', 'Equity']
+    var status_labels = ['Achieved', 'Remaining']
+
+    var users = {{users|safe}}
+    var all = {{all|safe}}
+    var debt_equity = [all.debt, all.equity]
+    var distribution_vals = all.distrib_vals
+    var status_vals = [all.achieved, all.remaining]
+    var distribution_labels = all.distrib_labels
+    var distribution_colors = all.distrib_colors
+    var x;
+    var user;
+    setChart('all',debt_equity,distribution_vals, distribution_colors,status_vals)
+    for (x in users) {
+        console.log(x)
+        user = users[x]
+        console.log(user)
+        data = user['data']
+        console.log(data)
+        debt_equity = [data.debt, data.equity]
+        distribution_vals = data.distrib_vals
+        distribution_labels = data.distrib_labels
+        distribution_colors = data.distrib_colors
+        status_vals = [data.achieved, data.remaining]
+        setChart(x, debt_equity,distribution_vals, distribution_colors,status_vals)
+    }
+    var investment_data = {{investment_data|safe}}
+    var ctx = document.getElementById("myChart");
+    var config = {
+      type:    'line',
+      data:    {
+        datasets: [
+          {
+            label: "PPF",
+            data: investment_data.ppf,
+            fill: false,
+            borderColor: '#92993c'
+          },
+          {
+            label: "EPF",
+            data: investment_data.epf,
+            fill: false,
+            borderColor: '#f15664'
+          },
+          {
+            label: "SSY",
+            data: investment_data.ssy,
+            fill:  false,
+            borderColor: '#f9c5c6'
+          },
+          {
+            label: "Total",
+            data: investment_data.total,
+            fill:  false,
+            borderColor: '#99A3A4'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        title:      {
+          display: true,
+          text:    "Portfolio"
+        },
+        scales:     {
+          xAxes: [{
+            type:       "time",
+            time:       {
+              format: 'YYYY-MM-DD',
+              tooltipFormat: 'll'
+            },
+            scaleLabel: {
+              display:     true,
+              labelString: 'Date'
+            }
+          }],
+          yAxes: [{
+            scaleLabel: {
+              display:     true,
+              labelString: 'Amount'
+            }
+          }]
+        }
+      }
+    };
+    var myChart = new Chart(ctx,config); 
+
+    function setChart(id, debt_equity,distribution_vals, distribution_colors,status_vals){
+      console.log(id)
+      console.log(debt_equity)
+      console.log(distribution_vals)
+      console.log(distribution_colors)
+      console.log(status_vals)
+
+      var ctx = document.getElementById(id+'_classificationChart').getContext('2d');
+      var config = {
+        type: 'pie',
+        data: {
+          datasets: [{
+            data: debt_equity,
+            backgroundColor: [
+              '#519463', '#a85b6a'
+            ],
+            label: 'Classification'
+          }],
+          labels: debt_equity_labels
+        },
+        options: {
+          responsive: true,
+          title: {
+            display: true,
+            text: 'Classification'
+          }
+        }
+      };
+      var ctx2 = document.getElementById(id+'_distributionChart').getContext('2d');
+      var config2 = {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: distribution_vals,
+            backgroundColor: distribution_colors,
+            label: 'Distribution'
+          }],
+          labels: distribution_labels
+        },
+        options: {
+          responsive: true,
+          title: {
+            display: true,
+            text: 'Distribution'
+          }
+        }
+      };
+      var ctx3 = document.getElementById(id+'_statusChart').getContext('2d');
+      var config3 = {
+        type: 'pie',
+        data: {
+          datasets: [{
+            data: status_vals,
+            backgroundColor: [
+              '#519463', '#a85b6a'
+            ],
+            label: 'Status'
+          }],
+          labels: status_labels
+        },
+        options: {
+          responsive: true,
+          title: {
+            display: true,
+            text: 'Goal Status'
+          }
+        }
+      };
+      var classificationChart = new Chart(ctx,config);
+      var distributionChart = new Chart(ctx2, config2);
+      var statusChart = new Chart(ctx3, config3);
+    }
+  {% endblock jquery %}
+  </script>
