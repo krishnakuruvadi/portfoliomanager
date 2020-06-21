@@ -1,12 +1,15 @@
 from ppf.models import Ppf, PpfEntry
 from ssy.models import Ssy, SsyEntry
 from fixed_deposit.models import FixedDeposit
+from fixed_deposit.fixed_deposit_helper import get_maturity_value
 from espp.models import Espp
 from epf.models import Epf, EpfEntry
 from goal.models import Goal
 from users.models import User
 import datetime
 from dateutil.relativedelta import relativedelta
+from common.models import HistoricalStockPrice, Stock
+from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price
 
 def get_ppf_amount_for_goal(id):
     ppf_objs = Ppf.objects.filter(goal=id)
@@ -137,7 +140,8 @@ def get_espp_amount_for_user(name):
     total_espp = 0
     for espp_obj in espp_objs:
         if not espp_obj.total_sell_price:
-            total_espp += espp_obj.latest_value
+            if espp_obj.latest_value:
+                total_espp += espp_obj.latest_value
     return total_espp
 
 def get_epf_amount_for_user(name):
@@ -194,13 +198,15 @@ def get_investment_data(start_date):
     epf_data = list()
     ppf_data = list()
     ssy_data = list()
+    fd_data = list()
+    espp_data = list()
     total_data = list()
 
     total_epf = 0
     total_ppf = 0
     total_ssy = 0
     
-    while data_start_date < datetime.date.today():
+    while data_start_date + relativedelta(months=+1) < datetime.date.today():
         total = 0
         data_end_date = data_start_date + relativedelta(months=+1)
         epf_entries = EpfEntry.objects.filter(trans_date__range=(data_start_date, data_end_date))
@@ -236,11 +242,51 @@ def get_investment_data(start_date):
             ssy_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':total_ssy})
             total += total_ssy
         
+        fd_entries = FixedDeposit.objects.filter(start_date__lte=data_start_date, mat_date__gte=data_end_date)
+        fd_val = 0
+        for fd in fd_entries:
+            time_period = data_end_date-fd.start_date
+            _, val = get_maturity_value(float(fd.principal), fd.start_date.strftime('%Y-%m-%d'), float(fd.roi), time_period.days)
+            fd_val += val
+        if fd_val != 0:
+            fd_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':fd_val})
+            total += fd_val
+        
+        espp_entries = Espp.objects.filter(purchase_date__lte=data_end_date)
+        espp_val = 0
+        for espp_entry in espp_entries:
+            print("espp entry")
+            if espp_entry.sell_date is None or espp_entry.sell_date < data_end_date:
+                try:
+                    stock = Stock.objects.get(symbol=espp_entry.symbol, exchange=espp_entry.exchange)
+                    historical_stock_prices = get_historical_stock_price(stock, data_end_date+relativedelta(days=-5), data_end_date)
+                    for val in historical_stock_prices:
+                        found = False
+                        print(val)
+                        for k,v in val.items():
+                            if espp_entry.exchange == 'NYSE' or espp_entry.exchange == 'NASDAQ':
+                                conv_val = get_conversion_rate('USD', 'INR', data_end_date)
+                                print('conversion value', conv_val)
+                                if conv_val:
+                                    espp_val += float(conv_val)*float(v)*int(espp_entry.shares_purchased)
+                                    found = True
+                                    break
+                            else:
+                                espp_val += float(v)*int(espp_entry.shares_purchased)
+                                found = True
+                                break
+                        if found:
+                            break
+                except Stock.DoesNotExist:
+                    pass
+        if espp_val != 0:
+            espp_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':int(espp_val)})
+            total += espp_val
         if total != 0:
-            total_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':total})
+            total_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':int(total)})
         
         data_start_date  = data_start_date+relativedelta(months=+1)
 
-    return {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'total':total_data}
+    return {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'total':total_data}
         
 
