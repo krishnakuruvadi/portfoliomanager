@@ -10,9 +10,10 @@ from django.views.generic import (
 )
 from .forms import EsppModelForm
 from .models import Espp
-from .espp_helper import get_latest_vals
+from .espp_helper import update_latest_vals
 from django.http import HttpResponseRedirect
 from shared.handle_get import get_goal_name_from_id, get_all_goals_id_to_name_mapping
+from shared.handle_create import add_common_stock
 
 class EsppCreateView(CreateView):
     template_name = 'espps/espp_create.html'
@@ -20,9 +21,11 @@ class EsppCreateView(CreateView):
     queryset = Espp.objects.all() # <blog>/<modelname>_list.html
     #success_url = '/'
 
+    '''
     def form_valid(self, form):
         print(form.cleaned_data)
         return super().form_valid(form)
+    '''
 
     def get_success_url(self):
         return reverse('espps:espp-list')
@@ -32,6 +35,7 @@ class EsppCreateView(CreateView):
         self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
         self.object.save()
         form.save_m2m()
+        add_common_stock(self.object.exchange, self.object.symbol, self.object.purchase_date)
         return HttpResponseRedirect(self.get_success_url())
 
 class EsppListView(ListView):
@@ -91,5 +95,5 @@ def refresh_espp_trans(request):
     template = '../../espp/'
     for espp_obj in Espp.objects.all():
         print("looping through espp " + str(espp_obj.id))
-        get_latest_vals(espp_obj)
+        update_latest_vals(espp_obj)
     return HttpResponseRedirect(template)

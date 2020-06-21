@@ -1,6 +1,25 @@
 {% extends "base.html" %}
 
 {% block viewname %}Dashboard{% endblock viewname %}
+{% block applicableactions %} 
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group mr-2">
+      <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span data-feather="calendar"></span>
+      Interval
+      <div class="dropdown-menu">
+        <a class="dropdown-item" href="#" id="action-week">Week</a>
+        <a class="dropdown-item" href="#" id="action-month">Month</a>
+        <a class="dropdown-item" href="#" id="action-year">Year</a>
+        <a class="dropdown-item" href="#" id="action-ytd">YTD</a>
+        <a class="dropdown-item" href="#" id="action-all">All</a>
+      </div>
+    </button>
+  </div>
+{% endblock applicableactions %}
 
 {% block content %}
     All
@@ -65,65 +84,81 @@
         setChart(x, debt_equity,distribution_vals, distribution_colors,status_vals)
     }
     var investment_data = {{investment_data|safe}}
-    var ctx = document.getElementById("myChart");
-    var config = {
-      type:    'line',
-      data:    {
-        datasets: [
-          {
-            label: "PPF",
-            data: investment_data.ppf,
-            fill: false,
-            borderColor: '#92993c'
-          },
-          {
-            label: "EPF",
-            data: investment_data.epf,
-            fill: false,
-            borderColor: '#f15664'
-          },
-          {
-            label: "SSY",
-            data: investment_data.ssy,
-            fill:  false,
-            borderColor: '#f9c5c6'
-          },
-          {
-            label: "Total",
-            data: investment_data.total,
-            fill:  false,
-            borderColor: '#99A3A4'
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        title:      {
-          display: true,
-          text:    "Portfolio"
-        },
-        scales:     {
-          xAxes: [{
-            type:       "time",
-            time:       {
-              format: 'YYYY-MM-DD',
-              tooltipFormat: 'll'
+    setInvestmentChart(investment_data)
+
+    function setInvestmentChart(investment_data) {
+      var ctx = document.getElementById("myChart");
+      var config = {
+        type:    'line',
+        data:    {
+          datasets: [
+            {
+              label: "PPF",
+              data: investment_data.ppf,
+              fill: false,
+              borderColor: '#92993c'
             },
-            scaleLabel: {
-              display:     true,
-              labelString: 'Date'
+            {
+              label: "EPF",
+              data: investment_data.epf,
+              fill: false,
+              borderColor: '#f15664'
+            },
+            {
+              label: "SSY",
+              data: investment_data.ssy,
+              fill:  false,
+              borderColor: '#f9c5c6'
+            },
+            {
+              label: "FD",
+              data: investment_data.fd,
+              fill:  false,
+              borderColor: '#12A4E8'
+            },
+            {
+              label: "ESPP",
+              data: investment_data.espp,
+              fill:  false,
+              borderColor: '#DC7633'
+            },
+            {
+              label: "Total",
+              data: investment_data.total,
+              fill:  false,
+              borderColor: '#99A3A4'
             }
-          }],
-          yAxes: [{
-            scaleLabel: {
-              display:     true,
-              labelString: 'Amount'
-            }
-          }]
+          ]
+        },
+        options: {
+          responsive: true,
+          title:      {
+            display: true,
+            text:    "Portfolio"
+          },
+          scales:     {
+            xAxes: [{
+              type:       "time",
+              time:       {
+                format: 'YYYY-MM-DD',
+                tooltipFormat: 'll'
+              },
+              scaleLabel: {
+                display:     true,
+                labelString: 'Date'
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display:     true,
+                labelString: 'Amount'
+              }
+            }]
+          }
         }
-      }
-    };
-    var myChart = new Chart(ctx,config); 
+      };
+      var myChart = new Chart(ctx,config);
+    }
 
     function setChart(id, debt_equity,distribution_vals, distribution_colors,status_vals){
       console.log(id)
@@ -199,3 +234,36 @@
     }
   {% endblock jquery %}
   </script>
+
+{% block javascript %}
+  <script>
+      $('#action-week').click(function(e) {
+        alert('week');
+        e.preventDefault();// prevent the default anchor functionality
+        var endpoint = '/user/api/chart/data/'
+        $.ajax({
+          method: "GET",
+          url: endpoint,
+          success: function(data){
+            console.log(data)
+            debt_equity = [data.debt, data.equity]
+            distribution_vals = data.distrib_vals
+            distribution_labels = data.distrib_labels
+            distribution_colors = data.distrib_colors
+            status_vals = [data.achieved, data.remaining]
+            console.log("debt_equity values")
+            console.log(debt_equity)
+            console.log("distribution_vals values")
+            console.log(distribution_vals)
+            console.log("status_vals values")
+            console.log(status_vals)
+            setChart()
+          },
+          error: function(error_data){
+            console.log("error")
+            console.log(error_data)
+          }
+        })
+      });
+  </script>
+{% endblock javascript %}
