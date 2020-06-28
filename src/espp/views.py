@@ -12,7 +12,7 @@ from .forms import EsppModelForm
 from .models import Espp
 from .espp_helper import update_latest_vals
 from django.http import HttpResponseRedirect
-from shared.handle_get import get_goal_name_from_id, get_all_goals_id_to_name_mapping
+from shared.handle_get import *
 from shared.handle_create import add_common_stock
 
 class EsppCreateView(CreateView):
@@ -46,6 +46,7 @@ class EsppListView(ListView):
         data = super().get_context_data(**kwargs)
         print(data)
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
+        data['user_name_mapping'] = get_all_users()
         return data
 
 class EsppDeleteView(DeleteView):
@@ -70,6 +71,7 @@ class EsppDetailView(DetailView):
         data = super().get_context_data(**kwargs)
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
+        data['user_str'] = get_user_name_from_id(data['object'].user)
         return data
 
 class EsppUpdateView(UpdateView):

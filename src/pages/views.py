@@ -1,7 +1,7 @@
 
 from django.http import HttpResponse
 from django.shortcuts import render
-from shared.handle_get import get_start_day_across_portfolio, get_user_id_from_name, get_all_users_names_as_list, get_all_goals_for_user_as_list, get_goal_id_from_name
+from shared.handle_get import *
 from shared.handle_chart_data import get_user_contributions, get_goal_contributions, get_investment_data
 
 # Create your views here.
@@ -39,7 +39,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             remaining = 0
         remaining_per = int(remaining*100/target)
         achieve_per = int(achieved*100/target)
-        data = {
+        context['users'][str(i)]['data'] = {
             "id": id,
             "debt": debt,
             "equity": equity,
@@ -52,11 +52,9 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "achieve_per": achieve_per,
         }
         if len(all_distrib_vals) == 0 :
-            all_distrib_vals = contrib['distrib_vals']
-        else:
-            for index, val in enumerate(contrib['distrib_vals']):
-                all_distrib_vals[index] += val
-        context['users'][str(i)]['data'] = data
+            all_distrib_vals = [0]*len(contrib['distrib_vals'])
+        for index, val in enumerate(contrib['distrib_vals']):
+            all_distrib_vals[index] += val
         all_distrib_labels = contrib['distrib_labels']
         all_distrib_colors = contrib['distrib_colors']
         i = i + 1
@@ -80,3 +78,11 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
     print("context", context)
     #return HttpResponse("<h1>Hello World</h1>") # string of HTML code
     return render(request, "home.html", context)
+
+'''
+class ChartData(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, id=None):
+'''

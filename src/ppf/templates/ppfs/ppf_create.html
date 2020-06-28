@@ -4,10 +4,15 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} Create PPF {% endblock viewname %}
+{% block viewname %}
+{% if object %}
+    Update PPF
+  {% else %}
+    Create PPF
+  {% endif %}
+{% endblock viewname %}
 
 {% block content %}
-
   <form action="." method="POST">
     {% csrf_token %} {{ form.as_p }}
     <input type="submit" value="Submit" class="btn btn-info"/>&nbsp;<a href="../" class="btn btn-danger" role="button">Cancel</a>
@@ -17,30 +22,45 @@
 
 {% block javascript %}
   <script>
+    setGoals();
     $("#id_user").change(function () {
-        var user = $(this).val();
-        console.log(user)
-        if (user != '') {
-          $.ajax({
-            url: '/goal/get-goals/'+user,
-            success: function (response) {
-              console.log(response)
-              var  new_options = response.goal_list;
-              $('#id_goal').empty();
-              $('#id_goal')
-                .append($('<option>', { value : '' })
-                .text(''));
-              $.each(new_options, function(key, value) {
-                  console.log(key,value)
-                  $('#id_goal')
-                    .append($('<option>', { value : value })
-                    .text(value)); 
-              });
-            }
-          });
-        } else {
-          $('#id_goal').empty();
-        }
+      setGoals();
     });
+    function setGoals(){
+      var userElem = document.getElementById("id_user");
+      var user = userElem.value
+      var goalElem = document.getElementById("id_goal");
+      var goal = goalElem.value
+      console.log(user)
+      console.log(goal)
+      if (user != '') {
+        $.ajax({
+          url: '/goal/get-goals/'+user,
+          success: function (response) {
+            console.log(response)
+            var  new_options = response.goal_list;
+            $('#id_goal').empty();
+            $('#id_goal')
+              .append($('<option>', { value : '' })
+              .text(''));
+            $.each(new_options, function(key, value) {
+              console.log(key,value)
+              if(goal==key){
+                $('#id_goal')
+                  .append($('<option>', { value : key })
+                  .text(value)
+                  .attr('selected',true));
+              } else {
+                $('#id_goal')
+                  .append($('<option>', { value : key })
+                  .text(value));
+              }
+            });
+          }
+        });
+      } else {
+        $('#id_goal').empty();
+      }
+    }
   </script>
 {% endblock javascript %}

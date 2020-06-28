@@ -28,7 +28,7 @@ class Espp(models.Model):
     sell_price = models.DecimalField(_('Sell Price'), max_digits=20, decimal_places=2, null=True, blank=True)
     sell_conversion_rate = models.DecimalField(_('Sell Conversion Rate'), max_digits=20, decimal_places=2, null=True, blank=True)
     total_sell_price = models.DecimalField(_('Total Sell Price'), max_digits=20, decimal_places=2, null=True, blank=True)
-    user = models.CharField(max_length=20)
+    user = models.IntegerField()
     goal = models.DecimalField(max_digits=20, decimal_places=0, null=True, blank=True)
     latest_conversion_rate =  models.DecimalField(_('Latest Conversion Price'), max_digits=20, decimal_places=2, null=True, blank=True)
     latest_price = models.DecimalField(_('Latest Price'), max_digits=20, decimal_places=2, null=True, blank=True)

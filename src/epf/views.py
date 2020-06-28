@@ -12,7 +12,7 @@ from .forms import EpfModelForm
 from .models import Epf, EpfEntry
 import datetime
 from dateutil.relativedelta import relativedelta
-from shared.handle_get import get_goal_name_from_id, get_all_goals_id_to_name_mapping
+from shared.handle_get import *
 
 
 
@@ -38,6 +38,7 @@ class EpfListView(ListView):
         data = super().get_context_data(**kwargs)
         print(data)
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
+        data['user_name_mapping'] = get_all_users()
         return data
 
 class EpfDeleteView(DeleteView):
@@ -62,6 +63,7 @@ class EpfDetailView(DetailView):
         data = super().get_context_data(**kwargs)
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
+        data['user_str'] = get_user_name_from_id(data['object'].user)
         return data
 
 class EpfUpdateView(UpdateView):

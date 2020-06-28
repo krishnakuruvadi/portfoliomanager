@@ -38,7 +38,7 @@
         <td>{{ instance.start_date }}</td>
         <td>{{ instance.time_period }}</td>
         <td>{{ instance.final_val }}</td>
-        <td>{{ instance.user }}</td>
+        <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ instance.notes }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>

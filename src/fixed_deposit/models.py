@@ -12,7 +12,7 @@ class FixedDeposit(models.Model):
     roi = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     time_period = models.IntegerField(null=False)
     final_val = models.DecimalField(max_digits=20, decimal_places=2, null=False)
-    user = models.CharField(max_length=20)
+    user = models.IntegerField()
     notes = models.CharField(max_length=80, null=True, blank=True)
     goal = models.IntegerField(null=False)
     mat_date = models.DateField(null=False)

@@ -43,7 +43,7 @@
         <td>{{ instance.final_val }}</td>
         <td>{{ instance.mat_date }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
-        <td>{{ instance.user }}</td>
+        <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ instance.notes }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>

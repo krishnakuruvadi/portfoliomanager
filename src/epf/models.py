@@ -10,7 +10,7 @@ class Epf(models.Model):
     company = models.CharField(max_length=120)
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)
-    user = models.CharField(max_length=20)
+    user = models.IntegerField()
     goal =  models.IntegerField(null=True)
 
     def get_absolute_url(self):

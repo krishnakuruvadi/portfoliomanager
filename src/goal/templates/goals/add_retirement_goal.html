@@ -112,7 +112,7 @@
 
 {% block javascript %}
     <script>
-        var users_list = {{users_list|safe}}
+        var users = {{users|safe}}
         var sel_user = '{{user|safe}}'
         var userdropdown = document.getElementById('user');
         var opt = document.createElement('option');
@@ -122,14 +122,16 @@
         opt.value = ''; 
         // add opt to end of select box (sel)
         userdropdown.appendChild(opt);
-        console.log(users_list);
-        for (var i = 0; i < users_list.length; ++i) {
+        console.log(users);
+        for (x in users) {
+            user = users[x]
+            console.log(user)
             // create new option element
             var opt = document.createElement('option');
             // create text node to add to option element (opt)
-            opt.appendChild( document.createTextNode(users_list[i]) );
+            opt.appendChild( document.createTextNode(user) );
             // set value property of opt
-            opt.value = users_list[i];
+            opt.value = x;
             if (opt.value == sel_user) {
                 opt.selected = true;
             }

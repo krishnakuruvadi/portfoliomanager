@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 class Ppf(models.Model):
     number = models.CharField(max_length=20, primary_key=True)
     start_date = models.DateField()
-    user = models.CharField(max_length=20)
+    user = models.IntegerField()
     goal =  models.IntegerField(null=True)
 
     def get_absolute_url(self):
