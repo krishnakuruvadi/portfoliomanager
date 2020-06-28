@@ -15,9 +15,9 @@ def get_all_users_names_as_list():
         users_list.append(user.name)
     return users_list
 
-def get_all_goals_for_user_as_list(user):
+def get_all_goals_for_user_as_list(user_id):
     goal_list = list()
-    goals = Goal.objects.filter(user=user)
+    goals = Goal.objects.filter(user=user_id)
     for goal in goals:
         goal_list.append(goal.name)
     return goal_list
@@ -47,10 +47,24 @@ def get_all_goals_id_to_name_mapping():
         goal_mapping[goal.id] = goal.name
     return goal_mapping
 
+def get_all_users():
+    ret_user = dict()
+    users = User.objects.all()
+    for user in users:
+        ret_user[user.id] = user.name
+    return ret_user
+
 def get_user_id_from_name(name):
     try:
         user_obj = User.objects.get(name=name)
         return user_obj.id
+    except Exception as e:
+        return None
+
+def get_user_name_from_id(id):
+    try:
+        user_obj = User.objects.get(id=id)
+        return user_obj.name
     except Exception as e:
         return None
 

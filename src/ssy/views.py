@@ -21,7 +21,7 @@ from .forms import SsyModelForm, SsyEntryModelForm
 from .models import Ssy, SsyEntry
 from .ssy_helper import ssy_add_transactions
 import decimal
-from shared.handle_get import get_goal_name_from_id, get_all_goals_id_to_name_mapping
+from shared.handle_get import *
 
 class SsyCreateView(CreateView):
     template_name = 'ssys/ssy_create.html'
@@ -44,6 +44,7 @@ class SsyListView(ListView):
         data = super().get_context_data(**kwargs)
         print(data)
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
+        data['user_name_mapping'] = get_all_users()
         return data
 
 class SsyDetailView(DetailView):
@@ -58,6 +59,7 @@ class SsyDetailView(DetailView):
         data = super().get_context_data(**kwargs)
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
+        data['user_str'] = get_user_name_from_id(data['object'].user)
         return data
 
 class SsyUpdateView(UpdateView):
@@ -140,6 +142,8 @@ class ChartData(APIView):
             ssy_details = Ssy.objects.get(number=id)
             projected_rate = 8
             years_completed = relativedelta(datetime.date.today(), ssy_details.start_date).years
+            if years_completed == 0:
+                years_completed = 1
             print("completed years", years_completed)
             years_remaining = 15-years_completed-1
             ssy_data_principal = list()

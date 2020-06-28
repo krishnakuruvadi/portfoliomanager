@@ -35,7 +35,7 @@
         </td>
         <td>{{ instance.company }}</td>
         <td>{{ instance.start_date }}</td>
-        <td>{{ instance.user }}</td>
+        <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>

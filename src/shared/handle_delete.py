@@ -10,12 +10,12 @@ def delete_user(id):
     try:
         name = User.objects.get(id=id).name
         print('name is', name)
-        Epf.objects.filter(user=name).delete()
-        Ppf.objects.filter(user=name).delete()
-        Ssy.objects.filter(user=name).delete()
-        FixedDeposit.objects.filter(user=name).delete()
-        Espp.objects.filter(user=name).delete()
-        Goal.objects.filter(user=name).delete()
+        Epf.objects.filter(user=id).delete()
+        Ppf.objects.filter(user=id).delete()
+        Ssy.objects.filter(user=id).delete()
+        FixedDeposit.objects.filter(user=id).delete()
+        Espp.objects.filter(user=id).delete()
+        Goal.objects.filter(user=id).delete()
     except User.DoesNotExist:
         print("No user with that id found")
         pass

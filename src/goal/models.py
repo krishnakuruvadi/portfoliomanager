@@ -10,7 +10,7 @@ class Goal(models.Model):
     time_period = models.IntegerField(null=False)
     inflation = models.DecimalField(max_digits=4, decimal_places=2, null=False)
     final_val = models.DecimalField(max_digits=20, decimal_places=2, null=False)
-    user = models.CharField(max_length=20)
+    user = models.IntegerField()
     recurring_pay_goal = models.BooleanField(null=False)
     expense_period = models.IntegerField(null=True, blank=True)
     post_returns = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
