@@ -38,6 +38,7 @@ def refresh(request):
     for stock in stock_objs:
         collection_start_date = stock.collection_start_date
         historical_entries = HistoricalStockPrice.objects.filter(id=stock.id)
+        # TODO: optimize
         for entry in historical_entries:
             if entry.date>collection_start_date:
                 collection_start_date = entry.date

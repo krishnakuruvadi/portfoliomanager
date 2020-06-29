@@ -14,10 +14,13 @@ def update_latest_vals(espp_obj):
     if vals:
         for k, v in vals.items():
             if k and v:
-                if k > espp_obj.as_on_date:
+                if not espp_obj.as_on_date or k > espp_obj.as_on_date:
                     espp_obj.as_on_date = k
                     espp_obj.latest_price = v
-                    espp_obj.latest_conversion_rate = get_forex_rate(k, 'USD', 'INR')
+                    if espp_obj.exchange == 'NASDAQ':
+                        espp_obj.latest_conversion_rate = get_forex_rate(k, 'USD', 'INR')
+                    else:
+                        espp_obj.latest_conversion_rate = 1
                     espp_obj.latest_value = float(espp_obj.latest_price) * float(espp_obj.latest_conversion_rate) * float(espp_obj.shares_purchased)
                     espp_obj.gain = float(espp_obj.latest_value) - float(espp_obj.total_purchase_price)
                     espp_obj.save()
