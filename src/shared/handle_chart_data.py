@@ -204,6 +204,13 @@ def get_investment_data(start_date):
     total_epf = 0
     total_ppf = 0
     total_ssy = 0
+
+    epf_reset_on_zero = False
+    fd_reset_on_zero = False
+    ppf_reset_on_zero = False
+    ssy_reset_on_zero = False
+    espp_reset_on_zero = False
+    total_reset_on_zero = False
     
     while data_start_date + relativedelta(months=+1) < datetime.date.today():
         total = 0
@@ -216,8 +223,14 @@ def get_investment_data(start_date):
             else:
                 total_epf -= int(epf_entry.employee_contribution) + int(epf_entry.employer_contribution) + int(epf_entry.interest_contribution)
         if total_epf != 0:
+            if not epf_reset_on_zero:
+                epf_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
             epf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':total_epf})
             total += total_epf
+            epf_reset_on_zero = True
+        elif epf_reset_on_zero:
+            epf_reset_on_zero = False
+            epf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
         
         ppf_entries = PpfEntry.objects.filter(trans_date__range=(data_start_date, data_end_date))
         for ppf_entry in ppf_entries:
@@ -228,8 +241,14 @@ def get_investment_data(start_date):
             else:
                 total_ppf -= int(ppf_entry.amount)
         if total_ppf != 0:
+            if not ppf_reset_on_zero:
+                ppf_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
             ppf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':total_ppf})
             total += total_ppf
+            ppf_reset_on_zero = True
+        elif ppf_reset_on_zero:
+            ppf_reset_on_zero = False
+            ppf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
 
         ssy_entries = SsyEntry.objects.filter(trans_date__year=data_start_date.year, trans_date__month=data_start_date.month)
         for ssy_entry in ssy_entries:
@@ -238,8 +257,14 @@ def get_investment_data(start_date):
             else:
                 total_ssy -= int(ssy_entry.amount)
         if total_ssy != 0:
+            if not ssy_reset_on_zero:
+                ssy_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
             ssy_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':total_ssy})
             total += total_ssy
+            ssy_reset_on_zero = True
+        elif ssy_reset_on_zero:
+            ssy_reset_on_zero = False
+            ssy_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
         
         fd_entries = FixedDeposit.objects.filter(start_date__lte=data_start_date, mat_date__gte=data_end_date)
         fd_val = 0
@@ -248,8 +273,14 @@ def get_investment_data(start_date):
             _, val = get_maturity_value(float(fd.principal), fd.start_date.strftime('%Y-%m-%d'), float(fd.roi), time_period.days)
             fd_val += val
         if fd_val != 0:
+            if not fd_reset_on_zero:
+                fd_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
             fd_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':fd_val})
             total += fd_val
+            fd_reset_on_zero = True
+        elif fd_reset_on_zero:
+            fd_reset_on_zero = False
+            fd_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
         
         espp_entries = Espp.objects.filter(purchase_date__lte=data_end_date)
         espp_val = 0
@@ -279,11 +310,24 @@ def get_investment_data(start_date):
                 except Stock.DoesNotExist:
                     pass
         if espp_val != 0:
+            if not espp_reset_on_zero:
+                espp_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
             espp_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':int(espp_val)})
             total += espp_val
+            espp_reset_on_zero = True
+        elif espp_reset_on_zero:
+            espp_reset_on_zero = False
+            espp_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+
         if total != 0:
+            if not total_reset_on_zero:
+                total_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
             total_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':int(total)})
-        
+            total_reset_on_zero = True
+        elif total_reset_on_zero:
+            total_reset_on_zero = False
+            total_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+
         data_start_date  = data_start_date+relativedelta(months=+1)
 
     return {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'total':total_data}
