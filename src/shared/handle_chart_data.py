@@ -3,6 +3,7 @@ from ssy.models import Ssy, SsyEntry
 from fixed_deposit.models import FixedDeposit
 from fixed_deposit.fixed_deposit_helper import get_maturity_value
 from espp.models import Espp
+from rsu.models import RSUAward, RestrictedStockUnits
 from epf.models import Epf, EpfEntry
 from goal.models import Goal
 from users.models import User
@@ -60,6 +61,16 @@ def get_espp_amount_for_goal(id):
             total_espp += espp_obj.latest_value
     return total_espp
 
+def get_rsu_amount_for_goal(id):
+    award_objs = RSUAward.objects.filter(goal=id)
+    total_rsu = 0
+    for award_obj in award_objs:
+        for rsu_obj in RestrictedStockUnits.objects.filter(award=award_obj):
+            if not rsu_obj.total_sell_price:
+                if rsu_obj.latest_value:
+                    total_rsu += rsu_obj.latest_value
+    return total_rsu
+
 def get_epf_amount_for_goal(id):
     epf_objs = Epf.objects.filter(goal=id)
     total_epf = 0
@@ -83,14 +94,15 @@ def get_goal_contributions(goal_id):
     contrib['epf'] = int(get_epf_amount_for_goal(goal_id))
     contrib['espp'] = int(get_espp_amount_for_goal(goal_id))
     contrib['fd'] = int(get_fd_amount_for_goal(goal_id))
-    contrib['ppf'] =int( get_ppf_amount_for_goal(goal_id))
-    contrib['ssy'] =int( get_ssy_amount_for_goal(goal_id))
-    contrib['equity'] = contrib['espp']
+    contrib['ppf'] =int(get_ppf_amount_for_goal(goal_id))
+    contrib['ssy'] =int(get_ssy_amount_for_goal(goal_id))
+    contrib['rsu'] =int(get_rsu_amount_for_goal(goal_id))
+    contrib['equity'] = contrib['espp']+contrib['rsu']
     contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
     contrib['total'] = contrib['equity'] + contrib['debt']
-    contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY']
-    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy']]
-    contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6']
+    contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU']
+    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu']]
+    contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8']
     print("contrib:", contrib)
     return contrib
 
@@ -144,6 +156,16 @@ def get_espp_amount_for_user(user_id):
                 total_espp += espp_obj.latest_value
     return total_espp
 
+def get_rsu_amount_for_user(user_id):
+    award_objs = RSUAward.objects.filter(user=user_id)
+    total_rsu = 0
+    for award_obj in award_objs:
+        for rsu_obj in RestrictedStockUnits.objects.filter(award=award_obj):
+            if not rsu_obj.total_sell_price:
+                if rsu_obj.latest_value:
+                    total_rsu += rsu_obj.latest_value
+    return total_rsu
+
 def get_epf_amount_for_user(user_id):
     epf_objs = Epf.objects.filter(user=user_id)
     total_epf = 0
@@ -179,12 +201,13 @@ def get_user_contributions(user_id):
         contrib['fd'] = int(get_fd_amount_for_user(user_id))
         contrib['ppf'] =int(get_ppf_amount_for_user(user_id))
         contrib['ssy'] =int(get_ssy_amount_for_user(user_id))
-        contrib['equity'] = contrib['espp']
+        contrib['rsu'] = int(get_rsu_amount_for_user(user_id))
+        contrib['equity'] = contrib['espp']+contrib['rsu']
         contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
         contrib['total'] = contrib['equity'] + contrib['debt']
-        contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY']
-        contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy']]
-        contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6']
+        contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU']
+        contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu']]
+        contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8']
         print("contrib:", contrib)
         return contrib
     except User.DoesNotExist:
@@ -199,6 +222,7 @@ def get_investment_data(start_date):
     ssy_data = list()
     fd_data = list()
     espp_data = list()
+    rsu_data = list()
     total_data = list()
 
     total_epf = 0
@@ -210,6 +234,7 @@ def get_investment_data(start_date):
     ppf_reset_on_zero = False
     ssy_reset_on_zero = False
     espp_reset_on_zero = False
+    rsu_reset_on_zero = False
     total_reset_on_zero = False
     
     while data_start_date + relativedelta(months=+1) < datetime.date.today():
@@ -319,6 +344,43 @@ def get_investment_data(start_date):
             espp_reset_on_zero = False
             espp_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
 
+        rsu_entries = RestrictedStockUnits.objects.filter(vest_date__lte=data_end_date)
+        rsu_val = 0
+        for rsu_entry in rsu_entries:
+            print("rsu entry")
+            if rsu_entry.sell_date is None or rsu_entry.sell_date < data_end_date:
+                try:
+                    stock = Stock.objects.get(symbol=rsu_entry.award.symbol, exchange=rsu_entry.award.exchange)
+                    historical_stock_prices = get_historical_stock_price(stock, data_end_date+relativedelta(days=-5), data_end_date)
+                    for val in historical_stock_prices:
+                        found = False
+                        #print(val)
+                        for k,v in val.items():
+                            if stock.exchange == 'NYSE' or stock.exchange == 'NASDAQ':
+                                conv_val = get_conversion_rate('USD', 'INR', data_end_date)
+                                #print('conversion value', conv_val)
+                                if conv_val:
+                                    rsu_val += float(conv_val)*float(v)*int(rsu_entry.shares_for_sale)
+                                    found = True
+                                    break
+                            else:
+                                rsu_val += float(v)*int(rsu_entry.shares_for_sale)
+                                found = True
+                                break
+                        if found:
+                            break
+                except Stock.DoesNotExist:
+                    pass
+        if rsu_val != 0:
+            if not rsu_reset_on_zero:
+                rsu_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
+            rsu_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':int(rsu_val)})
+            total += rsu_val
+            rsu_reset_on_zero = True
+        elif rsu_reset_on_zero:
+            rsu_reset_on_zero = False
+            rsu_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+
         if total != 0:
             if not total_reset_on_zero:
                 total_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
@@ -330,6 +392,6 @@ def get_investment_data(start_date):
 
         data_start_date  = data_start_date+relativedelta(months=+1)
 
-    return {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'total':total_data}
+    return {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'total':total_data}
         
 
