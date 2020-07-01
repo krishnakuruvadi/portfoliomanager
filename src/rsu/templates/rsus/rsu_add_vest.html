@@ -1,0 +1,155 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+    Add RSU Vest 
+{% endblock viewname %}
+
+{% block content %}
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Award</th>
+            <th scope="col">Company</th>
+            <th scope="col">Award Date</th>
+        </tr>
+    </thead>
+    <tr>
+        <td>{{award_id}} </td>
+        <td>{{symbol}}</td>
+        <td>{{award_date}}</td>
+    </tr>
+</table>
+<p></p>
+<p></p>
+<form method="POST">
+    {% csrf_token %}
+    <div class="row">
+    <div class='col-sm-6'>
+        <div class="form-group row">
+            <label for="vest_date" class="col-sm-3 col-form-label">Vest Date</label>
+            <div class="col-sm-3">
+                <div class="md-form mt-0">
+                    <input type="date" id="vest_date" name="vest_date" value="{{vest_date}}">
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="fmv" class="col-sm-3 col-form-label">FMV</label>
+            <div class="col-sm-3">
+              <div class="md-form mt-0">
+                <input type="number" step="0.01" id="fmv" name="fmv" value="{{fmv}}">
+              </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="aquisition_price" class="col-sm-3 col-form-label">Aquisition Price</label>
+            <div class="col-sm-3">
+              <div class="md-form mt-0">
+                <input type="number" step="0.01" id="aquisition_price" name="aquisition_price" value="{{aquisition_price}}">
+              </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="shares_vested" class="col-sm-3 col-form-label">Shares Vested</label>
+            <div class="col-sm-3">
+              <div class="md-form mt-0">
+                <input type="number" id="shares_vested" name="shares_vested" value="{{shares_vested}}">
+              </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="shares_for_sale" class="col-sm-3 col-form-label">Shares For Sale</label>
+            <div class="col-sm-3">
+              <div class="md-form mt-0">
+                <input type="number" id="shares_for_sale" name="shares_for_sale" value="{{shares_for_sale}}">
+              </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="total_aquisition_price" class="col-sm-3 col-form-label">Total Aquisition Price</label>
+            <div class="col-sm-3">
+              <div class="md-form mt-0">
+                <input type="number" step="0.01" id="total_aquisition_price" name="total_aquisition_price" value="{{total_aquisition_price}}">
+              </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="sell_date" class="col-sm-3 col-form-label">Sell Date</label>
+            <div class="col-sm-3">
+                <div class="md-form mt-0">
+                    <input type="date" id="sell_date" name="sell_date" value="{{sell_date}}">
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="sell_price" class="col-sm-3 col-form-label">Sell Price</label>
+            <div class="col-sm-3">
+              <div class="md-form mt-0">
+                <input type="number" step="0.01" id="sell_price" name="sell_price" value="{{sell_price}}">
+              </div>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="sell_conversion_rate" class="col-sm-3 col-form-label">Sell Conversion Rate</label>
+            <div class="col-sm-3">
+              <div class="md-form mt-0">
+                <input type="number" step="0.01" id="sell_conversion_rate" name="sell_conversion_rate" value="{{sell_conversion_rate}}">
+              </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="total_sell_price" class="col-sm-3 col-form-label">Total Sell Price</label>
+            <div class="col-sm-3">
+              <div class="md-form mt-0">
+                <input type="number" step="0.01" id="total_sell_price" name="total_sell_price" value="{{total_sell_price}}">
+              </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+            <div class="col-sm-3">
+              <div class="md-form mt-0">
+                <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
+              </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <div class="md-form mt-0">
+                    <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                    <a href="../" class="btn btn-danger" role="button">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+    $("#aquisition_price").change(function () {
+      setTotalAquisitionPrice();
+    });
+    $("#shares_vested").change(function () {
+      setTotalAquisitionPrice();
+    });
+    function setTotalAquisitionPrice(){
+      var aquisitionPriceElem = document.getElementById("aquisition_price");
+      var aquisitionPrice = aquisitionPriceElem.value
+      var sharesVestedElem = document.getElementById("shares_vested");
+      var sharesVested = sharesVestedElem.value
+      console.log(aquisitionPrice)
+      console.log(sharesVested)
+      if (sharesVested!= '' && aquisitionPrice!='') {
+        totalAquisitionPrice = sharesVested*aquisitionPrice
+        console.log(totalAquisitionPrice)
+        totalAquisitionPriceElem = document.getElementById("total_aquisition_price")
+        totalAquisitionPriceElem.value = totalAquisitionPrice
+      }  
+    }
+  </script>
+{% endblock javascript %}

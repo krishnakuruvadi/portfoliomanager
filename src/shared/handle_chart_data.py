@@ -285,18 +285,18 @@ def get_investment_data(start_date):
         espp_entries = Espp.objects.filter(purchase_date__lte=data_end_date)
         espp_val = 0
         for espp_entry in espp_entries:
-            print("espp entry")
+            #print("espp entry")
             if espp_entry.sell_date is None or espp_entry.sell_date < data_end_date:
                 try:
                     stock = Stock.objects.get(symbol=espp_entry.symbol, exchange=espp_entry.exchange)
                     historical_stock_prices = get_historical_stock_price(stock, data_end_date+relativedelta(days=-5), data_end_date)
                     for val in historical_stock_prices:
                         found = False
-                        print(val)
+                        #print(val)
                         for k,v in val.items():
                             if espp_entry.exchange == 'NYSE' or espp_entry.exchange == 'NASDAQ':
                                 conv_val = get_conversion_rate('USD', 'INR', data_end_date)
-                                print('conversion value', conv_val)
+                                #print('conversion value', conv_val)
                                 if conv_val:
                                     espp_val += float(conv_val)*float(v)*int(espp_entry.shares_purchased)
                                     found = True

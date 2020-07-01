@@ -1,0 +1,31 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+    RSU Vest 
+{% endblock viewname %}
+
+{% block content %}
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Vest Date</th>
+            <th scope="col">FMV</th>
+            <th scope="col">Aquisition Price</th>
+        </tr>
+    </thead>
+    <tr>
+        <td>{{object.vest_date}} </td>
+        <td>{{object.fmv}}</td>
+        <td>{{object.aquisition_price}}</td>
+    </tr>
+</table>
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+  </script>
+{% endblock javascript %}
