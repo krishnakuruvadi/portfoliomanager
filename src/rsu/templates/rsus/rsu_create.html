@@ -1,0 +1,82 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  {% if object %}
+    Update RSU Award
+  {% else %}
+    Create RSU Award
+  {% endif %} 
+{% endblock viewname %}
+
+{% block content %}
+
+  <form action="." method="POST" class="form-horizontal">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group row">
+        {{ field.errors }}
+        <label class="control-label col-sm-2 col-form-label" for="id_{{ field.name }}">{{ field.label }}</label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            {{ field }}
+          </div>
+        </div>
+        {% if field.help_text %}
+          <p class="help">{{ field.help_text|safe }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <input type="submit" value="Submit" class="btn btn-info"/>&nbsp;<a href="../" class="btn btn-danger" role="button">Cancel</a>
+
+  </form>
+
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+    setGoals();
+    $("#id_user").change(function () {
+      setGoals();
+    });
+    function setGoals(){
+      var userElem = document.getElementById("id_user");
+      var user = userElem.value
+      var goalElem = document.getElementById("id_goal");
+      var goal = goalElem.value
+      console.log(user)
+      console.log(goal)
+      if (user != '') {
+        $.ajax({
+          url: '/goal/get-goals/'+user,
+          success: function (response) {
+            console.log(response)
+            var  new_options = response.goal_list;
+            $('#id_goal').empty();
+            $('#id_goal')
+              .append($('<option>', { value : '' })
+              .text(''));
+            $.each(new_options, function(key, value) {
+              console.log(key,value)
+              if(goal==key){
+                $('#id_goal')
+                  .append($('<option>', { value : key })
+                  .text(value)
+                  .attr('selected',true));
+              } else {
+                $('#id_goal')
+                  .append($('<option>', { value : key })
+                  .text(value));
+              }
+            });
+          }
+        });
+      } else {
+        $('#id_goal').empty();
+      }
+    }
+  </script>
+{% endblock javascript %}
