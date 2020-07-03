@@ -19,6 +19,10 @@ def get_latest_vals(stock, exchange, start, end):
         #response = Nse(stock).get_historical_value(start, end)
         response = YahooFinance2(stock+'.NS').get_historical_value(start, end)
         return response
+    if exchange == 'BSE':
+        #response = Nse(stock).get_historical_value(start, end)
+        response = YahooFinance2(stock+'.BO').get_historical_value(start, end)
+        return response
 
 def get_forex_rate(date, from_cur, to_cur):
     # https://api.ratesapi.io/api/2020-01-31?base=USD&symbols=INR
@@ -52,7 +56,9 @@ def get_historical_stock_price(stock, start, end):
             pass
         start_date = start_date+relativedelta(days=-1)
     if len(ret_vals) == 0:
-        get_vals = get_latest_vals(stock.symbol, stock.exchange, end+relativedelta(months=-1), end)
+        get_vals = get_latest_vals(stock.symbol, stock.exchange, end+relativedelta(days=-5), end)
+        if not get_vals:
+            return ret_vals
         for k,v in get_vals.items():
             if k >= start and k<= end:
                 new_entry = HistoricalStockPrice(symbol=stock, date=k, price=v)

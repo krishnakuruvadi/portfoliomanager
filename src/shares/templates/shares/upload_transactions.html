@@ -1,0 +1,100 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} Upload Transactions {% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %} 
+    <!--div class="form-group">
+      <label for="exampleFormControlSelect1">Bank</label>
+      <select class="form-control" id="exampleFormControlSelect1">
+        <option>SBI</option>
+      </select>
+    </div-->
+    <!--div class="custom-file">
+      <input type="file" class="custom-file-input" id="customFile" name="customFile">
+      <label class="custom-file-label" for="customFile">Choose XLS file</label>
+    </div>
+           
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      <button type="button" class="btn btn-primary">Upload</button>
+    </div-->
+    <div class="row">
+      <div class='col-sm-6'>
+        <div class="form-group row">
+          <label for="user" class="col-sm-3 col-form-label">User</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_user" name="user" class="form-control"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="bankFormControlSelect" class="col-sm-3 col-form-label">Broker</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select class="form-control" id="brokerControlSelect" name="brokerControlSelect">
+                <option>ZERODHA</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='col-sm-6'></div>
+      <div class='col-sm-6'>
+        <div class="form-group row">
+          <label for="file" class="col-sm-3 col-form-label">File</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="file" name="document" required>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='col-sm-3'></div>
+      <div class='col-sm-6'>
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+            <a href="../" class="btn btn-danger" role="button">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+    var users = {{users|safe}}
+    var userdropdown = document.getElementById('id_user');
+    var opt = document.createElement('option');
+    // create text node to add to option element (opt)
+    opt.appendChild( document.createTextNode('') );
+    // set value property of opt
+    opt.value = ''; 
+    // add opt to end of select box (sel)
+    userdropdown.appendChild(opt);
+    console.log(users);
+    for (x in users) {
+      user = users[x]
+      // create new option element
+      var opt = document.createElement('option');
+      // create text node to add to option element (opt)
+      opt.appendChild( document.createTextNode(user) );
+      // set value property of opt
+      opt.value = x;
+      // add opt to end of select box (sel)
+      userdropdown.appendChild(opt);
+    }
+  </script>
+{% endblock %}
