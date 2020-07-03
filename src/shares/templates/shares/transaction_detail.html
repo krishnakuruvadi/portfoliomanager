@@ -1,0 +1,30 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} {{object.name }} {% endblock viewname %}
+
+{% block content %} 
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Transaction Date</th>
+        <th scope="col">Transaction Type</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>{{ object.id }}</th>
+        <td>{{ object.trans_date }}</td>
+        <td>{{ object.trans_type }}</td>
+        <td>{{ object.quantity }}</td>
+        <td>{{ object.notes }}</td>
+      </tr>
+    </tbody>
+  </table>
+  {% endblock content %}

@@ -31,6 +31,7 @@ urlpatterns = [
     path('rsu/', include('rsu.urls')),
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),
+    path('shares/', include('shares.urls')),
     path('common/', include('common.urls')),
     #path('api/chart/data/<id>', ChartData.as_view())
 ]

@@ -75,6 +75,7 @@ def get_day_range_of_month(year, month):
     return first_day, last_day
 
 def get_start_day_across_portfolio():
+    #TODO: Fill for other investment avenues
     start_day = datetime.date.today()
     epf_objs = Epf.objects.all()
     for epf_obj in epf_objs:    
@@ -96,4 +97,3 @@ def get_start_day_across_portfolio():
     
     new_start_day = datetime.date(start_day.year, start_day.month, 1)
     return new_start_day
-    

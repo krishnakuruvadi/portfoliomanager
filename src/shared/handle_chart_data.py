@@ -6,11 +6,13 @@ from espp.models import Espp
 from rsu.models import RSUAward, RestrictedStockUnits
 from epf.models import Epf, EpfEntry
 from goal.models import Goal
+from shares.models import Share, Transactions
 from users.models import User
 import datetime
 from dateutil.relativedelta import relativedelta
 from common.models import HistoricalStockPrice, Stock
 from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price
+from shared.handle_create import add_common_stock
 
 def get_ppf_amount_for_goal(id):
     ppf_objs = Ppf.objects.filter(goal=id)
@@ -71,6 +73,14 @@ def get_rsu_amount_for_goal(id):
                     total_rsu += rsu_obj.latest_value
     return total_rsu
 
+def get_shares_amount_for_goal(id):
+    share_objs = Share.objects.filter(goal=id)
+    total_shares = 0
+    for share_obj in share_objs:
+        if share_obj.latest_value:
+            total_shares += share_obj.latest_value
+    return total_shares
+
 def get_epf_amount_for_goal(id):
     epf_objs = Epf.objects.filter(goal=id)
     total_epf = 0
@@ -97,12 +107,13 @@ def get_goal_contributions(goal_id):
     contrib['ppf'] =int(get_ppf_amount_for_goal(goal_id))
     contrib['ssy'] =int(get_ssy_amount_for_goal(goal_id))
     contrib['rsu'] =int(get_rsu_amount_for_goal(goal_id))
-    contrib['equity'] = contrib['espp']+contrib['rsu']
+    contrib['shares'] = int(get_shares_amount_for_goal(goal_id))
+    contrib['equity'] = contrib['espp']+contrib['rsu']+contrib['shares']
     contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
     contrib['total'] = contrib['equity'] + contrib['debt']
-    contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU']
-    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu']]
-    contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8']
+    contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU','Shares']
+    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu'],contrib['shares']]
+    contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8','#e31219']
     print("contrib:", contrib)
     return contrib
 
@@ -166,6 +177,14 @@ def get_rsu_amount_for_user(user_id):
                     total_rsu += rsu_obj.latest_value
     return total_rsu
 
+def get_shares_amount_for_user(user_id):
+    share_objs = Share.objects.filter(user=user_id)
+    total_shares = 0
+    for share_obj in share_objs:
+        if share_obj.latest_value:
+            total_shares += share_obj.latest_value
+    return total_shares
+
 def get_epf_amount_for_user(user_id):
     epf_objs = Epf.objects.filter(user=user_id)
     total_epf = 0
@@ -202,12 +221,13 @@ def get_user_contributions(user_id):
         contrib['ppf'] =int(get_ppf_amount_for_user(user_id))
         contrib['ssy'] =int(get_ssy_amount_for_user(user_id))
         contrib['rsu'] = int(get_rsu_amount_for_user(user_id))
-        contrib['equity'] = contrib['espp']+contrib['rsu']
+        contrib['shares'] = int(get_shares_amount_for_user(user_id))
+        contrib['equity'] = contrib['espp']+contrib['rsu']+contrib['shares']
         contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
         contrib['total'] = contrib['equity'] + contrib['debt']
-        contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU']
-        contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu']]
-        contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8']
+        contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU','Shares']
+        contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu'],contrib['shares']]
+        contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8','#e31219']
         print("contrib:", contrib)
         return contrib
     except User.DoesNotExist:
@@ -223,6 +243,7 @@ def get_investment_data(start_date):
     fd_data = list()
     espp_data = list()
     rsu_data = list()
+    shares_data = list()
     total_data = list()
 
     total_epf = 0
@@ -235,7 +256,10 @@ def get_investment_data(start_date):
     ssy_reset_on_zero = False
     espp_reset_on_zero = False
     rsu_reset_on_zero = False
+    shares_reset_on_zero = False
     total_reset_on_zero = False
+
+    share_qty = dict()
     
     while data_start_date + relativedelta(months=+1) < datetime.date.today():
         total = 0
@@ -381,6 +405,49 @@ def get_investment_data(start_date):
             rsu_reset_on_zero = False
             rsu_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
 
+        share_transactions = Transactions.objects.filter(trans_date__range=(data_start_date, data_end_date))
+        for trans in share_transactions:
+            uni_name = trans.share.exchange+'-'+trans.share.symbol
+            if uni_name not in share_qty:
+                share_qty[uni_name] = 0
+            if trans.trans_type == 'Buy':
+                share_qty[uni_name] += trans.quantity
+            else:
+                share_qty[uni_name] -= trans.quantity
+        share_val = 0
+        if data_start_date.year == 2020:
+            print(share_qty)
+        for s,q in share_qty.items():
+            stock_obj = add_common_stock(exchange=s[0:s.find('-')], symbol=s[s.find('-')+1:], start_date=data_end_date)
+            if stock_obj:
+                historical_stock_prices = get_historical_stock_price(stock_obj, data_end_date+relativedelta(days=-5), data_end_date)
+                for val in historical_stock_prices:
+                    found = False
+                    #print(val)
+                    for k,v in val.items():
+                        if stock_obj.exchange == 'NYSE' or stock_obj.exchange == 'NASDAQ':
+                            conv_val = get_conversion_rate('USD', 'INR', data_end_date)
+                            #print('conversion value', conv_val)
+                            if conv_val:
+                                share_val += float(conv_val)*float(v)*int(q)
+                                found = True
+                                break
+                        else:
+                            share_val += float(v)*int(q)
+                            found = True
+                            break
+                    if found:
+                        break
+        if share_val != 0:
+            if not shares_reset_on_zero:
+                shares_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
+            shares_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':int(share_val)})
+            total += share_val
+            shares_reset_on_zero = True
+        elif shares_reset_on_zero:
+            shares_reset_on_zero = False
+            shares_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+        
         if total != 0:
             if not total_reset_on_zero:
                 total_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
@@ -391,7 +458,7 @@ def get_investment_data(start_date):
             total_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
 
         data_start_date  = data_start_date+relativedelta(months=+1)
-
-    return {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'total':total_data}
+    #print('shares data is:',shares_data)
+    return {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'total':total_data}
         
 

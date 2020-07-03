@@ -28,8 +28,8 @@ class YahooFinance2(Exchange):
         else:
             self.crumb = match.group(1)
 
-    def get_datetime_from_date(self, date_obj):
-        dt = datetime.datetime.combine(date_obj, datetime.datetime.min.time())
+    def get_datetime_from_date(self, date_obj, use_min=True):
+        dt = datetime.datetime.combine(date_obj, datetime.datetime.min.time() if use_min else datetime.datetime.max.time())
         return dt
 
     def get_historical_value(self, start, end):
@@ -38,7 +38,7 @@ class YahooFinance2(Exchange):
             try:
                 if not hasattr(self, 'crumb') or len(self.session.cookies) == 0:
                     self.get_crumb()
-                dt_to =  self.get_datetime_from_date(end)
+                dt_to =  self.get_datetime_from_date(end,False)
                 dt_from = self.get_datetime_from_date(start)
                 dateto = int(dt_to.timestamp())
                 datefrom = int(dt_from.timestamp())
