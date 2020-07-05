@@ -3,7 +3,7 @@ bs4==0.0.1
 certifi==2020.4.5.1
 chardet==3.0.4
 dateutils==0.6.8
-Django==2.1.5
+Django==2.2.14
 djangorestframework==3.11.0
 idna==2.9
 mftool==1.4
@@ -13,4 +13,5 @@ pytz==2019.3
 requests==2.23.0
 six==1.14.0
 soupsieve==2.0.1
+sqlparse==0.3.1
 urllib3==1.25.9
