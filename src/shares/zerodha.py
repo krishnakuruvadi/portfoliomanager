@@ -12,7 +12,6 @@ class Zerodha:
             with open(self.filename, mode='r', encoding='utf-8-sig') as csv_file:
                 print("opened file as csv:", self.filename)
                 csv_reader = csv.DictReader(csv_file, delimiter=",")
-                line_count = 0
                 last_order = ''
                 symbol=''
                 exchange=''

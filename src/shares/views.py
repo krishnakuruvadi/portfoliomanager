@@ -159,7 +159,7 @@ def add_transaction(request):
         trans_price = get_float_or_none_from_string(request.POST['trans_price'])
         broker = request.POST['broker']
         notes = request.POST['notes']
-        insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate, trans_price)
+        insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, trans_date, notes, broker, conversion_rate, trans_price)
     users = get_all_users()
     context = {'users':users, 'operation': 'Add Transaction'}
     return render(request, template, context)
@@ -206,9 +206,9 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
             share_obj.buy_price = new_buy_value/float(new_qty)
             share_obj.save()
         else:
-            new_qty = share_obj.quantity-quantity
+            new_qty = int(share_obj.quantity)-quantity
             if new_qty:
-                new_buy_value = share_obj.buy_value - trans_price
+                new_buy_value = float(share_obj.buy_value) - trans_price
                 share_obj.quantity = new_qty
                 share_obj.buy_value = new_buy_value
                 share_obj.buy_price = new_buy_value/float(new_qty)

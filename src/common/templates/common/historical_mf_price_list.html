@@ -1,0 +1,44 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}{{ page_obj.0.code.code }} {{ page_obj.0.code.name }} {% endblock %} 
+
+{% block applicableactions %} 
+
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+<b>ISIN Div Payout/ ISIN Growth:</b>{{ page_obj.0.code.isin }} <b>ISIN Div Reinvestment:</b>{{ page_obj.0.code.isin2 }}
+<table class="table table-striped">
+  <thead>
+      <tr>
+          <th>Date</td>
+          <th>NAV</td>
+      </tr>
+  </thead>
+  <tbody>
+    {% for entry in page_obj %}
+      <tr>
+        <td>{{ entry.date }}</td>
+        <td>{{ entry.nav }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="pagination d-flex justify-content-center align-items-center">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1"><i class="fa fa-fast-backward" aria-hidden="true" style="font-size: 1.3em;"></i></a>
+            <a href="?page={{ page_obj.previous_page_number }}"><i class="fa fa-step-backward" aria-hidden="true"  style="font-size: 1.3em;"></i></a>
+        {% endif %}
+
+          <button type="button" class="btn btn-outline-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</button>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}"><i class="fa fa-step-forward" aria-hidden="true" style="font-size: 1.3em;"></i></a>
+            <a href="?page={{ page_obj.paginator.num_pages }}"><i class="fa fa-fast-forward" aria-hidden="true" style="font-size: 1.3em;"></i>
+            </a>
+        {% endif %}
+    </span>
+  </div>
+{% endblock %}
