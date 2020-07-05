@@ -19,7 +19,7 @@ class Stock(models.Model):
     collection_start_date = models.DateField(_('Collection Start Date'), )
     
     def get_absolute_url(self):
-        return reverse("common:common-stock-detail", kwargs={'id': self.id})
+        return reverse("common:stock-detail", kwargs={'id': self.id})
 
 
 class HistoricalStockPrice(models.Model):
@@ -30,14 +30,19 @@ class HistoricalStockPrice(models.Model):
     price = models.DecimalField(_('Price'), max_digits=20, decimal_places=2, null=False)
     #face_value = models.DecimalField(_('Face Value'), max_digits=20, decimal_places=2, null=False)
 
+
 class MutualFund(models.Model):
-    code = models.CharField(max_length=10) # amfi code for India
+    code = models.CharField(max_length=15) # amfi code for India
     name = models.CharField(max_length=200) # amfi name for India
+    isin = models.CharField(max_length=20) # amfi isin code ISIN Div Payout/ ISIN Growth
+    isin2 = models.CharField(max_length=20, null=True, blank=True) # amfi isin code ISIN Div Reinvestment
+    fund_house = models.CharField(max_length=50, null=True, blank=True)
     kuvera_name = models.CharField(max_length=200, null=True, blank=True)
     collection_start_date = models.DateField(_('Collection Start Date'), )
+    bse_star_name = models.CharField(max_length=200, null=True, blank=True)
     
     def get_absolute_url(self):
-        return reverse("common:common-mf-detail", kwargs={'id': self.id})
+        return reverse("common:mf-detail", kwargs={'id': self.id})
 
 
 class HistoricalMFPrice(models.Model):

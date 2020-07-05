@@ -1,0 +1,42 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %} Stocks Being Tracked {% endblock %} 
+
+{% block applicableactions %} 
+<div class="btn-toolbar mb-2 mb-md-0">
+  <div class="btn-group mr-2">
+    <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+  </div>
+</div>
+
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Exchange</th>
+        <th scope="col">Symbol</th>
+        <th scope="col">Collection Start Date</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in stock_list %}
+      <tr>
+        <th scope="row">{{ instance.id }}</th>
+        <td>{{ instance.exchange }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}">{{ instance.symbol }}</a>
+        </td>
+        <td>{{ instance.collection_start_date }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}stock/{{ instance.id }}/historical-prices"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

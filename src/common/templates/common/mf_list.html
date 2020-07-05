@@ -1,0 +1,71 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %} Mutual Funds Being Tracked{% endblock %} 
+
+{% block applicableactions %} 
+<div class="btn-toolbar mb-2 mb-md-0">
+  <div class="btn-group mr-2">
+    <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="trash"><i class="fa fa-trash" aria-hidden="true" title="Trash" style="font-size: 1.2em;"></i></a>
+  </div>
+</div>
+
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Code</th>
+        <th scope="col">Name</th>
+        <th scope="col">ISIN</th>
+        <th scope="col">ISIN2</th>
+        <th scope="col">Fund House</th>
+        <th scope="col">Kuvera Name</th>
+        <th scope="col">BSEStar Name</th>
+        <th scope="col">Collection Start Date</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in page_obj %}
+      <tr>
+        <th scope="row">{{ instance.id }}</th>
+
+        <td>
+          <a href="{{ instance.get_absolute_url }}">{{ instance.code }}</a>
+        </td>
+        <td>{{ instance.name }}</td>
+        <td>{{ instance.isin }}</td>
+        <td>{{ instance.isin2 }}</td>
+        <td>{{ instance.fund_house }}</td>
+        <td>{{ instance.kuvera_name }}</td>
+        <td>{{ instance.bse_star_name }}</td>
+        <td>{{ instance.collection_start_date }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}historical-prices"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="pagination d-flex justify-content-center align-items-center">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1"><i class="fa fa-fast-backward" aria-hidden="true" style="font-size: 1.3em;"></i></a>
+            <a href="?page={{ page_obj.previous_page_number }}"><i class="fa fa-step-backward" aria-hidden="true"  style="font-size: 1.3em;"></i></a>
+        {% endif %}
+
+          <button type="button" class="btn btn-outline-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</button>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}"><i class="fa fa-step-forward" aria-hidden="true" style="font-size: 1.3em;"></i></a>
+            <a href="?page={{ page_obj.paginator.num_pages }}"><i class="fa fa-fast-forward" aria-hidden="true" style="font-size: 1.3em;"></i>
+            </a>
+        {% endif %}
+    </span>
+  </div>
+{% endblock %}

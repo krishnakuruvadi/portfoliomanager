@@ -1,0 +1,54 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %} Mutual Funds Being Tracked{% endblock %} 
+
+{% block applicableactions %} 
+<div class="btn-toolbar mb-2 mb-md-0">
+  <div class="btn-group mr-2">
+    <a href="mf/refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+  </div>
+</div>
+
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Code</th>
+        <th scope="col">Name</th>
+        <th scope="col">ISIN</th>
+        <th scope="col">ISIN2</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">{{ object.id }}</th>
+
+        <td>
+          <a href="{{ object.get_absolute_url }}">{{ object.code }}</a>
+        </td>
+        <td>{{ object.name }}</td>
+        <td>{{ object.isin }}</td>
+        <td>{{ object.isin2 }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="table table-hover">
+      <tr>
+        <th scope="col">Fund House</th>
+        <th scope="col">Kuvera Name</th>
+        <th scope="col">BSEStar Name</th>
+        <th scope="col">Collection Start Date</th>
+      </tr>
+      <tr>
+        <td>{{ object.fund_house }}</td>
+        <td>{{ object.kuvera_name }}</td>
+        <td>{{ object.bse_star_name }}</td>
+        <td>{{ object.collection_start_date }}</td>
+      </tr>
+  </table>
+{% endblock %}
