@@ -7,6 +7,7 @@ from .views import (
     MFListView,
     mf_refresh,
     mf_trash,
+    mf_bse_star,
     HistoricalStockPriceList,
     HistoricalMFPriceList,
     MfDetailView
@@ -25,5 +26,6 @@ urlpatterns = [
     path('mf/<id>/historical-prices', HistoricalMFPriceList.as_view(), name='historical-mf-price-list'),
     path('mf/<id>/', MfDetailView.as_view(), name='mf-detail'),
     path('mf/trash', mf_trash, name='mf-trash'),
+    path('mf/bsestar', mf_bse_star, name='mf-bse-star'),
     path('mf/', MFListView.as_view(), name='mf-list')
 ]

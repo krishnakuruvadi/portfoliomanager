@@ -11,6 +11,9 @@ from dateutil.relativedelta import relativedelta
 import datetime
 from mftool import Mftool
 from django.db import IntegrityError
+from django.core.files.storage import FileSystemStorage
+from .bsestar import BSEStar
+from django.conf import settings
 
 def common_list_view(request):
     template = 'common/common_list.html'
@@ -78,6 +81,7 @@ def mf_refresh(request):
         mf_obj.isin2 = isin2
         mf_obj.name = details['name']
         mf_obj.save()
+
         try:
             HistoricalMFPrice.objects.create(code=mf_obj,
                                              date=datetime.datetime.strptime(details['date'],'%d-%b-%Y').date(),
@@ -114,6 +118,12 @@ def get_scheme_codes(mf, as_json=False):
                                       'date':scheme[5]}
 
     return mf.render_response(scheme_info, as_json)
+
+def update_bsestar_schemes(schemes):
+    mf_objs = MutualFund.objects.all()
+    for mf_obj in mf_objs:
+        mf_obj.bse_star_name = schemes.get(mf_obj.isin, None)
+        mf_obj.save()
 
 class HistoricalStockPriceList(ListView):
     template_name = 'common/historical_stock_price_list.html'
@@ -154,5 +164,22 @@ def mf_trash(request):
     print('inside mf_trash request.method',request.method)
     if request.method == 'POST':
         MutualFund.objects.all().delete()
+        return HttpResponseRedirect(reverse('common:mf-list'))
+    return render(request, template)
+
+def mf_bse_star(request):
+    template = 'common/upload_bsestar.html'
+    if request.method == 'POST':
+        uploaded_file = request.FILES['document']
+        print(uploaded_file)
+        fs = FileSystemStorage()
+        file_locn = fs.save(uploaded_file.name, uploaded_file)
+        print(file_locn)
+        print(settings.MEDIA_ROOT)
+        full_file_path = settings.MEDIA_ROOT + '/' + file_locn
+        bse_star = BSEStar()
+        schemes = bse_star.get_all_schemes(full_file_path)
+        fs.delete(file_locn)
+        update_bsestar_schemes(schemes)
         return HttpResponseRedirect(reverse('common:mf-list'))
     return render(request, template)

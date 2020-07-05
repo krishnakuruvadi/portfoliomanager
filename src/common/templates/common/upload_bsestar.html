@@ -1,0 +1,43 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} Upload Transactions {% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %} 
+    <div class="row">
+
+      <div class='col-sm-6'>
+        <div class="form-group row">
+          <label for="file" class="col-sm-3 col-form-label">File</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="file" name="document" required>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='col-sm-3'></div>
+      <div class='col-sm-6'>
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+            <a href="../" class="btn btn-danger" role="button">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+  </script>
+{% endblock %}

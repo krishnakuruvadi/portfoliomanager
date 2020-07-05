@@ -28,6 +28,7 @@ urlpatterns = [
     path('goal/', include('goal.urls')),
     path('user/', include('users.urls')),
     path('fixed-deposit/', include('fixed_deposit.urls')),
+    path('mutualfunds/', include('mutualfunds.urls')),
     path('rsu/', include('rsu.urls')),
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),
