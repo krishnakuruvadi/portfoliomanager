@@ -26,15 +26,26 @@ userid@host portfoliomanager %  source ./venv/bin/activate
 ```
 * Install the following:
 ```
-(venv) userid@host portfoliomanager % pip install Django==2.1.5
-(venv) userid@host portfoliomanager % pip install djangorestframework==3.11.0
-(venv) userid@host portfoliomanager % pip install python-dateutil==2.8.1
-(venv) userid@host portfoliomanager % pip install requests==2.23.0
+(venv) userid@host portfoliomanager % pip install -r requirements.txt
+```
+* Setup server
+```
+(venv) userid@host portfoliomanager % cd src
+(venv) userid@host src % python manage.py makemigrations
+(venv) userid@host src % python manage.py migrate
+```
+* Create super user (Reference: https://docs.djangoproject.com/en/2.2/intro/tutorial02/#creating-an-admin-user)
+```
+(venv) userid@host src % python manage.py createsuperuser
+Username: admin
+Email address: admin@example.com
+Password: **********
+Password (again): *********
+Superuser created successfully.
+(venv) userid@host src % 
 ```
 * Start django server
 ```
-(venv) userid@host src % python manage.py makemigrations
-(venv) userid@host src % python manage.py migrate
 (venv) userid@host src % python manage.py runserver
 ```
 * Open homepage at http://127.0.0.1:8000/
