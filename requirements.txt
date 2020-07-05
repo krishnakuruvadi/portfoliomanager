@@ -3,7 +3,7 @@ bs4==0.0.1
 certifi==2020.4.5.1
 chardet==3.0.4
 dateutils==0.6.8
-Django==2.1.5
+Django==2.2.13
 djangorestframework==3.11.0
 idna==2.9
 mftool==1.4
