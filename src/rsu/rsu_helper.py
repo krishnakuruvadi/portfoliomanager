@@ -32,7 +32,7 @@ def update_latest_vals(rsu_obj):
                     rsu_award.as_on_date = k
                     latest_conversion_rate = rsu_obj.latest_conversion_rate
                     latest_price = rsu_obj.latest_price
-    rsu_award.latest_value = total_for_sale*float(latest_price)*float(latest_conversion_rate)
+    rsu_award.latest_value = float(total_for_sale)*float(latest_price)*float(latest_conversion_rate)
     print('done with request')
 
 def get_rsu_award_latest_vals():
