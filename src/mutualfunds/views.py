@@ -64,7 +64,7 @@ def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes,
         folio_obj = Folio.objects.create(folio=folio,
                                          fund=mf_obj,
                                          user=user,
-                                         quantity=0,
+                                         units=0,
                                          buy_price=0,
                                          buy_value=0,
                                          gain=0)
@@ -127,26 +127,18 @@ class FolioDeleteView(DeleteView):
 
 class FolioTransactionsListView(ListView):
     template_name = 'mutualfunds/transactions_list.html'
-    #queryset = Transactions.objects.all()
 
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        print(data)
-        id_ = self.kwargs.get("id")
-        print("id is:",id_)
-        data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
-        data['user_name_mapping'] = get_all_users()
-        return data
-    
+    paginate_by = 15
+    model = MutualFundTransaction
     def get_queryset(self):
-        id_ = self.kwargs.get("id")
-        print("id is:",id_)
-        folio = get_object_or_404(Folio, id=id_)
-        return MutualFundTransaction.objects.filter(folio=folio)
+        #folio = get_object_or_404(Folio, id=self.kwargs['id'])
+        return MutualFundTransaction.objects.filter(folio__id=self.kwargs['id'])
+
 
 class TransactionsListView(ListView):
     template_name = 'mutualfunds/transactions_list.html'
-    queryset = MutualFundTransaction.objects.all()
+    paginate_by = 15
+    model = MutualFundTransaction
 
 class TransactionDeleteView(DeleteView):
     template_name = 'mutualfunds/transaction_delete.html'
@@ -190,8 +182,17 @@ def add_transactions(broker, user, full_file_path):
         kuvera_helper = Kuvera(full_file_path)
         for trans in kuvera_helper.get_transactions():
             print("trans is", trans)
-            insert_trans_entry(
-                trans["exchange"], trans["symbol"], user, trans["type"], trans["quantity"], trans["price"], trans["date"], trans["notes"], 'ZERODHA')
+            insert_trans_entry(trans["folio"],
+                               trans['fund'],
+                               user,
+                               trans["trans_type"],
+                               trans["units"],
+                               trans["nav"],
+                               trans["trans_date"],
+                               None,
+                               'KUVERA',
+                               1.0,
+                               trans["trans_value"])
 
 def update_folio(request, id):
     template = 'shares/update_folio.html'
@@ -225,21 +226,20 @@ def mf_refresh(request):
     folio_objs = Folio.objects.all()
     for folio_obj in folio_objs:
         if folio_obj.as_on_date != datetime.date.today():
-            vals = get_historical_mf_nav(folio_obj.code, start, end)
+            vals = get_historical_mf_nav(folio_obj.fund.code, start, end)
             if vals:
-                for k, v in vals.items():
-                    if k and v:
-                        if not folio_obj.as_on_date or k > folio_obj.as_on_date:
-                            folio_obj.as_on_date = k
-                            folio_obj.latest_price = v
-                            #if folio_obj.exchange == 'NASDAQ':
-                            #    share_obj.conversion_rate = get_forex_rate(k, 'USD', 'INR')
-                            #else:
-                            #    share_obj.conversion_rate = 1
-                            folio_obj.latest_value = float(folio_obj.latest_price) * float(folio_obj.conversion_rate) * float(share_obj.quantity)
-                            folio_obj.save()
+                for val in vals:
+                    for k,v in val.items():
+                        if k and v:
+                            if not folio_obj.as_on_date or k > folio_obj.as_on_date:
+                                folio_obj.as_on_date = k
+                                folio_obj.latest_price = v
+                                if folio_obj.country == 'India':
+                                    folio_obj.conversion_rate = 1
+                                folio_obj.latest_value = float(folio_obj.latest_price) * float(folio_obj.conversion_rate) * float(folio_obj.units)
+                                folio_obj.save()
         if folio_obj.latest_value: 
-            folio_obj.gain=folio_obj.latest_value-folio_obj.buy_value
+            folio_obj.gain=float(folio_obj.latest_value)-float(folio_obj.buy_value)
             folio_obj.save()
     print('done with request')
-    return HttpResponseRedirect(reverse('mutualfund:mf-list'))
+    return HttpResponseRedirect(reverse('mutualfund:folio-list'))

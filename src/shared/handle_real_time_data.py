@@ -100,8 +100,8 @@ def get_historical_mf_nav(amfi_code, start, end):
         code = MutualFund.objects.get(code=amfi_code)
         while(start_date>start):
             try:
-                hsp = HistoricalMFPrice.objects.get(code=code, date=start_date)
-                ret_vals.append({hsp.date:hsp.price})
+                hmfp = HistoricalMFPrice.objects.get(code=code, date=start_date)
+                ret_vals.append({hmfp.date:hmfp.nav})
             except HistoricalMFPrice.DoesNotExist:
                 pass
             start_date = start_date+relativedelta(days=-1)
@@ -116,8 +116,8 @@ def get_historical_mf_nav(amfi_code, start, end):
             start_date = end
             while(start_date>start):
                 try:
-                    hsp = HistoricalMFPrice.objects.get(code=code, date=start_date)
-                    ret_vals.append({hsp.date:hsp.price})
+                    hmfp = HistoricalMFPrice.objects.get(code=code, date=start_date)
+                    ret_vals.append({hmfp.date:hmfp.price})
                 except HistoricalMFPrice.DoesNotExist:
                     pass
                 start_date = start_date+relativedelta(days=-1)

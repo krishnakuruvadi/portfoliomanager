@@ -20,11 +20,11 @@
     <thead class="thead-dark">
       <tr>
         <th scope="col">Id</th>
-        <th scope="col">Code</th>
+        <th scope="col">Folio</th>
         <th scope="col">Name</th>
         <th scope="col">User</th>
         <th scope="col">Goal</th>
-        <th scope="col">Quantity</th>
+        <th scope="col">Units</th>
         <th scope="col">Avg. Buy Price</th>
         <th scope="col">Buy Value</th>
         <th scope="col">Conversion Rate</th>
@@ -40,11 +40,11 @@
       {% for instance in object_list %}
       <tr>
         <th scope="row">{{ instance.id }}</th>
-        <td>{{ instance.exchange }}</td>
-        <td>{{ instance.symbol }}</td>
+        <td>{{ instance.folio }}</td>
+        <td>{{ instance.fund.name }}</td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
-        <td>{{ instance.quantity }}</td>
+        <td>{{ instance.units }}</td>
         <td>{{ instance.buy_price }}</td>
         <td>{{ instance.buy_value }}</td>
         <td>{{ instance.conversion_rate }}</td>
