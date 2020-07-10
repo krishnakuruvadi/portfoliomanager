@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from shared.handle_get import *
 from shared.handle_chart_data import get_user_contributions, get_goal_contributions, get_investment_data
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 # Create your views here.
 def home_view(request, *args, **kwargs): # *args, **kwargs
@@ -73,8 +75,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "achieve_per": all_achieve_per,
         }
     #for user in users:
-    start_date = get_start_day_across_portfolio()
-    context['investment_data'] = get_investment_data(start_date)
+    #start_date = get_start_day_across_portfolio()
+    #context['investment_data'] = get_investment_data(start_date)
     print("context", context)
     #return HttpResponse("<h1>Hello World</h1>") # string of HTML code
     return render(request, "home.html", context)
@@ -86,3 +88,12 @@ class ChartData(APIView):
 
     def get(self, request, format=None, id=None):
 '''
+
+class InvestmentData(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, id=None):
+        start_date = get_start_day_across_portfolio()
+        data = get_investment_data(start_date)
+        return Response(data)

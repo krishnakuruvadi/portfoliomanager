@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from pages.views import home_view
+from pages.views import home_view, InvestmentData
 #from pages.views import ChartData
 from django.conf.urls.static import static
 from django.conf import settings
@@ -34,7 +34,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('shares/', include('shares.urls')),
     path('common/', include('common.urls')),
-    #path('api/chart/data/<id>', ChartData.as_view())
+    path('api/chart/investmentdata/', InvestmentData.as_view())
 ]
 
 if settings.DEBUG:
