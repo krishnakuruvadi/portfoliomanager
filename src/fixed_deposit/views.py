@@ -67,7 +67,9 @@ def add_fixed_deposit(request):
             final_val = Decimal(request.POST['final_val'])
             goal = request.POST['goal']
             if goal != '':
-                goal_id = get_goal_id_from_name(user, goal)
+                goal_id = Decimal(goal)
+            else:
+                goal_id = None
             notes = request.POST['notes']
             mat_date = request.POST['mat_date']
             add_fd_entry(number, bank_name, start_date, principal, time_period_days,
@@ -114,8 +116,9 @@ def update_fixed_deposit(request, id):
                 fd_obj.final_val = Decimal(request.POST['final_val'])
                 goal = request.POST['goal']
                 if goal != '':
-                    goal_id = get_goal_id_from_name(fd_obj.user, goal)
-                    fd_obj.goal = goal_id
+                    fd_obj.goal = Decimal(goal)
+                else:
+                    fd_obj.goal = None
                 fd_obj.notes = request.POST['notes']
                 fd_obj.mat_date = request.POST['mat_date']
                 fd_obj.save()

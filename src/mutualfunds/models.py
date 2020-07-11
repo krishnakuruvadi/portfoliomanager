@@ -16,7 +16,7 @@ class Folio(models.Model):
     folio = models.CharField(max_length=50)
     fund = models.ForeignKey('common.MutualFund',on_delete=models.CASCADE)
     user = models.IntegerField()
-    goal = models.DecimalField(max_digits=20, decimal_places=0, null=True, blank=True)
+    goal = models.IntegerField(null=True, blank=True)
     units = models.DecimalField(max_digits=20, decimal_places=4, null=True, blank=True)
     conversion_rate =  models.DecimalField(_('Conversion Price'), max_digits=20, decimal_places=2, null=True, blank=True)
     buy_price = models.DecimalField(_('Buy Price'), max_digits=20, decimal_places=4)

@@ -166,14 +166,14 @@
             .text(''));
           $.each(new_options, function(key, value) {
               console.log(key,value)
-              if(sel_goal == value) {
+              if(sel_goal == key) {
                 $('#id_goal')
-                  .append($('<option>', { value : value })
+                  .append($('<option>', { value : key })
                   .text(value)
                   .attr('selected',true));
               } else {
                 $('#id_goal')
-                  .append($('<option>', { value : value })
+                  .append($('<option>', { value : key })
                   .text(value));
               }
           });
@@ -199,7 +199,7 @@
             $.each(new_options, function(key, value) {
                 console.log(key,value)
                 $('#id_goal')
-                  .append($('<option>', { value : value })
+                  .append($('<option>', { value : key })
                   .text(value)); 
             });
           }

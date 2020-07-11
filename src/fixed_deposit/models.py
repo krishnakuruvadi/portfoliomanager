@@ -14,7 +14,7 @@ class FixedDeposit(models.Model):
     final_val = models.DecimalField(max_digits=20, decimal_places=2, null=False)
     user = models.IntegerField()
     notes = models.CharField(max_length=80, null=True, blank=True)
-    goal = models.IntegerField(null=False)
+    goal = models.IntegerField(null=True, blank=True)
     mat_date = models.DateField(null=False)
 
     def get_absolute_url(self):

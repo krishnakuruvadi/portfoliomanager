@@ -22,7 +22,7 @@ class Share(models.Model):
     exchange = models.CharField(max_length=10, choices=EXCHANGE_CHOICES)
     symbol = models.CharField(max_length=20)
     user = models.IntegerField()
-    goal = models.DecimalField(max_digits=20, decimal_places=0, null=True, blank=True)
+    goal = models.IntegerField(null=True, blank=True)
     quantity = models.DecimalField(max_digits=20, decimal_places=0, null=True, blank=True)
     conversion_rate =  models.DecimalField(_('Conversion Price'), max_digits=20, decimal_places=2, null=True, blank=True)
     buy_price = models.DecimalField(_('Buy Price'), max_digits=20, decimal_places=2)
