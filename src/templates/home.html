@@ -2,63 +2,14 @@
 
 {% block style %}
 <style>
-  /* Center the loader */
-  #loader {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    z-index: 1;
-    width: 150px;
-    height: 150px;
-    margin: -75px 0 0 -75px;
-    border: 16px solid #f3f3f3;
-    border-radius: 50%;
-    border-top: 16px solid #3498db;
-    width: 120px;
-    height: 120px;
-    -webkit-animation: spin 2s linear infinite;
-    animation: spin 2s linear infinite;
-  }
-  
-  @-webkit-keyframes spin {
-    0% { -webkit-transform: rotate(0deg); }
-    100% { -webkit-transform: rotate(360deg); }
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  /* Add animation to "page content" */
-  .animate-bottom {
-    position: relative;
-    -webkit-animation-name: animatebottom;
-    -webkit-animation-duration: 1s;
-    animation-name: animatebottom;
-    animation-duration: 1s
-  }
-  
-  @-webkit-keyframes animatebottom {
-    from { bottom:-100px; opacity:0 } 
-    to { bottom:0px; opacity:1 }
-  }
-  
-  @keyframes animatebottom { 
-    from{ bottom:-100px; opacity:0 } 
-    to{ bottom:0; opacity:1 }
-  }
-  
-  .myDiv {
-    display: block;
-    text-align: center;
-    width:900;
-    height:380;
-  }
+  #tempChart {
+    width: 200px;
+    height:200px;
+    margin: 0px auto;
+}
 
-  
-  </style>
-  {% endblock style %}
+</style>
+{% endblock style %}
 {% block viewname %}Dashboard{% endblock viewname %}
 {% block applicableactions %} 
   <div class="btn-toolbar mb-2 mb-md-0">
@@ -81,8 +32,9 @@
 {% endblock applicableactions %}
 
 {% block content %}
-
-<div width="900" height="380" id="loader" class="myDiv">&nbsp;</div>
+<div id="tempChart">
+<canvas id="myTempChart" width="200" height="200" margin="auto" position="absolute"></canvas>
+</div>
     All
     <hr>
     <div class="row">
@@ -144,21 +96,49 @@
         status_vals = [data.achieved, data.remaining]
         setChart(x, debt_equity,distribution_vals, distribution_colors,status_vals)
     }
-    let canvas = document.getElementById('myChart')
-    canvas.style.display="none";
+    document.getElementById("myChart").style.display="none"
+
+    var canvas = document.getElementById('myTempChart');
+    var context = canvas.getContext('2d');
+    var start = new Date();
+    var lines = 16,  
+        cW = context.canvas.width,
+        cH = context.canvas.height;
+
+    var draw = function() {
+      var rotation = parseInt(((new Date() - start) / 1000) * lines) / lines;
+      context.save();
+      context.clearRect(0, 0, cW, cH);
+      context.translate(cW / 2, cH / 2);
+      context.rotate(Math.PI * 2 * rotation);
+      for (var i = 0; i < lines; i++) {
+        context.beginPath();
+        context.rotate(Math.PI * 2 / lines);
+        context.moveTo(cW / 10, 0);
+        context.lineTo(cW / 4, 0);
+        context.lineWidth = cW / 40;
+        context.strokeStyle = "rgba(44, 130, 201," + i / lines + ")";
+        context.stroke();
+      }
+      context.restore();
+    };
+    window.setInterval(draw, 1000 / 30);
 
     $.ajax({
       method: "GET",
       url: investmentdataendpoint,
       success: function(investmentdata){
-        document.getElementById("loader").style.display = "none";
-        document.getElementById('myChart').style.display="block";
+        document.getElementById("myTempChart").style.display="none"
+        document.getElementById("tempChart").style.display="none"
+        document.getElementById("myChart").style.display="block"
         console.log(investmentdata)
         setInvestmentChart(investmentdata)
       },
       error: function(error_data){
-        document.getElementById("loader").style.display = "none";
-        document.getElementById('myChart').style.display="block";
+        document.getElementById("myTempChart").style.display="none"
+        document.getElementById("tempChart").style.display="none"
+        document.getElementById("myChart").style.display="block"
+
         console.log("error")
         console.log(error_data)
       }
