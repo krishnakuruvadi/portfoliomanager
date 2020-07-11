@@ -16,7 +16,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
     context['users'] = dict()
     all_debt = 0
     all_equity = 0
-    all_distrib_labels = None
+    all_distrib_labels = list()
+    all_distrib_colors = list()
     all_target = 0
     all_achieved = 0
     all_distrib_vals = list()
@@ -60,9 +61,14 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         all_distrib_labels = contrib['distrib_labels']
         all_distrib_colors = contrib['distrib_colors']
         i = i + 1
-    all_remaining = all_target - all_achieved
-    all_remaining_per = int(all_remaining*100/all_target)
-    all_achieve_per = int(all_achieved*100/all_target)
+    if all_target > 0:
+        all_remaining = all_target - all_achieved
+        all_remaining_per = int(all_remaining*100/all_target)
+        all_achieve_per = int(all_achieved*100/all_target)
+    else:
+        all_remaining = all_target = all_achieved = 0
+        all_remaining_per = all_achieve_per = 0
+
     context['all'] = {
             "debt": all_debt,
             "equity": all_equity,

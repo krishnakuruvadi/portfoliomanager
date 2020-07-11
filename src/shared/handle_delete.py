@@ -5,6 +5,9 @@ from fixed_deposit.models import FixedDeposit
 from espp.models import Espp
 from goal.models import Goal
 from users.models import User
+from shares.models import Share
+from mutualfunds.models import Folio
+from rsu.models import RSUAward
 
 def delete_user(id):
     try:
@@ -16,6 +19,10 @@ def delete_user(id):
         FixedDeposit.objects.filter(user=id).delete()
         Espp.objects.filter(user=id).delete()
         Goal.objects.filter(user=id).delete()
+        Share.objects.filter(user=id).delete()
+        Folio.objects.filter(user=id).delete()
+        RSUAward.objects.filter(user=id).delete()
+
     except User.DoesNotExist:
         print("No user with that id found")
         pass
@@ -45,9 +52,19 @@ def delete_goal(id):
         for espp_obj in espp_objs:
             espp_obj.goal = None
             espp_obj.save()
+        share_objs = Share.objects.filter(goal=id)
+        for share_obj in share_objs:
+            share_obj.goal = None
+            share_obj.save()
+        folio_objs = Folio.objects.filter(goal=id)
+        for folio_obj in folio_objs:
+            folio_obj.goal = None
+            folio_obj.save()
+        rsu_awards = RSUAward.objects.filter(goal=id)
+        for rsu_award in rsu_awards:
+            rsu_award.goal = None
+            rsu_award.save()
 
     except Goal.DoesNotExist:
         pass
 
-
-    

@@ -7,6 +7,20 @@
     height:200px;
     margin: 0px auto;
 }
+#start {
+    width: 600px;
+    height:200px;
+    margin: 0px auto;
+    text-align: center;  
+}
+.center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
 
 </style>
 {% endblock style %}
@@ -32,23 +46,31 @@
 {% endblock applicableactions %}
 
 {% block content %}
-<div id="tempChart">
-<canvas id="myTempChart" width="200" height="200" margin="auto" position="absolute"></canvas>
-</div>
-    All
-    <hr>
-    <div class="row">
-        <div class='col-sm-3'>
-            <canvas id="all_classificationChart" width="300" height="200"></canvas>
-        </div>
-        <div class='col-sm-4'>
-            <canvas id="all_distributionChart" width="300" height="150"></canvas>
-        </div>
-        <div class='col-sm-3'>
-            <canvas id="all_statusChart" width="300" height="200"></canvas>
-        </div>
+  <div id="start">
+    <div class="center">
+      Welcome to PortfolioManager.  Start by creating <a href="/user">Users</a> and <a href="/goal">Goals</a>
     </div>
-    <br><br>
+  </div>
+  <div id="tempChart">
+    <canvas id="myTempChart" width="200" height="200" margin="auto" position="absolute"></canvas>
+  </div>
+  <div id="usercharts">
+    {% if users %}
+      All
+      <hr>
+      <div class="row">
+          <div class='col-sm-3'>
+              <canvas id="all_classificationChart" width="300" height="200"></canvas>
+          </div>
+          <div class='col-sm-4'>
+              <canvas id="all_distributionChart" width="300" height="150"></canvas>
+          </div>
+          <div class='col-sm-3'>
+              <canvas id="all_statusChart" width="300" height="200"></canvas>
+          </div>
+      </div>
+      <br><br>
+    {% endif %}
     {% for key, value in users.items %}
         {{value.name}}
         <hr>
@@ -65,6 +87,7 @@
         </div>
         <br><br>
     {% endfor %}
+  </div>
 {% endblock content %}
 
 <script>
@@ -82,7 +105,11 @@
     var distribution_colors = all.distrib_colors
     var x;
     var user;
-    setChart('all',debt_equity,distribution_vals, distribution_colors,status_vals)
+    console.log("users")
+    console.log(users)
+    if (!jQuery.isEmptyObject(users)) {
+      setChart('all',debt_equity,distribution_vals, distribution_colors,status_vals)
+    }
     for (x in users) {
         console.log(x)
         user = users[x]
@@ -97,52 +124,62 @@
         setChart(x, debt_equity,distribution_vals, distribution_colors,status_vals)
     }
     document.getElementById("myChart").style.display="none"
+    if (jQuery.isEmptyObject(users)) {
+      console.log("no users are present")
 
-    var canvas = document.getElementById('myTempChart');
-    var context = canvas.getContext('2d');
-    var start = new Date();
-    var lines = 16,  
-        cW = context.canvas.width,
-        cH = context.canvas.height;
+      document.getElementById("myChart").style.display="none"
+      document.getElementById("myTempChart").style.display="none"
+      
+    } else {
+      console.log("users are present")
+      document.getElementById("start").style.display="none"
+    
+      var canvas = document.getElementById('myTempChart');
+      var context = canvas.getContext('2d');
+      var start = new Date();
+      var lines = 16,  
+          cW = context.canvas.width,
+          cH = context.canvas.height;
 
-    var draw = function() {
-      var rotation = parseInt(((new Date() - start) / 1000) * lines) / lines;
-      context.save();
-      context.clearRect(0, 0, cW, cH);
-      context.translate(cW / 2, cH / 2);
-      context.rotate(Math.PI * 2 * rotation);
-      for (var i = 0; i < lines; i++) {
-        context.beginPath();
-        context.rotate(Math.PI * 2 / lines);
-        context.moveTo(cW / 10, 0);
-        context.lineTo(cW / 4, 0);
-        context.lineWidth = cW / 40;
-        context.strokeStyle = "rgba(44, 130, 201," + i / lines + ")";
-        context.stroke();
-      }
-      context.restore();
-    };
-    window.setInterval(draw, 1000 / 30);
+      var draw = function() {
+        var rotation = parseInt(((new Date() - start) / 1000) * lines) / lines;
+        context.save();
+        context.clearRect(0, 0, cW, cH);
+        context.translate(cW / 2, cH / 2);
+        context.rotate(Math.PI * 2 * rotation);
+        for (var i = 0; i < lines; i++) {
+          context.beginPath();
+          context.rotate(Math.PI * 2 / lines);
+          context.moveTo(cW / 10, 0);
+          context.lineTo(cW / 4, 0);
+          context.lineWidth = cW / 40;
+          context.strokeStyle = "rgba(44, 130, 201," + i / lines + ")";
+          context.stroke();
+        }
+        context.restore();
+      };
+      window.setInterval(draw, 1000 / 30);
 
-    $.ajax({
-      method: "GET",
-      url: investmentdataendpoint,
-      success: function(investmentdata){
-        document.getElementById("myTempChart").style.display="none"
-        document.getElementById("tempChart").style.display="none"
-        document.getElementById("myChart").style.display="block"
-        console.log(investmentdata)
-        setInvestmentChart(investmentdata)
-      },
-      error: function(error_data){
-        document.getElementById("myTempChart").style.display="none"
-        document.getElementById("tempChart").style.display="none"
-        document.getElementById("myChart").style.display="block"
+      $.ajax({
+        method: "GET",
+        url: investmentdataendpoint,
+        success: function(investmentdata){
+          document.getElementById("myTempChart").style.display="none"
+          document.getElementById("tempChart").style.display="none"
+          document.getElementById("myChart").style.display="block"
+          console.log(investmentdata)
+          setInvestmentChart(investmentdata)
+        },
+        error: function(error_data){
+          document.getElementById("myTempChart").style.display="none"
+          document.getElementById("tempChart").style.display="none"
+          document.getElementById("myChart").style.display="block"
 
-        console.log("error")
-        console.log(error_data)
-      }
-    })
+          console.log("error")
+          console.log(error_data)
+        }
+      })
+    }
     function setInvestmentChart(investment_data) {
       var ctx = document.getElementById("myChart");
       var config = {
