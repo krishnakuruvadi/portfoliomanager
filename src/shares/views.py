@@ -239,7 +239,7 @@ def refresh(request):
                             share_obj.latest_value = float(share_obj.latest_price) * float(share_obj.conversion_rate) * float(share_obj.quantity)
                             share_obj.save()
         if share_obj.latest_value: 
-            share_obj.gain=share_obj.latest_value-share_obj.buy_value
+            share_obj.gain=float(share_obj.latest_value)-float(share_obj.buy_value)
             share_obj.save()
     print('done with request')
     return HttpResponseRedirect(reverse('shares:shares-list'))
