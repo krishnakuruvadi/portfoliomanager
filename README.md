@@ -12,6 +12,10 @@ To build a portfolio manager which can track and provide insights into a individ
 * Fixed Deposit
 * ESPP (Employee Stock Purchase Plan)
 * Users
+* SSY (Sukanya Samridhi Yojana)
+* RSU (Restricted Stock Units)
+* Shares
+* Mutual Funds
 
 
 ## How to start
