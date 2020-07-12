@@ -10,7 +10,7 @@
 
   <form action="." method="POST">
     {% csrf_token %} {{ form.as_p }}
-    <input type="submit" value="Submit" class="btn btn-info"/>&nbsp;<a href="../" class="btn btn-danger" role="button">Cancel</a>
+    <input type="submit" value="Submit" class="btn btn-primary"/>&nbsp;<a href="../" class="btn btn-danger" role="button">Cancel</a>
   </form>
 
 {% endblock content %}

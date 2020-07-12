@@ -11,7 +11,7 @@
 <form method="POST">
   {% csrf_token %}
   <h2>Do you want to delete the Folio {{ object.folio }}?</h2>
-  <p><input type="submit" value="Submit" class="btn btn-danger"/>&nbsp;<a href="../../" class="btn btn-info" role="button">Cancel</a></p>
+  <p><input type="submit" value="Submit" class="btn btn-danger"/>&nbsp;<a href="../../" class="btn btn-primary" role="button">Cancel</a></p>
 </form>
 
 {% endblock %}
