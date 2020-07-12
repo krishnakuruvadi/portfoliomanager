@@ -108,6 +108,8 @@ class HistoricalStockPriceList(ListView):
 
     paginate_by = 15
     model = HistoricalStockPrice
+    def get_queryset(self):
+        return HistoricalStockPrice.objects.filter(symbol__id=self.kwargs['id'])
 
 class HistoricalMFPriceList(ListView):
     template_name = 'common/historical_mf_price_list.html'
