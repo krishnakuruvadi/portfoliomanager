@@ -1,70 +1,40 @@
 {% extends 'base.html' %} 
 {% load template_filters %}
-{% block viewname %} Historical Prices {% endblock %} 
+{% block viewname %} Internals of Portfolio Manager {% endblock %} 
 
 {% block applicableactions %} 
-<div class="btn-toolbar mb-2 mb-md-0">
-  <div class="btn-group mr-2">
-    <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
-  </div>
-</div>
-
 {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
-  <table class="table table-hover">
-    <thead class="thead-dark">
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Exchange</th>
-        <th scope="col">Symbol</th>
-        <th scope="col">Collection Start Date</th>
-        <th scope="col"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for instance in stock_list %}
-      <tr>
-        <th scope="row">{{ instance.id }}</th>
-        <td>{{ instance.exchange }}</td>
-        <td>
-          <a href="{{ instance.get_absolute_url }}">{{ instance.symbol }}</a>
-        </td>
-        <td>{{ instance.collection_start_date }}</td>
-        <td>
-          <a href="{{ instance.get_absolute_url }}stock/{{ instance.id }}/historical-prices"><i class="far fa-file-alt" aria-hidden="true"></i></a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
 
-  <table class="table table-hover">
-    <thead class="thead-dark">
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Code</th>
-        <th scope="col">Name</th>
-        <th scope="col">Collection Start Date</th>
-        <th scope="col"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for instance in mf_list %}
-      <tr>
-        <th scope="row">{{ instance.id }}</th>
-
-        <td>
-          <a href="{{ instance.get_absolute_url }}">{{ instance.code }}</a>
-        </td>
-        <td>{{ instance.name }}</td>
-        <td>{{ instance.collection_start_date }}</td>
-        <td>
-          <a href="{{ instance.get_absolute_url }}mf/{{ instance.id }}/historical-prices"><i class="far fa-file-alt" aria-hidden="true"></i></a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="row">
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Admin</h5>
+      <h6 class="card-subtitle mb-2 text-muted">Admin View</h6>
+      <p class="card-text">Default Django Admin view to make modifications to db. Needs login</p>
+      <a href="../admin" class="card-link">Admin</a>
+    </div>
+  </div>
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Stocks</h5>
+      <h6 class="card-subtitle mb-2 text-muted">All stocks being tracked</h6>
+      <p class="card-text">View of all historical data collected for stocks being tracked.</p>
+      <a href="stocks" class="card-link">Stocks</a>
+    </div>
+  </div>
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Mutual Funds</h5>
+      <h6 class="card-subtitle mb-2 text-muted">All Mutual Funds being tracked</h6>
+      <p class="card-text">View of all historical data collected for mutual funds being tracked.</p>
+      <a href="mf" class="card-link">Mutual Funds</a>
+    </div>
+  </div>
+</div>
 {% endblock %}

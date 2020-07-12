@@ -20,6 +20,8 @@ class Zerodha:
                 price=0
                 tran_date=None
                 for row in csv_reader:
+                    if 'order_id' not in row:
+                        break
                     print(row)
                     if last_order == row['order_id']:
                         new_qty = int(get_float_or_none_from_string(row['quantity']))

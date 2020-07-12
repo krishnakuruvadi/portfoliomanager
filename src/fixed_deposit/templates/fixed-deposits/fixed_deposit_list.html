@@ -19,36 +19,39 @@
         <th scope="col">#</th>
         <th scope="col">Number</th>
         <th scope="col">Bank Name</th>
-        <th scope="col">Start Date</th>
-        <th scope="col">Time Period (days)</th>
         <th scope="col">Maturity Value</th>
         <th scope="col">Maturity Date</th>
         <th scope="col">Goal</th>
         <th scope="col">User</th>
-        <th scope="col">Notes</th>
         <th scope="col"></th>
       </tr>
     </thead>
     <tbody>
       {% for instance in object_list %}
-      <tr>
+      <tr data-toggle="collapse" data-target="#collapse{{forloop.counter}}">
         <th scope="row">{{ forloop.counter }}</th>
 
         <td>
           <a href="{{ instance.get_absolute_url }}">{{ instance.number }}</a>
         </td>
         <td>{{ instance.bank_name }}</td>
-        <td>{{ instance.start_date }}</td>
-        <td>{{ instance.time_period }}</td>
         <td>{{ instance.final_val }}</td>
         <td>{{ instance.mat_date }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
-        <td>{{ instance.notes }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
           <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
         </td>
+      </tr>
+      <tr class="collapse out" id="collapse{{forloop.counter}}">
+        <td></td>
+        <th>Start Date</th>
+        <td>{{ instance.start_date }}</td>
+        <th>Time Period (days)</th>
+        <td>{{ instance.time_period }}</td>
+        <th>Notes</th>
+        <td>{{ instance.notes }}</td>
       </tr>
       {% endfor %}
     </tbody>

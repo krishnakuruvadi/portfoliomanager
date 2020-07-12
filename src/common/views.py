@@ -17,29 +17,7 @@ from django.conf import settings
 
 def common_list_view(request):
     template = 'common/common_list.html'
-    context = dict()
-    stock_list = list()
-    mf_list = list()
-    stock_objs = Stock.objects.all()
-    for stock in stock_objs:
-        stock_entry = dict()
-        stock_entry['id'] = stock.id
-        stock_entry['exchange'] = stock.exchange
-        stock_entry['symbol'] = stock.symbol
-        stock_entry['collection_start_date'] = stock.collection_start_date
-        stock_list.append(stock_entry)
-    mf_objs = MutualFund.objects.all()
-    for mf in mf_objs:
-        mf_entry = dict()
-        mf_entry['id'] = mf.id
-        mf_entry['code'] = mf.code
-        mf_entry['name'] = mf.name
-        mf_entry['collection_start_date'] = mf.collection_start_date
-        mf_list.append(mf_entry)
-    context['mf_objs'] = mf_list
-    context['stock_list'] = stock_list
-    print(context)
-    return render(request, template, context)
+    return render(request, template)
 
 def refresh(request):
     print("inside refresh")
@@ -144,6 +122,14 @@ class StockListView(ListView):
 
     paginate_by = 15
     model = Stock
+
+class StockDetailView(DetailView):
+    template_name = 'common/stock_detail.html'
+    #queryset = Ppf.objects.all()
+
+    def get_object(self):
+        id_ = self.kwargs.get("id")
+        return get_object_or_404(Stock, id=id_)
 
 class MFListView(ListView):
     template_name = 'common/mf_list.html'
