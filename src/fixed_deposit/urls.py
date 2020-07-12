@@ -5,7 +5,8 @@ from .views import (
     FixedDepositDetailView,
     FixedDepositDeleteView,
     add_fixed_deposit,
-    update_fixed_deposit
+    update_fixed_deposit,
+    ChartData
 )
 
 app_name = 'fixed-deposits'
@@ -16,4 +17,6 @@ urlpatterns = [
     path('<id>/', FixedDepositDetailView.as_view(), name='fixed-deposit-detail'),
     path('<id>/delete/', FixedDepositDeleteView.as_view(), name='fixed-deposit-delete'),
     path('<id>/update/', update_fixed_deposit, name='fixed-deposit-update'),
+    path('api/chart/data/<id>', ChartData.as_view())
+
 ]

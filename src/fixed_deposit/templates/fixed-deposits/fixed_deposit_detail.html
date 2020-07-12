@@ -47,10 +47,85 @@
     </tr>
   </table>
 <br><br><br>
+<div class='col-sm-6'>
+  <canvas id="myChart" width="400" height="400"></canvas>
+</div>
 {% endblock content %}
 
 <script>
   {% block jquery %}
+    var endpoint = '/fixed-deposit/api/chart/data/{{ object.id }}'
+    var principal_values = []
+    var interest_values = []
+    var bal_values = []
+    $.ajax({
+      method: "GET",
+      url: endpoint,
+      success: function(data){
+        console.log(data)
+        amount_values = data.amount_values
+        exp_amount_values = data.exp_amount_values
+        console.log("amount values")
+        console.log(amount_values)
+        console.log("expected amount values")
+        console.log(exp_amount_values)
 
+        setChart()
+      },
+      error: function(error_data){
+        console.log("error")
+        console.log(error_data)
+      }
+    })
+
+    function setChart(){
+      var ctx = document.getElementById("myChart");
+      var config = {
+        type:    'line',
+        data:    {
+          datasets: [
+            {
+              label: "Amount",
+              data: amount_values,
+              fill: false,
+              borderColor: 'blue'
+            },
+            {
+              label: "Projected Amount",
+              data:  exp_amount_values,
+              fill:  true,
+              borderColor: 'grey'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          title:      {
+            display: true,
+            text:    "FD"
+          },
+          scales:     {
+            xAxes: [{
+              type:       "time",
+              time:       {
+                format: 'YYYY-MM-DD',
+                tooltipFormat: 'll'
+              },
+              scaleLabel: {
+                display:     true,
+                labelString: 'Date'
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display:     true,
+                labelString: 'Amount'
+              }
+            }]
+          }
+        }
+      };
+      var myChart = new Chart(ctx,config); 
+    }
   {% endblock jquery %}
 </script>

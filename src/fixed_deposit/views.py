@@ -5,13 +5,15 @@ from django.views.generic import (
     DetailView,
     DeleteView
 )
+from dateutil.relativedelta import relativedelta
 from django.http import HttpResponseRedirect
 from django.template import Context
 from decimal import Decimal
 from .models import FixedDeposit
 from .fixed_deposit_helper import add_fd_entry, get_maturity_value
 from shared.handle_get import *
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
 # Create your views here.
 
 class FixedDepositListView(ListView):
@@ -137,7 +139,7 @@ def update_fixed_deposit(request, id):
             goal = request.POST['goal']
             mat_date, val = get_maturity_value(int(principal), start_date, float(roi), int(time_period_days))
             print("calculated value", val)
-            users = get_all_users()()
+            users = get_all_users()
             context = {'users':users,'user':user, 'number':number, 'start_date':start_date, 'bank_name': bank_name, 'roi': roi,
                 'time_period_days': time_period_days, 'principal': principal, 'final_val':val, 'notes': notes,
                 'goal':goal, 'mat_date':mat_date, 'operation': 'Edit Fixed Deposit'}
@@ -155,3 +157,53 @@ def update_fixed_deposit(request, id):
         except FixedDeposit.DoesNotExist:
             context = {'operation': 'Edit Fixed Deposit'}
         return render(request, template, context=context)
+
+class ChartData(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, id=None):
+        try:
+            fd_obj = FixedDeposit.objects.get(id=id)
+            amount_values= list()
+            exp_amount_values = list()
+            today = datetime.date.today()
+            curr_date = fd_obj.start_date
+            if today > fd_obj.start_date+relativedelta(days=-1):
+                amount_values.append(dict({'x':(fd_obj.start_date+relativedelta(days=-1)).strftime("%Y-%m-%d"), 'y':0  }))
+            else:
+                exp_amount_values.append(dict({'x':(fd_obj.start_date+relativedelta(days=-1)).strftime("%Y-%m-%d"), 'y':0  }))
+
+            if today > fd_obj.start_date:
+                amount_values.append(dict({'x':fd_obj.start_date.strftime("%Y-%m-%d"), 'y':fd_obj.principal }))
+            else:
+                exp_amount_values.append(dict({'x':fd_obj.start_date.strftime("%Y-%m-%d"), 'y':fd_obj.principal  }))
+
+            
+            while curr_date < fd_obj.mat_date:
+                curr_date = curr_date +relativedelta(months=1)
+                time_period_days = (curr_date - fd_obj.start_date).days
+                mat_date, val = get_maturity_value(int(fd_obj.principal), fd_obj.start_date.strftime("%Y-%m-%d"), float(fd_obj.roi), int(time_period_days))
+                if today > curr_date:
+                    amount_values.append(dict({'x':curr_date.strftime("%Y-%m-%d"), 'y':val }))
+                else:
+                    exp_amount_values.append(dict({'x':curr_date.strftime("%Y-%m-%d"), 'y':val }))
+            if today > fd_obj.mat_date:
+                amount_values.append(dict({'x':fd_obj.mat_date.strftime("%Y-%m-%d"), 'y':fd_obj.final_val }))
+            else:
+                exp_amount_values.append(dict({'x':fd_obj.mat_date.strftime("%Y-%m-%d"), 'y':fd_obj.final_val  }))
+
+            if today > fd_obj.mat_date+relativedelta(days=1):
+                amount_values.append(dict({'x':(fd_obj.mat_date+relativedelta(days=1)).strftime("%Y-%m-%d"), 'y':0 }))
+            else:
+                exp_amount_values.append(dict({'x':(fd_obj.mat_date+relativedelta(days=1)).strftime("%Y-%m-%d"), 'y':0  }))
+
+            data = {
+                "id":id,
+                "exp_amount_values":exp_amount_values,
+                "amount_values":amount_values
+            }
+            #mat_date, val = get_maturity_value(int(fd_obj.principal), fd_obj.start_date, float(fd_obj.roi), int(time_period_days))
+        except FixedDeposit.DoesNotExist:
+            data = {}
+        return Response(data)
