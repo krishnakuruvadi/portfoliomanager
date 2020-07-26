@@ -44,12 +44,9 @@ class EsppModelForm(forms.ModelForm):
         if self.instance.goal:
             #self.instance.goal = get_goal_name_from_id(self.instance.goal)
             self.initial['goal'] = self.instance.goal
-    '''
+    
     def clean_goal(self):
         goal = self.cleaned_data['goal']
         if goal == '':
             return None
-        goal_id = get_goal_id_from_name(self.cleaned_data['user'], goal)
-        print("goal_id", goal_id)
-        return goal_id
-    '''
+        return goal

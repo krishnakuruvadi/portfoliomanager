@@ -23,9 +23,11 @@ class EpfCreateView(CreateView):
     queryset = Epf.objects.all() # <blog>/<modelname>_list.html
     #success_url = '/'
 
+    '''
     def form_valid(self, form):
         print(form.cleaned_data)
         return super().form_valid(form)
+    '''
 
     def get_success_url(self):
         return reverse('epfs:epf-list')

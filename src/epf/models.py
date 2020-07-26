@@ -12,6 +12,7 @@ class Epf(models.Model):
     end_date = models.DateField(blank=True, null=True)
     user = models.IntegerField()
     goal =  models.IntegerField(null=True)
+    notes = models.CharField(max_length=40, null=True, blank=True)
 
     def get_absolute_url(self):
         return reverse("epfs:epf-detail", kwargs={'id': self.id})
