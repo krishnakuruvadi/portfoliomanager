@@ -33,7 +33,11 @@ class SsyModelForm(forms.ModelForm):
         if self.instance.goal:
             #self.instance.goal = get_goal_name_from_id(self.instance.goal)
             self.initial['goal'] = self.instance.goal
-
+    def clean_goal(self):
+        goal = self.cleaned_data['goal']
+        if goal == '':
+            return None
+        return goal
 
 class SsyEntryModelForm(forms.ModelForm):
     class Meta:

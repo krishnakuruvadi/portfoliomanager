@@ -21,6 +21,6 @@ urlpatterns = [
     path('<id>/delete/', SsyDeleteView.as_view(), name='ssy-delete'),
     path('<id>/transactions/', SsyEntryListView.as_view(), name='ssy-entry-list'),
     path('<id>/upload-transactions/', upload_ssy_trans, name='ssy-upload-trans'),
-    path('<id>/add-contribution/', SsyAddEntryView.as_view(), name='ssy-add-trans'),
+    path('<id>/add-transaction/', SsyAddEntryView.as_view(), name='ssy-add-trans'),
     path('api/chart/data/<id>', ChartData.as_view())
 ]
