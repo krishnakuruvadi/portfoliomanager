@@ -12,6 +12,7 @@ from .views import (
     upload_transactions,
     update_share,
     refresh,
+    CurrentShares,
     #ChartData
 )
 
@@ -29,7 +30,8 @@ urlpatterns = [
     path('<id>/delete', ShareDeleteView.as_view(), name='share-delete'),
     path('<id>/transactions/', ShareTransactionsListView.as_view(), name='share-transactions-list'),
     path('transaction/<id>', TransactionDetailView.as_view(), name='transaction-detail'),
-
+    path('api/get/current/<user_id>', CurrentShares.as_view()),
+    path('api/get/current/', CurrentShares.as_view())
     #path('transaction/<id>/edit', edit_transaction, name='transaction-edit'),
     #path('api/chart/data/<id>', ChartData.as_view()),
 

@@ -21,6 +21,8 @@ from django.db import IntegrityError
 from .models import Folio, MutualFundTransaction
 from common.models import MutualFund
 from .kuvera import Kuvera
+from rest_framework.views import APIView
+from rest_framework.response import Response
 # Create your views here.
 
 class FolioListView(ListView):
@@ -243,3 +245,32 @@ def mf_refresh(request):
             folio_obj.save()
     print('done with request')
     return HttpResponseRedirect(reverse('mutualfund:folio-list'))
+
+class CurrentMfs(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, user_id=None):
+        print("inside CurrentMfs")
+        folios = dict()
+        folios['folio'] = list()
+        if user_id:
+            folio_objs = Folio.objects.filter(units__gt=0).filter(user=user_id)
+        else:
+            folio_objs = Folio.objects.filter(units__gt=0)
+        for folio in folio_objs:
+            data = dict()
+            data['folio'] = folio.folio
+            data['fund'] = folio.fund.name
+            data['units'] = folio.units
+            data['buy_price'] = folio.buy_price
+            data['buy_value'] = folio.buy_value
+            data['user_id'] = folio.user
+            data['user'] = get_user_name_from_id(folio.user)
+            data['notes'] = folio.notes
+            data['latest_price'] = folio.latest_price
+            data['latest_value'] = folio.latest_value
+            data['as_on_date'] = folio.as_on_date
+            data['gain'] = folio.gain
+            folios['folio'].append(data)
+        return Response(folios)

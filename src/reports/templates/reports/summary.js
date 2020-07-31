@@ -290,3 +290,99 @@
         console.log(error_data)
       }
     })
+
+    var mf_ep = '/mutualfunds/api/get/current/{{user_id|safe}}'
+    $.ajax({
+      method: "GET",
+      url: mf_ep,
+      success: function(mf_data){
+        console.log(mf_data)
+        var table = document.getElementById("mf-table")
+        var i;
+        var mf_entries = mf_data['folio']
+        for (i=0;i<mf_entries.length;i++) {
+          var row = table.insertRow(-1)
+          mf_entry = mf_entries[i]
+          var cell0 = row.insertCell(0)
+          cell0.innerHTML = i+1
+          var cell1 = row.insertCell(1)
+          cell1.innerHTML = mf_entry['folio']
+          var cell2 = row.insertCell(2)
+          cell2.innerHTML = mf_entry['fund']
+          var cell3 = row.insertCell(3)
+          cell3.innerHTML = mf_entry['units']
+          var cell4 = row.insertCell(4)
+          cell4.innerHTML = mf_entry['buy_price']
+          var cell5 = row.insertCell(5)
+          cell5.innerHTML = mf_entry['buy_value']
+          var cell6 = row.insertCell(6)
+          cell6.innerHTML = mf_entry['latest_price']
+          var cell7 = row.insertCell(7)
+          cell7.innerHTML = mf_entry['latest_value']
+          var cell8 = row.insertCell(8)
+          cell8.innerHTML = mf_entry['gain']
+          var cell9 = row.insertCell(9)
+          cell9.innerHTML = mf_entry['user']
+          var cell10 = row.insertCell(10)
+          cell10.innerHTML = mf_entry['notes']
+          var cell11 = row.insertCell(11)
+          cell11.innerHTML = mf_entry['as_on_date']
+        }
+        if (mf_entries.length == 0) {
+          document.getElementById("mf").style.display="none"
+        }
+      },
+      error: function(error_data){
+        document.getElementById("mf").style.display="none"
+        console.log("error")
+        console.log(error_data)
+      }
+    })
+
+    var share_ep = '/shares/api/get/current/{{user_id|safe}}'
+    $.ajax({
+      method: "GET",
+      url: share_ep,
+      success: function(share_data){
+        console.log(share_data)
+        var table = document.getElementById("stock-table")
+        var i;
+        var share_entries = share_data['shares']
+        for (i=0;i<share_entries.length;i++) {
+          var row = table.insertRow(-1)
+          share_entry = share_entries[i]
+          var cell0 = row.insertCell(0)
+          cell0.innerHTML = i+1
+          var cell1 = row.insertCell(1)
+          cell1.innerHTML = share_entry['exchange']
+          var cell2 = row.insertCell(2)
+          cell2.innerHTML = share_entry['symbol']
+          var cell3 = row.insertCell(3)
+          cell3.innerHTML = share_entry['quantity']
+          var cell4 = row.insertCell(4)
+          cell4.innerHTML = share_entry['buy_price']
+          var cell5 = row.insertCell(5)
+          cell5.innerHTML = share_entry['buy_value']
+          var cell6 = row.insertCell(6)
+          cell6.innerHTML = share_entry['latest_price']
+          var cell7 = row.insertCell(7)
+          cell7.innerHTML = share_entry['latest_value']
+          var cell8 = row.insertCell(8)
+          cell8.innerHTML = share_entry['gain']
+          var cell9 = row.insertCell(9)
+          cell9.innerHTML = share_entry['user']
+          var cell10 = row.insertCell(10)
+          cell10.innerHTML = share_entry['notes']
+          var cell11 = row.insertCell(11)
+          cell11.innerHTML = share_entry['as_on_date']
+        }
+        if (share_entries.length == 0) {
+          document.getElementById("stock").style.display="none"
+        }
+      },
+      error: function(error_data){
+        document.getElementById("stock").style.display="none"
+        console.log("error")
+        console.log(error_data)
+      }
+    })

@@ -20,6 +20,8 @@ from shared.handle_get import *
 from shared.handle_real_time_data import get_latest_vals, get_forex_rate
 from .zerodha import Zerodha
 from django.db import IntegrityError
+from rest_framework.views import APIView
+from rest_framework.response import Response
 # Create your views here.
 
 class TransactionsListView(ListView):
@@ -243,3 +245,32 @@ def refresh(request):
             share_obj.save()
     print('done with request')
     return HttpResponseRedirect(reverse('shares:shares-list'))
+
+class CurrentShares(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, user_id=None):
+        print("inside CurrentShares")
+        shares = dict()
+        shares['shares'] = list()
+        if user_id:
+            share_objs = Share.objects.filter(quantity__gt=0).filter(user=user_id)
+        else:
+            share_objs = Share.objects.filter(quantity__gt=0)
+        for share in share_objs:
+            data = dict()
+            data['exchange'] = share.exchange
+            data['symbol'] = share.symbol
+            data['quantity'] = share.quantity
+            data['buy_price'] = share.buy_price
+            data['buy_value'] = share.buy_value
+            data['latest_price'] = share.latest_price
+            data['latest_value'] = share.latest_value
+            data['gain'] = share.gain
+            data['user_id'] = share.user
+            data['user'] = get_user_name_from_id(share.user)
+            data['notes'] = share.notes
+            data['as_on_date'] = share.as_on_date
+            shares['shares'].append(data)
+        return Response(shares)

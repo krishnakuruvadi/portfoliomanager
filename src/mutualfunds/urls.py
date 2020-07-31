@@ -12,6 +12,7 @@ from .views import (
     upload_transactions,
     update_folio,
     mf_refresh,
+    CurrentMfs,
     #ChartData
 )
 
@@ -32,5 +33,6 @@ urlpatterns = [
 
     #path('transaction/<id>/edit', edit_transaction, name='transaction-edit'),
     #path('api/chart/data/<id>', ChartData.as_view()),
-
+    path('api/get/current/<user_id>', CurrentMfs.as_view()),
+    path('api/get/current/', CurrentMfs.as_view())
 ]
