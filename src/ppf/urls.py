@@ -9,8 +9,8 @@ from .views import (
     PpfEntryListView,
     upload_ppf_trans,
     PpfAddEntryView,
-    ChartData
-   
+    ChartData,
+    CurrentPpfs
 
 )
 
@@ -24,5 +24,7 @@ urlpatterns = [
     path('<id>/transactions/', PpfEntryListView.as_view(), name='ppf-entry-list'),
     path('<id>/upload-transactions/', upload_ppf_trans, name='ppf-upload-trans'),
     path('<id>/add-transaction/', PpfAddEntryView.as_view(), name='ppf-add-trans'),
-    path('api/chart/data/<id>', ChartData.as_view())
+    path('api/chart/data/<id>', ChartData.as_view()),
+    path('api/get/current/<user_id>', CurrentPpfs.as_view()),
+    path('api/get/current/', CurrentPpfs.as_view())
 ]

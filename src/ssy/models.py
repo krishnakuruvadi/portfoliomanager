@@ -8,6 +8,7 @@ class Ssy(models.Model):
     start_date = models.DateField()
     user = models.IntegerField()
     goal =  models.IntegerField(null=True)
+    notes = models.CharField(max_length=40, null=True, blank=True)
 
     def get_absolute_url(self):
         return reverse("ssys:ssy-detail", kwargs={'id': self.number})

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} Reports {% endblock viewname %}
+
+{% block style %}
+<style>
+a:link {
+  color: black;
+  background-color: transparent;
+  text-decoration: none;
+}
+</style>
+{% endblock style %}
+
+{% block applicableactions %} 
+<div class="btn-toolbar mb-2 mb-md-0">
+  <div class="btn-group mr-2">
+    <a href="../standalone-user/{{user_id|safe}}" target="_"><i class="fa fa-print" aria-hidden="true" title="Print" style="font-size: 1.2em;"></i></a>
+  </div>
+</div>
+
+{% endblock applicableactions %}
+
+
+{% block content %}
+  <ul class="nav nav-tabs" id="summary-tabs">
+    <li class="nav-item">
+      <a class="nav-link" href="../">Summary</a>
+    </li>
+  </ul>
+  <br>
+  {% include "reports/summary.html" %}
+{% endblock content %}
+
+{% block jquery %}
+{% include "reports/summary.js" %}
+    sel_usr = '{{user_id|safe}}'
+    console.log(sel_usr)
+    var user_ep = '/user/api/get/users'
+    $.ajax({
+      method: "GET",
+      url: user_ep,
+      success: function(user_list_data){
+        console.log(user_list_data)
+        var tabs = document.getElementById("summary-tabs")
+        console.log(tabs)
+        var i;
+        var user_list = user_list_data['user_list']
+        for (i=0;i<user_list.length;i++) {
+            var li_item = document.createElement("LI");
+            li_item.classList.add("nav-item");
+            a_item = document.createElement("A");
+            a_item.classList.add("nav-link");
+            if (sel_usr == user_list[i]['id']) {
+              a_item.classList.add("active");
+            }
+            var user_link = user_list[i]['id'].toString();
+            a_item.setAttribute("href", user_link);
+            console.log(user_link)
+            var text_item = document.createTextNode(user_list[i]['name']);
+            a_item.appendChild(text_item);
+            li_item.appendChild(a_item);
+            tabs.appendChild(li_item);
+        }
+        
+      },
+      error: function(error_data){
+        console.log("error")
+        console.log(error_data)
+      }
+    })
+{% endblock jquery %}

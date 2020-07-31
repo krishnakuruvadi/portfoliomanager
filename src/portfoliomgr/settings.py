@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'shares',
     'mutualfunds',
     'fixed_deposit',
+    'reports',
     'common'
 ]
 
@@ -66,7 +67,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'portfoliomgr.urls'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "ppf", "ssy", "epf", "espp", "shares", "goal", "mutualfunds", "fixed_deposit", "rsu", "users", "common", "static"),
+    os.path.join(BASE_DIR, "ppf", "ssy", "epf", "espp", "shares", "goal", "mutualfunds", "fixed_deposit", "rsu", "users", "reports", "common", "static"),
     os.path.join(BASE_DIR, "static"),
 ]
 

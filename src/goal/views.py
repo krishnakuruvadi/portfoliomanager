@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect
 from decimal import Decimal
 from .models import Goal
 from .goal_helper import one_time_pay_final_val, add_goal_entry, get_corpus_to_be_saved, get_depletion_vals
-
+from dateutil.relativedelta import relativedelta
 from ppf.models import Ppf, PpfEntry
 
 from rest_framework.views import APIView
@@ -308,3 +308,39 @@ class ChartData(APIView):
         finally:
             print(data)
             return Response(data)
+
+class CurrentGoals(APIView):
+    authentication_classes = []
+    permission_classes = []
+    def get(self, request, format=None, user_id=None):
+        goals = list()
+        if user_id:
+            goal_objs = Goal.objects.filter(user=user_id)
+        else:
+            goal_objs = Goal.objects.all()
+        for goal_obj in goal_objs:
+            data = dict()
+            data['id'] = goal_obj.id
+            data['name'] = goal_obj.name
+            data['start_date'] = goal_obj.start_date
+            data['curr_val'] = goal_obj.curr_val
+            data['final_val'] = goal_obj.final_val
+            data['user'] = get_user_name_from_id(goal_obj.user)
+            data['user_id'] = goal_obj.user
+            data['notes'] = goal_obj.notes
+            contrib = get_goal_contributions(goal_obj.id)
+            data['debt'] = contrib['debt']
+            data['equity'] = contrib['equity']
+            data['achieved'] = contrib['total']
+            target = goal_obj.final_val
+            if target < 1:
+                target = 1
+            remaining = target - data['achieved']
+            if remaining < 0:
+                remaining = 0
+            data['remaining'] = remaining
+            data['remaining_per'] = int(remaining*100/target)
+            data['achieve_per'] = int(data['achieved']*100/target)
+            data['target_date'] = goal_obj.start_date + relativedelta(months=goal_obj.time_period)
+            goals.append(data)
+        return Response(goals)

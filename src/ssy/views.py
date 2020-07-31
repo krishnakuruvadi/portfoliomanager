@@ -228,3 +228,44 @@ class ChartData(APIView):
         except Ssy.DoesNotExist:
             data = {}
         return Response(data)
+
+def get_contrib_values(ssy_id):
+    principal = 0
+    interest = 0
+    try:
+        ssy = Ssy.objects.get(number=ssy_id)
+        for trans in SsyEntry.objects.filter(number=ssy):
+            if trans.interest_component:
+                interest += trans.amount
+            else:
+                principal += trans.amount
+    except Ssy.DoesNotExist:
+        pass
+    total = principal + interest
+    contribs = {'principal': principal, 'interest':interest, 'total':total}
+    return contribs
+
+class CurrentSsys(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, user_id=None):
+        print("inside CurrentSsys")
+        ssys = list()
+        if user_id:
+            ssy_objs = Ssy.objects.filter(user=user_id)
+        else:
+            ssy_objs = Ssy.objects.all()
+        for ssy in ssy_objs:
+            data = dict()
+            data['number'] = ssy.number
+            data['start_date'] = ssy.start_date
+            data['user_id'] = ssy.user
+            data['user'] = get_user_name_from_id(ssy.user)
+            data['notes'] = ssy.notes
+            vals = get_contrib_values(ssy.number)
+            data['principal'] = vals['principal']
+            data['interest'] = vals['interest']
+            data['total'] = vals['total']
+            ssys.append(data)
+        return Response(ssys)

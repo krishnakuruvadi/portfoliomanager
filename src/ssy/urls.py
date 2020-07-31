@@ -9,7 +9,8 @@ from .views import (
     SsyEntryListView,
     upload_ssy_trans,
     SsyAddEntryView,
-    ChartData
+    ChartData,
+    CurrentSsys
 )
 
 app_name = 'ssys'
@@ -22,5 +23,7 @@ urlpatterns = [
     path('<id>/transactions/', SsyEntryListView.as_view(), name='ssy-entry-list'),
     path('<id>/upload-transactions/', upload_ssy_trans, name='ssy-upload-trans'),
     path('<id>/add-transaction/', SsyAddEntryView.as_view(), name='ssy-add-trans'),
-    path('api/chart/data/<id>', ChartData.as_view())
+    path('api/chart/data/<id>', ChartData.as_view()),
+    path('api/get/current/<user_id>', CurrentSsys.as_view()),
+    path('api/get/current/', CurrentSsys.as_view())
 ]

@@ -7,8 +7,8 @@ from .views import (
     EpfDetailView,
     EpfUpdateView,
     add_contribution,
-    show_contributions
-
+    show_contributions,
+    CurrentEpfs
 )
 
 app_name = 'epfs'
@@ -22,5 +22,6 @@ urlpatterns = [
     path('<id>/transactions/<year>', show_contributions, name='epf-entry-list'),
     #path('<id>/upload-transactions/', upload_epf_trans, name='epf-upload-trans'),
     path('<id>/add-contribution/', add_contribution, name='epf-add-contribution'),
-    #path('api/chart/data/<id>', ChartData.as_view())
+    path('api/get/current/<user_id>', CurrentEpfs.as_view()),
+    path('api/get/current/', CurrentEpfs.as_view())
 ]

@@ -104,3 +104,17 @@ class ChartData(APIView):
         finally:
             print(data)
             return Response(data)
+
+class Users(APIView):
+    authentication_classes = []
+    permission_classes = []
+    def get(self, request, format=None):
+        data = dict()
+        data['user_list'] = list()
+        user_objs = User.objects.all()
+        for user_obj in user_objs:
+            obj = dict()
+            obj['id'] = user_obj.id
+            obj['name'] = user_obj.name
+            data['user_list'].append(obj)
+        return Response(data)

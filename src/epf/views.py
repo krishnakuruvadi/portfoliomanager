@@ -13,7 +13,8 @@ from .models import Epf, EpfEntry
 import datetime
 from dateutil.relativedelta import relativedelta
 from shared.handle_get import *
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 
 # Create your views here.
@@ -190,3 +191,46 @@ def add_contribution(request, id):
     
     context = {'fy_list':fy_list, 'object': {'number':epf_obj.number, 'company':epf_obj.company, 'sel_fy':'select'}}
     return render(request, template, context)
+
+def get_contrib_values(epf_id):
+    employer = 0
+    employee = 0
+    interest = 0
+    try:
+        epf = Epf.objects.get(id=epf_id)
+        for trans in EpfEntry.objects.filter(epf_id=epf):
+            employer += trans.employer_contribution
+            employee += trans.employee_contribution
+            interest += trans.interest_contribution
+    except Epf.DoesNotExist:
+        pass
+    total = employer + employee + interest
+    contribs = {'employer_contribution': employer, 'employee_contribution':employee, 'interest_contribution':interest, 'total':total}
+    return contribs
+
+class CurrentEpfs(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, user_id=None):
+        print("inside get_current_epfs")
+        epfs = list()
+        if user_id:
+            epf_objs = Epf.objects.filter(end_date__isnull=True).filter(user=user_id)
+        else:
+            epf_objs = Epf.objects.filter(end_date__isnull=True)
+        for epf in epf_objs:
+            data = dict()
+            data['number'] = epf.number
+            data['company'] = epf.company
+            data['start_date'] = epf.start_date
+            data['user_id'] = epf.user
+            data['user'] = get_user_name_from_id(epf.user)
+            data['notes'] = epf.notes
+            vals = get_contrib_values(epf.id)
+            data['employee_contribution'] = vals['employee_contribution']
+            data['employer_contribution'] = vals['employer_contribution']
+            data['interest_contribution'] = vals['interest_contribution']
+            data['total'] = vals['total']
+            epfs.append(data)
+        return Response(epfs)

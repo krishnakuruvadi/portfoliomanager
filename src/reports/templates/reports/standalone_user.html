@@ -1,0 +1,15 @@
+
+{% extends "reports/standalone_base.html" %}
+
+
+{% block title %}
+Summary
+{% endblock title %}
+
+{% block content %}
+{% include "reports/summary.html" %}
+{% endblock content %}
+
+{% block jquery %}
+{% include "reports/summary.js" %}
+{% endblock jquery %}

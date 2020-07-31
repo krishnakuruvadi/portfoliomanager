@@ -207,3 +207,29 @@ class ChartData(APIView):
         except FixedDeposit.DoesNotExist:
             data = {}
         return Response(data)
+
+class CurrentFds(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, user_id=None):
+        print("inside CurrentFds")
+        fds = list()
+        if user_id:
+            fd_objs = FixedDeposit.objects.filter(mat_date__gte=datetime.date.today()).filter(user=user_id)
+        else:
+            fd_objs = FixedDeposit.objects.filter(mat_date__gte=datetime.date.today())
+        for fd in fd_objs:
+            data = dict()
+            data['number'] = fd.number
+            data['bank_name'] = fd.bank_name
+            data['start_date'] = fd.start_date
+            data['principal'] = fd.principal
+            data['roi'] = fd.roi
+            data['final_val'] = fd.final_val
+            data['user_id'] = fd.user
+            data['user'] = get_user_name_from_id(fd.user)
+            data['notes'] = fd.notes
+            data['mat_date'] = fd.mat_date
+            fds.append(data)
+        return Response(fds)

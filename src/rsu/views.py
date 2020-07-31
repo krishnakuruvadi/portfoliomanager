@@ -16,6 +16,8 @@ from shared.handle_get import *
 from shared.handle_create import add_common_stock
 from django.shortcuts import redirect
 from shared.utils import *
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 class RsuCreateView(CreateView):
     template_name = 'rsus/rsu_create.html'
@@ -245,3 +247,41 @@ def update_vest(request,id,vestid):
     context = {'award_id':award_obj.award_id, 'symbol':award_obj.symbol, 'award_date':award_obj.award_date}
     
     return render(request, template, context)
+
+class CurrentRsus(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, user_id=None):
+        print("inside CurrentRsus")
+        rsus = dict()
+        total = 0
+        if user_id:
+            rsu_objs = RestrictedStockUnits.objects.filter(sell_date__isnull=True).filter(award__user=user_id)
+        else:
+            rsu_objs = RestrictedStockUnits.objects.filter(sell_date__isnull=True)
+        for rsu in rsu_objs:
+            key = rsu.award.symbol+rsu.award.exchange+str(rsu.award.user)
+            if key in rsus:
+                rsus[key]['shares_for_sale'] += rsu.shares_for_sale
+                if rsu.latest_value:
+                    rsus[key]['latest_value'] += rsu.latest_value
+
+            else:
+                rsus[key] = dict()
+                rsus[key]['exchange'] = rsu.award.exchange
+                rsus[key]['symbol'] = rsu.award.symbol
+                rsus[key]['user_id'] = rsu.award.user
+                rsus[key]['user'] = get_user_name_from_id(rsu.award.user)
+                rsus[key]['shares_for_sale'] = rsu.shares_for_sale
+                if rsu.latest_value:
+                    rsus[key]['latest_value'] = rsu.latest_value
+            if rsu.as_on_date:
+                rsus[key]['as_on_date'] = rsu.as_on_date
+
+        data = dict()
+        data['entry'] = list()
+        for _,v in rsus.items():
+            data['entry'].append(v)
+        data['total'] = total    
+        return Response(data)

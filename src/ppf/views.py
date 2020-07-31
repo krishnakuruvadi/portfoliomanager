@@ -20,6 +20,8 @@ from .models import Ppf, PpfEntry
 from .ppf_helper import ppf_add_transactions
 import decimal
 from shared.handle_get import *
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 class PpfCreateView(CreateView):
     template_name = 'ppfs/ppf_create.html'
@@ -224,3 +226,44 @@ class ChartData(APIView):
         except Ppf.DoesNotExist:
             data = {}
         return Response(data)
+
+def get_contrib_values(ppf_id):
+    principal = 0
+    interest = 0
+    try:
+        ppf = Ppf.objects.get(number=ppf_id)
+        for trans in PpfEntry.objects.filter(number=ppf):
+            if trans.interest_component:
+                interest += trans.amount
+            else:
+                principal += trans.amount
+    except ppf.DoesNotExist:
+        pass
+    total = principal + interest
+    contribs = {'principal': principal, 'interest':interest, 'total':total}
+    return contribs
+
+class CurrentPpfs(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, user_id=None):
+        print("inside CurrentPpfs")
+        ppfs = list()
+        if user_id:
+            ppf_objs = Ppf.objects.filter(end_date__isnull=True).filter(user=user_id)
+        else:
+            ppf_objs = Ppf.objects.filter(end_date__isnull=True)
+        for ppf in ppf_objs:
+            data = dict()
+            data['number'] = ppf.number
+            data['start_date'] = ppf.start_date
+            data['user_id'] = ppf.user
+            data['user'] = get_user_name_from_id(ppf.user)
+            data['notes'] = ppf.notes
+            vals = get_contrib_values(ppf.number)
+            data['principal'] = vals['principal']
+            data['interest'] = vals['interest']
+            data['total'] = vals['total']
+            ppfs.append(data)
+        return Response(ppfs)

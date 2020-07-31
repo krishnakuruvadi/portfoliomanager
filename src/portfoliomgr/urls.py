@@ -33,6 +33,7 @@ urlpatterns = [
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),
     path('shares/', include('shares.urls')),
+    path('reports/', include('reports.urls')),
     path('common/', include('common.urls')),
     path('api/chart/investmentdata/', InvestmentData.as_view())
 ]

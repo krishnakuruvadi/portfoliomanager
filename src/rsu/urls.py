@@ -12,7 +12,8 @@ from .views import (
     refresh_rsu_vest_trans,
     show_vest_list,
     add_vest,
-    update_vest
+    update_vest,
+    CurrentRsus
 )
 
 app_name = 'rsus'
@@ -32,5 +33,6 @@ urlpatterns = [
 
     #path('<id>/upload-transactions/', upload_rsu_trans, name='rsu-upload-trans'),
     #path('<id>/add-contribution/', add_contribution, name='rsu-add-contribution'),
-    #path('api/chart/data/<id>', ChartData.as_view())
+    path('api/get/current/<user_id>', CurrentRsus.as_view()),
+    path('api/get/current/', CurrentRsus.as_view())
 ]

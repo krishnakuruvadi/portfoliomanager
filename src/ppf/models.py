@@ -8,7 +8,8 @@ class Ppf(models.Model):
     start_date = models.DateField()
     user = models.IntegerField()
     goal =  models.IntegerField(null=True)
-
+    notes = models.CharField(max_length=40, null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
     def get_absolute_url(self):
         return reverse("ppfs:ppf-detail", kwargs={'id': self.number})
 
