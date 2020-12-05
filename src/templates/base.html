@@ -21,6 +21,10 @@
     />
 {% block style %}
 {% endblock style %}
+{% block extrastyle %}
+  {% load static %}
+  {{ block.super }}<link rel="stylesheet" type="text/css" href="{% static 'override.css' %}" />
+{% endblock %}
     <title>Portfolio Manager</title>
   </head>
   <body>
