@@ -37,7 +37,7 @@
       {% for instance in object_list %}
       <tr data-toggle="collapse" data-target="#collapse{{instance.id}}">
         <th scope="row">{{ instance.id }}</th>
-        <td>{{ instance.folio }}</td>
+        <td><a href="{{ instance.get_absolute_url }}">{{ instance.folio }}</a></td>
         <td>{{ instance.fund.name }}</td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>

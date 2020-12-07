@@ -6,7 +6,7 @@ dateutils==0.6.8
 Django==2.2.14
 djangorestframework==3.11.0
 idna==2.9
-mftool==1.4
+mftool==1.8
 nsetools==1.0.11
 python-dateutil==2.8.1
 pytz==2019.3

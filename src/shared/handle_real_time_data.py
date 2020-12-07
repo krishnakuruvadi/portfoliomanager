@@ -30,18 +30,43 @@ def get_mf_vals(amfi_code, start, end):
     response = dict()
     for i in range(5):
         try:
-            full_year_vals = mf.get_scheme_historical_nav_year(amfi_code,start.year)
-            if full_year_vals:
-                data = full_year_vals.data
+            vals = mf.get_scheme_historical_nav_year(amfi_code,start.year)
+            if vals:
+                data = vals['data']
+                print(" data in get_mf_vals ", amfi_code, data)
                 for entry in data:
-                    if entry['date'] >= start and entry['date'] <= end:
-                        date = datetime.datetime.strptime(entry['date'], "%d-%m-%Y").date()
-                        response[date] = float(entry['nav'])
-                    elif entry['date'] > end:
-                        break
-        except:
+                    entry_date = datetime.datetime.strptime(entry['date'], "%d-%m-%Y").date()
+                    if entry_date >= start and entry_date <= end:
+                        response[entry_date] = float(entry['nav'])
+                break
+        except Exception as ex:
+            print(ex)
             pass
     return response
+
+def get_historical_year_mf_vals(amfi_code, year):
+    mf = Mftool()
+    for i in range(5):
+        try:
+            vals = mf.get_scheme_historical_nav_year(amfi_code,year)
+            if vals:
+                data = vals['data']
+                print(" data in get_mf_vals ", amfi_code, data)
+                for entry in data:
+                    entry_date = datetime.datetime.strptime(entry['date'], "%d-%m-%Y").date()
+                    if entry_date.day in [27,28,29,30,31,1]:
+                        nav = float(entry['nav'])
+                        try:
+                            code = MutualFund.objects.get(code=amfi_code)
+                            new_entry = HistoricalMFPrice(code=code, date=entry_date, nav=nav)
+                            new_entry.save()
+                        except Exception as ex:
+                            print("no mutual fund object with code ", amfi_code)
+                            pass
+                break
+        except Exception as ex:
+            print("exception in getting historial mf vals for year", year, ex)
+            pass
 
 def get_forex_rate(date, from_cur, to_cur):
     # https://api.ratesapi.io/api/2020-01-31?base=USD&symbols=INR
@@ -94,6 +119,7 @@ def get_historical_stock_price(stock, start, end):
     return ret_vals
 
 def get_historical_mf_nav(amfi_code, start, end):
+    print("getting historical mf nav for code ", amfi_code)
     ret_vals = list()
     start_date = end
     try:
@@ -106,23 +132,19 @@ def get_historical_mf_nav(amfi_code, start, end):
                 pass
             start_date = start_date+relativedelta(days=-1)
         if len(ret_vals) == 0:
-            get_vals = get_mf_vals(amfi_code=amfi_code, start=end+relativedelta(days=-5), end=end)
-            if not get_vals:
-                return ret_vals
-            for k,v in get_vals.items():
-                if k >= start and k<= end:
-                    new_entry = HistoricalMFPrice(code=code, date=k, nav=v)
-                    new_entry.save()
+            poll_date = end+relativedelta(days=-5)
+            get_historical_year_mf_vals(amfi_code=amfi_code, year=poll_date.year)
+            
             start_date = end
             while(start_date>start):
                 try:
                     hmfp = HistoricalMFPrice.objects.get(code=code, date=start_date)
-                    ret_vals.append({hmfp.date:hmfp.price})
+                    ret_vals.append({hmfp.date:hmfp.nav})
                 except HistoricalMFPrice.DoesNotExist:
                     pass
                 start_date = start_date+relativedelta(days=-1)
     except MutualFund.DoesNotExist:
         print('couldnt find mutual fund with amfi code ', amfi_code)
-    
+    print("returning mf vals ", ret_vals)
     return ret_vals
 

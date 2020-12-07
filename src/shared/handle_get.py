@@ -5,6 +5,8 @@ from ppf.models import Ppf, PpfEntry
 from ssy.models import Ssy, SsyEntry
 from users.models import User
 from goal.models import Goal
+from shares.models import Transactions
+from mutualfunds.models import MutualFundTransaction
 import calendar
 import datetime
 
@@ -94,6 +96,14 @@ def get_start_day_across_portfolio():
     ssy_objs = Ssy.objects.all()
     for ssy_obj in ssy_objs:
         start_day = start_day if start_day < ssy_obj.start_date else ssy_obj.start_date
+    
+    mf_trans = MutualFundTransaction.objects.all()
+    for trans in mf_trans:
+        start_day = start_day if start_day < trans.trans_date else trans.trans_date
+    
+    share_trans = Transactions.objects.all()
+    for trans in share_trans:
+        start_day = start_day if start_day < trans.trans_date else trans.trans_date
     
     new_start_day = datetime.date(start_day.year, start_day.month, 1)
     return new_start_day

@@ -1,0 +1,42 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} {{object.fund.name }} {% endblock viewname %}
+
+{% block content %} 
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Units</th>
+        <th scope="col">Latest Price</th>
+        <th scope="col">As On</th>
+        <th scope="col">Avg. Buy Price</th>
+        <th scope="col">Total Buy Value</th>
+        <th scope="col">Latest Value</th>
+        <th scope="col">Gain/Loss</th>
+        <th scope="col">User</th>
+        <th scope="col">Goal</th>
+        <th scope="col">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>{{ object.id }}</th>
+        <td>{{ object.units }}</td>
+        <td>{{ object.latest_price }}</td>
+        <td>{{ object.as_on_date }}</td>
+        <td>{{ object.buy_price }}</td>
+        <td>{{ object.buy_value }}</td>
+        <td>{{ object.latest_value }}</td>
+        <td>{{ object.gain }}</td>
+        <td>{{ user_str }}</td>
+        <td>{{ goal_str }}</td>
+        <td>{{ object.notes }}</td>
+      </tr>
+    </tbody>
+  </table>
+  {% endblock content %}

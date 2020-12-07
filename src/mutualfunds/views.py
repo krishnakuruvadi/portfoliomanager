@@ -87,10 +87,13 @@ def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes,
             new_buy_value = float(folio_obj.buy_value) + trans_price
             folio_obj.units = new_units
             folio_obj.buy_value = new_buy_value
-            folio_obj.buy_price = new_buy_value/float(new_units)
+            if float(new_units) == 0:
+                folio_obj.buy_price = 0
+            else:
+                folio_obj.buy_price = new_buy_value/float(new_units)
             folio_obj.save()
         else:
-            new_units = float(folio_obj.quantity)-units
+            new_units = float(folio_obj.units)-units
             if new_units:
                 new_buy_value = float(folio_obj.buy_value) - trans_price
                 folio_obj.units = new_units
@@ -197,17 +200,17 @@ def add_transactions(broker, user, full_file_path):
                                trans["trans_value"])
 
 def update_folio(request, id):
-    template = 'shares/update_folio.html'
+    template = 'mutualfunds/update_folio.html'
     folio = Folio.objects.get(id=id)
     if request.method == 'POST':
-        goal = request.POST['goal']
-        share.user = int(request.POST['user'])
+        folio.user = int(request.POST['user'])
         print('user is:',folio.user)
+        goal = request.POST['goal']
         if goal != '':
             folio.goal = int(goal)
         else:
             folio.goal = None
-        notes = request.POST['notes']
+        folio.notes = request.POST['notes']
         folio.save()
         
     else:
@@ -240,8 +243,14 @@ def mf_refresh(request):
                                     folio_obj.conversion_rate = 1
                                 folio_obj.latest_value = float(folio_obj.latest_price) * float(folio_obj.conversion_rate) * float(folio_obj.units)
                                 folio_obj.save()
-        if folio_obj.latest_value: 
+        folio_obj.latest_value = float(folio_obj.latest_price) * float(folio_obj.conversion_rate) * float(folio_obj.units)
+        if folio_obj.latest_value:
             folio_obj.gain=float(folio_obj.latest_value)-float(folio_obj.buy_value)
+            #print("folio_obj.gain",folio_obj.gain)
+            #print("folio_obj.latest_value",folio_obj.latest_value)
+            #print("folio_obj.buy_value",folio_obj.buy_value)
+            #print("folio_obj.latest_price",folio_obj.latest_price)
+            #print("folio_obj.units",folio_obj.units)
             folio_obj.save()
     print('done with request')
     return HttpResponseRedirect(reverse('mutualfund:folio-list'))
