@@ -35,6 +35,7 @@ urlpatterns = [
     path('shares/', include('shares.urls')),
     path('reports/', include('reports.urls')),
     path('common/', include('common.urls')),
+    path('calculator/', include('calculator.urls')),
     path('api/chart/investmentdata/', InvestmentData.as_view())
 ]
 

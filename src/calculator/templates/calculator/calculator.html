@@ -1,0 +1,151 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+{% block viewname %}
+  Calculators
+{% endblock viewname %}
+
+{% block content %}
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+        <div class='col-sm-6'>
+            <b>Fixed Deposit</b><br><br>
+            <div class="form-group row">
+                <label for="fd_prin" class="col-sm-3 col-form-label">Principal</label>
+                <div class="col-sm-6">
+                  <div class="md-form mt-0">
+                    <input type="number" id="fd_prin" name="fd_prin" value="{{fd_prin}}" step="0.01"> 
+                    <button type="submit" class="btn btn-primary" id="calculatefdprin" name="calculatefdprin">Calculate</button>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="fd_time" class="col-sm-3 col-form-label">Time Period (months)</label>
+                <div class="col-sm-6">
+                  <div class="md-form mt-0">
+                    <input type="number" id="fd_time" name="fd_time" value="{{fd_time}}"> 
+                    <button type="submit" class="btn btn-primary" id="calculatefdtime" name="calculatefdtime">Calculate</button>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="fd_int" class="col-sm-3 col-form-label">Interest Rate</label>
+                <div class="col-sm-6">
+                  <div class="md-form mt-0">
+                    <input type="number" id="fd_int" name="fd_int" value="{{fd_int}}" step="0.01"> 
+                    <button type="submit" class="btn btn-primary" id="calculatefdint" name="calculatefdint">Calculate</button>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="fd_compounding" class="col-sm-3 col-form-label">Compounding</label>
+                <div class="col-sm-6">
+                    <input type="radio" id="fd_compound_qtr" name="fdcompounding" value="fd_compound_qtr">
+                    <label for="fd_compound_qtr">Quarterly</label><br>
+                    <input type="radio" id="fd_compound_half" name="fdcompounding" value="fd_compound_half">
+                    <label for="fd_compound_half">Half Yearly</label><br>
+                    <input type="radio" id="fd_compound_yr" name="fdcompounding" value="fd_compound_yr">
+                    <label for="fd_compound_yr">Yearly</label>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="fd_final_val" class="col-sm-3 col-form-label">Final Value</label>
+                <div class="col-sm-6">
+                  <div class="md-form mt-0">
+                    <input type="number" id="fd_final_val" name="fd_final_val" value="{{fd_final_val}}" step="0.01"> 
+                    <button type="submit" class="btn btn-primary" id="calculatefdfinalval" name="calculatefdfinalval">Calculate</button>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group row">
+                <p id="errors" style="color:red;"></p>
+              </div>
+        </div>
+    </div>
+</form>
+
+{% endblock content %}
+
+{% block javascript %}
+    <script>
+        function setFdOptions(){
+            var fdp = parseFloat(document.getElementById('fd_prin').value);
+            var fdt = parseFloat(document.getElementById('fd_time').value);
+            var fdf = parseFloat(document.getElementById('fd_final_val').value);
+            var fdi = parseFloat(document.getElementById('fd_int').value);
+            if ((fdp > 0) && (fdt > 0) && (fdi > 0)) {
+                document.getElementById('calculatefdfinalval').disabled=false;
+            } else {
+                document.getElementById('calculatefdfinalval').disabled=true;
+            }
+            if ((fdp > 0) && (fdt > 0) && (fdf > 0)) {
+                if (fdf < fdp) {
+                    document.getElementById('calculatefdint').disabled=true;
+                    document.getElementById('errors').innerHTML = '* Final value cannot be less than Principal';
+                } else {
+                    document.getElementById('calculatefdint').disabled=false;
+                    document.getElementById('errors').innerHTML = '';
+                }
+            } else {
+                document.getElementById('calculatefdint').disabled=true;
+            }
+            if ((fdf > 0) && (fdt > 0) && (fdi > 0)) {
+                document.getElementById('calculatefdprin').disabled=false;
+            } else {
+                document.getElementById('calculatefdprin').disabled=true;
+            }
+            if ((fdf > 0) && (fdp > 0) && (fdi > 0)) {
+                if (fdf < fdp) {
+                    document.getElementById('calculatefdtime').disabled=true;
+                    document.getElementById('errors').innerHTML = '* Final value cannot be less than Principal';
+                } else {
+                    document.getElementById('calculatefdtime').disabled=false;
+                    document.getElementById('errors').innerHTML = '';
+                }
+            } else {
+                document.getElementById('calculatefdtime').disabled=true;
+            }
+            console.log(fdp);
+            console.log(fdt);
+            console.log(fdf);
+            console.log(fdi);
+        }
+        var fdc = '{{fd_compound}}';
+        console.log('hello');
+        console.log(fdc);
+        if (fdc ==  'fd_compound_yr'){
+            document.getElementById('fd_compound_yr').checked = true;
+        }
+        if (fdc ==  'fd_compound_half'){
+            document.getElementById('fd_compound_half').checked = true;
+        }
+        if (fdc ==  'fd_compound_qtr'){
+            document.getElementById('fd_compound_qtr').checked = true;
+        }
+        document.getElementById('calculatefdfinalval').disabled=true;
+        document.getElementById('calculatefdint').disabled=true;
+        document.getElementById('calculatefdtime').disabled=true;
+        document.getElementById('calculatefdprin').disabled=true;
+        setFdOptions();
+        $("#fd_int").change(function () {
+            console.log( $(this).val() );
+            setFdOptions();
+        });
+        $("#fd_prin").change(function () {
+            console.log( $(this).val() );
+            setFdOptions();
+        });
+        $("#fd_final_val").change(function () {
+            console.log( $(this).val() );
+            setFdOptions();
+        });
+        $("#fd_time").change(function () {
+            console.log( $(this).val() );
+            setFdOptions();
+        });
+
+    </script>
+{% endblock %}
