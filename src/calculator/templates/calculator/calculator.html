@@ -14,35 +14,35 @@
         <div class='col-sm-6'>
             <b>Fixed Deposit</b><br><br>
             <div class="form-group row">
-                <label for="fd_prin" class="col-sm-3 col-form-label">Principal</label>
+                <label for="fd_prin" class="col-sm-2 col-form-label">Principal</label>
                 <div class="col-sm-6">
-                  <div class="md-form mt-0">
-                    <input type="number" id="fd_prin" name="fd_prin" value="{{fd_prin}}" step="0.01"> 
-                    <button type="submit" class="btn btn-primary" id="calculatefdprin" name="calculatefdprin">Calculate</button>
-                  </div>
+                    <div class="md-form mt-0">
+                        <input type="number" id="fd_prin" name="fd_prin" value="{{fd_prin}}" step="0.01"> 
+                        <button type="submit" class="btn btn-primary" id="calculatefdprin" name="calculatefdprin">Calculate</button>
+                    </div>
                 </div>
-              </div>
-              <div class="form-group row">
-                <label for="fd_time" class="col-sm-3 col-form-label">Time Period (months)</label>
+            </div>
+            <div class="form-group row">
+                <label for="fd_time" class="col-sm-2 col-form-label">Time Period (months)</label>
                 <div class="col-sm-6">
-                  <div class="md-form mt-0">
-                    <input type="number" id="fd_time" name="fd_time" value="{{fd_time}}"> 
-                    <button type="submit" class="btn btn-primary" id="calculatefdtime" name="calculatefdtime">Calculate</button>
-                  </div>
+                    <div class="md-form mt-0">
+                        <input type="number" id="fd_time" name="fd_time" value="{{fd_time}}"> 
+                        <button type="submit" class="btn btn-primary" id="calculatefdtime" name="calculatefdtime">Calculate</button>
+                    </div>
                 </div>
-              </div>
-              <div class="form-group row">
-                <label for="fd_int" class="col-sm-3 col-form-label">Interest Rate</label>
+            </div>
+            <div class="form-group row">
+                <label for="fd_int" class="col-sm-2 col-form-label">Interest Rate</label>
                 <div class="col-sm-6">
-                  <div class="md-form mt-0">
-                    <input type="number" id="fd_int" name="fd_int" value="{{fd_int}}" step="0.01"> 
-                    <button type="submit" class="btn btn-primary" id="calculatefdint" name="calculatefdint">Calculate</button>
-                  </div>
+                    <div class="md-form mt-0">
+                        <input type="number" id="fd_int" name="fd_int" value="{{fd_int}}" step="0.01"> 
+                        <button type="submit" class="btn btn-primary" id="calculatefdint" name="calculatefdint">Calculate</button>
+                    </div>
                 </div>
-              </div>
-              <div class="form-group row">
-                <label for="fd_compounding" class="col-sm-3 col-form-label">Compounding</label>
-                <div class="col-sm-6">
+            </div>
+            <div class="form-group row">
+                <label for="fd_compounding" class="col-sm-2 col-form-label">Compounding</label>
+                <div class="col-sm-4">
                     <input type="radio" id="fd_compound_qtr" name="fdcompounding" value="fd_compound_qtr">
                     <label for="fd_compound_qtr">Quarterly</label><br>
                     <input type="radio" id="fd_compound_half" name="fdcompounding" value="fd_compound_half">
@@ -52,17 +52,68 @@
                 </div>
               </div>
               <div class="form-group row">
-                <label for="fd_final_val" class="col-sm-3 col-form-label">Final Value</label>
+                <label for="fd_final_val" class="col-sm-2 col-form-label">Final Value</label>
                 <div class="col-sm-6">
-                  <div class="md-form mt-0">
-                    <input type="number" id="fd_final_val" name="fd_final_val" value="{{fd_final_val}}" step="0.01"> 
-                    <button type="submit" class="btn btn-primary" id="calculatefdfinalval" name="calculatefdfinalval">Calculate</button>
-                  </div>
+                    <div class="md-form mt-0">
+                        <input type="number" id="fd_final_val" name="fd_final_val" value="{{fd_final_val}}" step="0.01"> 
+                        <button type="submit" class="btn btn-primary" id="calculatefdfinalval" name="calculatefdfinalval">Calculate</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <p id="errors" style="color:red;"></p>
+            </div>
+        </div>
+        <div class='col-sm-1'></div>
+        <div class='col-sm-5'>
+            <b>Recurring Deposit</b><br><br>
+            <div class="form-group row">
+                <label for="rd_prin" class="col-sm-3 col-form-label">Principal</label>
+                <div class="col-sm-3">
+                    <div class="md-form mt-0">
+                        <input type="number" id="rd_prin" name="rd_prin" value="{{rd_prin}}" step="0.01"> 
+                        <!--button type="submit" class="btn btn-primary" id="calculaterdprin" name="calculaterdprin">Calculate</button-->
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="rd_time" class="col-sm-3 col-form-label">Time Period (months)</label>
+                <div class="col-sm-3">
+                    <div class="md-form mt-0">
+                        <input type="number" id="rd_time" name="rd_time" value="{{rd_time}}"> 
+                        <!--button type="submit" class="btn btn-primary" id="calculaterdtime" name="calculaterdtime">Calculate</button-->
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="rd_int" class="col-sm-3 col-form-label">Interest Rate</label>
+                <div class="col-sm-3">
+                    <div class="md-form mt-0">
+                        <input type="number" id="rd_int" name="rd_int" value="{{rd_int}}" step="0.01"> 
+                        <!--button type="submit" class="btn btn-primary" id="calculaterdint" name="calculaterdint">Calculate</button-->
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="rd_compounding" class="col-sm-3 col-form-label">Compounding</label>
+                <div class="col-sm-3">
+                    <input type="radio" id="rd_compound_qtr" name="rdcompounding" value="rd_compound_qtr">
+                    <label for="rd_compound_qtr">Quarterly</label><br>
+                    <input type="radio" id="rd_compound_half" name="rdcompounding" value="rd_compound_half">
+                    <label for="rd_compound_half">Half Yearly</label><br>
+                    <input type="radio" id="rd_compound_yr" name="rdcompounding" value="rd_compound_yr">
+                    <label for="rd_compound_yr">Yearly</label>
                 </div>
               </div>
               <div class="form-group row">
-                <p id="errors" style="color:red;"></p>
-              </div>
+                <label for="rd_final_val" class="col-sm-3 col-form-label">Final Value</label>
+                <div class="col-sm-8">
+                    <div class="md-form mt-0">
+                        <input type="number" id="rd_final_val" name="rd_final_val" value="{{rd_final_val}}" step="0.01"> 
+                        <button type="submit" class="btn btn-primary" id="calculaterdfinalval" name="calculaterdfinalval">Calculate</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </form>
@@ -71,6 +122,16 @@
 
 {% block javascript %}
     <script>
+        function setRdOptions(){
+            var rdp = parseFloat(document.getElementById('rd_prin').value);
+            var rdt = parseFloat(document.getElementById('rd_time').value);
+            var rdi = parseFloat(document.getElementById('rd_int').value);
+            if ((rdp > 0) && (rdt > 0) && (rdi > 0)) {
+                document.getElementById('calculaterdfinalval').disabled=false;
+            } else {
+                document.getElementById('calculaterdfinalval').disabled=true;
+            }
+        }
         function setFdOptions(){
             var fdp = parseFloat(document.getElementById('fd_prin').value);
             var fdt = parseFloat(document.getElementById('fd_time').value);
@@ -129,7 +190,19 @@
         document.getElementById('calculatefdint').disabled=true;
         document.getElementById('calculatefdtime').disabled=true;
         document.getElementById('calculatefdprin').disabled=true;
+        var rdc = '{{rd_compound}}';
+        if (rdc ==  'rd_compound_yr'){
+            document.getElementById('rd_compound_yr').checked = true;
+        }
+        if (rdc ==  'rd_compound_half'){
+            document.getElementById('rd_compound_half').checked = true;
+        }
+        if (rdc ==  'rd_compound_qtr'){
+            document.getElementById('rd_compound_qtr').checked = true;
+        }
+        document.getElementById('calculaterdfinalval').disabled=true;
         setFdOptions();
+        setRdOptions();
         $("#fd_int").change(function () {
             console.log( $(this).val() );
             setFdOptions();
@@ -145,6 +218,18 @@
         $("#fd_time").change(function () {
             console.log( $(this).val() );
             setFdOptions();
+        });
+        $("#rd_int").change(function () {
+            console.log( $(this).val() );
+            setRdOptions();
+        });
+        $("#rd_prin").change(function () {
+            console.log( $(this).val() );
+            setRdOptions();
+        });
+        $("#rd_time").change(function () {
+            console.log( $(this).val() );
+            setRdOptions();
         });
 
     </script>
