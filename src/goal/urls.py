@@ -9,7 +9,8 @@ from .views import (
     update_goal,
     GoalNames,
     ChartData,
-    CurrentGoals
+    CurrentGoals,
+    GoalProgressData
 )
 
 app_name = 'goals'
@@ -24,5 +25,6 @@ urlpatterns = [
     path('api/chart/data/<id>', ChartData.as_view()),
     path('get-goals/<user>', GoalNames.as_view(), name='get-goals'),
     path('api/get/current/<user_id>', CurrentGoals.as_view()),
-    path('api/get/current/', CurrentGoals.as_view())
+    path('api/get/current/', CurrentGoals.as_view()),
+    path('api/chart/progress/<id>', GoalProgressData.as_view())
 ]

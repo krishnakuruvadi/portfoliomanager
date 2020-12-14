@@ -18,7 +18,7 @@ from rest_framework.response import Response
 import json
 from shared.handle_delete import delete_goal
 from shared.handle_get import *
-from shared.handle_chart_data import get_goal_contributions
+from shared.handle_chart_data import get_goal_contributions, get_goal_yearly_contrib
 
 
 # Create your views here.
@@ -43,8 +43,9 @@ class GoalDetailView(DetailView):
     
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        print(data)
+        print(data['object'])
         data['user_str'] = get_user_name_from_id(data['object'].user)
+        data['target_date'] = data['object'].start_date+relativedelta(months=data['object'].time_period)
         return data
 
 class GoalDeleteView(DeleteView):
@@ -344,3 +345,20 @@ class CurrentGoals(APIView):
             data['target_date'] = goal_obj.start_date + relativedelta(months=goal_obj.time_period)
             goals.append(data)
         return Response(goals)
+
+class GoalProgressData(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, id=None):
+        data = dict()
+        try:
+            goal_obj = Goal.objects.get(id=id)
+            #target_vals,target_dates = get_monthly_projected_vals_and_dates(goal_obj.start_date, goal_obj.start_amount, goal_obj.time_period, goal_obj.inflation)
+            data = get_goal_yearly_contrib(id)
+            
+        except Exception as e:
+            print(e)
+        finally:
+            print(data)
+            return Response(data)

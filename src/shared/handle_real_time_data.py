@@ -9,6 +9,7 @@ from .nasdaq import Nasdaq
 #from .nse import Nse
 from .yahoo_finance_2 import YahooFinance2
 from mftool import Mftool
+from common.models import Stock
 
 
 def get_latest_vals(stock, exchange, start, end):
@@ -88,6 +89,15 @@ def get_conversion_rate(from_cur, to_cur, date):
         new_entry.save()
         print(val)
         return val
+
+def get_historical_stock_price_based_on_symbol(symbol, exchange, start, end):
+    try:
+        stock = Stock.objects.get(exchange=exchange, symbol=symbol)
+        vals = get_historical_stock_price(stock, start, end)
+        if vals:
+            return vals[0]
+    except:
+        return None
 
 def get_historical_stock_price(stock, start, end):
     ret_vals = list()

@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from decimal import Decimal
 import math
-import numpy_financial as npf
 
 def calculator(request):
     template = 'calculator/calculator.html'

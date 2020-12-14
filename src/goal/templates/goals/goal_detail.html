@@ -6,29 +6,42 @@
 
 {% block viewname %} {{object.name }} {% endblock viewname %}
 
-{% block content %} 
-  <table>
+{% block content %}
+<div class="row">
+<div class='col-sm-4'>
+  <table class="table table-condensed table-borderless">
     <tr>
       <td>Number</td>
-      <td>{{ object.id }}</td>
+      <td colspan=2>{{ object.id }}</td>
     </tr>
     <tr>
       <td>Name</td>
-      <td>{{ object.name }}</td>
-    </tr>
-    <tr>
-      <td>Start Date</td>
-      <td>{{ object.start_date }}</td>
+      <td colspan=2>{{ object.name }}</td>
     </tr>
     <tr>
       <td>User</td>
-      <td>{{ user_str }}</td>
+      <td colspan=2>{{ user_str }}</td>
+    </tr>
+    <tr>
+      <td  rowspan=2>Target Amount</td>
+      <td>{{ object.final_val}}</td>
+      <td>{{ object.curr_val}}</td>
+    </tr>
+    <tr>
+      <td>as on {{ target_date }}</td>
+      <td>as on {{ object.start_date }}</td>
     </tr>
     <tr>
       <td>Inflation</td>
-      <td>{{ object.inflation }}</td>
+      <td colspan=2>{{ object.inflation }}%</td>
     </tr>
   </table>
+</div>
+<div class='col-sm-2'></div>
+<div class='col-sm-4'><canvas id="progressChart" width="200" height="200"></canvas>
+<div class='col-sm-2'></div>
+</div>
+</div>
 <br><br><br>
 <div class="row">
   <div class='col-sm-2'>
@@ -47,6 +60,21 @@
 
 <script>
   {% block jquery %}
+  var progress_endpoint = '/goal/api/chart/progress/{{object.id}}'
+  var progress_data = {}
+  $.ajax({
+    method:"GET",
+    url:progress_endpoint,
+    success: function(data){
+      console.log(data)
+      progress_data = data
+      setProgressChart()
+    },
+    error: function(error_data){
+      console.log("error")
+      console.log(error_data)
+    }
+  })
   var endpoint = '/goal/api/chart/data/{{ object.id }}'
   var debt_equity = [0, 0]
   var done_pending = [0, 0]
@@ -78,6 +106,30 @@
       console.log(error_data)
     }
   })
+  function setProgressChart(){
+    var ctx = document.getElementById('progressChart').getContext('2d');
+    var config = {
+      type: 'bar',
+      data: progress_data,
+      options: {
+        scales: {
+            xAxes: [{
+                stacked: true,
+                ticks: {
+                  beginAtZero: true
+                }
+            }],
+            yAxes: [{
+                stacked: true,
+                ticks: {
+                  beginAtZero: true
+                }
+            }]
+        }
+      }
+    };
+    var progressChart = new Chart(ctx,config);
+  }
   function setChart(){
     var ctx = document.getElementById('classificationChart').getContext('2d');
     var config = {

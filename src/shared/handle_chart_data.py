@@ -11,7 +11,7 @@ from users.models import User
 import datetime
 from dateutil.relativedelta import relativedelta
 from common.models import HistoricalStockPrice, Stock, MutualFund
-from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price, get_historical_mf_nav
+from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price, get_historical_mf_nav, get_historical_stock_price_based_on_symbol
 from shared.handle_create import add_common_stock
 from mutualfunds.models import Folio, MutualFundTransaction
 
@@ -126,6 +126,141 @@ def get_goal_contributions(goal_id):
     contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8','#e31219','#bfff00']
     print("contrib:", contrib)
     return contrib
+
+#port: portfolioval
+#contrib: contribution 
+#deduct: deduction
+def add_or_create(year, key, contrib_obj, deduct_obj, port_obj, contrib, deduct, port):
+    if year not in contrib_obj:
+        contrib_obj[year] = dict()
+        port_obj[year] = dict()
+        deduct_obj[year] = dict()
+    if contrib:
+        contrib_obj[year][key] = contrib + contrib_obj[year].get(key, 0)
+    if port:
+        port_obj[year][key] = port + port_obj[year].get(key, 0)
+    if deduct: 
+        deduct_obj[year][key] = port + deduct_obj[year].get(key, 0)
+
+def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
+    print("inside get_goal_yearly_contrib")
+    contrib = dict()
+    total = dict()
+    deduct = dict()
+
+    for ppf_obj in Ppf.objects.filter(goal=goal_id):
+        for ppf_trans in PpfEntry.objects.filter(number=ppf_obj):
+            #entry_date = (datetime.date(ppf_trans.year + (ppf_trans.month == 12), 
+            #      (ppf_trans.month + 1 if ppf_trans.month < 12 else 1), 1) - datetime.timedelta(1)).strftime(format)
+            if ppf_trans.interest_component:
+                if ppf_trans.entry_type == 'CR':
+                    add_or_create(ppf_trans.trans_date.year, 'PPF', contrib, deduct, total, 0, 0, ppf_trans.amount)
+                else:
+                    add_or_create(ppf_trans.trans_date.year, 'PPF', contrib, deduct, total, 0, 0, -1*ppf_trans.amount)
+            else:
+                if ppf_trans.entry_type == 'CR':
+                    add_or_create(ppf_trans.trans_date.year, 'PPF', contrib, deduct, total, ppf_trans.amount, 0, ppf_trans.amount)
+                else:
+                    add_or_create(ppf_trans.trans_date.year, 'PPF', contrib, deduct, total, 0, -1*ppf_trans.amount, -1*ppf_trans.amount)
+     
+    for epf_obj in Epf.objects.filter(goal=goal_id):
+        for epf_trans in EpfEntry.objects.filter(number=epf_obj):
+        #entry_date = (datetime.date(epf_trans.year + (epf_trans.month == 12), 
+        #      (epf_trans.month + 1 if epf_trans.month < 12 else 1), 1) - datetime.timedelta(1)).strftime(format)
+        
+            if epf_trans.entry_type == 'CR':
+                add_or_create(epf_trans.trans_date.year, 'EPF', contrib, deduct, total, epf_trans.employer_contribution + epf_trans.employee_contribution, 0, epf_trans.employer_contribution + epf_trans.employee_contribution+ epf_trans.interest_contribution)
+            else:
+                add_or_create(epf_trans.trans_date.year, 'EPF', contrib, deduct, total, 0, -1*(epf_trans.employer_contribution + epf_trans.employee_contribution), -1*(epf_trans.employer_contribution + epf_trans.employee_contribution+ epf_trans.interest_contribution))
+    
+    for ssy_obj in Ssy.objects.filter(goal=goal_id):
+        for ssy_trans in SsyEntry.objects.filter(number=ssy_obj):
+            if ssy_trans.interest_component:
+                if ssy_trans.entry_type == 'CR':
+                    add_or_create(ssy_trans.trans_date.year, 'SSY', contrib, deduct, total, 0, 0, ssy_trans.amount)
+                else:
+                    add_or_create(ssy_trans.trans_date.year, 'SSY', contrib, deduct, total, 0, 0, -1*ssy_trans.amount)
+            else:
+                if ssy_trans.entry_type == 'CR':
+                    add_or_create(ssy_trans.trans_date.year, 'SSY', contrib, deduct, total, ssy_trans.amount, 0, ssy_trans.amount)
+                else:
+                    add_or_create(ssy_trans.trans_date.year, 'SSY', contrib, deduct, total, 0, -1*ssy_trans.amount, -1*ssy_trans.amount)
+    
+    for espp_obj in Espp.objects.filter(goal=goal_id):
+        add_or_create(espp_obj.purchase_date.year, 'ESPP', contrib, deduct, total, espp_obj.total_purchase_price, 0, 0)
+        end_year = datetime.datetime.now().year
+        if espp_obj.sell_date:
+            end_year = espp_obj.sell_date.year - 1
+            add_or_create(espp_obj.sell_date.year, 'ESPP', contrib, deduct, total, 0, -1*espp_obj.total_sell_price, 0)
+        for i in range (espp_obj.purchase_date.year, end_year):
+            end_date = datetime.datetime.now()
+            if i != datetime.datetime.now().year:
+                end_date = datetime.date.datetime.strptime(str(i)+'-12-31', '%Y-%m-%d')
+            year_end_value = get_historical_stock_price_based_on_symbol(espp_obj.symbol, espp_obj.exchange, end_date+relativedelta(days=-5), end_date)
+            if year_end_value is not None:
+                conv_rate = 1
+                if espp_obj.exchange == 'NASDAQ' or espp_obj.exchange == 'NYSE':
+                    conv_val = get_conversion_rate('USD', 'INR', end_date)
+                    if conv_val:
+                        conv_rate = conv_val
+                year_end_value = year_end_value*conv_rate
+                add_or_create(espp_obj.sell_date.year, 'ESPP', contrib, deduct, total, 0, 0, year_end_value)
+    print("total", total)
+    sorted_years = sorted (contrib.keys(), reverse=True)
+    for i, val in enumerate(sorted_years):
+        if i != len(sorted_years)-1:
+            for j in range (i+1, len(sorted_years)):
+                print("val", val, " j", j, " sorted_years[j]", sorted_years[j])
+                total[val]['PPF'] = total[val].get('PPF', 0) + total[sorted_years[j]].get('PPF', 0)
+                total[val]['EPF'] = total[val].get('EPF', 0) + total[sorted_years[j]].get('EPF', 0)
+                total[val]['SSY'] = total[val].get('SSY', 0) + total[sorted_years[j]].get('SSY', 0)
+
+    print('contrib', contrib)
+    print('deduct', deduct)
+    print('total', total)
+    colormap = {'EPF':'#f15664','ESPP':'#DC7633','FD':'#006f75','PPF':'#92993c','SSY':'#f9c5c6','RSU':'#AA12E8','Shares':'#e31219', 'MutualFunds':'#bfff00'}
+    data = dict()
+    data['labels'] = list()
+    data['datasets'] = list()
+    for i in sorted (contrib.keys()):
+        data['labels'].append(str(i))
+    print('data at 218', data)
+    for val in ['PPF', 'EPF', 'SSY', 'ESPP']:
+        entry = dict()
+        entry['label'] = val+' contribution'
+        entry['type'] = 'bar'
+        entry['stack'] = 'contribution'
+        entry['backgroundColor'] = colormap[val]
+        entry['data'] = list()
+        for i in sorted (contrib.keys()):
+            entry['data'].append(contrib[i].get(val,0))
+        data['datasets'].append(entry)
+    print('data at 229', data)
+    for val in ['PPF', 'EPF', 'SSY', 'ESPP']:
+        entry = dict()
+        entry['label'] = val+ ' deduction'
+        entry['type'] = 'bar'
+        entry['stack'] = 'deduction'
+        entry['backgroundColor'] = colormap[val]
+        entry['data'] = list()
+        for i in sorted (contrib.keys()):
+            entry['data'].append(deduct[i].get(val,0))
+        data['datasets'].append(entry)
+    print('data at 240', data)
+    
+    for val in ['PPF', 'EPF', 'SSY', 'ESPP']:
+        entry = dict()
+        entry['label'] = val + ' total'
+        entry['type'] = 'bar'
+        entry['stack'] = 'total'
+        entry['backgroundColor'] = colormap[val]
+        entry['data'] = list()
+        for i in sorted (contrib.keys()):
+            entry['data'].append(total[i].get(val,0))
+        data['datasets'].append(entry)
+
+    print('data at 252', data)
+    return data
 
 def get_ppf_amount_for_user(user_id):
     ppf_objs = Ppf.objects.filter(user=user_id)
