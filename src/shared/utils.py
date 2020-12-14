@@ -1,6 +1,15 @@
 import datetime
 from dateutil.relativedelta import relativedelta
 
+def get_float_or_zero_from_string(input):
+    if input != None and input != '':
+        try:
+            res = float(input)
+            return res
+        except Exception as e:
+            print('error converting ', input, ' to float')
+    return 0
+
 def get_float_or_none_from_string(input):
     if input != None and input != '':
         try:

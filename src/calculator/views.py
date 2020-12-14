@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from decimal import Decimal
 import math
+from shared.utils import get_float_or_zero_from_string
 
 def calculator(request):
     template = 'calculator/calculator.html'
@@ -16,40 +17,30 @@ def calculator(request):
     rd_final_val = 0
     rd_compound = 'rd_compound_yr'
     if request.method == 'POST':
+        fd_prin = get_float_or_zero_from_string(request.POST['fd_prin'])
+        fd_time = get_float_or_zero_from_string(request.POST['fd_time'])
+        fd_roi = get_float_or_zero_from_string(request.POST['fd_int'])
+        fd_final_val = get_float_or_zero_from_string(request.POST['fd_final_val'])
+        fd_compound = request.POST.get('fdcompounding', 'fd_compound_yr')
+        rd_prin = get_float_or_zero_from_string(request.POST['rd_prin'])
+        rd_time = get_float_or_zero_from_string(request.POST['rd_time'])
+        rd_roi = get_float_or_zero_from_string(request.POST['rd_int'])
+        rd_final_val = get_float_or_zero_from_string(request.POST['rd_final_val'])
+        rd_compound = request.POST.get('rdcompounding','rd_compound_yr')
         print(request.POST)
         if "calculatefdprin" in request.POST:
-            fd_time = float(request.POST['fd_time'])
-            fd_roi = float(request.POST['fd_int'])
-            fd_compound = request.POST['fdcompounding']
-            fd_final_val = float(request.POST['fd_final_val'])
             fd_prin = round(float(fd_calc_prin_val(fd_final_val, fd_time, fd_roi, fd_compound)),2)
 
         if "calculatefdtime" in request.POST:
-            fd_prin = float(request.POST['fd_prin'])
-            fd_roi = float(request.POST['fd_int'])
-            fd_compound = request.POST['fdcompounding']
-            fd_final_val = float(request.POST['fd_final_val'])
             fd_time = fd_calc_time(fd_prin, fd_final_val, fd_roi, fd_compound)
 
         if "calculatefdint" in request.POST:
-            fd_prin = float(request.POST['fd_prin'])
-            fd_time = float(request.POST['fd_time'])
-            fd_compound = request.POST['fdcompounding']
-            fd_final_val = float(request.POST['fd_final_val'])
             fd_roi = round(float(fd_calc_roi(fd_prin, fd_time, fd_final_val, fd_compound)),2)
 
         if "calculatefdfinalval" in request.POST:
-            fd_prin = float(request.POST['fd_prin'])
-            fd_time = float(request.POST['fd_time'])
-            fd_roi = float(request.POST['fd_int'])
-            fd_compound = request.POST['fdcompounding']
             fd_final_val = round(float(fd_calc_final_val(fd_prin, fd_time, fd_roi, fd_compound)),2)
         
         if "calculaterdfinalval" in request.POST:
-            rd_prin = float(request.POST['rd_prin'])
-            rd_time = float(request.POST['rd_time'])
-            rd_roi = float(request.POST['rd_int'])
-            rd_compound = request.POST['rdcompounding']
             rd_final_val = round(float(rd_calc_final_val(rd_prin, rd_time, rd_roi, rd_compound)),2)
 
     context = {'fd_prin':fd_prin, 'fd_time':fd_time,
