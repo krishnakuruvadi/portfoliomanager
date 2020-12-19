@@ -10,18 +10,23 @@ def update_latest_vals(espp_obj):
     start = datetime.date.today()+relativedelta(days=-5)
     end = datetime.date.today()
 
-    vals = get_latest_vals(espp_obj.symbol, espp_obj.exchange, start, end)
-    if vals:
-        for k, v in vals.items():
-            if k and v:
-                if not espp_obj.as_on_date or k > espp_obj.as_on_date:
-                    espp_obj.as_on_date = k
-                    espp_obj.latest_price = v
-                    if espp_obj.exchange == 'NASDAQ':
-                        espp_obj.latest_conversion_rate = get_forex_rate(k, 'USD', 'INR')
-                    else:
-                        espp_obj.latest_conversion_rate = 1
-                    espp_obj.latest_value = float(espp_obj.latest_price) * float(espp_obj.latest_conversion_rate) * float(espp_obj.shares_purchased)
-                    espp_obj.gain = float(espp_obj.latest_value) - float(espp_obj.total_purchase_price)
-                    espp_obj.save()
-    print('done with request')
+    if espp_obj.sell_date:
+        espp_obj.latest_value = 0
+        espp_obj.gain = float(espp_obj.total_sell_price) - float(espp_obj.total_purchase_price)
+    else:
+        vals = get_latest_vals(espp_obj.symbol, espp_obj.exchange, start, end)
+        print('vals', vals)
+        if vals:
+            for k, v in vals.items():
+                if k and v:
+                    if not espp_obj.as_on_date or k > espp_obj.as_on_date:
+                        espp_obj.as_on_date = k
+                        espp_obj.latest_price = v
+                        if espp_obj.exchange == 'NASDAQ':
+                            espp_obj.latest_conversion_rate = get_forex_rate(k, 'USD', 'INR')
+                        else:
+                            espp_obj.latest_conversion_rate = 1
+                        espp_obj.latest_value = float(espp_obj.latest_price) * float(espp_obj.latest_conversion_rate) * float(espp_obj.shares_purchased)                    
+                        espp_obj.gain = float(espp_obj.latest_value) - float(espp_obj.total_purchase_price)
+    espp_obj.save()
+    print('done with update request')

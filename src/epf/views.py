@@ -140,6 +140,8 @@ def add_contribution(request, id):
     template = 'epfs/epf_add_contrib.html'
     epf_obj = get_object_or_404(Epf, id=id)
     epf_start_year = epf_obj.start_date.year
+    if epf_obj.start_date.month < 4:
+        epf_start_year = epf_start_year - 1
     this_year = datetime.date.today().year if datetime.date.today().month < 4 else datetime.date.today().year+1
     fy_list = ['Select']
     for i in range(epf_start_year, this_year):

@@ -7,6 +7,7 @@ from rsu.models import RSUAward, RestrictedStockUnits
 from epf.models import Epf, EpfEntry
 from goal.models import Goal
 from shares.models import Share, Transactions
+from mutualfunds.models import Folio, MutualFundTransaction
 from users.models import User
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -140,7 +141,7 @@ def add_or_create(year, key, contrib_obj, deduct_obj, port_obj, contrib, deduct,
     if port:
         port_obj[year][key] = port + port_obj[year].get(key, 0)
     if deduct: 
-        deduct_obj[year][key] = port + deduct_obj[year].get(key, 0)
+        deduct_obj[year][key] = deduct + deduct_obj[year].get(key, 0)
 
 def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
     print("inside get_goal_yearly_contrib")
@@ -164,7 +165,7 @@ def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
                     add_or_create(ppf_trans.trans_date.year, 'PPF', contrib, deduct, total, 0, -1*ppf_trans.amount, -1*ppf_trans.amount)
      
     for epf_obj in Epf.objects.filter(goal=goal_id):
-        for epf_trans in EpfEntry.objects.filter(number=epf_obj):
+        for epf_trans in EpfEntry.objects.filter(epf_id=epf_obj):
         #entry_date = (datetime.date(epf_trans.year + (epf_trans.month == 12), 
         #      (epf_trans.month + 1 if epf_trans.month < 12 else 1), 1) - datetime.timedelta(1)).strftime(format)
         
@@ -190,21 +191,63 @@ def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
         add_or_create(espp_obj.purchase_date.year, 'ESPP', contrib, deduct, total, espp_obj.total_purchase_price, 0, 0)
         end_year = datetime.datetime.now().year
         if espp_obj.sell_date:
-            end_year = espp_obj.sell_date.year - 1
+            end_year = espp_obj.sell_date.year
             add_or_create(espp_obj.sell_date.year, 'ESPP', contrib, deduct, total, 0, -1*espp_obj.total_sell_price, 0)
         for i in range (espp_obj.purchase_date.year, end_year):
+            year_end_value = 0
             end_date = datetime.datetime.now()
             if i != datetime.datetime.now().year:
-                end_date = datetime.date.datetime.strptime(str(i)+'-12-31', '%Y-%m-%d')
-            year_end_value = get_historical_stock_price_based_on_symbol(espp_obj.symbol, espp_obj.exchange, end_date+relativedelta(days=-5), end_date)
-            if year_end_value is not None:
+                end_date = datetime.datetime.strptime(str(i)+'-12-31', '%Y-%m-%d').date()
+            year_end_value_vals = get_historical_stock_price_based_on_symbol(espp_obj.symbol, espp_obj.exchange, end_date+relativedelta(days=-5), end_date)
+            print('espp year_end_value',year_end_value_vals)
+            if year_end_value_vals:
                 conv_rate = 1
                 if espp_obj.exchange == 'NASDAQ' or espp_obj.exchange == 'NYSE':
                     conv_val = get_conversion_rate('USD', 'INR', end_date)
                     if conv_val:
                         conv_rate = conv_val
-                year_end_value = year_end_value*conv_rate
-                add_or_create(espp_obj.sell_date.year, 'ESPP', contrib, deduct, total, 0, 0, year_end_value)
+                for k,v in year_end_value_vals.items():
+                    year_end_value = v*conv_rate*espp_obj.shares_purchased
+                    break
+            add_or_create(i, 'ESPP', contrib, deduct, total, 0, 0, year_end_value)
+
+    year_end_mf = dict()
+
+    try:
+        for folio_obj in Folio.objects.filter(goal=goal_id):
+            for trans in MutualFundTransaction.objects.filter(folio=folio_obj):
+                trans_yr = trans.trans_date.year
+                
+                for yr in range(trans_yr,datetime.datetime.now().year+1,1):
+                    if yr not in year_end_mf:
+                        year_end_mf[yr] = dict()
+                    if folio_obj.fund.code not in year_end_mf[yr]:
+                        year_end_mf[yr][folio_obj.fund.code] = 0
+                if trans.trans_type == 'Buy':
+                    add_or_create(trans.trans_date.year, 'MutualFunds',contrib, deduct, total,trans.trans_price,0,0)
+                    for yr in range(trans_yr,datetime.datetime.now().year+1,1):
+                        year_end_mf[yr][folio_obj.fund.code] = year_end_mf[yr][folio_obj.fund.code]+trans.units
+                elif trans.trans_type == 'Sell':
+                    add_or_create(trans.trans_date.year, 'MutualFunds',contrib, deduct, total,0, -1*trans.trans_price,0)
+                    for yr in range(trans_yr,datetime.datetime.now().year+1,1):
+                        year_end_mf[yr][folio_obj.fund.code] = year_end_mf[yr][folio_obj.fund.code]-trans.units
+    except Exception as ex:
+        print(ex)
+    print('year_end_mf', year_end_mf)
+    for yr,_ in year_end_mf.items():
+        print('yr',yr)
+        yr_data = year_end_mf[yr]
+        end_date = datetime.datetime.now()
+        if yr != datetime.datetime.now().year:
+            end_date = datetime.datetime.strptime(str(yr)+'-12-31', '%Y-%m-%d').date()
+        print('yr_data', yr_data)
+        for code,qty in yr_data.items():
+            historical_mf_prices = get_historical_mf_nav(code, end_date+relativedelta(days=-5), end_date)
+            if len(historical_mf_prices) > 0:
+                print('historical_mf_prices',historical_mf_prices)
+                for k,v in historical_mf_prices[0].items():
+                    add_or_create(yr, 'MutualFunds',contrib, deduct, total,0,0,v*qty)
+    
     print("total", total)
     sorted_years = sorted (contrib.keys(), reverse=True)
     for i, val in enumerate(sorted_years):
@@ -225,7 +268,7 @@ def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
     for i in sorted (contrib.keys()):
         data['labels'].append(str(i))
     print('data at 218', data)
-    for val in ['PPF', 'EPF', 'SSY', 'ESPP']:
+    for val in ['PPF', 'EPF', 'SSY', 'ESPP', 'MutualFunds']:
         entry = dict()
         entry['label'] = val+' contribution'
         entry['type'] = 'bar'
@@ -236,7 +279,7 @@ def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
             entry['data'].append(contrib[i].get(val,0))
         data['datasets'].append(entry)
     print('data at 229', data)
-    for val in ['PPF', 'EPF', 'SSY', 'ESPP']:
+    for val in ['PPF', 'EPF', 'SSY', 'ESPP', 'MutualFunds']:
         entry = dict()
         entry['label'] = val+ ' deduction'
         entry['type'] = 'bar'
@@ -248,7 +291,7 @@ def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
         data['datasets'].append(entry)
     print('data at 240', data)
     
-    for val in ['PPF', 'EPF', 'SSY', 'ESPP']:
+    for val in ['PPF', 'EPF', 'SSY', 'ESPP', 'MutualFunds']:
         entry = dict()
         entry['label'] = val + ' total'
         entry['type'] = 'bar'

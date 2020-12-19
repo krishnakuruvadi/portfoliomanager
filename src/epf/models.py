@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 class Epf(models.Model):
     class Meta:
         unique_together = (('number', 'company'),)
-    number = models.CharField(max_length=20)
+    number = models.CharField(max_length=50)
     company = models.CharField(max_length=120)
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)

@@ -47,6 +47,7 @@ def get_mf_vals(amfi_code, start, end):
 
 def get_historical_year_mf_vals(amfi_code, year):
     mf = Mftool()
+    today = end_date = datetime.date.today()
     for i in range(5):
         try:
             vals = mf.get_scheme_historical_nav_year(amfi_code,year)
@@ -55,7 +56,7 @@ def get_historical_year_mf_vals(amfi_code, year):
                 print(" data in get_mf_vals ", amfi_code, data)
                 for entry in data:
                     entry_date = datetime.datetime.strptime(entry['date'], "%d-%m-%Y").date()
-                    if entry_date.day in [27,28,29,30,31,1]:
+                    if entry_date.day in [27,28,29,30,31,1] or (entry_date.year == today.year and abs((today - entry_date).days) <= 5):
                         nav = float(entry['nav'])
                         try:
                             code = MutualFund.objects.get(code=amfi_code)
@@ -110,7 +111,7 @@ def get_historical_stock_price(stock, start, end):
             pass
         start_date = start_date+relativedelta(days=-1)
     if len(ret_vals) == 0:
-        get_vals = get_latest_vals(stock.symbol, stock.exchange, end+relativedelta(days=-5), end)
+        get_vals = get_latest_vals(stock.symbol, stock.exchange, end+relativedelta(days=-5), datetime.date.today())
         if not get_vals:
             return ret_vals
         for k,v in get_vals.items():
