@@ -26,5 +26,6 @@ urlpatterns = [
     path('get-goals/<user>', GoalNames.as_view(), name='get-goals'),
     path('api/get/current/<user_id>', CurrentGoals.as_view()),
     path('api/get/current/', CurrentGoals.as_view()),
-    path('api/chart/progress/<id>', GoalProgressData.as_view())
+    path('api/chart/progress/<id>/', GoalProgressData.as_view()),
+    path('api/chart/progress/<id>/<expected_return>', GoalProgressData.as_view())
 ]

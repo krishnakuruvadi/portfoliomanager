@@ -8,39 +8,57 @@
 
 {% block content %}
 <div class="row">
-<div class='col-sm-4'>
-  <table class="table table-condensed table-borderless">
-    <tr>
-      <td>Number</td>
-      <td colspan=2>{{ object.id }}</td>
-    </tr>
-    <tr>
-      <td>Name</td>
-      <td colspan=2>{{ object.name }}</td>
-    </tr>
-    <tr>
-      <td>User</td>
-      <td colspan=2>{{ user_str }}</td>
-    </tr>
-    <tr>
-      <td  rowspan=2>Target Amount</td>
-      <td>{{ object.final_val}}</td>
-      <td>{{ object.curr_val}}</td>
-    </tr>
-    <tr>
-      <td>as on {{ target_date }}</td>
-      <td>as on {{ object.start_date }}</td>
-    </tr>
-    <tr>
-      <td>Inflation</td>
-      <td colspan=2>{{ object.inflation }}%</td>
-    </tr>
-  </table>
-</div>
-<div class='col-sm-2'></div>
-<div class='col-sm-4'><canvas id="progressChart" width="200" height="200"></canvas>
-<div class='col-sm-2'></div>
-</div>
+  <div class='col-sm-4'>
+    <table class="table table-condensed table-borderless">
+      <tr>
+        <td>Number</td>
+        <td colspan=2>{{ object.id }}</td>
+      </tr>
+      <tr>
+        <td>Name</td>
+        <td colspan=2>{{ object.name }}</td>
+      </tr>
+      <tr>
+        <td>User</td>
+        <td colspan=2>{{ user_str }}</td>
+      </tr>
+      <tr>
+        <td rowspan=2>Target Amount</td>
+        <td>{{ object.final_val}}</td>
+        <td>{{ object.curr_val}}</td>
+      </tr>
+      <tr>
+        <td>as on {{ target_date }}</td>
+        <td>as on {{ object.start_date }}</td>
+      </tr>
+      <tr>
+        <td>Inflation</td>
+        <td colspan=2>{{ object.inflation }}%</td>
+      </tr>
+    </table>
+  </div>
+  <div class='col-sm-2'></div>
+  <div class='col-sm-4'>
+    <canvas id="progressChart" width="200" height="200"></canvas>
+  </div>
+  <div class='col-sm-2'>
+    <table class="table table-condensed table-borderless">
+      <tr>
+        <td>Average New Investment</td>
+        <td id="avg_new_investment"></td>
+      </tr>
+      <tr>
+        <td>Average Growth</td>
+        <td id="avg_growth"></td>
+      </tr>
+      <tr>
+        <td>Custom Growth</td>
+        <td>
+          <input type="number" id="custom_growth" step="1" max="100" min="1" name="custom_growth">
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>
 <br><br><br>
 <div class="row">
@@ -106,11 +124,29 @@
       console.log(error_data)
     }
   })
+  $("#custom_growth").change(function () {
+    cgElem = document.getElementById("custom_growth")
+    var progress_endpoint = '/goal/api/chart/progress/{{object.id}}/' + $(this).val()
+    progress_data = {}
+    $.ajax({
+      method:"GET",
+      url:progress_endpoint,
+      success: function(data){
+        console.log(data)
+        progress_data = data
+        setProgressChart()
+      },
+      error: function(error_data){
+        console.log("error")
+        console.log(error_data)
+      }
+    })
+  })
   function setProgressChart(){
     var ctx = document.getElementById('progressChart').getContext('2d');
     var config = {
       type: 'bar',
-      data: progress_data,
+      data: progress_data.chart_data,
       options: {
         scales: {
             xAxes: [{
@@ -129,6 +165,13 @@
       }
     };
     var progressChart = new Chart(ctx,config);
+    aniElem = document.getElementById("avg_new_investment")
+    aniElem.innerHTML = progress_data.avg_contrib
+    agElem = document.getElementById("avg_growth")
+    var agVal = progress_data.avg_growth
+    agElem.innerHTML = agVal.toString() + "%";
+    var cgVal = progress_data.custom_growth
+    cgElem.innerHTML = cgVal.toString() + "%";
   }
   function setChart(){
     var ctx = document.getElementById('classificationChart').getContext('2d');

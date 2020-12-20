@@ -56,6 +56,41 @@ def add_transaction(request):
     context = {'users':users, 'operation': 'Add Transaction'}
     return render(request, template, context)
 
+def update_transaction(request, id):
+    template = 'mutualfunds/update_transaction.html'
+    transaction = MutualFundTransaction.objects.get(id=id)
+    if request.method == 'POST':
+        #folio = request.POST['folio']
+        #fund = request.POST['fund']
+        #user = request.POST['user']
+        #print('user is of type:',type(user))
+        transaction.trans_date = get_date_or_none_from_string(request.POST['trans_date'])
+        transaction.trans_type = request.POST['trans_type']
+        transaction.price = get_float_or_none_from_string(request.POST['price'])
+        transaction.units = get_float_or_none_from_string(request.POST['units'])
+        transaction.conversion_rate = get_float_or_none_from_string(request.POST['conversion_rate'])
+        transaction.trans_price = get_float_or_none_from_string(request.POST['trans_price'])
+        transaction.broker = request.POST['broker']
+        transaction.notes = request.POST['notes']
+        if 'switch_trans' in request.POST:
+            print('switch_trans', request.POST['switch_trans'])
+            transaction.switch_trans = True
+        else:
+            transaction.switch_trans = False
+        transaction.save()
+    context = {'operation': 'Update Transaction'}
+    context['trans_date'] = transaction.trans_date.strftime("%Y-%m-%d")
+    context['trans_type'] = transaction.trans_type
+    context['price'] = transaction.price
+    context['units'] = transaction.units
+    context['conversion_rate'] = transaction.conversion_rate
+    context['trans_price'] = transaction.trans_price
+    context['broker'] = transaction.broker
+    context['notes'] = transaction.notes
+    context['switch_trans'] = transaction.switch_trans  
+    print('context', context) 
+    return render(request, template, context)
+
 def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes, broker, conversion_rate=1, trans_price=None):
     folio_obj = None
     try:

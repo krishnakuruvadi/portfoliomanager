@@ -143,11 +143,14 @@ def add_or_create(year, key, contrib_obj, deduct_obj, port_obj, contrib, deduct,
     if deduct: 
         deduct_obj[year][key] = deduct + deduct_obj[year].get(key, 0)
 
-def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
+def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
+    if expected_return:
+        expected_return = int(expected_return)
     print("inside get_goal_yearly_contrib")
     contrib = dict()
     total = dict()
     deduct = dict()
+    ret = dict()
 
     for ppf_obj in Ppf.objects.filter(goal=goal_id):
         for ppf_trans in PpfEntry.objects.filter(number=ppf_obj):
@@ -223,11 +226,11 @@ def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
                         year_end_mf[yr] = dict()
                     if folio_obj.fund.code not in year_end_mf[yr]:
                         year_end_mf[yr][folio_obj.fund.code] = 0
-                if trans.trans_type == 'Buy':
+                if trans.trans_type == 'Buy' and not trans.switch_trans:
                     add_or_create(trans.trans_date.year, 'MutualFunds',contrib, deduct, total,trans.trans_price,0,0)
                     for yr in range(trans_yr,datetime.datetime.now().year+1,1):
                         year_end_mf[yr][folio_obj.fund.code] = year_end_mf[yr][folio_obj.fund.code]+trans.units
-                elif trans.trans_type == 'Sell':
+                elif trans.trans_type == 'Sell' and not trans.switch_trans:
                     add_or_create(trans.trans_date.year, 'MutualFunds',contrib, deduct, total,0, -1*trans.trans_price,0)
                     for yr in range(trans_yr,datetime.datetime.now().year+1,1):
                         year_end_mf[yr][folio_obj.fund.code] = year_end_mf[yr][folio_obj.fund.code]-trans.units
@@ -258,17 +261,58 @@ def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
                 total[val]['EPF'] = total[val].get('EPF', 0) + total[sorted_years[j]].get('EPF', 0)
                 total[val]['SSY'] = total[val].get('SSY', 0) + total[sorted_years[j]].get('SSY', 0)
 
+    sorted_years = sorted (contrib.keys(), reverse=True)
+    total_contribution = 0
+    total_years = 0
+    for i, yr in enumerate(sorted_years):
+        total_years += 1
+        for typ,amt in contrib[yr].items():
+            total_contribution += amt
+    if total_contribution:
+        curr_yr = datetime.datetime.now().year
+        avg_contrib = total_contribution/total_years
+        latest_value = 0
+        for k,v in total[curr_yr].items():
+            latest_value += v
+        calc_avg_growth = (latest_value-total_contribution)/(total_contribution*total_years)
+
+        if expected_return:
+            avg_growth = expected_return/100
+        else:
+            avg_growth = calc_avg_growth
+        goal_obj = Goal.objects.get(id=goal_id)
+        goal_end_date = goal_obj.start_date+relativedelta(months=goal_obj.time_period)
+        print('*************')
+        ret['goal_end_date'] = goal_end_date
+        ret['avg_growth'] = int(calc_avg_growth*100)
+        ret['latest_value'] = latest_value
+        ret['total_contribution'] = total_contribution
+        ret['avg_contrib'] = int(avg_contrib)
+        print(ret)
+        print('*************')
+
+        for yr in range(curr_yr+1, goal_end_date.year+1):
+            contrib[yr] = dict()
+            total[yr] = dict()
+            deduct[yr] = dict()
+            contrib[yr]['Projected'] = avg_contrib
+            if 'Projected' in total[yr-1]:
+                total[yr]['Projected'] = (float(total[yr-1]['Projected'])+float(avg_contrib))*(1+float(avg_growth))
+            else:
+                total[yr]['Projected'] = (float(total_contribution)+float(avg_contrib))*(1+float(avg_growth))
+            deduct[yr]['Projected'] = 0
+
     print('contrib', contrib)
     print('deduct', deduct)
     print('total', total)
-    colormap = {'EPF':'#f15664','ESPP':'#DC7633','FD':'#006f75','PPF':'#92993c','SSY':'#f9c5c6','RSU':'#AA12E8','Shares':'#e31219', 'MutualFunds':'#bfff00'}
+    colormap = {'EPF':'#f15664','ESPP':'#DC7633','FD':'#006f75','PPF':'#92993c','SSY':'#f9c5c6','RSU':'#AA12E8','Shares':'#e31219', 'MutualFunds':'#bfff00', 'Projected':'#cbcdd1'}
     data = dict()
     data['labels'] = list()
     data['datasets'] = list()
     for i in sorted (contrib.keys()):
         data['labels'].append(str(i))
-    print('data at 218', data)
-    for val in ['PPF', 'EPF', 'SSY', 'ESPP', 'MutualFunds']:
+    print('data at 294', data)
+    for val in ['PPF', 'EPF', 'SSY', 'ESPP', 'MutualFunds', 'Projected']:
         entry = dict()
         entry['label'] = val+' contribution'
         entry['type'] = 'bar'
@@ -276,9 +320,9 @@ def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
         entry['backgroundColor'] = colormap[val]
         entry['data'] = list()
         for i in sorted (contrib.keys()):
-            entry['data'].append(contrib[i].get(val,0))
+            entry['data'].append(int(contrib[i].get(val,0)))
         data['datasets'].append(entry)
-    print('data at 229', data)
+    print('data at 305', data)
     for val in ['PPF', 'EPF', 'SSY', 'ESPP', 'MutualFunds']:
         entry = dict()
         entry['label'] = val+ ' deduction'
@@ -289,9 +333,9 @@ def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
         for i in sorted (contrib.keys()):
             entry['data'].append(deduct[i].get(val,0))
         data['datasets'].append(entry)
-    print('data at 240', data)
+    print('data at 316', data)
     
-    for val in ['PPF', 'EPF', 'SSY', 'ESPP', 'MutualFunds']:
+    for val in ['PPF', 'EPF', 'SSY', 'ESPP', 'MutualFunds', 'Projected']:
         entry = dict()
         entry['label'] = val + ' total'
         entry['type'] = 'bar'
@@ -299,11 +343,10 @@ def get_goal_yearly_contrib(goal_id, format='%Y-%m-%d'):
         entry['backgroundColor'] = colormap[val]
         entry['data'] = list()
         for i in sorted (contrib.keys()):
-            entry['data'].append(total[i].get(val,0))
+            entry['data'].append(int(total[i].get(val,0)))
         data['datasets'].append(entry)
 
-    print('data at 252', data)
-    return data
+    return data, ret
 
 def get_ppf_amount_for_user(user_id):
     ppf_objs = Ppf.objects.filter(user=user_id)

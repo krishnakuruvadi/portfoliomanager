@@ -350,12 +350,15 @@ class GoalProgressData(APIView):
     authentication_classes = []
     permission_classes = []
 
-    def get(self, request, format=None, id=None):
+    def get(self, request, format=None, id=None, expected_return=None):
         data = dict()
         try:
             goal_obj = Goal.objects.get(id=id)
             #target_vals,target_dates = get_monthly_projected_vals_and_dates(goal_obj.start_date, goal_obj.start_amount, goal_obj.time_period, goal_obj.inflation)
-            data = get_goal_yearly_contrib(id)
+            chart_data, ret = get_goal_yearly_contrib(id, expected_return)
+            data['chart_data'] = chart_data
+            data['avg_growth'] = ret['avg_growth']
+            data['avg_contrib'] = ret['avg_contrib']
             
         except Exception as e:
             print(e)
