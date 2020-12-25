@@ -13,33 +13,28 @@
     <div class="row">
       <div class='col-sm-6'>
         <div class="form-group row">
-          <label for="exchange" class="col-sm-3 col-form-label">Exchange</label>
+          <label for="folio" class="col-sm-3 col-form-label">Folio</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <select id="exchange" name="exchange" class="form-control">
-                <option value="BSE">BSE</option>
-                <option value="NSE">NSE</option>
-                <option value="NASDAQ">NASDAQ</option>
-                <option value="NYSE">NYSE</option>
-              </select>
+              <label>{{folio}}</label>
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="symbol" class="col-sm-3 col-form-label">Symbol</label>
-          <div class="col-sm-3">
+          <label for="fund_name" class="col-sm-3 col-form-label">Fund Name</label>
+          <div class="col-sm-6">
             <div class="md-form mt-0">
-              <input type="text" id="symbol" name="symbol" value="{{symbol}}">
+              <label>{{fund_name}}</label>
             </div>
           </div>
         </div>
 
         <div class="form-group row">
           <label for="user" class="col-sm-3 col-form-label">User</label>
-          <div class="col-sm-3">
+          <div class="col-sm-6">
             <div class="md-form mt-0">
-              <select id="id_user" name="user" class="form-control"></select>
+              <label>{{user}}</label>
             </div>
           </div>
         </div>
@@ -75,10 +70,10 @@
         </div>
 
         <div class="form-group row">
-          <label for="quantity" class="col-sm-3 col-form-label">Quantity</label>
+          <label for="units" class="col-sm-3 col-form-label">Units</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="quantity" name="quantity" value="{{quantity}}">
+              <input type="number" id="units" name="units" value="{{units}}">
             </div>
           </div>
         </div>
@@ -134,57 +129,19 @@
 
 {% block javascript %}
   <script>
-    var users = {{users|safe}}
-    var sel_user = '{{user|safe}}'
-    var userdropdown = document.getElementById('id_user');
-    var opt = document.createElement('option');
-    // create text node to add to option element (opt)
-    opt.appendChild( document.createTextNode('') );
-    // set value property of opt
-    opt.value = ''; 
-    // add opt to end of select box (sel)
-    userdropdown.appendChild(opt);
-    console.log(users);
-    console.log(sel_user)
-    for (x in users) {
-      user = users[x]
-      // create new option element
-      var opt = document.createElement('option');
-      // create text node to add to option element (opt)
-      opt.appendChild( document.createTextNode(user) );
-      // set value property of opt
-      opt.value = x;
-      if (opt.value == sel_user) {
-        opt.selected = true;
-      }
-      // add opt to end of select box (sel)
-      userdropdown.appendChild(opt);
-    }
     $("#price").change(function () {
       setTransPrice();
     });
-    $("#quantity").change(function () {
+    $("#units").change(function () {
       setTransPrice();
     });
     $("#conversion_rate").change(function () {
       setTransPrice();
     });
-    $("#exchange").change(function () {
-      var exchangeElem = document.getElementById("exchange");
-      var exchange = exchangeElem.value
-      console.log(exchange)
-      var conversionRateElem = document.getElementById("conversion_rate");
-      if (exchange == 'BSE' || exchange=='NSE') {
-        conversionRateElem.value = 1
-      } else {
-        conversionRateElem.value = ''
-      }
-      setTransPrice();
-    });
     function setTransPrice(){
       var priceElem = document.getElementById("price");
       var price = priceElem.value
-      var quantityElem = document.getElementById("quantity");
+      var quantityElem = document.getElementById("units");
       var quantity = quantityElem.value
       var conversionRateElem = document.getElementById("conversion_rate");
       var conversionRate = conversionRateElem.value

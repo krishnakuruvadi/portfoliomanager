@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import (
     ListView,
     DetailView
@@ -14,6 +14,12 @@ from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 from .bsestar import BSEStar
 from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
+import json
+
 
 def common_list_view(request):
     template = 'common/common_list.html'
@@ -171,3 +177,24 @@ def mf_bse_star(request):
         update_bsestar_schemes(schemes)
         return HttpResponseRedirect(reverse('common:mf-list'))
     return render(request, template)
+
+@api_view(('GET',))
+@renderer_classes((TemplateHTMLRenderer, JSONRenderer))
+def get_mutual_funds(request):
+    print('inside get_mutual_funds')
+    filte = request.GET.get('q', '')
+    mfs = list()
+    try:
+        i = 0
+        for mfo in MutualFund.objects.filter(name__contains=filte):
+            data = dict()
+            data['value'] = mfo.code
+            data['label'] = mfo.name
+            mfs.append(data)
+            i = i +1
+            if i > 10:
+                break
+    except Exception as ex:
+        print('exception in AvailableMutualFunds', ex)
+    #s = json.dumps(mfs)
+    return JsonResponse(mfs, safe=False)

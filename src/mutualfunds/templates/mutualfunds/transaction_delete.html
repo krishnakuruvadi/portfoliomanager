@@ -1,0 +1,36 @@
+{% extends 'base.html' %} 
+
+{% block viewname %} Delete Folio {% endblock %}
+
+
+{% block canvas %}{% endblock canvas %}
+
+{% block applicableactions %} {% endblock applicableactions %} 
+{% block content %}
+
+<form method="POST">
+  {% csrf_token %}
+  <h2>Do you want to delete the transaction?</h2>
+    <table class="table table-condensed  table-borderless">
+      <tr>
+        <td>Folio</td>
+        <td>{{object.folio.folio}}</td>
+      </tr>
+      <tr>
+        <td>Fund Name</td>
+        <td>{{ object.folio.fund.name }}</td>
+      </tr>
+      <tr>
+        <td>Transaction Type</td>
+        <td>{{object.trans_type}}</td>
+      </tr>
+      <tr>
+        <td>Units</td>
+        <td>{{object.units}}</td>
+      </tr>
+    </table>
+
+  <p><input type="submit" value="Submit" class="btn btn-danger"/>&nbsp;<a href="../../" class="btn btn-primary" role="button">Cancel</a></p>
+</form>
+
+{% endblock %}

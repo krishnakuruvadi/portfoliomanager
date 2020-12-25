@@ -36,13 +36,44 @@ class FolioListView(ListView):
         data['user_name_mapping'] = get_all_users()
         return data
 
-def add_transaction(request):
-    template = 'mutualfunds/add_transaction.html'
+def add_folio(request):
+    template = 'mutualfunds/add_folio.html'
     if request.method == 'POST':
+        print('inside add_folio')
         folio = request.POST['folio']
         fund = request.POST['fund']
         user = request.POST['user']
         print('user is of type:',type(user))
+        notes = request.POST['notes']
+        goal_id = None
+        goal = request.POST['goal']
+        if goal != '':
+            goal_id = Decimal(goal)
+        
+        mf_obj = MutualFund.objects.get(code=fund)
+        found = False
+        try:
+            fos = Folio.objects.filter(folio=folio)
+            for fo in fos:
+                if fo.fund.code == fund:
+                    found = True
+        except Exception as ex:
+            pass
+        
+        if not found:
+            folio_obj = Folio.objects.create(folio=folio,
+                                            fund=mf_obj,
+                                            user=user,
+                                            goal=goal_id)
+    users = get_all_users()
+    context = {'users':users, 'operation': 'Add Folio'}
+    return render(request, template, context)
+
+def add_transaction(request, id):
+    template = 'mutualfunds/add_transaction.html'
+    folio = Folio.objects.get(id=id)
+    user = get_user_name_from_id(folio.user)
+    if request.method == 'POST':
         trans_date = get_date_or_none_from_string(request.POST['trans_date'])
         trans_type = request.POST['trans_type']
         price = get_float_or_none_from_string(request.POST['price'])
@@ -51,9 +82,9 @@ def add_transaction(request):
         trans_price = get_float_or_none_from_string(request.POST['trans_price'])
         broker = request.POST['broker']
         notes = request.POST['notes']
-        insert_trans_entry(folio, fund, user, trans_type, units, price, trans_date, notes, broker, conversion_rate, trans_price)
+        insert_trans_entry(folio.folio, folio.fund.code, folio.user, trans_type, units, price, trans_date, notes, broker, conversion_rate, trans_price)
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add Transaction'}
+    context = {'users':users, 'operation': 'Add Transaction', 'folio':folio.folio, 'user':user, 'fund_name':folio.fund.name}
     return render(request, template, context)
 
 def update_transaction(request, id):
@@ -94,9 +125,16 @@ def update_transaction(request, id):
 def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes, broker, conversion_rate=1, trans_price=None):
     folio_obj = None
     try:
-        folio_obj = Folio.objects.get(folio=folio)
+        folio_objs = Folio.objects.filter(folio=folio)
+        for fo in folio_objs:
+            if fo.fund.code == fund:
+                folio_obj = fo
+                break
+
     except Folio.DoesNotExist:
         print("Couldnt find folio object:", folio)
+    
+    if not folio_obj:
         mf_obj = MutualFund.objects.get(code=fund)
         folio_obj = Folio.objects.create(folio=folio,
                                          fund=mf_obj,
@@ -118,8 +156,8 @@ def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes,
                                              broker=broker,
                                              notes=notes)
         if trans_type == 'Buy':
-            new_units = float(folio_obj.units)+units
-            new_buy_value = float(folio_obj.buy_value) + trans_price
+            new_units = get_float_or_zero_from_string(folio_obj.units)+units
+            new_buy_value = get_float_or_zero_from_string(folio_obj.buy_value) + trans_price
             folio_obj.units = new_units
             folio_obj.buy_value = new_buy_value
             if float(new_units) == 0:
@@ -128,17 +166,17 @@ def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes,
                 folio_obj.buy_price = new_buy_value/float(new_units)
             folio_obj.save()
         else:
-            new_units = float(folio_obj.units)-units
+            new_units = get_float_or_zero_from_string(folio_obj.units)-units
             if new_units:
-                new_buy_value = float(folio_obj.buy_value) - trans_price
+                new_buy_value = get_float_or_zero_from_string(folio_obj.buy_value) - trans_price
                 folio_obj.units = new_units
                 folio_obj.buy_value = new_buy_value
                 folio_obj.buy_price = new_buy_value/float(new_units)
                 folio_obj.save()
             else:
                 folio_obj.delete()
-    except IntegrityError:
-        print('Transaction exists')
+    except IntegrityError as ex:
+        print('Transaction exists', ex)
 
 class FolioDetailView(DetailView):
     template_name = 'mutualfunds/folio_detail.html'

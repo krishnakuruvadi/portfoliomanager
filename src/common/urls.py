@@ -11,7 +11,8 @@ from .views import (
     mf_bse_star,
     HistoricalStockPriceList,
     HistoricalMFPriceList,
-    MfDetailView
+    MfDetailView,
+    get_mutual_funds
 )
 # Create your views here.
 
@@ -25,8 +26,9 @@ urlpatterns = [
 
     path('mf/refresh', mf_refresh, name='mf-refresh'),
     path('mf/<id>/historical-prices', HistoricalMFPriceList.as_view(), name='historical-mf-price-list'),
-    path('mf/<id>/', MfDetailView.as_view(), name='mf-detail'),
     path('mf/trash', mf_trash, name='mf-trash'),
     path('mf/bsestar', mf_bse_star, name='mf-bse-star'),
+    path('mf/avail_funds/', get_mutual_funds),
+    path('mf/<id>/', MfDetailView.as_view(), name='mf-detail'),
     path('mf/', MFListView.as_view(), name='mf-list')
 ]

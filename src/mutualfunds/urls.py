@@ -9,6 +9,7 @@ from .views import (
     TransactionDeleteView,
     TransactionDetailView,
     add_transaction,
+    add_folio,
     upload_transactions,
     update_folio,
     mf_refresh,
@@ -21,7 +22,7 @@ app_name = 'mutualfund'
 
 urlpatterns = [
     path('', FolioListView.as_view(), name='folio-list'),
-    path('add/', add_transaction, name='transaction-add'),
+    path('add/', add_folio, name='folio-add'),
     path('refresh/', mf_refresh, name='refresh'),
     path('transactions', TransactionsListView.as_view(), name='transactions-list'),
     path('upload/', upload_transactions, name='transaction-upload'),
@@ -30,6 +31,7 @@ urlpatterns = [
     path('<id>/update', update_folio, name='folio-update'),
     path('<id>/delete', FolioDeleteView.as_view(), name='folio-delete'),
     path('<id>/transactions/', FolioTransactionsListView.as_view(), name='folio-transactions-list'),
+    path('<id>/transactions/add', add_transaction, name='folio-add-transaction'),
     path('transaction/<id>', TransactionDetailView.as_view(), name='transaction-detail'),
 
     path('transaction/<id>/update', update_transaction, name='transaction-update'),

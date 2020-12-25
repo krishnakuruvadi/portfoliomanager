@@ -1,0 +1,207 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} {{operation}} {% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6'>
+        <div class="form-group row">
+          <label for="folio" class="col-sm-3 col-form-label">Folio</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="id_folio" name="folio" value="{{folio}}">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="fund" class="col-sm-3 col-form-label">Fund</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <!--input class="form-control ui-autocomplete-input" type="text" autocomplete="off" id="id_fund"-->
+              <!--select class="form-control basicAutoSelect" name="fund_select"
+    placeholder="type to search..."
+    data-url="testdata/test-select-simple.json" autocomplete="off"></select-->
+              <input  type="text" id="id_fund" name="fund" value="{{fund}}">
+
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="user" class="col-sm-3 col-form-label">User</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_user" name="user" class="form-control"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="goal" class="col-sm-3 col-form-label">Goal</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_goal" name="goal" class="form-control"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+
+
+{% block javascript %}
+  <!--script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script-->
+  <!--script>
+    $('.basicAutoComplete').autoComplete(
+        {minLength: 1}
+    );
+    $('.dropdown-menu').css({'top': 'auto', 'left': 'auto'})
+
+  </script-->
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>
+    var users = {{users|safe}}
+    var sel_user = '{{user|safe}}'
+    var userdropdown = document.getElementById('id_user');
+    var opt = document.createElement('option');
+    // create text node to add to option element (opt)
+    opt.appendChild( document.createTextNode('') );
+    // set value property of opt
+    opt.value = ''; 
+    // add opt to end of select box (sel)
+    userdropdown.appendChild(opt);
+    console.log(users);
+    console.log(sel_user)
+    for (x in users) {
+      user = users[x]
+      // create new option element
+      var opt = document.createElement('option');
+      // create text node to add to option element (opt)
+      opt.appendChild( document.createTextNode(user) );
+      // set value property of opt
+      opt.value = x;
+      if (opt.value == sel_user) {
+        opt.selected = true;
+      }
+      // add opt to end of select box (sel)
+      userdropdown.appendChild(opt);
+    }
+    if (sel_user != '' && sel_user != 'AnonymousUser') {
+      var sel_goal = '{{goal|safe}}'
+      $.ajax({
+        url: '/goal/get-goals/'+sel_user,
+        success: function (response) {
+          console.log(response)
+          var  new_options = response.goal_list;
+          $('#id_goal').empty();
+          $('#id_goal')
+            .append($('<option>', { value : '' })
+            .text(''));
+          $.each(new_options, function(key, value) {
+              console.log(key,value)
+              if(sel_goal == key) {
+                $('#id_goal')
+                  .append($('<option>', { value : key })
+                  .text(value)
+                  .attr('selected',true));
+              } else {
+                $('#id_goal')
+                  .append($('<option>', { value : key })
+                  .text(value));
+              }
+          });
+        }
+      });
+    } else {
+      $('#id_goal').empty();
+    }
+    $(function() {
+      function log( message ) {
+        $( "<div>" ).text( message ).prependTo( "#log" );
+        $( "#log" ).scrollTop( 0 );
+      }
+
+      $( "#id_fund" ).autocomplete({
+        source: function( request, response ) {
+          $.ajax({
+            url: "/common/mf/avail_funds",
+            dataType: "json",
+            data: {
+              q: request.term
+            },
+            success: function( data ) {
+              response( data );
+            }
+          });
+        },
+        minLength: 3,
+        select: function( event, ui ) {
+          log( ui.item ?
+            "Selected: " + ui.item.label :
+            "Nothing selected, input was " + this.value);
+        },
+        open: function() {
+          $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+        },
+        close: function() {
+          $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+        }
+      });
+    });
+
+    $("#id_user").change(function () {
+      var user = $(this).val();
+      console.log(user)
+      if (user != '') {
+        $.ajax({
+          url: '/goal/get-goals/'+user,
+          success: function (response) {
+            console.log(response)
+            var  new_options = response.goal_list;
+            $('#id_goal').empty();
+            $('#id_goal')
+              .append($('<option>', { value : '' })
+              .text(''));
+            $.each(new_options, function(key, value) {
+                console.log(key,value)
+                $('#id_goal')
+                  .append($('<option>', { value : key })
+                  .text(value)); 
+            });
+          }
+        });
+      } else {
+        $('#id_goal').empty();
+      }
+    });
+
+
+  </script>
+{% endblock %}
