@@ -63,7 +63,7 @@ def get_historical_year_mf_vals(amfi_code, year):
                             new_entry = HistoricalMFPrice(code=code, date=entry_date, nav=nav)
                             new_entry.save()
                         except Exception as ex:
-                            print("no mutual fund object with code ", amfi_code)
+                            print("error getting historical mf vals for mutual fund object with code ", amfi_code, ex)
                             pass
                 break
         except Exception as ex:

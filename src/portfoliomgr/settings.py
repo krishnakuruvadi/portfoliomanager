@@ -23,10 +23,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'uuoc10!bp#0bkgq2oyh3s@sd^8%^k3(q8poba@onqv)@9zy(*4'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
+DEBUG = False
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost'] if DEBUG==False else [ ]
 
 # Application definition
 
@@ -38,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-
+    'huey.contrib.djhuey',
     # own
     'ppf',
     'ssy',
@@ -52,7 +50,8 @@ INSTALLED_APPS = [
     'fixed_deposit',
     'reports',
     'common',
-    'calculator'
+    'calculator',
+    'tasks'
 ]
 
 MIDDLEWARE = [
@@ -147,3 +146,22 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MEDIA_URL = '/media/'
+
+HUEY = {
+    'huey_class': 'huey.SqliteHuey',
+    'name': DATABASES['default']['NAME'],
+    'results': True,  # Store return values of tasks.
+    'store_none': False,  # If a task returns None, do not save to results.
+    'immediate': False,
+    'consumer': {
+        'workers': 1,
+        'worker_type': 'thread',
+        'initial_delay': 0.1,  # Smallest polling interval, same as -d.
+        'backoff': 1.15,  # Exponential backoff using this rate, -b.
+        'max_delay': 10.0,  # Max possible polling interval, -m.
+        'scheduler_interval': 1,  # Check schedule every second, -s.
+        'periodic': True,  # Enable crontab feature.
+        'check_worker_health': True,  # Enable worker health checks.
+        'health_check_interval': 1,  # Check worker health every second.
+    },
+}
