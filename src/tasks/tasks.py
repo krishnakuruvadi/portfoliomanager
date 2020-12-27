@@ -10,9 +10,11 @@ import datetime
 import time
 from django.db.models import Q
 from mftool import Mftool
+from common.helper import update_mf_scheme_codes
 from shared.utils import get_float_or_zero_from_string
+from common.bsestar import download_bsestar_schemes
 
-@db_periodic_task(crontab(hour='*/12'))
+@db_periodic_task(crontab(minute='0', hour='*/12'))
 def get_mf_navs():
     print('inside get_mf_navs')
     folios = Folio.objects.all()
@@ -47,9 +49,9 @@ def get_mf_navs():
         else:
             print('folio ', folio.folio, ' with code ', folio.fund.code, ' already done')
 
-@db_periodic_task(crontab(hour='9'))
+@db_periodic_task(crontab(minute='35', hour='*/12'))
 def update_mf():
-    print('inside update_mf')
+    print('Updating Mutual Fund with latest nav')
     folios = Folio.objects.all()
     finished_funds = dict()
     mf = Mftool()
@@ -76,14 +78,22 @@ def update_mf():
             folio.as_on_date =  datetime.datetime.strptime(finished_funds[folio.fund.code]['as_on'], '%d-%b-%Y')
             folio.save()
 
-@periodic_task(crontab(hour='*/2'))
+@periodic_task(crontab(minute='0', hour='*/2'))
 def update_espp():
-    print('inside update_espp')
+    print('Updating ESPP')
     for espp_obj in Espp.objects.all():
         print("looping through espp " + str(espp_obj.id))
         update_latest_vals(espp_obj)
 
+@periodic_task(crontab(minute='0', hour='10'))
+def update_mf_schemes():
+    print('Updating Mutual Fund Schemes')
+    update_mf_scheme_codes()
 
+@periodic_task(crontab(minute='45', hour='*/12'))
+def update_bse_star_schemes():
+    print('Updating BSE STaR Schemes')
+    download_bsestar_schemes()
 '''
 #  example code below
 

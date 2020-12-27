@@ -129,7 +129,7 @@ def get_historical_stock_price(stock, start, end):
     
     return ret_vals
 
-def get_historical_mf_nav(amfi_code, start, end):
+def get_historical_mf_nav(amfi_code, start, end, fetch=False):
     print("getting historical mf nav for code ", amfi_code)
     ret_vals = list()
     start_date = end
@@ -142,7 +142,7 @@ def get_historical_mf_nav(amfi_code, start, end):
             except HistoricalMFPrice.DoesNotExist:
                 pass
             start_date = start_date+relativedelta(days=-1)
-        if len(ret_vals) == 0:
+        if len(ret_vals) == 0 and fetch:
             poll_date = end+relativedelta(days=-5)
             get_historical_year_mf_vals(amfi_code=amfi_code, year=poll_date.year)
             

@@ -304,7 +304,7 @@ def mf_refresh(request):
     folio_objs = Folio.objects.all()
     for folio_obj in folio_objs:
         if folio_obj.as_on_date != datetime.date.today():
-            vals = get_historical_mf_nav(folio_obj.fund.code, start, end)
+            vals = get_historical_mf_nav(folio_obj.fund.code, start, end, True)
             if vals:
                 for val in vals:
                     for k,v in val.items():

@@ -6,6 +6,7 @@ from django.views.generic import (
     DetailView
 )
 from .models import Stock, MutualFund, HistoricalStockPrice, HistoricalMFPrice
+from .helper import update_mf_scheme_codes
 from shared.handle_real_time_data import get_latest_vals, get_historical_mf_nav
 from dateutil.relativedelta import relativedelta
 import datetime
@@ -43,71 +44,8 @@ def refresh(request):
     return HttpResponseRedirect(reverse('common:common-list'))
 
 def mf_refresh(request):
-    print("inside mf_refresh")
-    mf = Mftool()
-    mf_schemes = get_scheme_codes(mf, False)
-    print(mf_schemes)
-    for code, details in mf_schemes.items():
-        isin2 = None
-        if details['isin2'] and details['isin2'] != '' and details['isin2'] != '-':
-            isin2 = details['isin2']
-        mf_obj = None
-        try:
-            mf_obj = MutualFund.objects.get(code=code)
-        except MutualFund.DoesNotExist:
-            mf_obj = MutualFund.objects.create(code=code,
-                                               name=details['name'],
-                                               isin=details['isin1'],
-                                               isin2=isin2,
-                                               collection_start_date=datetime.date.today())
-
-        mf_obj.isin = details['isin1']
-        mf_obj.isin2 = isin2
-        mf_obj.name = details['name']
-        mf_obj.save()
-
-        try:
-            HistoricalMFPrice.objects.create(code=mf_obj,
-                                             date=datetime.datetime.strptime(details['date'],'%d-%b-%Y').date(),
-                                             nav=float(details['nav']))
-        except Exception as ex:
-            print(ex)
-    '''
-    mf_objs = MutualFund.objects.all()
-    for mf in mf_objs:
-        collection_start_date = datetime.date.today()+relativedelta(days=-5)       
-        _ = get_historical_mf_nav(mf.code, collection_start_date, datetime.date.today())
-    '''
-
+    update_mf_scheme_codes()
     return HttpResponseRedirect(reverse('common:mf-list'))
-
-def get_scheme_codes(mf, as_json=False):
-    """
-    returns a dictionary with key as scheme code and value as scheme name.
-    cache handled internally
-    :return: dict / json
-    """
-    scheme_info = {}
-    url = mf._get_quote_url
-    response = mf._session.get(url)
-    data = response.text.split("\n")
-    for scheme_data in data:
-        if ";INF" in scheme_data:
-            scheme = scheme_data.rstrip().split(";")
-            #print(scheme[1],', ',scheme[2])
-            scheme_info[scheme[0]] = {'isin1': scheme[1],
-                                      'isin2':scheme[2],
-                                      'name':scheme[3],
-                                      'nav':scheme[4],
-                                      'date':scheme[5]}
-
-    return mf.render_response(scheme_info, as_json)
-
-def update_bsestar_schemes(schemes):
-    mf_objs = MutualFund.objects.all()
-    for mf_obj in mf_objs:
-        mf_obj.bse_star_name = schemes.get(mf_obj.isin, None)
-        mf_obj.save()
 
 class HistoricalStockPriceList(ListView):
     template_name = 'common/historical_stock_price_list.html'
