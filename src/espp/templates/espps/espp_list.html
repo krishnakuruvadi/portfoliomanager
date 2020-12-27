@@ -2,14 +2,9 @@
 {% load template_filters %}
 {% block viewname %} ESPP {% endblock %} 
 
-{% block applicableactions %} 
-<div class="btn-toolbar mb-2 mb-md-0">
-  <div class="btn-group mr-2">
+{% block applicableactions %}
     <a style="padding-right:20px;" href="create"><i class="fa fa-plus" aria-hidden="true" title="Add ESPP" style="font-size: 1.2em;"></i></a>
     <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
-  </div>
-</div>
-
 {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
 

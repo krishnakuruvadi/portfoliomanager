@@ -36,7 +36,8 @@ urlpatterns = [
     path('reports/', include('reports.urls')),
     path('common/', include('common.urls')),
     path('calculator/', include('calculator.urls')),
-    path('api/chart/investmentdata/', InvestmentData.as_view())
+    path('api/chart/investmentdata/', InvestmentData.as_view()),
+    path('alerts/', include('alerts.urls'))
 ]
 
 if settings.DEBUG:

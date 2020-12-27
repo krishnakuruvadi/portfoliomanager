@@ -1,7 +1,6 @@
 {% extends 'base.html' %} 
 
 {% block applicableactions %}
-    <a style="padding-left:25px;" href="add-contribution"><i class="fa fa-plus" aria-hidden="true" title="Add Contribution" style="font-size: 1.2em;"></i></a>
 {% endblock applicableactions %} 
 
 {%block canvas %}{% endblock canvas %}
@@ -15,26 +14,22 @@
       <td>{{ object.id }}</td>
     </tr>
     <tr>
-      <td>Number</td>
-      <td>{{ object.number }}</td>
+      <td>Seen</td>
+      <td>{{ object.seen }}</td>
     </tr>
     <tr>
-      <td>Start Date</td>
-      <td>{{ object.start_date }}</td>
+      <td>Time of alert</td>
+      <td>{{ object.time }}</td>
     </tr>
     <tr>
-      <td>User</td>
-      <td>{{ user_str }}</td>
+      <td>Summary</td>
+      <td>{{ object.summary }}</td>
     </tr>
     <tr>
-      <td>Goal</td>
-      <td>{{ goal_str }}</td>
+      <td>Content</td>
+      <td>{{ object.content }}</td>
     </tr>
   </table>
-
-  <div class='col-sm-6'>
-    <canvas id="myChart" width="400" height="400"></canvas>
-  </div>
 {% endblock content %}
 
 <script>

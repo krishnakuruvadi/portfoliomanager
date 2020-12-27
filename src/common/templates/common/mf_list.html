@@ -4,14 +4,9 @@
 {% block viewname %} Mutual Funds Being Tracked{% endblock %} 
 
 {% block applicableactions %} 
-<div class="btn-toolbar mb-2 mb-md-0">
-  <div class="btn-group mr-2">
     <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
-    <a style="padding-left:25px;" href="bsestar"><img src="{% static 'BSestarMF.png' %}" height="20" width="24" alt="EPF image"></a>
+    <a style="padding-left:25px;" href="bsestar"><img src="{% static 'BSestarMF.png' %}" height="20" width="24" alt="BSE StAR image"></a>
     <a style="padding-left:25px;" href="trash"><i class="fa fa-trash" aria-hidden="true" title="Trash" style="font-size: 1.2em;"></i></a>
-  </div>
-</div>
-
 {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
 

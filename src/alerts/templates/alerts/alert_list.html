@@ -1,0 +1,62 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %} Alerts {% endblock %} 
+
+{% block applicableactions %} {% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover table-condensed">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col" style="text-align:center">Severity</th>
+        <th scope="col">Time</th>
+        <th scope="col">Summary</th>
+        <th scope="col">Read</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <th scope="row"><a href="{{ instance.get_absolute_url }}">{{ instance.id }}</a></th>
+        <td style="text-align:center">
+          {% if instance.severity == 0 %}
+            <i class="far fa-times-circle" title="critical" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
+          {% elif instance.severity == 1 %}
+            <i class="fas fa-exclamation-triangle" title="error" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
+          {% elif instance.severity == 2 %}
+            <i class="fas fa-exclamation-triangle" title="warning" aria-hidden="true" style="color:#ffae42" style="font-size: 1.2em;"></i>
+          {% elif instance.severity == 3 %}
+          {% else %}
+          <i class="fas fa-info-circle" title="info" aria-hidden="true" style="color:green" style="font-size: 1.2em;"></i>
+          {% endif %}
+        </td>
+        <td>{{ instance.time }}</td>
+        <td>{{ instance.summary }}</td>
+        <td>
+          {% if instance.seen %}
+            <a href="{{ instance.get_absolute_url }}toggle_seen"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></a>
+          {% else %}
+            <a href="{{ instance.get_absolute_url }}toggle_seen"><i class="fa fa-check" aria-hidden="true" style="color:grey"></i></a>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}transactions"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block javascript %}
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete this?');
+    })
+</script>
+{% endblock javascript %}
