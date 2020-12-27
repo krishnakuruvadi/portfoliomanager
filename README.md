@@ -53,3 +53,11 @@ Superuser created successfully.
 (venv) userid@host src % python manage.py runserver
 ```
 * Open homepage at http://127.0.0.1:8000/
+
+* In another terminal activate virtual environment and run background tasks
+```
+userid@host portfoliomanager %  source ./venv/bin/activate
+(venv) userid@host portfoliomanager % cd src
+(venv) userid@host src % python manage.py run_huey
+```
+* Copy chrome driver to root of the project (portfoliomanager) from here: https://chromedriver.chromium.org/downloads
