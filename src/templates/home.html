@@ -164,10 +164,11 @@
         method: "GET",
         url: investmentdataendpoint,
         success: function(investmentdata){
+          console.log('received investment data for chart')
+          console.log(investmentdata)
           document.getElementById("myTempChart").style.display="none"
           document.getElementById("tempChart").style.display="none"
           document.getElementById("myChart").style.display="block"
-          console.log(investmentdata)
           setInvestmentChart(investmentdata)
         },
         error: function(error_data){

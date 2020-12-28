@@ -2,11 +2,14 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import (
     ListView,
-    DetailView
+    DetailView,
+    DeleteView
 )
 from . import models
 from shared.handle_get import *
 from django.http import HttpResponseRedirect
+from django.urls import reverse
+
 
 # Create your views here.
 
@@ -32,6 +35,17 @@ class AlertsDetailView(DetailView):
         data = super().get_context_data(**kwargs)
         print(data)
         return data
+
+class AlertsDeleteView(DeleteView):
+    def get_object(self):
+        id_ = self.kwargs.get("id")
+        return get_object_or_404(models.Alert, id=id_)
+
+    def get_success_url(self):
+        return reverse('alerts:alerts-list')
+    
+    def get(self, *args, **kwargs):
+        return self.post(*args, **kwargs)
 
 def toggle_seen(request, id):
     alert = get_object_or_404(models.Alert, id=id)

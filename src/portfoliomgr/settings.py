@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'rest_framework',
     'huey.contrib.djhuey',
     # own
@@ -51,11 +52,13 @@ INSTALLED_APPS = [
     'reports',
     'common',
     'calculator',
-    'tasks'
+    'tasks',
+    'alerts'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -67,7 +70,20 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'portfoliomgr.urls'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "ppf", "ssy", "epf", "espp", "shares", "goal", "mutualfunds", "fixed_deposit", "rsu", "users", "reports", "common", "static", "calculator"),
+    os.path.join(BASE_DIR, "ppf"),
+    os.path.join(BASE_DIR, "ssy"),
+    os.path.join(BASE_DIR, "epf"),
+    os.path.join(BASE_DIR, "espp"),
+    os.path.join(BASE_DIR, "shares"),
+    os.path.join(BASE_DIR, "goal"),
+    os.path.join(BASE_DIR, "mutualfunds"),
+    os.path.join(BASE_DIR, "fixed_deposit"),
+    os.path.join(BASE_DIR, "rsu"),
+    os.path.join(BASE_DIR, "users"),
+    os.path.join(BASE_DIR, "reports"),
+    os.path.join(BASE_DIR, "common"),
+    os.path.join(BASE_DIR, "calculator"),
+    os.path.join(BASE_DIR, "alerts"),
     os.path.join(BASE_DIR, "static"),
 ]
 
@@ -92,7 +108,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'portfoliomgr.wsgi.application'
-
+ASGI_APPLICATION = "portfoliomgr.routing.application"
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
@@ -165,3 +181,11 @@ HUEY = {
         'health_check_interval': 1,  # Check worker health every second.
     },
 }
+# Channels
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

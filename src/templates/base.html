@@ -152,7 +152,7 @@
               <div class="btn-group mr-2">
                 {% block applicableactions %} 
                 {% endblock applicableactions %}
-                <a href="/alerts" style="padding-left:15px;"><i class="far fa-bell" aria-hidden="true" title="Alerts" style="font-size: 1.2em;"></i><sup>0</sup></a>
+                <a href="/alerts" style="padding-left:15px;"><i class="far fa-bell" aria-hidden="true" title="Alerts" style="font-size: 1.2em;"></i><sup id='alert-count'>0</sup></a>
               </div>
             </div>
           </div>          
@@ -182,9 +182,28 @@
     <!--script src="dashboard.js"></script-->
     <script>
       $(document).ready(function(){
-        {% block jquery %}jquery data base{% endblock jquery %}
-      })
+        const alertSocket = new WebSocket(
+            'ws://' +
+            window.location.host +
+            '/ws/alerts/'
+        );
+        alertSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            console.log(data)
+            var el = document.getElementById('alert-count');
+            el.innerHTML = `${data.count}`;
+        }
+        alertSocket.onopen = function(e) {
+          console.log("Socket connected; asking for alert count");
+          alertSocket.send("giveAlertCount");
+        }
+      });
+      $(document).ready(function(){
+        {% block jquery %}{% endblock jquery %}
+      });
     </script>
-    {% block javascript %}{% endblock %}
+  {% block javascript %}{% endblock %}
+
+  
   </body>
 </html>
