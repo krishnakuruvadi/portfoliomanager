@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'common',
     'calculator',
     'tasks',
-    'alerts'
+    'alerts',
+    'pages'
 ]
 
 MIDDLEWARE = [
@@ -84,6 +85,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "common"),
     os.path.join(BASE_DIR, "calculator"),
     os.path.join(BASE_DIR, "alerts"),
+    os.path.join(BASE_DIR, "pages"),
     os.path.join(BASE_DIR, "static"),
 ]
 

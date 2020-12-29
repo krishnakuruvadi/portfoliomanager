@@ -13,6 +13,9 @@ from mftool import Mftool
 from common.helper import update_mf_scheme_codes
 from shared.utils import get_float_or_zero_from_string
 from common.bsestar import download_bsestar_schemes
+from shared.handle_get import *
+from shared.handle_chart_data import get_investment_data
+from pages.models import InvestmentData
 
 @db_periodic_task(crontab(minute='0', hour='*/12'))
 def get_mf_navs():
@@ -78,22 +81,56 @@ def update_mf():
             folio.as_on_date =  datetime.datetime.strptime(finished_funds[folio.fund.code]['as_on'], '%d-%b-%Y')
             folio.save()
 
-@periodic_task(crontab(minute='0', hour='*/2'))
+@db_periodic_task(crontab(minute='0', hour='*/2'))
 def update_espp():
     print('Updating ESPP')
     for espp_obj in Espp.objects.all():
         print("looping through espp " + str(espp_obj.id))
         update_latest_vals(espp_obj)
 
-@periodic_task(crontab(minute='0', hour='10'))
+@db_periodic_task(crontab(minute='0', hour='10'))
 def update_mf_schemes():
     print('Updating Mutual Fund Schemes')
     update_mf_scheme_codes()
 
-@periodic_task(crontab(minute='45', hour='*/12'))
+@db_periodic_task(crontab(minute='55', hour='*/12'))
 def update_bse_star_schemes():
     print('Updating BSE STaR Schemes')
     download_bsestar_schemes()
+
+@db_periodic_task(crontab(minute='45', hour='*/12'))
+def update_investment_data():
+    start_date = get_start_day_across_portfolio()
+    investment_data = get_investment_data(start_date)
+    try:
+        all_investment_data = InvestmentData.objects.get(user='all')
+        all_investment_data.ppf_data=investment_data['ppf']
+        all_investment_data.epf_data=investment_data['epf']
+        all_investment_data.ssy_data=investment_data['ssy']
+        all_investment_data.fd_data=investment_data['fd']
+        all_investment_data.espp_data=investment_data['espp']
+        all_investment_data.rsu_data=investment_data['rsu']
+        all_investment_data.shares_data=investment_data['shares']
+        all_investment_data.mf_data=investment_data['mf']
+        all_investment_data.total_data=investment_data['total']
+        all_investment_data.start_day_across_portfolio=start_date
+        all_investment_data.as_on_date=datetime.datetime.now()
+    except InvestmentData.DoesNotExist:
+        InvestmentData.objects.create(
+            user='all',
+            ppf_data=investment_data['ppf'],
+            epf_data=investment_data['epf'],
+            ssy_data=investment_data['ssy'],
+            fd_data=investment_data['fd'],
+            espp_data=investment_data['espp'],
+            rsu_data=investment_data['rsu'],
+            shares_data=investment_data['shares'],
+            mf_data=investment_data['mf'],
+            total_data=investment_data['total'],
+            start_day_across_portfolio=start_date,
+            as_on_date=datetime.datetime.now()
+        )
+
 '''
 #  example code below
 

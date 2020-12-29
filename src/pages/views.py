@@ -5,6 +5,8 @@ from shared.handle_get import *
 from shared.handle_chart_data import get_user_contributions, get_goal_contributions, get_investment_data
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from .models import InvestmentData
+import json
 
 # Create your views here.
 def home_view(request, *args, **kwargs): # *args, **kwargs
@@ -95,11 +97,32 @@ class ChartData(APIView):
     def get(self, request, format=None, id=None):
 '''
 
-class InvestmentData(APIView):
+class GetInvestmentData(APIView):
     authentication_classes = []
     permission_classes = []
 
     def get(self, request, format=None, id=None):
-        start_date = get_start_day_across_portfolio()
-        data = get_investment_data(start_date)
-        return Response(data)
+        investment_data = None
+        try:
+            investment_data = InvestmentData.objects.get(user='all')
+            return Response({
+                    'ppf':json.loads(investment_data.ppf_data.replace("\'", "\"")),
+                    'epf':json.loads(investment_data.epf_data.replace("\'", "\"")),
+                    'ssy':json.loads(investment_data.ssy_data.replace("\'", "\"")),
+                    'fd': json.loads(investment_data.fd_data.replace("\'", "\"")),
+                    'espp': json.loads(investment_data.espp_data.replace("\'", "\"")),
+                    'rsu':json.loads(investment_data.rsu_data.replace("\'", "\"")),
+                    'shares':json.loads(investment_data.shares_data.replace("\'", "\"")),
+                    'mf':json.loads(investment_data.mf_data.replace("\'", "\"")),
+                    'total':json.loads(investment_data.total_data.replace("\'", "\"")),
+                    'start_date': investment_data.start_day_across_portfolio,
+                    'as_on_date_time': investment_data.as_on_date
+            })
+
+        except InvestmentData.DoesNotExist:
+            start_date = get_start_day_across_portfolio()
+            investment_data = get_investment_data(start_date)
+            investment_data['start_date'] = start_date
+            investment_data['as_on_date_time'] = datetime.datetime.now()
+
+        return Response(investment_data)
