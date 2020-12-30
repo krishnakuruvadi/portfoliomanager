@@ -1,0 +1,47 @@
+{
+    "100120": {
+        "kuvera_name":"HDFC Balance Advantage Regular Dividend Payout Plan"
+    },
+    "101762": {
+        "kuvera_name":"HDFC Equity Growth Plan"
+    },
+    "101978": {
+        "name": "HDFC Prudence Fund - Dividend Option",
+        "isin": "INF179K01AT2",
+        "isin2": "INF179K01AU0",
+        "kuvera_name": "HDFC Prudence Dividend Payout Plan"
+    },
+    "101980": {
+        "kuvera_name": "HDFC Tax Saver Dividend Payout Plan"
+    },
+    "105628": {
+        "kuvera_name": "Magnum Taxgain Scheme 1993 Growth Plan"
+    },
+    "107410": {
+        "kuvera_name": "JM Core 11 Growth Plan"
+    },
+    "118047": {
+        "kuvera_name": "L&T Tax Advantage Growth Plan"
+    },
+    "118551": {
+        "kuvera_name": "Franklin India Feeder Franklin US Opportunities Growth Direct Plan"
+    },
+    "118617": {
+        "kuvera_name": "Edelweiss Large Cap Growth Direct Plan"
+    },
+    "119308": {
+        "kuvera_name": "L&T India Large Cap Growth Direct Plan"
+    },
+    "120356": {
+        "kuvera_name": "Invesco India Opportunities Growth Direct Plan"
+    },
+    "120488":{
+        "kuvera_name": "JM Core 11 Growth Direct Plan"
+    },
+    "125497": {
+        "kuvera_name": "SBI Small Cap Growth Direct Plan"
+    },
+    "140243": {
+        "kuvera_name": "Edelweiss Greater China Equity Off Shore Growth Direct Plan"
+    }
+}

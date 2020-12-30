@@ -16,6 +16,12 @@ from common.bsestar import download_bsestar_schemes
 from shared.handle_get import *
 from shared.handle_chart_data import get_investment_data
 from pages.models import InvestmentData
+from mutualfunds.models import Folio
+from mutualfunds.mf_helper import add_transactions
+import os
+import json
+
+from alerts.alert_helper import create_alert, Severity
 
 @db_periodic_task(crontab(minute='0', hour='*/12'))
 def get_mf_navs():
@@ -130,6 +136,69 @@ def update_investment_data():
             start_day_across_portfolio=start_date,
             as_on_date=datetime.datetime.now()
         )
+
+@db_periodic_task(crontab(minute='0', hour='1'))
+def clean_db():
+    folios = Folio.objects.all()
+    tracking_funds = set()
+    for folio in folios:
+        tracking_funds.add(folio.fund.code)
+    print('funds being tracked', tracking_funds)
+    for hmfp in HistoricalMFPrice.objects.all():
+        if hmfp.code.code not in tracking_funds:
+            print('Deleting unwanted entry', hmfp.id, hmfp.code, hmfp.date)
+            hmfp.delete()
+        else:
+            if hmfp.date.year != datetime.datetime.now().year:
+                if hmfp.date.day not in (25, 26, 27, 28, 29, 30, 31, 1, 2):
+                    print('Deleting outdated entry', hmfp.id, hmfp.code, hmfp.date)
+                    hmfp.delete()
+            else:
+                if hmfp.date.day not in (25, 26, 27, 28, 29, 30, 31, 1, 2) and abs(datetime.date.today() - hmfp.date).days > 7:
+                    print('Deleting recent outdated entry', hmfp.id, hmfp.code, hmfp.date)
+                    hmfp.delete()
+
+@task()
+def add_mf_transactions(broker, user, full_file_path):
+    add_transactions(broker, user, full_file_path)
+
+@db_periodic_task(crontab(minute='0', hour='2'))
+def update_mf_mapping():
+    fp = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    mapping_file = os.path.join(fp, 'media', 'mf_mapping.json')
+    if os.path.exists(mapping_file):
+        with open(mapping_file) as f:
+            data = json.load(f)
+            for k,v in data.items():
+                try:
+                    fund = MutualFund.objects.get(code=k)
+                    if 'kuvera_name' in v:
+                        fund.kuvera_name = v['kuvera_name']
+                    fund.save()
+                except MutualFund.DoesNotExist:
+                    if 'name' in v:
+                        fund = MutualFund.objects.create(
+                            code=k,
+                            name=v['name'],
+                            collection_start_date=datetime.datetime.today()
+                        )
+                        if 'kuvera_name' in v:
+                            fund.kuvera_name = v['kuvera_name']
+                        if 'isin' in v:
+                            fund.isin = v['isin']
+                        if 'isin2' in v:
+                            fund.isin2 = v['isin2']
+                    else:
+                        create_alert(
+                            summary='Code:' + k + ' Mutual fund not found',
+                            content= 'Not able to find a matching Mutual Fund with the code.',
+                            severity=Severity.error
+                        )
+    else:
+        print(mapping_file + ' doesnt exist')
+
+
+
 
 '''
 #  example code below

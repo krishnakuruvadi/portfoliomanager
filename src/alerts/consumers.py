@@ -28,11 +28,11 @@ class NoseyConsumer(AsyncWebsocketConsumer):
 
             await self.channel_layer.group_send(
                 "gossip",
-                {
+                json.dumps({
                     'type': 'alert_gossip',
                     'event': event,
                     'count': count,
-                }
+                }).encode("utf-8")
             )
 
     async def alert_gossip(self, event):
@@ -42,5 +42,5 @@ class NoseyConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'event': eve,
             'count': count,
-        }))
+        }).encode("utf-8"))
     pass

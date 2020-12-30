@@ -4,6 +4,7 @@ from shared.utils import *
 from common.models import MutualFund
 from .models import Folio
 import enum
+from alerts.alert_helper import create_alert, Severity
 
 class FundType(enum.Enum):
     growth = 1
@@ -18,6 +19,7 @@ class Kuvera:
     def get_transactions(self):
         transactions = dict()
         if isfile(self.filename):
+            ignored_folios = set()
             with open(self.filename, mode='r', encoding='utf-8-sig') as csv_file:
                 print("opened file as csv:", self.filename)
                 csv_reader = csv.DictReader(csv_file, delimiter=",")
@@ -47,10 +49,18 @@ class Kuvera:
                             'units':units,
                             'nav':nav,
                             'trans_value':trans_value}
-    
+                    else:
+                        ignored_folios.add(folio)
+            for fol in ignored_folios:
+                create_alert(
+                    summary='Folio:' + fol + ' Failure to add transactions',
+                    content= 'Not able to find a matching entry between Kuvera name and BSE STaR name. Edit the mf_mapping.json to process this folio',
+                    severity=Severity.error
+                )
+
     def _get_fund(self, fund_name):
         try:
-            fund = MutualFund.objects.get(kuvera_name=fund_name)
+            fund = MutualFund.objects.get(kuvera_name__contains=fund_name)
             return fund.code
         except MutualFund.DoesNotExist:
             for mf_obj in MutualFund.objects.all():
