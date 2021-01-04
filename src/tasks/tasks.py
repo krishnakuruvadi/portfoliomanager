@@ -1,7 +1,7 @@
 from huey.contrib.djhuey import task, periodic_task, db_task, db_periodic_task
 from huey import crontab
 from mutualfunds.models import Folio, MutualFundTransaction
-from common.models import MutualFund, HistoricalMFPrice
+from common.models import MutualFund, HistoricalMFPrice, MFYearlyReturns
 from espp.models import Espp
 from espp.espp_helper import update_latest_vals
 from shared.handle_real_time_data import get_historical_year_mf_vals
@@ -11,7 +11,7 @@ import time
 from django.db.models import Q
 from mftool import Mftool
 from common.helper import update_mf_scheme_codes
-from shared.utils import get_float_or_zero_from_string
+from shared.utils import get_float_or_zero_from_string, get_float_or_none_from_string
 from common.bsestar import download_bsestar_schemes
 from shared.handle_get import *
 from shared.handle_chart_data import get_investment_data
@@ -20,6 +20,9 @@ from mutualfunds.models import Folio
 from mutualfunds.mf_helper import add_transactions
 import os
 import json
+from mutualfunds.mf_analyse import pull_ms
+from django.db import IntegrityError
+from goal.goal_helper import update_all_goals_contributions
 
 from alerts.alert_helper import create_alert, Severity
 
@@ -197,6 +200,72 @@ def update_mf_mapping():
     else:
         print(mapping_file + ' doesnt exist')
 
+@db_periodic_task(crontab(minute='52', hour='*'))
+def update_goal_contrib():
+    update_all_goals_contributions()
+
+@db_periodic_task(crontab(minute='06', hour='*'))
+def analyse_mf():
+    folios = Folio.objects.all()
+    finished_funds = set()
+    for folio in folios:
+        code = folio.fund.code
+        if not folio.units or code in finished_funds:
+            continue
+        finished_funds.add(code)
+        data = pull_ms(code, list())
+        if not data:
+            create_alert(
+                            summary='Code:' + code + ' Mutual fund not analysed',
+                            content= 'Not able to find a matching Mutual Fund with the code for analysis.',
+                            severity=Severity.error
+                        )
+            continue
+        print('analysed data for mf', data)
+        fund = MutualFund.objects.get(code=code)
+        #{'blend': 'Large Growth', 'performance': {'2010': '—', '2011': '—', '2012': '—', '2013': '—', '2014': '1.55', '2015': '-14.06', '2016': '1.49', '2017': '13.54', '2018': '1.78', '2019': '31.88', 
+        # 'YTD': '74.40', '1D': '-0.05', '1W': '-1.73', '1M': '8.27', '3M': '18.37', '1Y': '73.53', '3Y': '32.78', '5Y': '21.92', '10Y': '—', '15Y': '—', 'INCEPTION': '13.19'}}
+        if 'blend' in data:
+            fund.category = data['blend']
+        if 'performance' in data:
+            for k,v in data['performance'].items():
+                if k == 'YTD':
+                    fund.return_ytd = get_float_or_none_from_string(v)
+                elif k == '1D':
+                    fund.return_1d = get_float_or_none_from_string(v)
+                elif k == '1W':
+                    fund.return_1w = get_float_or_none_from_string(v)
+                elif k == '1M':
+                    fund.return_1m = get_float_or_none_from_string(v)
+                elif k == '3M':
+                    fund.return_3m = get_float_or_none_from_string(v)
+                elif k == '1Y':
+                    fund.return_1y = get_float_or_none_from_string(v)
+                elif k == '3Y':
+                    fund.return_3y = get_float_or_none_from_string(v)
+                elif k == '5Y':
+                    fund.return_5y = get_float_or_none_from_string(v)
+                elif k == '10Y':
+                    fund.return_10y = get_float_or_none_from_string(v)
+                elif k == '15Y':
+                    fund.return_15y = get_float_or_none_from_string(v)
+                elif k == 'INCEPTION':
+                    fund.return_incep = get_float_or_none_from_string(v)
+                else:
+                    yr = get_float_or_none_from_string(k)
+                    returns = get_float_or_none_from_string(v)
+                    if yr and returns:
+                        try:
+                            entry = MFYearlyReturns.objects.create(
+                                fund=fund,
+                                year=yr,
+                                returns=returns
+                            )
+                        except IntegrityError:
+                            entry = MFYearlyReturns.objects.get(fund=fund, year=yr)
+                            entry.returns = returns
+                            entry.save()
+        fund.save()
 
 
 

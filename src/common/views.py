@@ -79,9 +79,12 @@ class StockDetailView(DetailView):
 
 class MFListView(ListView):
     template_name = 'common/mf_list.html'
-
-    paginate_by = 15
-    model = MutualFund
+    queryset = MutualFund.objects.all()
+    
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        print(data)
+        return data
 
 class MfDetailView(DetailView):
     template_name = 'common/mf_detail.html'

@@ -9,7 +9,7 @@
 {% block content %}
 <div class="row">
   <div class='col-sm-4'>
-    <table class="table table-condensed table-borderless">
+    <table class="table table-condensed table-borderless" id="goal-table">
       <tr>
         <td>Number</td>
         <td colspan=2>{{ object.id }}</td>
@@ -57,6 +57,11 @@
           <input type="number" id="custom_growth" step="1" max="100" min="1" name="custom_growth">
         </td>
       </tr>
+      <tr>
+        <td colspan=2>
+          <input type="button" id="additionalSimulation" disabled value="Additional Simulations">
+        </td>
+      </tr>
     </table>
   </div>
 </div>
@@ -78,53 +83,38 @@
 
 <script>
   {% block jquery %}
+  var debt_equity_labels = ['Debt', 'Equity']
+  var debt_equity = [{{ object.debt_contrib}}, {{ object.equity_contrib}}]
+
+  var status_labels = ['Achieved', 'Remaining']
+  var status_vals = [{{ object.achieved_amt}}, {{ object.pending_amt}}]
+    
+  var distribution_vals = [{{ object.epf_conitrib }}, {{ object.espp_conitrib }}, {{ object.fd_conitrib }}, {{ object.ppf_conitrib }}, {{ object.ssy_conitrib }}, {{ object.rsu_conitrib }}, {{ object.shares_conitrib }}, {{ object.mf_conitrib }}]
+  var distribution_labels = ["EPF", "ESPP", "FD", "PPF", "SSY", "RSU", "Shares", "MutualFunds"]
+  var distribution_colors = ["#f15664","#DC7633","#006f75","#92993c","#f9c5c6","#AA12E8","#e31219","#bfff00"]
+  setChart()
+
   var progress_endpoint = '/goal/api/chart/progress/{{object.id}}'
   var progress_data = {}
   $.ajax({
     method:"GET",
     url:progress_endpoint,
     success: function(data){
+      console.log("data from progress api")
       console.log(data)
       progress_data = data
+      
+      //console.log('enabling additionalSimulation');
+      //document.getElementById('additionalSimulation').disabled = false;
       setProgressChart()
     },
     error: function(error_data){
       console.log("error")
       console.log(error_data)
     }
-  })
-  var endpoint = '/goal/api/chart/data/{{ object.id }}'
-  var debt_equity = [0, 0]
-  var done_pending = [0, 0]
-  var debt_equity_labels = ['Debt', 'Equity']
-  var status_vals = [0, 0]
-  var status_labels = ['Achieved', 'Remaining']
-  var distribution_vals = [0, 0]
-  var distribution_labels = ['PPF', 'MF']
-  $.ajax({
-    method: "GET",
-    url: endpoint,
-    success: function(data){
-      console.log(data)
-      debt_equity = [data.debt, data.equity]
-      distribution_vals = data.distrib_vals
-      distribution_labels = data.distrib_labels
-      distribution_colors = data.distrib_colors
-      status_vals = [data.achieved, data.remaining]
-      console.log("debt_equity values")
-      console.log(debt_equity)
-      console.log("distribution_vals values")
-      console.log(distribution_vals)
-      console.log("status_vals values")
-      console.log(status_vals)
-      setChart()
-    },
-    error: function(error_data){
-      console.log("error")
-      console.log(error_data)
-    }
-  })
+  });
   $("#custom_growth").change(function () {
+    console.log('change in custom growth detected')
     cgElem = document.getElementById("custom_growth")
     var progress_endpoint = '/goal/api/chart/progress/{{object.id}}/' + $(this).val()
     progress_data = {}
@@ -143,6 +133,7 @@
     })
   })
   function setProgressChart(){
+    console.log('setting progress chart')
     var ctx = document.getElementById('progressChart').getContext('2d');
     var config = {
       type: 'bar',
@@ -171,7 +162,8 @@
     var agVal = progress_data.avg_growth
     agElem.innerHTML = agVal.toString() + "%";
     var cgVal = progress_data.custom_growth
-    cgElem.innerHTML = cgVal.toString() + "%";
+    cgElem = document.getElementById("custom_growth")
+    cgElem.innerHTML = cgVal
   }
   function setChart(){
     var ctx = document.getElementById('classificationChart').getContext('2d');
@@ -227,5 +219,35 @@
     var distributionChart = new Chart(ctx2, config2);
     var statusChart = new Chart(ctx3, config3);
   }
+
+  var csrftoken = getCookie('csrftoken');
+  $("#additionalSimulation").click(function(){
+    console.log("additionalSimulation button clicked");
+    console.log("data: " + progress_data);
+    //var csrftoken = getCookie('csrftoken');
+    $.ajax({
+        method: 'POST',
+        url: "/calculator/",
+        data : { 
+          'rd_prin': progress_data.avg_contrib,
+          'rd_int': progress_data.avg_growth,
+          'rd_time':1,
+          'rd_final_val':0,
+
+          'fd_int': progress_data.avg_growth,
+          'fd_prin':0,
+          'fd_final_val':0,
+          'fd_time':0,
+
+
+          "csrfmiddlewaretoken" : "{{csrf_token}}"
+        },
+        success : function(data) {
+            //$("#request-access").hide();
+            console.log("requested access complete");
+            window.location.href ='/calculator/'
+        }
+    });
+  });
   {% endblock jquery %}
 </script>

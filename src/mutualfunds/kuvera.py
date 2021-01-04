@@ -5,6 +5,7 @@ from common.models import MutualFund
 from .models import Folio
 import enum
 from alerts.alert_helper import create_alert, Severity
+from shared.handle_real_time_data import get_mf_vals
 
 class FundType(enum.Enum):
     growth = 1
@@ -50,7 +51,17 @@ class Kuvera:
                             'nav':nav,
                             'trans_value':trans_value}
                     else:
-                        ignored_folios.add(folio)
+                        fund = self._get_match_from_fund_nav(folio, fund_name, trans_date, nav)
+                        if fund:
+                            yield {'folio':folio,
+                                'trans_date':trans_date, 
+                                'fund':fund,
+                                'trans_type':trans_type,
+                                'units':units,
+                                'nav':nav,
+                                'trans_value':trans_value}
+                        else:
+                            ignored_folios.add(folio)
             for fol in ignored_folios:
                 create_alert(
                     summary='Folio:' + fol + ' Failure to add transactions',
@@ -65,6 +76,8 @@ class Kuvera:
         except MutualFund.DoesNotExist:
             for mf_obj in MutualFund.objects.all():
                 if mf_obj.bse_star_name and self._matches_bsestar(fund_name, mf_obj.bse_star_name):
+                    mf_obj.kuvera_name = fund_name
+                    mf_obj.save()
                     return mf_obj.code
         print('couldnt find match with bse star name for fund:', fund_name)
         return None
@@ -115,3 +128,66 @@ class Kuvera:
                 if b_fund_type and b_fund_type == k_fund_type:
                     return True
         return False
+
+    def _get_match_from_fund_nav(self, folio, fund_name, trans_date, nav):
+        print('Getting fund bse star name using nav and transaction date')
+        k_fund_name_lower = fund_name.lower().replace(' plan','')
+        
+        if 'direct' in fund_name.lower():
+            k_direct = True
+            k_fund_name_lower = k_fund_name_lower.replace(' direct', '')
+        else:
+            k_direct = False
+            k_fund_name_lower = k_fund_name_lower.replace(' regular', '')
+        k_fund_type = None
+        if 'growth' in fund_name.lower():
+            k_fund_type = FundType.growth
+            k_fund_name_lower = k_fund_name_lower.replace(' growth', '')
+        elif 'dividend reinvest' in fund_name.lower():
+            k_fund_type = FundType.div_reinvest
+            k_fund_name_lower = k_fund_name_lower.replace(' dividend reinvest', '')
+        elif 'dividend payout' in fund_name.lower():
+            k_fund_type = FundType.div_payout
+            k_fund_name_lower = k_fund_name_lower.replace(' dividend payout', '')
+        k_fund_name_lower = k_fund_name_lower.replace('&','and')
+        
+        for mf_obj in MutualFund.objects.all():
+            if not mf_obj.bse_star_name:
+                continue
+            bse_star_name = mf_obj.bse_star_name
+            bse_star_parts = list()
+            bse_star_parts.append(bse_star_name[0:bse_star_name.find('-')])
+            other_part = bse_star_name[bse_star_name.find('-')+1:]
+            other_part = other_part.replace('-','')
+            bse_star_parts.append(other_part)
+            if 'growth' in bse_star_parts[1].lower():
+                b_fund_type = FundType.growth
+            elif 'div' in bse_star_parts[1].lower() and 'rein' in bse_star_parts[1].lower():
+                b_fund_type = FundType.div_reinvest
+            elif 'div' in bse_star_parts[1].lower() and 'pay' in bse_star_parts[1].lower():
+                b_fund_type = FundType.div_payout
+            else:
+                b_fund_type = None
+            
+            if 'dir' in bse_star_parts[1].lower():
+                b_direct = True
+            else:
+                b_direct = False
+
+            if b_direct == k_direct:
+                if b_fund_type and b_fund_type == k_fund_type:
+                    if bse_star_name.split(' ')[0].lower() == fund_name.split(' ')[0].lower():
+                        vals = get_mf_vals(mf_obj.code, datetime.date(trans_date.year, trans_date.month, trans_date.day), datetime.date(trans_date.year, trans_date.month, trans_date.day))
+                        if vals:
+                            for k,v in vals.items():
+                                print(k,':',v, 'compare nav:',nav)
+                                if v == nav:
+                                    create_alert(
+                                        summary='Folio:' + folio + ' Guess to add transaction',
+                                        content= 'Not able to find a exact matching entry between Kuvera name and BSE STaR name. Made a guess with the name.  If incorrect, delete the folio, update the mf_mapping.json and retry upload',
+                                        severity=Severity.warning
+                                    )
+                                    mf_obj.kuvera_name = fund_name
+                                    mf_obj.save()
+                                    return mf_obj.code
+        return None

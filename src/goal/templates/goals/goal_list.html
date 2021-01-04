@@ -9,7 +9,7 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
-  <table class="table table-hover">
+  <table class="table table-hover" id="goal-table">
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
@@ -25,7 +25,7 @@
     <tbody>
       {% for instance in object_list %}
       <tr>
-        <th scope="row">{{ forloop.counter }}</th>
+        <td>{{ forloop.counter }}</td>
 
         <td>
           <a href="{{ instance.get_absolute_url }}">{{ instance.name }}</a>
@@ -44,3 +44,9 @@
     </tbody>
   </table>
 {% endblock %}
+
+<script>
+  {% block jquery %}
+  $('#goal-table').DataTable();
+  {% endblock jquery %}
+</script>

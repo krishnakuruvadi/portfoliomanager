@@ -40,10 +40,30 @@ class MutualFund(models.Model):
     kuvera_name = models.CharField(max_length=200, null=True, blank=True)
     collection_start_date = models.DateField(_('Collection Start Date'), )
     bse_star_name = models.CharField(max_length=200, null=True, blank=True)
+    ms_name = models.CharField(max_length=200, null=True, blank=True)
+    return_1d = models.DecimalField(_('1D'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1w = models.DecimalField(_('1W'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1m = models.DecimalField(_('1M'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_3m = models.DecimalField(_('3M'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1y = models.DecimalField(_('1Y'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_3y = models.DecimalField(_('3Y'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_5y = models.DecimalField(_('5Y'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_10y = models.DecimalField(_('10Y'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_15y = models.DecimalField(_('15Y'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_incep = models.DecimalField(_('Inception'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_ytd = models.DecimalField(_('YTD'), max_digits=10, decimal_places=2, null=True, blank=True)
+    category = models.CharField(max_length=200, null=True, blank=True)
+    investment_style = models.CharField(max_length=200, null=True, blank=True)
     
     def get_absolute_url(self):
         return reverse("common:mf-detail", kwargs={'id': self.id})
 
+class MFYearlyReturns(models.Model):
+    class Meta:
+        unique_together = (('fund','year'),)
+    fund = models.ForeignKey('MutualFund', on_delete=models.CASCADE)
+    year = models.IntegerField()
+    returns = models.DecimalField(max_digits=10, decimal_places=2, null=False)  
 
 class HistoricalMFPrice(models.Model):
     class Meta:

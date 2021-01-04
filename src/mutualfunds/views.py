@@ -19,7 +19,7 @@ from shared.handle_get import *
 from shared.handle_real_time_data import get_latest_vals, get_forex_rate, get_historical_mf_nav
 from django.db import IntegrityError
 from .models import Folio, MutualFundTransaction
-from common.models import MutualFund
+from common.models import MutualFund, MFYearlyReturns
 from .kuvera import Kuvera
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -38,6 +38,71 @@ class FolioListView(ListView):
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
         data['user_name_mapping'] = get_all_users()
         return data
+
+class FolioTransactionsListView(ListView):
+    template_name = 'mutualfunds/transactions_list.html'
+    def get_queryset(self):
+        #folio = get_object_or_404(Folio, id=self.kwargs['id'])
+        return MutualFundTransaction.objects.filter(folio__id=self.kwargs['id'])
+
+def fund_insights(request):
+    template = 'mutualfunds/investment_insights.html'
+
+def fund_returns(request):
+    template = 'mutualfunds/folio_returns.html'
+    queryset = Folio.objects.all()
+    data = dict()
+    data['object_list'] = dict()
+    for folio in queryset:
+        if folio.fund.code not in data['object_list']:
+            data['object_list'][folio.fund.code] = dict()
+            data['object_list'][folio.fund.code]['name'] = folio.fund.name
+            data['object_list'][folio.fund.code]['code'] = folio.fund.code
+            data['object_list'][folio.fund.code]['id'] = folio.fund.id
+            data['object_list'][folio.fund.code]['units'] = folio.units
+            data['object_list'][folio.fund.code]['buy_value'] = folio.buy_value
+            data['object_list'][folio.fund.code]['latest_value'] = folio.latest_value
+            data['object_list'][folio.fund.code]['gain'] = folio.gain
+            data['object_list'][folio.fund.code]['1d'] = folio.fund.return_1d
+            data['object_list'][folio.fund.code]['1w'] = folio.fund.return_1w
+            data['object_list'][folio.fund.code]['1m'] = folio.fund.return_1m
+            data['object_list'][folio.fund.code]['3m'] = folio.fund.return_3m
+            data['object_list'][folio.fund.code]['ytd'] = folio.fund.return_ytd
+            data['object_list'][folio.fund.code]['1y'] = folio.fund.return_1y
+            data['object_list'][folio.fund.code]['3y'] = folio.fund.return_3y
+            data['object_list'][folio.fund.code]['5y'] = folio.fund.return_5y
+            data['object_list'][folio.fund.code]['10y'] = folio.fund.return_10y
+            data['object_list'][folio.fund.code]['15y'] = folio.fund.return_15y
+            data['object_list'][folio.fund.code]['inception'] = folio.fund.return_incep
+
+            try:
+                yrly_returns = MFYearlyReturns.objects.filter(fund=folio.fund)
+
+            except MFYearlyReturns.DoesNotExist:
+                print('Yearly returns not found for code', folio.fund.code)
+                for ret in ['1d','1w','1m','3m','1y','3y','5y','10y','15y','inception']:
+                    data['object_list'][folio.fund.code][ret] = ''
+        else:
+            data['object_list'][folio.fund.code]['buy_value'] = add_two(data['object_list'][folio.fund.code]['buy_value'], folio.buy_value)
+            data['object_list'][folio.fund.code]['latest_value'] = add_two(data['object_list'][folio.fund.code]['latest_value'], folio.latest_value)
+            data['object_list'][folio.fund.code]['gain'] = add_two(data['object_list'][folio.fund.code]['gain'], folio.gain)
+            data['object_list'][folio.fund.code]['units'] = add_two(data['object_list'][folio.fund.code]['units'], folio.units)
+
+    ret = dict()
+    ret['object_list'] = list()
+    for _,v in data['object_list'].items():
+        if v['units']:
+            ret['object_list'].append(v)
+    return render(request, template, ret)
+
+def add_two(first, second):
+    if first and second:
+        return first+second
+    if first:
+        return first
+    if second:
+        return second
+    return None
 
 def add_folio(request):
     template = 'mutualfunds/add_folio.html'
@@ -64,10 +129,11 @@ def add_folio(request):
             pass
         
         if not found:
-            folio_obj = Folio.objects.create(folio=folio,
-                                            fund=mf_obj,
-                                            user=user,
-                                            goal=goal_id)
+            Folio.objects.create(folio=folio,
+                                 fund=mf_obj,
+                                 user=user,
+                                 goal=goal_id,
+                                 notes=notes)
     users = get_all_users()
     context = {'users':users, 'operation': 'Add Folio'}
     return render(request, template, context)
@@ -149,15 +215,6 @@ class FolioDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse('mutualfund:folio-list')
-
-class FolioTransactionsListView(ListView):
-    template_name = 'mutualfunds/transactions_list.html'
-
-    paginate_by = 15
-    model = MutualFundTransaction
-    def get_queryset(self):
-        #folio = get_object_or_404(Folio, id=self.kwargs['id'])
-        return MutualFundTransaction.objects.filter(folio__id=self.kwargs['id'])
 
 
 class TransactionsListView(ListView):

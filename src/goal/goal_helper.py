@@ -1,7 +1,7 @@
 from .models import Goal
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
-
+from shared.handle_chart_data import get_goal_contributions
 
 def one_time_pay_final_val(curr_val, inflation, time_period):
     #final_val = curr_val*(pow(1+inflation/100, time_period/12)-1)
@@ -61,3 +61,37 @@ def get_corpus_to_be_saved(curr_yrly_exp, inflation, accum_period, depletion_per
             cur_sav = get_curr_val_from_fut_val(fut_exp, (i-accum_period), roi_during_depletion)
         corpus = corpus + cur_sav
     return corpus
+
+
+def update_all_goals_contributions():
+    for goal_obj in Goal.objects.all():
+        update_goal_contributions(goal_obj.id)
+
+def update_goal_contributions(id):
+    try:
+        goal_obj = Goal.objects.get(id=id)
+        contrib = get_goal_contributions(id)
+
+        goal_obj.debt_contrib = contrib['debt']
+        goal_obj.equity_contrib = contrib['equity']
+        goal_obj.achieved_amt = contrib['total']
+        target = goal_obj.final_val
+        if target < 1:
+            target = 1
+        remaining = target - contrib['total']
+        if remaining < 0:
+            remaining = 0
+        goal_obj.pending_percent = int(remaining*100/target)
+        goal_obj.achieved_percent = int(contrib['total']*100/target)
+        goal_obj.pending_amt = remaining
+        goal_obj.epf_conitrib = contrib['epf']
+        goal_obj.espp_conitrib = contrib['espp']
+        goal_obj.fd_conitrib = contrib['fd']
+        goal_obj.ppf_conitrib = contrib['ppf']
+        goal_obj.ssy_conitrib = contrib['ssy']
+        goal_obj.rsu_conitrib = contrib['rsu']
+        goal_obj.shares_conitrib = contrib['shares']
+        goal_obj.mf_conitrib = contrib['mf']
+        goal_obj.save()
+    except Exception as e:
+        print(e)
