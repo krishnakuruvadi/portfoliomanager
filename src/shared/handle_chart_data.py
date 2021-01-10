@@ -251,7 +251,8 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                 for k,v in historical_mf_prices[0].items():
                     add_or_create(yr, 'MutualFunds',contrib, deduct, total,0,0,v*qty)
     
-    print("total", total)
+    curr_yr = datetime.datetime.now().year
+    '''
     sorted_years = sorted (contrib.keys(), reverse=True)
     for i, val in enumerate(sorted_years):
         if i != len(sorted_years)-1:
@@ -260,16 +261,27 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                 total[val]['PPF'] = total[val].get('PPF', 0) + total[sorted_years[j]].get('PPF', 0)
                 total[val]['EPF'] = total[val].get('EPF', 0) + total[sorted_years[j]].get('EPF', 0)
                 total[val]['SSY'] = total[val].get('SSY', 0) + total[sorted_years[j]].get('SSY', 0)
+    '''
+    if len(contrib.keys()):
+        for i in range (curr_yr, min(contrib.keys())-1, -1):
+            print('i:', i)
+            if i not in total:
+                total[i] = dict()
+            for j in range(i-1, min(contrib.keys())-1, -1):
+                print('j:', j)
+                total[i]['PPF'] = total[i].get('PPF', 0) + total[j].get('PPF', 0)
+                total[i]['EPF'] = total[i].get('EPF', 0) + total[j].get('EPF', 0)
+                total[i]['SSY'] = total[i].get('SSY', 0) + total[j].get('SSY', 0)
 
-    sorted_years = sorted (contrib.keys(), reverse=True)
     total_contribution = 0
     total_years = 0
-    for i, yr in enumerate(sorted_years):
-        total_years += 1
-        for typ,amt in contrib[yr].items():
-            total_contribution += amt
-    if total_contribution:
-        curr_yr = datetime.datetime.now().year
+    if len(contrib.keys()):
+        for yr in range(curr_yr, min(contrib.keys())-1, -1):
+            total_years += 1
+            if yr in contrib:
+                for _,amt in contrib[yr].items():
+                    total_contribution += amt
+    if total_contribution:        
         avg_contrib = total_contribution/total_years
         latest_value = 0
         for k,v in total[curr_yr].items():

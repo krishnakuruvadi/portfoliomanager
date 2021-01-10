@@ -1,0 +1,44 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %} Tasks {% endblock %} 
+
+{% block applicableactions %} {% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover table-condensed">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Description</th>
+        <th scope="col">Current State</th>
+        <th scope="col">Last Run</th>
+        <th scope="col">Last Run Status</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <th scope="row">{{ instance.id }}</th>
+        <td>{{ instance.description }}</td>
+        <td>{{ task_state_mapping|lookup:instance.current_state }}</td>
+        <td>{{ instance.last_run }}</td>
+        <td>{{ task_state_mapping|lookup:instance.last_run_status }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}run" class="confirm-run"><i class="fa fa-location-arrow" aria-hidden="true"></i> </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block javascript %}
+  <script>
+    console.log({{task_state_mapping|safe}})
+    $(document).on('click', '.confirm-run', function(){
+      return confirm('Are you sure you want to run this?');
+    })
+</script>
+{% endblock javascript %}

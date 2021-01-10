@@ -47,6 +47,44 @@ class FolioTransactionsListView(ListView):
 
 def fund_insights(request):
     template = 'mutualfunds/investment_insights.html'
+    queryset = Folio.objects.all()
+    data = dict()
+    category = dict()
+    blend = dict()
+    for folio in queryset:
+        if folio.fund.category:
+            category[folio.fund.category] = add_two(category.get(folio.fund.category, 0), folio.latest_value)
+        else:
+            category['Other'] = add_two(category.get('Other', 0), folio.latest_value)
+        if folio.fund.investment_style:
+            blend[folio.fund.investment_style] = add_two(category.get(folio.fund.investment_style, 0) , folio.latest_value)
+        else:
+            blend['Other'] = add_two(category.get('Other', 0), folio.latest_value)
+    
+    data['blend_labels'] = list()
+    data['blend_vals'] = list()
+    data['blend_colors'] = list()
+    for k,v in blend.items():
+        if v:
+            data['blend_labels'].append(k)
+            data['blend_vals'].append(float(v))
+            import random
+            r = lambda: random.randint(0,255)
+            data['blend_colors'].append('#{:02x}{:02x}{:02x}'.format(r(), r(), r()))
+    
+    data['category_labels'] = list()
+    data['category_vals'] = list()
+    data['category_colors'] = list()
+    for k,v in category.items():
+        if v:
+            data['category_labels'].append(k)
+            data['category_vals'].append(float(v))
+            import random
+            r = lambda: random.randint(0,255)
+            data['category_colors'].append('#{:02x}{:02x}{:02x}'.format(r(), r(), r()))
+    print('returning:', data)
+    return render(request, template, data)
+
 
 def fund_returns(request):
     template = 'mutualfunds/folio_returns.html'

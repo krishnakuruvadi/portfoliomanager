@@ -1,0 +1,35 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} {{object.number }} : {{object.company}} {% endblock viewname %}
+
+{% block content %} 
+  <table>
+    <tr>
+      <td>#</td>
+      <td>{{ object.id }}</td>
+    </tr>
+    <tr>
+      <td>Description</td>
+      <td>{{ object.description }}</td>
+    </tr>
+    <tr>
+      <td>Last Run</td>
+      <td>{{ object.last_run }}</td>
+    </tr>
+    <tr>
+      <td>Last Run Result</td>
+      <td>{{ object.last_run_result }}</td>
+    </tr>
+  </table>
+{% endblock content %}
+
+<script>
+{% block jquery %}
+
+{% endblock jquery %}
+</script>

@@ -23,12 +23,27 @@ import json
 from mutualfunds.mf_analyse import pull_ms
 from django.db import IntegrityError
 from goal.goal_helper import update_all_goals_contributions
-
+from .models import Task, TaskState
 from alerts.alert_helper import create_alert, Severity
+
+def set_task_state(name, state):
+    try:
+        task = Task.objects.get(task_name=name)
+        
+        if state.value == TaskState.Running.value:
+            task.current_state = state.value
+            task.last_run = datetime.datetime.now()
+        else:
+            task.last_run_status = state.value
+            task.current_state = TaskState.Unknown.value
+        task.save()
+    except Task.DoesNotExist:
+        print('Task ',name,' doesnt exist')
 
 @db_periodic_task(crontab(minute='0', hour='*/12'))
 def get_mf_navs():
     print('inside get_mf_navs')
+    set_task_state('get_mf_navs', TaskState.Running)
     folios = Folio.objects.all()
     finished_funds = list()
     for folio in folios:
@@ -60,10 +75,12 @@ def get_mf_navs():
                 print('error getting mutual fund historical nav in periodic task', folio.fund.code, ex)
         else:
             print('folio ', folio.folio, ' with code ', folio.fund.code, ' already done')
+    set_task_state('get_mf_navs', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='35', hour='*/12'))
 def update_mf():
     print('Updating Mutual Fund with latest nav')
+    set_task_state('update_mf', TaskState.Running)
     folios = Folio.objects.all()
     finished_funds = dict()
     mf = Mftool()
@@ -89,26 +106,34 @@ def update_mf():
             folio.gain=float(folio.latest_value)-float(folio.buy_value)
             folio.as_on_date =  datetime.datetime.strptime(finished_funds[folio.fund.code]['as_on'], '%d-%b-%Y')
             folio.save()
+    set_task_state('update_mf', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='0', hour='*/2'))
 def update_espp():
     print('Updating ESPP')
+    set_task_state('update_espp', TaskState.Running)
     for espp_obj in Espp.objects.all():
         print("looping through espp " + str(espp_obj.id))
         update_latest_vals(espp_obj)
+    set_task_state('update_espp', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='0', hour='10'))
 def update_mf_schemes():
     print('Updating Mutual Fund Schemes')
+    set_task_state('update_mf_schemes', TaskState.Running)
     update_mf_scheme_codes()
+    set_task_state('update_mf_schemes', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='55', hour='*/12'))
 def update_bse_star_schemes():
     print('Updating BSE STaR Schemes')
+    set_task_state('update_bse_star_schemes', TaskState.Running)
     download_bsestar_schemes()
+    set_task_state('update_bse_star_schemes', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='45', hour='*/12'))
 def update_investment_data():
+    set_task_state('update_investment_data', TaskState.Running)
     start_date = get_start_day_across_portfolio()
     investment_data = get_investment_data(start_date)
     try:
@@ -139,9 +164,11 @@ def update_investment_data():
             start_day_across_portfolio=start_date,
             as_on_date=datetime.datetime.now()
         )
+    set_task_state('update_investment_data', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='0', hour='1'))
 def clean_db():
+    set_task_state('clean_db', TaskState.Running)
     folios = Folio.objects.all()
     tracking_funds = set()
     for folio in folios:
@@ -160,13 +187,17 @@ def clean_db():
                 if hmfp.date.day not in (25, 26, 27, 28, 29, 30, 31, 1, 2) and abs(datetime.date.today() - hmfp.date).days > 7:
                     print('Deleting recent outdated entry', hmfp.id, hmfp.code, hmfp.date)
                     hmfp.delete()
+    set_task_state('clean_db', TaskState.Successful)
 
 @task()
 def add_mf_transactions(broker, user, full_file_path):
+    set_task_state('add_mf_transactions', TaskState.Running)
     add_transactions(broker, user, full_file_path)
+    set_task_state('add_mf_transactions', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='0', hour='2'))
 def update_mf_mapping():
+    set_task_state('update_mf_mapping', TaskState.Running)
     fp = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     mapping_file = os.path.join(fp, 'media', 'mf_mapping.json')
     if os.path.exists(mapping_file):
@@ -197,15 +228,20 @@ def update_mf_mapping():
                             content= 'Not able to find a matching Mutual Fund with the code.',
                             severity=Severity.error
                         )
+        set_task_state('update_mf_mapping', TaskState.Successful)
     else:
         print(mapping_file + ' doesnt exist')
+        set_task_state('update_mf_mapping', TaskState.Failed)
 
-@db_periodic_task(crontab(minute='52', hour='*'))
+@db_periodic_task(crontab(minute='52', hour='2'))
 def update_goal_contrib():
+    set_task_state('update_goal_contrib', TaskState.Running)
     update_all_goals_contributions()
+    set_task_state('update_goal_contrib', TaskState.Successful)
 
-@db_periodic_task(crontab(minute='06', hour='*'))
+@db_periodic_task(crontab(minute='35', hour='2'))
 def analyse_mf():
+    set_task_state('analyse_mf', TaskState.Running)
     folios = Folio.objects.all()
     finished_funds = set()
     for folio in folios:
@@ -266,6 +302,7 @@ def analyse_mf():
                             entry.returns = returns
                             entry.save()
         fund.save()
+    set_task_state('analyse_mf', TaskState.Successful)
 
 
 
