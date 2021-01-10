@@ -37,6 +37,26 @@ class FolioListView(ListView):
         print(data)
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
         data['user_name_mapping'] = get_all_users()
+        total_investment = 0
+        latest_value = 0
+        as_on_date= None
+        total_gain = 0
+        folio_objs = Folio.objects.all()
+        for folio_obj in folio_objs:
+            if not folio_obj.latest_value:
+                continue
+            if not as_on_date:
+                as_on_date = folio_obj.as_on_date
+            else:
+                if as_on_date < folio_obj.as_on_date:
+                    as_on_date = folio_obj.as_on_date
+            latest_value += folio_obj.latest_value
+            total_investment += folio_obj.buy_value
+            total_gain += folio_obj.gain
+        data['as_on_date'] = as_on_date
+        data['total_gain'] = total_gain
+        data['total_investment'] = total_investment
+        data['latest_value'] = latest_value
         return data
 
 class FolioTransactionsListView(ListView):
