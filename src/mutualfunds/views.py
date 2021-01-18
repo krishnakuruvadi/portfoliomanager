@@ -25,6 +25,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .mf_helper import add_transactions, insert_trans_entry
 from tasks.tasks import add_mf_transactions
+from .pull_kuvera import pull_kuvera
 
 # Create your views here.
 
@@ -301,17 +302,28 @@ def upload_transactions(request):
     template = 'mutualfunds/upload_transactions.html'
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
     if request.method == 'POST':
-        uploaded_file = request.FILES['document']
-        user = request.POST['user']
-        broker = request.POST.get('brokerControlSelect')
-        print(uploaded_file)
-        print(broker)
-        fs = FileSystemStorage()
-        file_locn = fs.save(uploaded_file.name, uploaded_file)
-        print(file_locn)
-        print(settings.MEDIA_ROOT)
-        full_file_path = settings.MEDIA_ROOT + '/' + file_locn
-        add_mf_transactions(broker, user, full_file_path)
+        if 'pull-user' in request.POST:
+            pull_user = request.POST['pull-user']
+            pull_broker = request.POST.get('pullBrokerControlSelect')
+            pull_emailid = request.POST.get('pull-email-id')
+            pull_passwd = request.POST.get('pull-passwd')
+            print('user:',pull_user)
+            print('broker:',pull_broker)
+            print('emailid:',pull_emailid)
+            print('passwd:',pull_passwd)
+            pull_kuvera(pull_user, pull_emailid, pull_passwd)
+        else:
+            uploaded_file = request.FILES['document']
+            user = request.POST['user']
+            broker = request.POST.get('brokerControlSelect')
+            print(uploaded_file)
+            print(broker)
+            fs = FileSystemStorage()
+            file_locn = fs.save(uploaded_file.name, uploaded_file)
+            print(file_locn)
+            print(settings.MEDIA_ROOT)
+            full_file_path = settings.MEDIA_ROOT + '/' + file_locn
+            add_mf_transactions(broker, user, full_file_path)
     users = get_all_users()
     context = {'users':users}
     return render(request, template, context)
@@ -400,3 +412,7 @@ class CurrentMfs(APIView):
             data['gain'] = folio.gain
             folios['folio'].append(data)
         return Response(folios)
+
+def delete_folios(request):
+    Folio.objects.all().delete()
+    return HttpResponseRedirect('../')

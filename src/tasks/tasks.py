@@ -149,6 +149,7 @@ def update_investment_data():
         all_investment_data.total_data=investment_data['total']
         all_investment_data.start_day_across_portfolio=start_date
         all_investment_data.as_on_date=datetime.datetime.now()
+        all_investment_data.save()
     except InvestmentData.DoesNotExist:
         InvestmentData.objects.create(
             user='all',

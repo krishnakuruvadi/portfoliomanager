@@ -130,7 +130,7 @@ def get_historical_stock_price(stock, start, end):
     return ret_vals
 
 def get_historical_mf_nav(amfi_code, start, end, fetch=False):
-    print("getting historical mf nav for code ", amfi_code)
+    #print("getting historical mf nav for code ", amfi_code)
     ret_vals = list()
     start_date = end
     try:
@@ -156,6 +156,6 @@ def get_historical_mf_nav(amfi_code, start, end, fetch=False):
                 start_date = start_date+relativedelta(days=-1)
     except MutualFund.DoesNotExist:
         print('couldnt find mutual fund with amfi code ', amfi_code)
-    print("returning mf vals ", ret_vals)
+    #print("returning mf vals ", ret_vals)
     return ret_vals
 

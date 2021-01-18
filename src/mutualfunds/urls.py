@@ -16,7 +16,8 @@ from .views import (
     CurrentMfs,
     update_transaction,
     fund_returns,
-    fund_insights
+    fund_insights,
+    delete_folios
     #ChartData
 )
 
@@ -28,6 +29,7 @@ urlpatterns = [
     path('refresh/', mf_refresh, name='refresh'),
     path('transactions', TransactionsListView.as_view(), name='transactions-list'),
     path('upload/', upload_transactions, name='transaction-upload'),
+    path('delete/', delete_folios, name='folio-delete'),
     path('transaction/<id>/delete', TransactionDeleteView.as_view(), name='transaction-delete'),
     path('returns', fund_returns, name='fund-returns'),
     path('insights', fund_insights, name='fund-insights'),
