@@ -11,13 +11,12 @@
   <form method="POST">
     {% csrf_token %}
     <div class="row">
-      <div class='col-sm-6'>
+      <div class='col-sm-9'>
         <div class="form-group row">
           <label for="exchange" class="col-sm-3 col-form-label">Exchange</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <select id="exchange" name="exchange" class="form-control">
-              </select>
+              <label>{{exchange}}</label>
             </div>
           </div>
         </div>
@@ -26,16 +25,16 @@
           <label for="symbol" class="col-sm-3 col-form-label">Symbol</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="text" id="symbol" name="symbol" value="{{symbol}}">
+              <label>{{symbol}}</label>
             </div>
           </div>
         </div>
 
         <div class="form-group row">
           <label for="user" class="col-sm-3 col-form-label">User</label>
-          <div class="col-sm-3">
+          <div class="col-sm-6">
             <div class="md-form mt-0">
-              <select id="id_user" name="user" class="form-control"></select>
+              <label>{{user}}</label>
             </div>
           </div>
         </div>
@@ -50,18 +49,6 @@
         </div>
 
         <div class="form-group row">
-          <label for="conversion_rate" class="col-sm-3 col-form-label">Conversion Rate</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="conversion_rate" name="conversion_rate" value="{{conversion_rate}}" step="0.001">
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <button type="submit" class="btn btn-primary" id="fetch" name="fetch">Fetch</button>
-          </div>
-        </div>
-
-        <div class="form-group row">
           <label for="trans_type" class="col-sm-3 col-form-label">Transaction Type</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
@@ -71,6 +58,7 @@
               </select>
             </div>
           </div>
+          <div class="col-sm-3"> </div>
         </div>
 
         <div class="form-group row">
@@ -87,6 +75,15 @@
           <div class="col-sm-3">
             <div class="md-form mt-0">
               <input type="number" id="quantity" name="quantity" value="{{quantity}}" step="0.000001">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="conversion_rate" class="col-sm-3 col-form-label">Conversion Rate</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="conversion_rate" name="conversion_rate" value="{{conversion_rate}}" step="0.001">
             </div>
           </div>
         </div>
@@ -121,7 +118,7 @@
           <div class="col-sm-6">
             <div class="md-form mt-0">
               <button type="submit" class="btn btn-primary" name="submit">Submit</button>
-              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+              <a href="../../" class="btn btn-danger" role="button">Cancel</a>
             </div>
           </div>
         </div>
@@ -133,49 +130,7 @@
 
 {% block javascript %}
   <script>
-    var users = {{users|safe}}
-    var sel_user = '{{user|safe}}'
-    var userdropdown = document.getElementById('id_user');
-    var opt = document.createElement('option');
-    // create text node to add to option element (opt)
-    opt.appendChild( document.createTextNode('') );
-    // set value property of opt
-    opt.value = ''; 
-    // add opt to end of select box (sel)
-    userdropdown.appendChild(opt);
-    console.log(users);
-    console.log(sel_user)
-    for (x in users) {
-      user = users[x]
-      // create new option element
-      var opt = document.createElement('option');
-      // create text node to add to option element (opt)
-      opt.appendChild( document.createTextNode(user) );
-      // set value property of opt
-      opt.value = x;
-      if (opt.value == sel_user) {
-        opt.selected = true;
-      }
-      // add opt to end of select box (sel)
-      userdropdown.appendChild(opt);
-    }
-    var exchange = '{{exchange|safe}}';
-    var exchdropdown = document.getElementById('exchange');
-    var exchs = ['BSE', 'NSE', 'NASDAQ', 'NYSE'];
-    exchs.forEach(function(item, index, array) {
-      console.log(item, index)
-      var opt = document.createElement('option');
-      opt.appendChild( document.createTextNode(item) );
-      opt.value = item;
-      if (exchange != '') {
-        if (item == exchange) {
-          opt.selected = true;
-        }
-      }
-      exchdropdown.appendChild(opt);
-    })
-    setExchangePrice();
-
+    
     $("#price").change(function () {
       setTransPrice();
     });
@@ -185,29 +140,6 @@
     $("#conversion_rate").change(function () {
       setTransPrice();
     });
-    $("#exchange").change(function () {
-      setExchangePrice();
-    });
-    $("#trans_date").change(function () {
-      setExchangePrice();
-    });
-    function setExchangePrice() {
-      var exchangeElem = document.getElementById("exchange");
-      var exchange = exchangeElem.value
-      console.log(exchange)
-      var conversionRateElem = document.getElementById("conversion_rate");
-      document.getElementById('fetch').disabled=true;
-      if (exchange == 'BSE' || exchange=='NSE') {
-        conversionRateElem.value = 1;
-      } else {
-        var dateElem = document.getElementById("trans_date");
-        dateVal = dateElem.value;
-        if (dateVal !='') {
-          document.getElementById('fetch').disabled=false;
-        }
-      }
-      setTransPrice();
-    }
     function setTransPrice(){
       var priceElem = document.getElementById("price");
       var price = priceElem.value

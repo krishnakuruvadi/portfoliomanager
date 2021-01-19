@@ -9,7 +9,7 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
-  <table class="table table-hover">
+  <table class="table table-hover" id="trans-table">
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
@@ -49,3 +49,13 @@
     </tbody>
   </table>
 {% endblock %}
+
+<script>
+  {% block jquery %}
+  $('#trans-table').DataTable({
+        "columnDefs": [
+            { "type": "num", "targets": [0,5,6,7,8] }
+        ]
+      });
+{% endblock jquery %}
+</script>

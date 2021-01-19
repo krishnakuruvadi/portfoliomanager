@@ -106,17 +106,17 @@ class GetInvestmentData(APIView):
         try:
             investment_data = InvestmentData.objects.get(user='all')
             return Response({
-                    'ppf':json.loads(investment_data.ppf_data.replace("\'", "\"")),
-                    'epf':json.loads(investment_data.epf_data.replace("\'", "\"")),
-                    'ssy':json.loads(investment_data.ssy_data.replace("\'", "\"")),
-                    'fd': json.loads(investment_data.fd_data.replace("\'", "\"")),
-                    'espp': json.loads(investment_data.espp_data.replace("\'", "\"")),
-                    'rsu':json.loads(investment_data.rsu_data.replace("\'", "\"")),
-                    'shares':json.loads(investment_data.shares_data.replace("\'", "\"")),
-                    'mf':json.loads(investment_data.mf_data.replace("\'", "\"")),
-                    'total':json.loads(investment_data.total_data.replace("\'", "\"")),
-                    'start_date': investment_data.start_day_across_portfolio,
-                    'as_on_date_time': investment_data.as_on_date
+                'ppf':json.loads(investment_data.ppf_data.replace("\'", "\"")),
+                'epf':json.loads(investment_data.epf_data.replace("\'", "\"")),
+                'ssy':json.loads(investment_data.ssy_data.replace("\'", "\"")),
+                'fd': json.loads(investment_data.fd_data.replace("\'", "\"")),
+                'espp': json.loads(investment_data.espp_data.replace("\'", "\"")),
+                'rsu':json.loads(investment_data.rsu_data.replace("\'", "\"")),
+                'shares':json.loads(investment_data.shares_data.replace("\'", "\"")),
+                'mf':json.loads(investment_data.mf_data.replace("\'", "\"")),
+                'total':json.loads(investment_data.total_data.replace("\'", "\"")),
+                'start_date': investment_data.start_day_across_portfolio,
+                'as_on_date_time': investment_data.as_on_date
             })
 
         except InvestmentData.DoesNotExist:

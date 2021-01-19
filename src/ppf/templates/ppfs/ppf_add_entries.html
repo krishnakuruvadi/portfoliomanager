@@ -25,16 +25,34 @@
       <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       <button type="button" class="btn btn-primary">Upload</button>
     </div-->
-    <div class="form-group">
-      <label for="bankFormControlSelect">Bank</label>
-      <select class="form-control" id="bankFormControlSelect" name="bankFormControlSelect">
-        <option>SBI</option>
-      </select>
+    <div class="row">
+      <div class='col-sm-8'>
+        <div class="form-group row">
+          <label for="bankFormControlSelect" class="col-sm-2 col-form-label">Bank</label>
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <select class="form-control" id="bankFormControlSelect" name="bankFormControlSelect">
+                <option>SBI</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-sm-2"></div>
+          <div class="custom-file col-sm-4">
+            <input type="file" name="document" required>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary">Upload</button>
+              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="custom-file">
-    <input type="file" name="document" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Upload</button>
   </form>
 
 {% endblock content %}
