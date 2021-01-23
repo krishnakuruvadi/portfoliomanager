@@ -25,6 +25,8 @@ from django.db import IntegrityError
 from goal.goal_helper import update_all_goals_contributions
 from .models import Task, TaskState
 from alerts.alert_helper import create_alert, Severity
+from shares.pull_zerodha import pull_zerodha
+from shares.shares_helper import add_transactions
 
 def set_task_state(name, state):
     try:
@@ -306,6 +308,18 @@ def analyse_mf():
     set_task_state('analyse_mf', TaskState.Successful)
 
 
+@db_task()
+def pull_share_trans_from_broker(user, broker, user_id, passwd, pass_2fa):
+    print(f'user {user} broker {broker} userid {user_id} password {passwd} 2fa {pass_2fa}')
+    if broker == 'ZERODHA':
+        files = pull_zerodha(user_id, passwd, pass_2fa)
+        for dload_file in files:
+            add_share_transactions(broker, user, dload_file)
+
+@db_task()
+def add_share_transactions(broker, user, full_file_path):
+    add_transactions(broker, user, full_file_path)
+    os.remove(full_file_path)
 
 '''
 #  example code below
