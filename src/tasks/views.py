@@ -41,6 +41,9 @@ class TaskListView(ListView):
             },
             'analyse_mf':{
                 'description':'Analyse different Mutual Funds where users have active investment'
+            },
+            'update_shares_latest_vals':{
+                'description':'Get latest vals of shares'
             }
         }
         for task in available_tasks.keys():

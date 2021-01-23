@@ -1,7 +1,9 @@
 from .models import Share, Transactions
 from .zerodha import Zerodha
 from django.db import IntegrityError
-
+from shared.handle_real_time_data import get_latest_vals, get_forex_rate
+import datetime
+from dateutil.relativedelta import relativedelta
 
 def add_transactions(broker, user, full_file_path):
     if broker == 'ZERODHA':
@@ -87,3 +89,30 @@ def reconcile_share(share_obj):
     share_obj.buy_value = buy_value
     share_obj.buy_price = buy_price
     share_obj.save()
+
+def update_shares_latest_val():
+    start = datetime.date.today()+relativedelta(days=-5)
+    end = datetime.date.today()
+    share_objs = Share.objects.all()
+    for share_obj in share_objs:
+        latest_date = None
+        latest_val = None
+        vals = get_latest_vals(share_obj.symbol, share_obj.exchange, start, end)
+        if vals:
+            for k, v in vals.items():
+                if k and v:
+                    if not latest_date or k > latest_date:
+                        latest_date = k
+                        latest_val = v
+        if latest_date and latest_val:
+            share_obj.as_on_date = latest_date
+            if share_obj.exchange == 'NASDAQ':
+                share_obj.conversion_rate = get_forex_rate(k, 'USD', 'INR')
+            else:
+                share_obj.conversion_rate = 1
+            share_obj.latest_value = float(latest_val) * float(share_obj.conversion_rate) * float(share_obj.quantity)
+            share_obj.latest_price = latest_val * float(share_obj.conversion_rate)
+            share_obj.save()
+        if share_obj.latest_value: 
+            share_obj.gain=float(share_obj.latest_value)-float(share_obj.buy_value)
+            share_obj.save()

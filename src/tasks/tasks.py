@@ -26,7 +26,7 @@ from goal.goal_helper import update_all_goals_contributions
 from .models import Task, TaskState
 from alerts.alert_helper import create_alert, Severity
 from shares.pull_zerodha import pull_zerodha
-from shares.shares_helper import add_transactions
+from shares.shares_helper import add_transactions, update_shares_latest_val
 
 def set_task_state(name, state):
     try:
@@ -241,6 +241,12 @@ def update_goal_contrib():
     set_task_state('update_goal_contrib', TaskState.Running)
     update_all_goals_contributions()
     set_task_state('update_goal_contrib', TaskState.Successful)
+
+@db_periodic_task(crontab(minute='22', hour='2'))
+def update_shares_latest_vals():
+    set_task_state('update_shares_latest_vals', TaskState.Running)
+    update_shares_latest_val()
+    set_task_state('update_shares_latest_vals', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='35', hour='2'))
 def analyse_mf():

@@ -15,7 +15,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from .models import Share, Transactions
-from .shares_helper import insert_trans_entry, add_transactions, reconcile_share
+from .shares_helper import insert_trans_entry, add_transactions, reconcile_share, update_shares_latest_val
 from shared.utils import *
 from shared.handle_get import *
 from shared.handle_real_time_data import get_latest_vals, get_forex_rate
@@ -242,31 +242,7 @@ def update_transaction(request,id):
 
 def refresh(request):
     print("inside refresh")
-    start = datetime.date.today()+relativedelta(days=-5)
-    end = datetime.date.today()
-    share_objs = Share.objects.all()
-    for share_obj in share_objs:
-        latest_date = None
-        latest_val = None
-        vals = get_latest_vals(share_obj.symbol, share_obj.exchange, start, end)
-        if vals:
-            for k, v in vals.items():
-                if k and v:
-                    if not latest_date or k > latest_date:
-                        latest_date = k
-                        latest_val = v
-        if latest_date and latest_val:
-            share_obj.as_on_date = latest_date
-            if share_obj.exchange == 'NASDAQ':
-                share_obj.conversion_rate = get_forex_rate(k, 'USD', 'INR')
-            else:
-                share_obj.conversion_rate = 1
-            share_obj.latest_value = float(latest_val) * float(share_obj.conversion_rate) * float(share_obj.quantity)
-            share_obj.latest_price = latest_val * float(share_obj.conversion_rate)
-            share_obj.save()
-        if share_obj.latest_value: 
-            share_obj.gain=float(share_obj.latest_value)-float(share_obj.buy_value)
-            share_obj.save()
+    update_shares_latest_val()
     print('done with request')
     return HttpResponseRedirect(reverse('shares:shares-list'))
 

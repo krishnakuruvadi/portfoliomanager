@@ -55,3 +55,13 @@ def toggle_seen(request, id):
         alert.seen = True
     alert.save()
     return HttpResponseRedirect('../../')
+
+def delete_all(request):
+    models.Alert.objects.all().delete()
+    return HttpResponseRedirect(reverse('alerts:alerts-list'))
+
+def read_all(request):
+    for alert in models.Alert.objects.all():
+        alert.seen = True
+        alert.save()
+    return HttpResponseRedirect(reverse('alerts:alerts-list'))

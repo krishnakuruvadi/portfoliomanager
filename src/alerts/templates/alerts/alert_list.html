@@ -2,7 +2,10 @@
 {% load template_filters %}
 {% block viewname %} Alerts {% endblock %} 
 
-{% block applicableactions %} {% endblock applicableactions %}
+{% block applicableactions %}
+  <a style="padding-left:25px;" href="read"><i class="fa fa-check" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+  <a style="padding-left:25px;padding-right:25px;" href="delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Alerts" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
