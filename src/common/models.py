@@ -41,6 +41,7 @@ class MutualFund(models.Model):
     collection_start_date = models.DateField(_('Collection Start Date'), )
     bse_star_name = models.CharField(max_length=200, null=True, blank=True)
     ms_name = models.CharField(max_length=200, null=True, blank=True)
+    ms_id = models.CharField(max_length=20, null=True, blank=True)
     return_1d = models.DecimalField(_('1D'), max_digits=10, decimal_places=2, null=True, blank=True)
     return_1w = models.DecimalField(_('1W'), max_digits=10, decimal_places=2, null=True, blank=True)
     return_1m = models.DecimalField(_('1M'), max_digits=10, decimal_places=2, null=True, blank=True)
@@ -63,7 +64,11 @@ class MFYearlyReturns(models.Model):
         unique_together = (('fund','year'),)
     fund = models.ForeignKey('MutualFund', on_delete=models.CASCADE)
     year = models.IntegerField()
-    returns = models.DecimalField(max_digits=10, decimal_places=2, null=False)  
+    returns = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    diff_index = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    diff_category = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    percentile_rank = models.IntegerField(null=True, blank=True)
+    funds_in_category = models.IntegerField(null=True, blank=True)
 
 class HistoricalMFPrice(models.Model):
     class Meta:

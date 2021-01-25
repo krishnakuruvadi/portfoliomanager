@@ -11,12 +11,12 @@ import time
 from django.db.models import Q
 from mftool import Mftool
 from common.helper import update_mf_scheme_codes
-from shared.utils import get_float_or_zero_from_string, get_float_or_none_from_string
+from shared.utils import get_float_or_zero_from_string, get_float_or_none_from_string, get_int_or_none_from_string
 from common.bsestar import download_bsestar_schemes
 from shared.handle_get import *
 from shared.handle_chart_data import get_investment_data
 from pages.models import InvestmentData
-from mutualfunds.models import Folio
+from mutualfunds.models import Folio, MutualFundTransaction
 from mutualfunds.mf_helper import add_transactions
 import os
 import json
@@ -27,6 +27,7 @@ from .models import Task, TaskState
 from alerts.alert_helper import create_alert, Severity
 from shares.pull_zerodha import pull_zerodha
 from shares.shares_helper import add_transactions, update_shares_latest_val
+from shared.financial import xirr
 
 def set_task_state(name, state):
     try:
@@ -90,7 +91,7 @@ def update_mf():
         if not folio.units:
             continue
         if folio.fund.code not in finished_funds:
-            print('trying folio', folio.folio, folio.fund.code)
+            print('Updating folio', folio.folio, folio.fund.code)
             try:
                 fund = MutualFund.objects.get(code=folio.fund.code)
                 q = mf.get_scheme_quote(folio.fund.code)
@@ -106,7 +107,14 @@ def update_mf():
             folio.conversion_rate = 1 # TODO: change later
             folio.latest_value = float(folio.latest_price) * float(folio.conversion_rate) * float(folio.units)
             folio.gain=float(folio.latest_value)-float(folio.buy_value)
-            folio.as_on_date =  datetime.datetime.strptime(finished_funds[folio.fund.code]['as_on'], '%d-%b-%Y')
+            folio.as_on_date = datetime.datetime.strptime(finished_funds[folio.fund.code]['as_on'], '%d-%b-%Y')
+            cash_flows = list()
+            for transaction in MutualFundTransaction.objects.filter(folio=folio):
+                cash_flows.append((transaction.trans_date, float(transaction.trans_price) if transaction.trans_type=='Sell' else float(-1*transaction.trans_price)))
+            if len(cash_flows) > 0:
+                cash_flows.append((datetime.date.today(), folio.latest_value))
+                #print('cash_flows', cash_flows)
+                folio.xirr = xirr(cash_flows, 0.1)*100
             folio.save()
     set_task_state('update_mf', TaskState.Successful)
 
@@ -211,6 +219,8 @@ def update_mf_mapping():
                     fund = MutualFund.objects.get(code=k)
                     if 'kuvera_name' in v:
                         fund.kuvera_name = v['kuvera_name']
+                    if 'ms_name' in v:
+                        fund.ms_name = v['ms_name']
                     fund.save()
                 except MutualFund.DoesNotExist:
                     if 'name' in v:
@@ -221,6 +231,8 @@ def update_mf_mapping():
                         )
                         if 'kuvera_name' in v:
                             fund.kuvera_name = v['kuvera_name']
+                        if 'ms_name' in v:
+                            fund.ms_name = v['ms_name']
                         if 'isin' in v:
                             fund.isin = v['isin']
                         if 'isin2' in v:
@@ -251,6 +263,7 @@ def update_shares_latest_vals():
 @db_periodic_task(crontab(minute='35', hour='2'))
 def analyse_mf():
     set_task_state('analyse_mf', TaskState.Running)
+    token = None
     folios = Folio.objects.all()
     finished_funds = set()
     for folio in folios:
@@ -258,13 +271,13 @@ def analyse_mf():
         if not folio.units or code in finished_funds:
             continue
         finished_funds.add(code)
-        data = pull_ms(code, list())
+        data, token = pull_ms(code, list(), token=token)
         if not data:
             create_alert(
-                            summary='Code:' + code + ' Mutual fund not analysed',
-                            content= 'Not able to find a matching Mutual Fund with the code for analysis.',
-                            severity=Severity.error
-                        )
+                summary='Code:' + code + ' Mutual fund not analysed',
+                content= 'Not able to find a matching Mutual Fund with the code for analysis.',
+                severity=Severity.error
+            )
             continue
         print('analysed data for mf', data)
         fund = MutualFund.objects.get(code=code)
@@ -310,6 +323,71 @@ def analyse_mf():
                             entry = MFYearlyReturns.objects.get(fund=fund, year=yr)
                             entry.returns = returns
                             entry.save()
+        if 'category' in data:
+            for k,v in data['category'].items():
+                if v:
+                    if k == 'YTD':
+                        k = str(datetime.date.today().year)
+                    yr = get_int_or_none_from_string(k)
+                    entry = None
+                    try:
+                        entry = MFYearlyReturns.objects.get(fund=fund, year=yr)
+                    except MFYearlyReturns.DoesNotExist:
+                        entry = MFYearlyReturns.objects.create(fund=fund, year=yr)
+                    entry.diff_category = get_float_or_none_from_string(v)
+                    entry.save()
+        if 'fund' in data:
+            for k,v in data['fund'].items():
+                if v:
+                    if k == 'YTD':
+                        k = str(datetime.date.today().year)
+                    yr = get_int_or_none_from_string(k)
+                    entry = None
+                    try:
+                        entry = MFYearlyReturns.objects.get(fund=fund, year=yr)
+                    except MFYearlyReturns.DoesNotExist:
+                        entry = MFYearlyReturns.objects.create(fund=fund, year=yr)
+                    entry.returns = get_float_or_none_from_string(v)
+                    entry.save()
+        if 'index' in data:
+            for k,v in data['index'].items():
+                if v:
+                    if k == 'YTD':
+                        k = str(datetime.date.today().year)
+                    yr = get_int_or_none_from_string(k)
+                    entry = None
+                    try:
+                        entry = MFYearlyReturns.objects.get(fund=fund, year=yr)
+                    except MFYearlyReturns.DoesNotExist:
+                        entry = MFYearlyReturns.objects.create(fund=fund, year=yr)
+                    entry.diff_index = get_float_or_none_from_string(v)
+                    entry.save()
+        if 'percentileRank' in data:
+            for k,v in data['percentileRank'].items():
+                if v:
+                    if k == 'YTD':
+                        k = str(datetime.date.today().year)
+                    yr = get_int_or_none_from_string(k)
+                    entry = None
+                    try:
+                        entry = MFYearlyReturns.objects.get(fund=fund, year=yr)
+                    except MFYearlyReturns.DoesNotExist:
+                        entry = MFYearlyReturns.objects.create(fund=fund, year=yr)
+                    entry.percentile_rank = get_int_or_none_from_string(v)
+                    entry.save()
+        if 'fundNumber' in data:
+            for k,v in data['fundNumber'].items():
+                if v:
+                    if k == 'YTD':
+                        k = str(datetime.date.today().year)
+                    yr = get_int_or_none_from_string(k)
+                    entry = None
+                    try:
+                        entry = MFYearlyReturns.objects.get(fund=fund, year=yr)
+                    except MFYearlyReturns.DoesNotExist:
+                        entry = MFYearlyReturns.objects.create(fund=fund, year=yr)
+                    entry.funds_in_category = get_int_or_none_from_string(v)
+                    entry.save()
         fund.save()
     set_task_state('analyse_mf', TaskState.Successful)
 
