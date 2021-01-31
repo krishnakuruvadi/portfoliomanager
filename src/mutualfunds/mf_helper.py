@@ -6,8 +6,8 @@ from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 
 
-def add_transactions(broker, user, full_file_path):
-    print('inside add_transactions', broker, user, full_file_path)
+def mf_add_transactions(broker, user, full_file_path):
+    print('inside mf_add_transactions', broker, user, full_file_path)
     if broker == 'KUVERA':
         kuvera_helper = Kuvera(full_file_path)
         for trans in kuvera_helper.get_transactions():

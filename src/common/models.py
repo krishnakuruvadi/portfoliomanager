@@ -46,6 +46,7 @@ class MutualFund(models.Model):
     return_1w = models.DecimalField(_('1W'), max_digits=10, decimal_places=2, null=True, blank=True)
     return_1m = models.DecimalField(_('1M'), max_digits=10, decimal_places=2, null=True, blank=True)
     return_3m = models.DecimalField(_('3M'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_6m = models.DecimalField(_('6M'), max_digits=10, decimal_places=2, null=True, blank=True)
     return_1y = models.DecimalField(_('1Y'), max_digits=10, decimal_places=2, null=True, blank=True)
     return_3y = models.DecimalField(_('3Y'), max_digits=10, decimal_places=2, null=True, blank=True)
     return_5y = models.DecimalField(_('5Y'), max_digits=10, decimal_places=2, null=True, blank=True)
@@ -55,9 +56,52 @@ class MutualFund(models.Model):
     return_ytd = models.DecimalField(_('YTD'), max_digits=10, decimal_places=2, null=True, blank=True)
     category = models.CharField(max_length=200, null=True, blank=True)
     investment_style = models.CharField(max_length=200, null=True, blank=True)
-    
+    as_on_date = models.DateField(_('As On Date'), null=True, blank=True)
     def get_absolute_url(self):
         return reverse("common:mf-detail", kwargs={'id': self.id})
+
+class MFCategoryReturns(models.Model):
+    category = models.CharField(max_length=200, unique=True)
+    return_1d_avg = models.DecimalField(_('1D Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1w_avg = models.DecimalField(_('1W Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1m_avg = models.DecimalField(_('1M Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_3m_avg = models.DecimalField(_('3M Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_6m_avg = models.DecimalField(_('6M Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1y_avg = models.DecimalField(_('1Y Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_3y_avg = models.DecimalField(_('3Y Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_5y_avg = models.DecimalField(_('5Y Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_10y_avg = models.DecimalField(_('10Y Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_15y_avg = models.DecimalField(_('15Y Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_inception_avg = models.DecimalField(_('Inception Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_ytd_avg = models.DecimalField(_('YTD Avg'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1d_top = models.DecimalField(_('1D Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1w_top = models.DecimalField(_('1W Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1m_top = models.DecimalField(_('1M Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_3m_top = models.DecimalField(_('3M Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_6m_top = models.DecimalField(_('6M Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1y_top = models.DecimalField(_('1Y Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_3y_top = models.DecimalField(_('3Y Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_5y_top = models.DecimalField(_('5Y Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_10y_top = models.DecimalField(_('10Y Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_15y_top = models.DecimalField(_('15Y Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_inception_top = models.DecimalField(_('Inception Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_ytd_top = models.DecimalField(_('YTD Top'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1d_bot = models.DecimalField(_('1D Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1w_bot = models.DecimalField(_('1W Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1m_bot = models.DecimalField(_('1M Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_3m_bot = models.DecimalField(_('3M Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_6m_bot = models.DecimalField(_('6M Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1y_bot = models.DecimalField(_('1Y Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_3y_bot = models.DecimalField(_('3Y Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_5y_bot = models.DecimalField(_('5Y Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_10y_bot = models.DecimalField(_('10Y Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_15y_bot = models.DecimalField(_('15Y Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_inception_bot = models.DecimalField(_('Inception Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_ytd_bot = models.DecimalField(_('YTD Bottom'), max_digits=10, decimal_places=2, null=True, blank=True)
+    as_on_date = models.DateField(_('As On Date'), null=True, blank=True)
+ 
+    def __str__(self):
+        return str(self.id)+':'+self.category
 
 class MFYearlyReturns(models.Model):
     class Meta:

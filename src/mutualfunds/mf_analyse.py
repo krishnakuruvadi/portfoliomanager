@@ -194,6 +194,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                                             if is_elem.tag_name == 'svg':
                                                 print('is_elem', is_elem.get_attribute('innerHTML'))
                                                 data['blend'] = is_elem.find_element_by_tag_name('title').text
+                                        '''
                                         cat_elems = driver.find_elements_by_xpath("//div[contains(text(),'Category')]")
                                         for cat_elem in cat_elems:
                                             print('cat_elem class:', cat_elem.get_attribute('class'))
@@ -202,6 +203,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                                                 for elem in parent_cat_elem.find_elements_by_tag_name('div'):
                                                     if elem.text != 'Category':
                                                         data['categoryName'] = elem.text
+                                        '''
                                         
                                         if data:
                                             driver.close()
@@ -351,3 +353,43 @@ def get_json_response(url):
     except Exception as err:
         print(f'Other error occurred: {err}')
         return None
+
+def pull_category_returns():
+    url = decode(b'\x03\x11\r\x07\x1cHKD\x07\n\x12\x06\x1c\x00\x02\x04W\x1a\x00\x00\n\x02\x0b\x1e\x04\x1b\x13\x16E\x0c\x17X\t\x07\n\x0f\x16V\x14\x0e\x06\x01\x0c\n\x0b\x0e\x1f\x17\x16\r\n\x0b\x1a\x0e\x1c\x07\x0eK\x18\x04\x1f\n')
+    driver = webdriver.Chrome(executable_path=get_path_to_chrome_driver())
+    driver.get(url)
+    timeout = 30
+
+    opt_element_id = decode(b"\x08\x11\x15G_-'\x04\x0b\r\x12\x01\x064\x07\x04\x1a\x12'\x1d\x08\x0f\x00\x0bF0\x16\x08;\x00\x0b\x1e\x00\x16")
+    WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID, opt_element_id)))
+    ret = dict()
+    val_opts = ['1D', '1W', '1M', '3M', '6M', '1Y', '2Y', '3Y', '4Y','5Y','6Y','7Y','8Y','9Y', '10Y', 'YTD', 'Inception']
+    for i, opt in enumerate(['1 Day', '1 Week', '1 Month', '3 Months', '6 Months', '1 Year', '2 Years', '3 Years', '4 Years','5 Years','6 Years','7 Years','8 Years','9 Years', '10 Years', 'YTD', 'Since Inception']):
+        sel_choice=driver.find_element_by_xpath("//select/option[@value='" + opt + "']")
+        sel_choice.click()
+        time.sleep(5)
+        WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID, opt_element_id)))
+        rows = driver.find_elements_by_xpath("//table/tbody/tr")
+        as_on = None
+        
+        for row in rows:
+            #print(row.text)
+            cols = row.find_elements_by_tag_name("td")
+            '''
+            for col in cols:
+                print('col text', col.text)
+                if 'As on' in col.text:
+                    as_on = col.text
+            '''
+            if len(cols) == 4 and 'h3' in cols[0].get_attribute('innerHTML'):
+                #print('------------------------------------------------------------------')
+                #print(cols[0].text,'\t', cols[1].text, '\t', cols[2].text, '\t', cols[3].text)
+                #print('------------------------------------------------------------------')
+                if cols[0].text not in ret.keys():
+                    ret[cols[0].text] = dict()
+                ret[cols[0].text][val_opts[i]] = dict()
+                ret[cols[0].text][val_opts[i]]['avg'] = cols[1].text
+                ret[cols[0].text][val_opts[i]]['top'] = cols[2].text
+                ret[cols[0].text][val_opts[i]]['bottom'] = cols[3].text
+    driver.close()
+    return ret

@@ -5,14 +5,15 @@ from shared.handle_real_time_data import get_latest_vals, get_forex_rate
 import datetime
 from dateutil.relativedelta import relativedelta
 
-def add_transactions(broker, user, full_file_path):
+def shares_add_transactions(broker, user, full_file_path):
     if broker == 'ZERODHA':
         zerodha_helper = Zerodha(full_file_path)
         for trans in zerodha_helper.get_transactions():
             print("trans is", trans)
             insert_trans_entry(
                 trans["exchange"], trans["symbol"], user, trans["type"], trans["quantity"], trans["price"], trans["date"], trans["notes"], 'ZERODHA')
-
+    else:
+        print(f'unsupported broker {broker}')
 
 def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate=1, trans_price=None):
     share_obj = None

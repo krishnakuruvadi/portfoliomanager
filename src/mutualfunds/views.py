@@ -19,11 +19,11 @@ from shared.handle_get import *
 from shared.handle_real_time_data import get_latest_vals, get_forex_rate, get_historical_mf_nav
 from django.db import IntegrityError
 from .models import Folio, MutualFundTransaction
-from common.models import MutualFund, MFYearlyReturns
+from common.models import MutualFund, MFYearlyReturns, MFCategoryReturns
 from .kuvera import Kuvera
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .mf_helper import add_transactions, insert_trans_entry
+from .mf_helper import insert_trans_entry
 from tasks.tasks import add_mf_transactions
 from .pull_kuvera import pull_kuvera
 
@@ -62,6 +62,7 @@ class FolioListView(ListView):
 
 class FolioTransactionsListView(ListView):
     template_name = 'mutualfunds/transactions_list.html'
+    ordering = ['-trans_date']
     def get_queryset(self):
         #folio = get_object_or_404(Folio, id=self.kwargs['id'])
         return MutualFundTransaction.objects.filter(folio__id=self.kwargs['id'])
@@ -261,8 +262,61 @@ class FolioDetailView(DetailView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         print(data)
+        id = data['object'].id
+        folio_obj = self.get_object()
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
+        data['category'] = folio_obj.fund.category
+        data['investment_style'] = folio_obj.fund.investment_style
+        data['1D'] = folio_obj.fund.return_1d
+        data['1W'] = folio_obj.fund.return_1w
+        data['1M'] = folio_obj.fund.return_1m
+        data['3M'] = folio_obj.fund.return_3m
+        data['6M'] = folio_obj.fund.return_6m
+        data['1Y'] = folio_obj.fund.return_1y
+        data['3Y'] = folio_obj.fund.return_3y
+        data['5Y'] = folio_obj.fund.return_5y
+        data['10Y'] = folio_obj.fund.return_10y
+        data['15Y'] = folio_obj.fund.return_15y
+        data['Inception'] = folio_obj.fund.return_incep
+        data['YTD'] = folio_obj.fund.return_ytd
+        try:
+            cat_returns = MFCategoryReturns.objects.get(category=folio_obj.fund.category)
+            data['cat_1D_avg'] = cat_returns.return_1d_avg
+            data['cat_1D_bot'] = cat_returns.return_1d_bot
+            data['cat_1D_top'] = cat_returns.return_1d_top
+            data['cat_1W_avg'] = cat_returns.return_1w_avg
+            data['cat_1W_bot'] = cat_returns.return_1w_bot
+            data['cat_1W_top'] = cat_returns.return_1w_top
+            data['cat_1M_avg'] = cat_returns.return_1m_avg
+            data['cat_1M_bot'] = cat_returns.return_1m_bot
+            data['cat_1M_top'] = cat_returns.return_1m_top
+            data['cat_3M_avg'] = cat_returns.return_3m_avg
+            data['cat_3M_bot'] = cat_returns.return_3m_bot
+            data['cat_3M_top'] = cat_returns.return_3m_top
+            data['cat_6M_avg'] = cat_returns.return_6m_avg
+            data['cat_6M_bot'] = cat_returns.return_6m_bot
+            data['cat_6M_top'] = cat_returns.return_6m_top
+            data['cat_1Y_avg'] = cat_returns.return_1y_avg
+            data['cat_1Y_bot'] = cat_returns.return_1y_bot
+            data['cat_1Y_top'] = cat_returns.return_1y_top
+            data['cat_3Y_avg'] = cat_returns.return_3y_avg
+            data['cat_3Y_bot'] = cat_returns.return_3y_bot
+            data['cat_3Y_top'] = cat_returns.return_3y_top
+            data['cat_5Y_avg'] = cat_returns.return_5y_avg
+            data['cat_5Y_bot'] = cat_returns.return_5y_bot
+            data['cat_5Y_top'] = cat_returns.return_5y_top
+            data['cat_10Y_avg'] = cat_returns.return_10y_avg
+            data['cat_10Y_bot'] = cat_returns.return_10y_bot
+            data['cat_10Y_top'] = cat_returns.return_10y_top
+            data['cat_YTD_avg'] = cat_returns.return_ytd_avg
+            data['cat_YTD_bot'] = cat_returns.return_ytd_bot
+            data['cat_YTD_top'] = cat_returns.return_ytd_top
+            data['cat_Inception_avg'] = cat_returns.return_inception_avg
+            data['cat_Inception_bot'] = cat_returns.return_inception_bot
+            data['cat_Inception_top'] = cat_returns.return_inception_top
+        except MFCategoryReturns.DoesNotExist:
+            print(f'not able to find returns for category {folio_obj.fund.category}')
         return data
 
 class FolioDeleteView(DeleteView):
@@ -278,8 +332,9 @@ class FolioDeleteView(DeleteView):
 
 class TransactionsListView(ListView):
     template_name = 'mutualfunds/transactions_list.html'
-    paginate_by = 15
+    #paginate_by = 15
     model = MutualFundTransaction
+    ordering = ['-trans_date']
 
 class TransactionDeleteView(DeleteView):
     template_name = 'mutualfunds/transaction_delete.html'

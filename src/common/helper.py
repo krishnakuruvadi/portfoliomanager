@@ -1,7 +1,7 @@
 from mftool import Mftool
 import datetime
-from common.models import MutualFund
-
+from common.models import MutualFund, MFCategoryReturns
+from shared.utils import get_float_or_none_from_string
 
 def update_mf_scheme_codes():
     print("inside update_mf_scheme_codes")
@@ -78,3 +78,46 @@ def get_scheme_codes(mf, as_json=False):
                                       'date':scheme[5]}
 
     return mf.render_response(scheme_info, as_json)
+
+def update_category_returns(json_input):
+    for k,v in json_input.items():
+        cat_row = None
+        try:
+            cat_row = MFCategoryReturns.objects.get(category=k)
+        except MFCategoryReturns.DoesNotExist:
+            cat_row = MFCategoryReturns.objects.create(category=k)
+        if cat_row:
+            cat_row.return_1d_avg = get_float_or_none_from_string(v['1D']['avg'])
+            cat_row.return_1d_top = get_float_or_none_from_string(v['1D']['top'])
+            cat_row.return_1d_bot = get_float_or_none_from_string(v['1D']['bottom'])
+            cat_row.return_1w_avg = get_float_or_none_from_string(v['1W']['avg'])
+            cat_row.return_1w_top = get_float_or_none_from_string(v['1W']['top'])
+            cat_row.return_1w_bot = get_float_or_none_from_string(v['1W']['bottom'])
+            cat_row.return_1m_avg = get_float_or_none_from_string(v['1M']['avg'])
+            cat_row.return_1m_top = get_float_or_none_from_string(v['1M']['top'])
+            cat_row.return_1m_bot = get_float_or_none_from_string(v['1M']['bottom'])
+            cat_row.return_3m_avg = get_float_or_none_from_string(v['3M']['avg'])
+            cat_row.return_3m_top = get_float_or_none_from_string(v['3M']['top'])
+            cat_row.return_3m_bot = get_float_or_none_from_string(v['3M']['bottom'])
+            cat_row.return_6m_avg = get_float_or_none_from_string(v['6M']['avg'])
+            cat_row.return_6m_top = get_float_or_none_from_string(v['6M']['top'])
+            cat_row.return_6m_bot = get_float_or_none_from_string(v['6M']['bottom'])
+            cat_row.return_1y_avg = get_float_or_none_from_string(v['1Y']['avg'])
+            cat_row.return_1y_top = get_float_or_none_from_string(v['1Y']['top'])
+            cat_row.return_1y_bot = get_float_or_none_from_string(v['1Y']['bottom'])
+            cat_row.return_3y_avg = get_float_or_none_from_string(v['3Y']['avg'])
+            cat_row.return_3y_top = get_float_or_none_from_string(v['3Y']['top'])
+            cat_row.return_3y_bot = get_float_or_none_from_string(v['3Y']['bottom'])
+            cat_row.return_5y_avg = get_float_or_none_from_string(v['5Y']['avg'])
+            cat_row.return_5y_top = get_float_or_none_from_string(v['5Y']['top'])
+            cat_row.return_5y_bot = get_float_or_none_from_string(v['5Y']['bottom'])
+            cat_row.return_10y_avg = get_float_or_none_from_string(v['10Y']['avg'])
+            cat_row.return_10y_top = get_float_or_none_from_string(v['10Y']['top'])
+            cat_row.return_10y_bot = get_float_or_none_from_string(v['10Y']['bottom'])
+            cat_row.return_ytd_avg = get_float_or_none_from_string(v['YTD']['avg'])
+            cat_row.return_ytd_top = get_float_or_none_from_string(v['YTD']['top'])
+            cat_row.return_ytd_bot = get_float_or_none_from_string(v['YTD']['bottom'])
+            cat_row.return_inception_avg = get_float_or_none_from_string(v['Inception']['avg'])
+            cat_row.return_inception_top = get_float_or_none_from_string(v['Inception']['top'])
+            cat_row.return_inception_bot = get_float_or_none_from_string(v['Inception']['bottom'])
+            cat_row.save()

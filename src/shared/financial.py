@@ -76,3 +76,5 @@ def xirr(cashflows,guess=0.1):
     
     #return secant_method(0.0001,lambda r: xnpv(r,cashflows),guess)
     return optimize.newton(lambda r: xnpv(r,cashflows),guess)
+
+# Source: https://github.com/peliot/XIRR-and-XNPV/blob/master/financial.py

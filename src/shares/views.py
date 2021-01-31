@@ -15,7 +15,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from .models import Share, Transactions
-from .shares_helper import insert_trans_entry, add_transactions, reconcile_share, update_shares_latest_val
+from .shares_helper import insert_trans_entry, shares_add_transactions, reconcile_share, update_shares_latest_val
 from shared.utils import *
 from shared.handle_get import *
 from shared.handle_real_time_data import get_latest_vals, get_forex_rate
@@ -172,7 +172,7 @@ def upload_transactions(request):
             print(file_locn)
             print(settings.MEDIA_ROOT)
             full_file_path = settings.MEDIA_ROOT + '/' + file_locn
-            add_transactions(broker, user, full_file_path)
+            shares_add_transactions(broker, user, full_file_path)
             fs.delete(file_locn)
     users = get_all_users()
     context = {'users':users}

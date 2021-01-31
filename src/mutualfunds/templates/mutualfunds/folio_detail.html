@@ -39,4 +39,131 @@
       </tr>
     </tbody>
   </table>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <h5>Returns</h5>
+        <table class="table table-condensed">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">Fund</th>
+              <th scope="col">Category Avg</th>
+              <th scope="col">Category Top</th>
+              <th scope="col">Category Bottom</th>
+              <th scope="col">Index</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="col">1D</th>
+              <td>{{1D}}</td>
+              <td>{{cat_1D_avg}}</td>
+              <td>{{cat_1D_top}}</td>
+              <td>{{cat_1D_bot}}</td>
+            </tr>
+            <tr>
+              <th scope="col">1W</th>
+              <td>{{1W}}</td>
+              <td>{{cat_1W_avg}}</td>
+              <td>{{cat_1W_top}}</td>
+              <td>{{cat_1W_bot}}</td>
+            </tr>
+            <tr>
+              <th scope="col">1M</th>
+              <td>{{1M}}</td>
+              <td>{{cat_1M_avg}}</td>
+              <td>{{cat_1M_top}}</td>
+              <td>{{cat_1M_bot}}</td>
+            </tr>
+            <tr>
+              <th scope="col">3M</th>
+              <td>{{3M}}</td>
+              <td>{{cat_3M_avg}}</td>
+              <td>{{cat_3M_top}}</td>
+              <td>{{cat_3M_bot}}</td>
+            </tr>
+            <tr>
+              <th scope="col">6M</th>
+              <td>{{6M}}</td>
+              <td>{{cat_6M_avg}}</td>
+              <td>{{cat_6M_top}}</td>
+              <td>{{cat_6M_bot}}</td>
+            </tr>
+            <tr>
+              <th scope="col">YTD</th>
+              <td>{{YTD}}</td>
+              <td>{{cat_YTD_avg}}</td>
+              <td>{{cat_YTD_top}}</td>
+              <td>{{cat_YTD_bot}}</td>
+            </tr>
+            <tr>
+              <th scope="col">1Y</th>
+              <td>{{1Y}}</td>
+              <td>{{cat_1Y_avg}}</td>
+              <td>{{cat_1Y_top}}</td>
+              <td>{{cat_1Y_bot}}</td>
+            </tr>
+            <tr>
+              <th scope="col">3Y</th>
+              <td>{{3Y}}</td>
+              <td>{{cat_3Y_avg}}</td>
+              <td>{{cat_3Y_top}}</td>
+              <td>{{cat_3Y_bot}}</td>
+            </tr>
+            <tr>
+              <th scope="col">5Y</th>
+              <td>{{5Y}}</td>
+              <td>{{cat_5Y_avg}}</td>
+              <td>{{cat_5Y_top}}</td>
+              <td>{{cat_5Y_bot}}</td>
+            </tr>
+            <tr>
+              <th scope="col">10Y</th>
+              <td>{{10Y}}</td>
+              <td>{{cat_10Y_avg}}</td>
+              <td>{{cat_10Y_top}}</td>
+              <td>{{cat_10Y_bot}}</td>
+            </tr>
+            <tr>
+              <th scope="col">15Y</th>
+              <td>{{15Y}}</td>
+              <td>{{cat_15Y_avg}}</td>
+              <td>{{cat_15Y_top}}</td>
+              <td>{{cat_15Y_bot}}</td>
+            </tr>
+            <tr>
+              <th scope="col">Inception</th>
+              <td>{{Inception}}</td>
+              <td>{{cat_Inception_avg}}</td>
+              <td>{{cat_Inception_top}}</td>
+              <td>{{cat_Inception_bot}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-sm">
+        <div class="row">
+          <div class="col">
+            Category
+          </div>
+          <div class="col">
+            {{category}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            Investment Style
+          </div>
+          <div class="col">
+            {{investment_style}}
+          </div>
+        </div>
+      </div>
+      <div class="col-sm">
+        One of three columns
+      </div>
+    </div>
+  </div>
   {% endblock content %}

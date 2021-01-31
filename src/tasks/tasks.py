@@ -10,23 +10,23 @@ import datetime
 import time
 from django.db.models import Q
 from mftool import Mftool
-from common.helper import update_mf_scheme_codes
+from common.helper import update_mf_scheme_codes, update_category_returns
 from shared.utils import get_float_or_zero_from_string, get_float_or_none_from_string, get_int_or_none_from_string
 from common.bsestar import download_bsestar_schemes
 from shared.handle_get import *
 from shared.handle_chart_data import get_investment_data
 from pages.models import InvestmentData
 from mutualfunds.models import Folio, MutualFundTransaction
-from mutualfunds.mf_helper import add_transactions
+from mutualfunds.mf_helper import mf_add_transactions
 import os
 import json
-from mutualfunds.mf_analyse import pull_ms
+from mutualfunds.mf_analyse import pull_ms, pull_category_returns
 from django.db import IntegrityError
 from goal.goal_helper import update_all_goals_contributions
 from .models import Task, TaskState
 from alerts.alert_helper import create_alert, Severity
 from shares.pull_zerodha import pull_zerodha
-from shares.shares_helper import add_transactions, update_shares_latest_val
+from shares.shares_helper import shares_add_transactions, update_shares_latest_val
 from shared.financial import xirr
 
 def set_task_state(name, state):
@@ -203,7 +203,7 @@ def clean_db():
 @task()
 def add_mf_transactions(broker, user, full_file_path):
     set_task_state('add_mf_transactions', TaskState.Running)
-    add_transactions(broker, user, full_file_path)
+    mf_add_transactions(broker, user, full_file_path)
     set_task_state('add_mf_transactions', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='0', hour='2'))
@@ -263,6 +263,8 @@ def update_shares_latest_vals():
 @db_periodic_task(crontab(minute='35', hour='2'))
 def analyse_mf():
     set_task_state('analyse_mf', TaskState.Running)
+    ret = pull_category_returns()
+    update_category_returns(ret)
     token = None
     folios = Folio.objects.all()
     finished_funds = set()
@@ -284,7 +286,9 @@ def analyse_mf():
         #{'blend': 'Large Growth', 'performance': {'2010': '—', '2011': '—', '2012': '—', '2013': '—', '2014': '1.55', '2015': '-14.06', '2016': '1.49', '2017': '13.54', '2018': '1.78', '2019': '31.88', 
         # 'YTD': '74.40', '1D': '-0.05', '1W': '-1.73', '1M': '8.27', '3M': '18.37', '1Y': '73.53', '3Y': '32.78', '5Y': '21.92', '10Y': '—', '15Y': '—', 'INCEPTION': '13.19'}}
         if 'blend' in data:
-            fund.category = data['blend']
+            fund.investment_style = data['blend']
+        if 'categoryName' in data:
+            fund.category = data['categoryName']
         if 'performance' in data:
             for k,v in data['performance'].items():
                 if k == 'YTD':
@@ -402,8 +406,9 @@ def pull_share_trans_from_broker(user, broker, user_id, passwd, pass_2fa):
 
 @db_task()
 def add_share_transactions(broker, user, full_file_path):
-    add_transactions(broker, user, full_file_path)
+    shares_add_transactions(broker, user, full_file_path)
     os.remove(full_file_path)
+
 
 '''
 #  example code below
