@@ -14,3 +14,57 @@ div {
     font-family: "Verdana";
     font-size: 14px;
 }
+
+.breadcrumb { 
+    list-style: none; 
+    overflow: hidden; 
+    font: 14px Verdana, Helvetica, Arial, Sans-Serif;
+}
+
+
+.breadcrumb li a {
+color: white;
+text-decoration: none; 
+padding: 5px 15px 5px 12px;
+background: transparent;
+position: relative; 
+display: block;
+float: left;
+z-index: 1;
+}
+
+.breadcrumb li a:after { 
+content: " "; 
+display: block; 
+width: 99%; 
+height: 50%;
+background: linear-gradient(to bottom, lightblue, rgb(63, 130, 218)); 
+position: absolute;
+top: 0px;
+left: 0px;
+z-index: -1; 
+-webkit-transform: skewX(35deg); 
+transform: skewX(35deg); 
+}
+
+.breadcrumb li a:before { 
+content: " "; 
+display: block; 
+width: 99%; 
+height: 50%;
+position: absolute;
+bottom: 0px;
+left: 0px;
+z-index: -1; 
+background: linear-gradient(to bottom,  rgb(63, 130, 218), black); 
+-webkit-transform: skewX(-35deg); 
+transform: skewX(-35deg); 
+}
+
+.breadcrumb li a:hover:after { 
+background: linear-gradient(to bottom, black,  rgb(63, 130, 218)); 
+}
+
+.breadcrumb li a:hover:before { 
+background: linear-gradient(to bottom,  rgb(63, 130, 218), lightblue); 
+}

@@ -8,7 +8,11 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
-
+  <ul class="breadcrumb">
+    <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+    <li><a href="{% url 'common:stocks-list' %}">Stocks</a></li>
+    <li><a href="#">{{ object.symbol }}</a></li>
+  </ul>
   <table class="table table-hover">
     <thead class="thead-dark">
       <tr>

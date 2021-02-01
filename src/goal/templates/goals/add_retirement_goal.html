@@ -13,7 +13,10 @@
 {% endblock viewname %}
 
 {% block content %}
-
+  <ul class="breadcrumb">
+    <li><a href="{% url 'goals:goal-list' %}">Goals</a></li>
+    <li><a href="#">Add Recurring Goal</a></li>
+  </ul>
   <form method="POST">
     {% csrf_token %} 
     <div class="row">

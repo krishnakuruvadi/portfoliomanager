@@ -8,7 +8,11 @@
 
 {% block viewname %} {{object.number }} : {{object.company}} {% endblock viewname %}
 
-{% block content %} 
+{% block content %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'epfs:epf-list' %}">EPFs</a></li>
+    <li><a href="#">{{ object.company }}</a></li>
+  </ul>
   <table>
     <tr>
       <td>#</td>

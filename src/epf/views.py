@@ -124,7 +124,7 @@ def show_contributions(request, id, year=None):
         entry['interest'] = contrib.interest_contribution
         fy_trans.append(entry)
      
-    context = {'fy_trans':fy_trans, 'object': {'number':epf_obj.number, 'company':epf_obj.company, 'fy':fy}}
+    context = {'fy_trans':fy_trans, 'object': {'number':epf_obj.number, 'id':epf_obj.id, 'company':epf_obj.company, 'fy':fy}}
     if epf_start_year < year:
         context['prev_link'] = '../transactions/'+str(year-epf_start_year-1)
     else:

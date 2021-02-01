@@ -9,7 +9,11 @@
 
 {% block viewname %} {{object.number }} {% endblock viewname %}
 
-{% block content %} 
+{% block content %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'ppfs:ppf-list' %}">PPFs</a></li>
+    <li><a href="#">{{ object.number }}</a></li>
+  </ul>
   <table>
     <tr>
       <td>Number</td>

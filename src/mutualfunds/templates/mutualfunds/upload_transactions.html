@@ -7,7 +7,10 @@
 {% block viewname %} Upload Transactions {% endblock viewname %}
 
 {% block content %}
-
+<ul class="breadcrumb">
+  <li><a href="{% url 'mutualfund:folio-list' %}">Mutual Funds</a></li>
+  <li><a href="#">Upload Transactions</a></li>
+</ul>
 <table class="table table-bordered">
   <tr>
     <td>

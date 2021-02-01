@@ -6,7 +6,11 @@
 
 {% block viewname %} {{object.fund.name }} {% endblock viewname %}
 
-{% block content %} 
+{% block content %}
+<ul class="breadcrumb">
+  <li><a href="{% url 'mutualfund:folio-list' %}">Mutual Funds</a></li>
+  <li><a href="#">{{object.fund.name }}</a></li>
+</ul>
   <table class="table table-hover">
     <thead class="thead-dark">
       <tr>
