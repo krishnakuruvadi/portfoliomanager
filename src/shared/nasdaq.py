@@ -3,6 +3,10 @@ import requests
 import csv
 import datetime
 import codecs
+from dateutil.parser import parse
+from pytz import timezone
+from common.helper import get_preferences
+from dateutil import tz
 
 class Nasdaq(Exchange):
     def __init__(self, stock):
@@ -26,7 +30,7 @@ class Nasdaq(Exchange):
                 'content-length': "166",
                 'Connection': "close",
                 'cache-control': "no-cache"
-                }
+            }
             get_response = requests.request('GET', urlData, headers=headers)
             print(get_response)
             if get_response.status_code == 200:
@@ -50,3 +54,82 @@ class Nasdaq(Exchange):
         print('done with request')
         print(response)
         return response
+    
+    def get_index_val(self):
+        get_response = None
+        for i in range(5):
+            urlData = "https://api.nasdaq.com/api/quote/"+self.stock+"/info?assetclass=index" 
+            print("accessing "+urlData)
+            headers =  {'Accept': 'application/json, text/plain, */*',
+                 'DNT': "1",
+                 'Origin': 'https://www.nasdaq.com/',
+                 'Sec-Fetch-Mode': 'cors',
+                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'}
+            get_response = requests.request('GET', urlData, headers=headers)
+            print(get_response)
+            if get_response.status_code == 200:
+                break
+        if get_response.status_code != 200:
+            return None
+        #print(get_response.content)
+        json_data = get_response.json()
+        data = dict()
+        if 'data' in json_data:
+            data['symbol'] = json_data['data']['symbol']
+            data['name'] = json_data['data']['companyName']
+            data['lastPrice'] = json_data['data']['primaryData']['lastSalePrice']
+            data['change'] = float(json_data['data']['primaryData']['netChange'])
+            data['pChange'] = json_data['data']['primaryData']['percentageChange']
+            data['pChange'] = float(data['pChange'].replace('%',''))
+            date_str = json_data['data']['primaryData']['lastTradeTimestamp']
+            date_str = date_str.replace('DATA AS OF', '')
+            date_str = date_str.replace(' ET', '')
+            date_obj = parse(date_str)
+            from_zone = timezone('America/Cancun')
+            date_obj = date_obj.replace(tzinfo=from_zone)
+            to_zone = tz.tzutc()
+            data['last_updated'] = date_obj.astimezone(to_zone).strftime("%Y-%m-%d %H:%M:%S")
+
+        return data
+
+    def get_all_index(self):
+        get_response = None
+        for i in range(5):
+            urlData = "https://api.nasdaq.com/api/quote/watchlist?symbol=comp%7cindex&symbol=ndx%7cindex&symbol=indu%7cindex&symbol=rui%7cindex&symbol=omxs30%7cindex&symbol=omxn40%7cindex&symbol=omxb10%7cindex&symbol=cac40%7cindex&symbol=nik%25sl%25o%7cindex" 
+            print("accessing "+urlData)
+            headers =  {'Accept': 'application/json, text/plain, */*',
+                 'DNT': "1",
+                 'Origin': 'https://www.nasdaq.com/',
+                 'Sec-Fetch-Mode': 'cors',
+                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'}
+            get_response = requests.request('GET', urlData, headers=headers)
+            print(get_response)
+            if get_response.status_code == 200:
+                break
+        if get_response.status_code != 200:
+            return None
+        #print(get_response.content)
+        json_data = get_response.json()
+        print(json_data)
+        data = dict()
+        if 'data' in json_data:
+            for ind in json_data['data']:
+                symbol = ind['symbol']
+                data[symbol] = dict()
+                data[symbol]['name'] = ind['companyName']
+                data[symbol]['lastPrice'] = ind['lastSalePrice']
+                data[symbol]['change'] = float(ind['netChange'])
+                data[symbol]['pChange'] = ind['percentageChange']
+                data[symbol]['pChange'] = float(data[symbol]['pChange'].replace('%',''))
+                try:
+                    date_str = ind['lastTradeTimestamp']
+                    date_str = date_str.replace('DATA AS OF', '')
+                    date_str = date_str.replace(' ET', '')
+                    date_obj = parse(date_str)
+                    from_zone = timezone('America/Cancun')
+                    date_obj = date_obj.replace(tzinfo=from_zone)
+                    to_zone = tz.tzutc()
+                    data[symbol]['last_updated'] = date_obj.astimezone(to_zone).strftime("%Y-%m-%d %H:%M:%S")
+                except Exception as ex:
+                    data[symbol]['last_updated'] = datetime.datetime.now()
+        return data

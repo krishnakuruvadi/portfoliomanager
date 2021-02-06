@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
+from solo.models import SingletonModel
 
 # Create your models here.
 
@@ -57,8 +58,12 @@ class MutualFund(models.Model):
     category = models.CharField(max_length=200, null=True, blank=True)
     investment_style = models.CharField(max_length=200, null=True, blank=True)
     as_on_date = models.DateField(_('As On Date'), null=True, blank=True)
+    
     def get_absolute_url(self):
         return reverse("common:mf-detail", kwargs={'id': self.id})
+    
+    def __str__(self):
+        return str(self.id) + ":" + self.code + ":" + self.name
 
 class MFCategoryReturns(models.Model):
     category = models.CharField(max_length=200, unique=True)
@@ -129,3 +134,15 @@ class HistoricalForexRates(models.Model):
     date = models.DateField(_('Date'))
     rate = models.DecimalField(_('Conversion Rate'), max_digits=20, decimal_places=2, null=False)
 
+class ScrollData(models.Model):
+    scrip = models.CharField(max_length=100, blank=False, null=False, unique=True)
+    val = models.DecimalField(max_digits=20, decimal_places=2, null=False)
+    change = models.DecimalField(max_digits=20, decimal_places=2, null=False)
+    percent = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+    last_updated = models.DateTimeField()
+
+    def __str__(self):
+        return str(self.id) + ":" + self.scrip
+
+class Preferences(SingletonModel):
+    timezone = models.CharField(max_length=100, default='Asia/Kolkata')

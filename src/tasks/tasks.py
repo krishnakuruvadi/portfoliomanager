@@ -20,7 +20,7 @@ from mutualfunds.models import Folio, MutualFundTransaction
 from mutualfunds.mf_helper import mf_add_transactions
 import os
 import json
-from mutualfunds.mf_analyse import pull_ms, pull_category_returns
+from mutualfunds.mf_analyse import pull_ms, pull_category_returns, pull_blend
 from django.db import IntegrityError
 from goal.goal_helper import update_all_goals_contributions
 from .models import Task, TaskState
@@ -28,6 +28,7 @@ from alerts.alert_helper import create_alert, Severity
 from shares.pull_zerodha import pull_zerodha
 from shares.shares_helper import shares_add_transactions, update_shares_latest_val
 from shared.financial import xirr
+from shared.nasdaq import Nasdaq
 
 def set_task_state(name, state):
     try:
@@ -273,6 +274,7 @@ def analyse_mf():
         if not folio.units or code in finished_funds:
             continue
         finished_funds.add(code)
+        fund = MutualFund.objects.get(code=code)
         data, token = pull_ms(code, list(), token=token)
         if not data:
             create_alert(
@@ -282,7 +284,7 @@ def analyse_mf():
             )
             continue
         print('analysed data for mf', data)
-        fund = MutualFund.objects.get(code=code)
+        
         #{'blend': 'Large Growth', 'performance': {'2010': '—', '2011': '—', '2012': '—', '2013': '—', '2014': '1.55', '2015': '-14.06', '2016': '1.49', '2017': '13.54', '2018': '1.78', '2019': '31.88', 
         # 'YTD': '74.40', '1D': '-0.05', '1W': '-1.73', '1M': '8.27', '3M': '18.37', '1Y': '73.53', '3Y': '32.78', '5Y': '21.92', '10Y': '—', '15Y': '—', 'INCEPTION': '13.19'}}
         if 'blend' in data:
@@ -395,6 +397,20 @@ def analyse_mf():
         fund.save()
     set_task_state('analyse_mf', TaskState.Successful)
 
+@db_periodic_task(crontab(day='1', minute='35', hour='3'))
+def mf_update_blend():
+    ms_codes = list()
+    folios = Folio.objects.all()
+    for folio in folios:
+        if folio.fund.ms_id:
+            ms_codes.append(folio.fund.ms_id)
+    blend_data = pull_blend(ms_codes)
+    print(blend_data)
+    for k,v in blend_data.items():
+        fund = MutualFund.objects.get(ms_id=k)
+        fund.investment_style = v
+        fund.save()
+    set_task_state('mf_update_blend', TaskState.Successful)
 
 @db_task()
 def pull_share_trans_from_broker(user, broker, user_id, passwd, pass_2fa):
@@ -408,6 +424,49 @@ def pull_share_trans_from_broker(user, broker, user_id, passwd, pass_2fa):
 def add_share_transactions(broker, user, full_file_path):
     shares_add_transactions(broker, user, full_file_path)
     os.remove(full_file_path)
+
+@db_periodic_task(crontab(minute='*/10'))
+def update_scroll_data():
+    from nsetools import Nse
+    from common.models import ScrollData
+    nse = Nse()
+    for item in nse.get_index_list():
+        data = nse.get_index_quote(item)
+        if data:
+            print(data)
+            scroll_item = None
+            try:
+                scroll_item = ScrollData.objects.get(scrip=item)
+                scroll_item.last_updated = datetime.datetime.now()
+                scroll_item.val = data['lastPrice']
+                scroll_item.change = data['change']
+                scroll_item.percent = data['pChange']
+                scroll_item.save()
+            except ScrollData.DoesNotExist:
+                scroll_item = ScrollData.objects.create(scrip=item,
+                                                        last_updated = datetime.datetime.now(),
+                                                        val = data['lastPrice'],
+                                                        change = data['change'],
+                                                        percent = data['pChange'])
+    n = Nasdaq('')
+    data = n.get_all_index()
+    if data:
+        for k, v in data.items():
+            scroll_item = None
+            try:
+                scroll_item = ScrollData.objects.get(scrip=v['name'])
+                scroll_item.last_updated = v['last_updated']
+                scroll_item.val = v['lastPrice']
+                scroll_item.change = v['change']
+                scroll_item.percent = v['pChange']
+                scroll_item.save()
+            except ScrollData.DoesNotExist:
+                scroll_item = ScrollData.objects.create(scrip=v['name'],
+                                                        last_updated = v['last_updated'],
+                                                        val = v['lastPrice'],
+                                                        change = v['change'],
+                                                        percent = v['pChange'])
+
 
 
 '''

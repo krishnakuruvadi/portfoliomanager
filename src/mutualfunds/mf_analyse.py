@@ -194,6 +194,10 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                                             if is_elem.tag_name == 'svg':
                                                 print('is_elem', is_elem.get_attribute('innerHTML'))
                                                 data['blend'] = is_elem.find_element_by_tag_name('title').text
+                                        blend_xpath = decode(b'DJ\n\x16\x03_\x07\x04\x08\t\x18\x01\x17\n\x1f\x16T\x1a\x0b\x01I\x02\x06\x16\x1942\x05\x0f\x01\x10\x03\x06\x1d\n\n\tT\x14\x03\x13\x17\x18X[\x1e\x01\x04\x01\x18\x11\x14\x12\x01\x06I\x18\x11\x00\x1b\nP9')
+                                        blend_elems = driver.find_elements_by_xpath(blend_xpath)
+                                        if len(blend_elems) == 1:
+                                            data['blend'] = blend_elems[0].get_attribute("title")
                                         '''
                                         cat_elems = driver.find_elements_by_xpath("//div[contains(text(),'Category')]")
                                         for cat_elem in cat_elems:
@@ -391,5 +395,62 @@ def pull_category_returns():
                 ret[cols[0].text][val_opts[i]]['avg'] = cols[1].text
                 ret[cols[0].text][val_opts[i]]['top'] = cols[2].text
                 ret[cols[0].text][val_opts[i]]['bottom'] = cols[3].text
+    driver.close()
+    return ret
+
+def pull_blend(codes):
+    ret = dict()
+    if len(codes) == 0:
+        return ret
+    
+    url = decode(b'\x03\x11\r\x07\x1cHKD\t\rY\x02\x1d\x16\x05\x0c\x17\x10\x1c\x06\x05\x19K\x1a\x18\x02]\x00\x00R\t\x1c\x0e\x17S\x00\tV\x11\x1a\x1c\x00\x18\x06\x0b\x12\n\x1c\x01\x19J\x0b\x12\x1c\x07\x08\x1f\x16W\x16\x1c\x02\x1cT)\x18\x19\x08\x07\x05\x0c\x000\x13R\x17\nF";Q:\x1c\r\x1d\x00\x0b\x04\nO"$,73KV%\')_2\x1e\x07\r\x1f\x1c*\x03\x16\x1e\x01VT\x05G\x13B\x18[\x19I\x0b_\x0eT\x17U\x05GI1\x11\x19\x17\x1c\x19\x0c\x0b-\x0fX09=T19)2\x12\x16O\x00\x00R\t\x1c\x0e\x17S\x00\t')
+    driver = webdriver.Chrome(executable_path=get_path_to_chrome_driver())
+    blendsFirst = ['Large', 'Mid', 'Small']
+    blendsSecond = ['Value', 'Blend', 'Growth']
+    count = 1
+    for i in range(9):
+        if len(codes) == len(ret):
+            break
+        bin = ''
+        for j in range (9):
+            if i == j:
+                bin = bin + '1'
+            else:
+                bin = bin + '0'
+            if j != 8:
+                bin = bin + '|'
+        cur_url = url.replace('1|0|0|0|0|0|0|0|0',bin)
+        print(f'getting {cur_url}')
+        driver.get(cur_url)
+        time.sleep(10)
+        while(True):
+            rows = driver.find_elements(By.TAG_NAME, "tr") # get all of the rows in the table
+            for row in rows:
+                # Get the columns (all the column 2)        
+                cols = row.find_elements(By.TAG_NAME, "td")
+                if len(cols) > 2:
+                    #print(cols[2].text)
+                    #cels = cols[2].find_elements_by_css_selector("*")
+                    #for cel in cels:
+                    #    print (cel.tag_name)
+                    #    print (cel.text)
+                    #print(cols[2].innerHTML)
+                    a_elements = cols[2].find_elements(By.TAG_NAME, "a")
+                    #print(len(a_elements))
+                    if len(a_elements) == 1:
+                        href=a_elements[0].get_attribute('href')
+                        id = href[href.find('id=')+3:href.find('id=')+13]
+                        mf_blend = blendsFirst[int(i/3)] + ' ' + blendsSecond[int(i%3)]
+                        print(f'{count} : {id} {cols[2].text} is of type {mf_blend}')
+                        count = count+1
+                        if id in codes:
+                            ret[id] = mf_blend
+            next_elem = driver.find_element_by_xpath("//a[text()='Next']")
+            class_exists = next_elem.get_attribute('class')
+            if next_elem.is_enabled and not class_exists:
+                next_elem.click()
+                time.sleep(5)
+            else:
+                break
     driver.close()
     return ret

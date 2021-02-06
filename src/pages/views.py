@@ -7,6 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import InvestmentData
 import json
+from dateutil import tz
+from pytz import timezone
+from common.helper import get_preferences
 
 # Create your views here.
 def home_view(request, *args, **kwargs): # *args, **kwargs
@@ -82,6 +85,29 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "remaining_per": all_remaining_per,
             "achieve_per": all_achieve_per,
         }
+    try:
+        investment_data = InvestmentData.objects.get(user='all')
+        context['investment_data'] = dict()
+        context['investment_data']['ppf'] = json.loads(investment_data.ppf_data.replace("\'", "\""))
+        context['investment_data']['epf'] = json.loads(investment_data.epf_data.replace("\'", "\""))
+        context['investment_data']['ssy'] = json.loads(investment_data.ssy_data.replace("\'", "\""))
+        context['investment_data']['fd'] =  json.loads(investment_data.fd_data.replace("\'", "\""))
+        context['investment_data']['espp'] = json.loads(investment_data.espp_data.replace("\'", "\""))
+        context['investment_data']['rsu'] = json.loads(investment_data.rsu_data.replace("\'", "\""))
+        context['investment_data']['shares'] = json.loads(investment_data.shares_data.replace("\'", "\""))
+        context['investment_data']['mf'] = json.loads(investment_data.mf_data.replace("\'", "\""))
+        context['investment_data']['total'] = json.loads(investment_data.total_data.replace("\'", "\""))
+        context['investment_data']['start_date'] =  investment_data.start_day_across_portfolio.strftime("%Y-%b-%d")
+        utc = investment_data.as_on_date
+        from_zone = tz.tzutc()
+        utc = utc.replace(tzinfo=from_zone)
+        preferred_tz = get_preferences('timezone')
+        if not preferred_tz:
+            preferred_tz = 'Asia/Kolkata'
+        context['investment_data']['as_on_date_time'] = utc.astimezone(timezone(preferred_tz)).strftime("%Y-%b-%d %H:%M:%S")
+
+    except InvestmentData.DoesNotExist:
+        pass
     #for user in users:
     #start_date = get_start_day_across_portfolio()
     #context['investment_data'] = get_investment_data(start_date)

@@ -12,7 +12,9 @@ from .views import (
     HistoricalStockPriceList,
     HistoricalMFPriceList,
     MfDetailView,
-    get_mutual_funds
+    get_mutual_funds,
+    ScrollDataView,
+    preferences
 )
 # Create your views here.
 
@@ -30,5 +32,7 @@ urlpatterns = [
     path('mf/bsestar', mf_bse_star, name='mf-bse-star'),
     path('mf/avail_funds/', get_mutual_funds),
     path('mf/<id>/', MfDetailView.as_view(), name='mf-detail'),
-    path('mf/', MFListView.as_view(), name='mf-list')
+    path('mf/', MFListView.as_view(), name='mf-list'),
+    path('preferences', preferences, name='preference'),
+    path('api/get/scrolldata', ScrollDataView.as_view())
 ]

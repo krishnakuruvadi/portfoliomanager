@@ -1,6 +1,6 @@
 from mftool import Mftool
 import datetime
-from common.models import MutualFund, MFCategoryReturns
+from common.models import MutualFund, MFCategoryReturns, Preferences
 from shared.utils import get_float_or_none_from_string
 
 def update_mf_scheme_codes():
@@ -121,3 +121,9 @@ def update_category_returns(json_input):
             cat_row.return_inception_top = get_float_or_none_from_string(v['Inception']['top'])
             cat_row.return_inception_bot = get_float_or_none_from_string(v['Inception']['bottom'])
             cat_row.save()
+
+def get_preferences(key):
+    config = Preferences.get_solo()
+    if hasattr(config, key):
+        return getattr(config, key)
+    return None

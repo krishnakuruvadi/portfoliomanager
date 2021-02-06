@@ -5,7 +5,7 @@ from django.views.generic import (
     ListView,
     DetailView
 )
-from .models import Stock, MutualFund, HistoricalStockPrice, HistoricalMFPrice
+from .models import Stock, MutualFund, HistoricalStockPrice, HistoricalMFPrice, ScrollData, Preferences
 from .helper import update_mf_scheme_codes
 from shared.handle_real_time_data import get_latest_vals, get_historical_mf_nav
 from dateutil.relativedelta import relativedelta
@@ -20,6 +20,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 import json
+from dateutil import tz
+from pytz import timezone
+from common.helper import get_preferences
+from pytz import common_timezones
 
 
 def common_list_view(request):
@@ -139,3 +143,46 @@ def get_mutual_funds(request):
         print('exception in AvailableMutualFunds', ex)
     #s = json.dumps(mfs)
     return JsonResponse(mfs, safe=False)
+
+class ScrollDataView(APIView):
+    authentication_classes = []
+    permission_classes = []
+    def get(self, request, format=None):
+        data = dict()
+        data['scroll_data'] = list()
+        scroll_objs = ScrollData.objects.all()
+        for scroll_obj in scroll_objs:
+            obj = dict()
+            obj['scrip'] = scroll_obj.scrip
+            obj['val'] = scroll_obj.val
+            obj['change'] = scroll_obj.change
+            obj['percent'] = scroll_obj.percent
+            utc = scroll_obj.last_updated
+            from_zone = tz.tzutc()
+            utc = utc.replace(tzinfo=from_zone)
+            preferred_tz = get_preferences('timezone')
+            if not preferred_tz:
+                preferred_tz = 'Asia/Kolkata'
+            obj['last_updated'] = utc.astimezone(timezone(preferred_tz)).strftime("%Y-%m-%d %H:%M:%S")
+            data['scroll_data'].append(obj)
+        return Response(data)
+
+def preferences(request):
+    template = 'common/preferences.html'
+    pref_obj = Preferences.get_solo()
+
+    if request.method == 'POST':
+        print(request.POST)
+        tz_pref = request.POST.get('timezone')
+        if tz_pref and tz_pref != '':
+            if isinstance(tz_pref, list): 
+                pref_obj.timezone = tz_pref[0]
+            else:
+                pref_obj.timezone = tz_pref
+            pref_obj.save()
+    
+    tzs = list()
+    for i_tz in common_timezones:
+        tzs.append(i_tz)
+    context = {'tz': pref_obj.timezone, 'tzs':tzs}
+    return render(request, template, context)

@@ -30,11 +30,41 @@
   <div class='col-sm-2'>
     <canvas id="categoryChart" width="200" height="200"></canvas>
   </div>
-  <div class='col-sm-2'></div>
-  <div class='col-sm-2'>
-    <canvas id="distributionChart" width="200" height="200"></canvas>
+  <div class='col-sm-4'>
+    <table>
+      {% for color in category_colors %}
+        <tr>
+          <td>
+            <div id="rectangle" style="width:30px;height:15px;background:{{color}}"></div>
+          </td>
+          <td>
+            {{category_labels|indexone:forloop.counter}}
+          </td>
+          <td>
+            {{category_vals|indexone:forloop.counter}} ({{category_percents|indexone:forloop.counter}}%)
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
   </div>
-  <div class='col-sm-2'></div>
+  <div class='col-sm-1'></div>
+  <div class='col-sm-3'>
+    <table>
+      {% for color in blend_colors %}
+        <tr>
+          <td>
+            <div id="rectangle" style="width:30px;height:15px;background:{{color}}"></div>
+          </td>
+          <td>
+            {{blend_labels|indexone:forloop.counter}}
+          </td>
+          <td>
+            {{blend_vals|indexone:forloop.counter}} ({{blend_percents|indexone:forloop.counter}}%)
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
   <div class='col-sm-2'>
     <canvas id="blendChart" width="200" height="200"></canvas>
   </div>
@@ -82,7 +112,10 @@ function setChart(){
         labels: blend_labels
       },
       options: {
-        responsive: true
+        responsive: true,
+        legend: {
+          display: false
+        }
       }
     };
     var categoryChart = new Chart(ctx,config);

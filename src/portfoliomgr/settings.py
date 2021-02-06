@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'channels',
     'rest_framework',
     'huey.contrib.djhuey',
+    'solo',
     # own
     'ppf',
     'ssy',

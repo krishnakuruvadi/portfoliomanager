@@ -44,6 +44,9 @@ class TaskListView(ListView):
             },
             'update_shares_latest_vals':{
                 'description':'Get latest vals of shares'
+            },
+            'mf_update_blend':{
+                'description':'Update latest blend of Mutual Funds'
             }
         }
         for task in available_tasks.keys():

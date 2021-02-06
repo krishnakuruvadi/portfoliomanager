@@ -92,10 +92,9 @@
 
 <script>
   {% block jquery %}
-    var investmentdataendpoint = '/api/chart/investmentdata/'
     var debt_equity_labels = ['Debt', 'Equity']
     var status_labels = ['Achieved', 'Remaining']
-
+    var investmentdata = {{investment_data|safe}}
     var users = {{users|safe}}
     var all = {{all|safe}}
     var debt_equity = [all.debt, all.equity]
@@ -160,26 +159,19 @@
       };
       window.setInterval(draw, 1000 / 30);
 
-      $.ajax({
-        method: "GET",
-        url: investmentdataendpoint,
-        success: function(investmentdata){
-          console.log('received investment data for chart')
-          console.log(investmentdata)
-          document.getElementById("myTempChart").style.display="none"
-          document.getElementById("tempChart").style.display="none"
-          document.getElementById("myChart").style.display="block"
-          setInvestmentChart(investmentdata)
-        },
-        error: function(error_data){
-          document.getElementById("myTempChart").style.display="none"
-          document.getElementById("tempChart").style.display="none"
-          document.getElementById("myChart").style.display="block"
-
-          console.log("error")
-          console.log(error_data)
-        }
-      })
+      if (jQuery.isEmptyObject(investmentdata)) {
+        document.getElementById("myTempChart").style.display="none"
+        document.getElementById("tempChart").style.display="none"
+        document.getElementById("myChart").style.display="block"
+        console.log("error: no investment data")
+      } else {
+        console.log('received investment data for chart')
+        console.log(investmentdata)
+        document.getElementById("myTempChart").style.display="none"
+        document.getElementById("tempChart").style.display="none"
+        document.getElementById("myChart").style.display="block"
+        setInvestmentChart(investmentdata)
+      }
     }
     function setInvestmentChart(investment_data) {
       var ctx = document.getElementById("myChart");
@@ -247,7 +239,7 @@
           responsive: true,
           title:      {
             display: true,
-            text:    "Portfolio"
+            text:    "Portfolio (Since "+investment_data.start_date+") As on "+investment_data.as_on_date_time
           },
           scales:     {
             xAxes: [{

@@ -486,6 +486,7 @@ def get_user_contributions(user_id):
         print("User with id ", user_id, " does not exist" )
         pass
 
+# home chart view
 def get_investment_data(start_date):
     data_start_date = start_date+ relativedelta(months=-1)
 
@@ -517,11 +518,11 @@ def get_investment_data(start_date):
     mf_qty = dict()
     
     while data_start_date + relativedelta(months=+1) < datetime.date.today():
+        print('Calculating for the month', data_start_date)
         total = 0
         data_end_date = data_start_date + relativedelta(months=+1)
         epf_entries = EpfEntry.objects.filter(trans_date__range=(data_start_date, data_end_date))
         for epf_entry in epf_entries:
-            print("epf entry")
             if epf_entry.entry_type.lower() == 'cr' or epf_entry.entry_type.lower() == 'credit':
                 total_epf += int(epf_entry.employee_contribution) + int(epf_entry.employer_contribution) + int(epf_entry.interest_contribution)
             else:
@@ -538,8 +539,6 @@ def get_investment_data(start_date):
         
         ppf_entries = PpfEntry.objects.filter(trans_date__range=(data_start_date, data_end_date))
         for ppf_entry in ppf_entries:
-            print("ppf entry")
-
             if ppf_entry.entry_type.lower() == 'cr' or ppf_entry.entry_type.lower() == 'credit':
                 total_ppf += int(ppf_entry.amount)
             else:
@@ -669,6 +668,8 @@ def get_investment_data(start_date):
                 share_qty[uni_name] += trans.quantity
             else:
                 share_qty[uni_name] -= trans.quantity
+        if len(share_transactions) == 0:
+            print(f'no transactions in shares in date range {data_start_date} and {data_end_date}')
         share_val = 0
         if data_start_date.year == 2020:
             print(share_qty)
@@ -684,16 +685,19 @@ def get_investment_data(start_date):
                             conv_val = get_conversion_rate('USD', 'INR', data_end_date)
                             #print('conversion value', conv_val)
                             if conv_val:
-                                share_val += float(conv_val)*float(v)*int(q)
+                                share_val += float(conv_val)*float(v)*float(q)
                                 found = True
                                 break
                         else:
-                            share_val += float(v)*int(q)
+                            share_val += float(v)*float(q)
                             found = True
                             break
                     if found:
                         break
+            else:
+                print(f'couldnt create stock object {s}')
         if share_val != 0:
+            print(f'share value is not zero {share_val}')
             if not shares_reset_on_zero:
                 shares_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
             shares_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':int(share_val)})
@@ -756,7 +760,9 @@ def get_investment_data(start_date):
             total_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
 
         data_start_date  = data_start_date+relativedelta(months=+1)
-    #print('shares data is:',shares_data)
+    print('shares data is:',shares_data)
+    print('returning', {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data})
+
     return {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data}
         
 

@@ -156,7 +156,13 @@
                 <a href="/alerts" style="padding-left:15px;"><i class="far fa-bell" aria-hidden="true" title="Alerts" style="font-size: 1.2em;"></i><sup id='alert-count'>0</sup></a>
               </div>
             </div>
-          </div>          
+          </div>
+
+          <div class="row no-gutters" style="margin-bottom: 10px;">
+            <div class='col-2' id='last-updated-scroll-data' style='text-align: center;'></div>
+            <div class='col-10'><marquee id="scroll-me"></marquee></div>
+          </div>
+     
           {% block canvas %} 
           <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
           {% endblock canvas %}
@@ -204,6 +210,43 @@
       $(document).ready(function(){
         {% block jquery %}{% endblock jquery %}
       });
+      function scroll_data() {
+
+          var scroll_data_api = '/common/api/get/scrolldata'
+          $.ajax({
+            method: "GET",
+            url: scroll_data_api,
+            success: function(data){
+              //console.log(data);
+              var items = data['scroll_data'];
+              var sc = '';
+              var last_updated = '';
+              for(i=0;i<items.length;i++){
+                sc = sc + '<b>' + items[i]['scrip'] + '</b>\xa0\xa0';
+                sc = sc + items[i]['val'].toString() + '\xa0\xa0';
+                if(items[i]['change']>0) {
+                  sc = sc + items[i]['change'].toString() + '\xa0(' + items[i]['percent'].toString() +'%)\xa0<span style="color:green"><i class="fas fa-arrow-up"></i></span>\xa0';
+                } else {
+                  sc = sc + items[i]['change'].toString() + '\xa0(' + items[i]['percent'].toString() +'%)\xa0<span style="color:red"><i class="fas fa-arrow-down"></i></span>\xa0';
+                }
+                sc = sc + '\xa0\xa0';
+                last_updated = items[i]['last_updated']
+              }
+              //console.log(sc)
+              var el = document.getElementById('scroll-me');
+              el.innerHTML = sc;
+              var last_updated_el = document.getElementById('last-updated-scroll-data');
+              last_updated_el.innerHTML = last_updated
+            },
+            error: function(error_data){
+              console.log("error")
+              console.log(error_data)
+            }
+          })
+        setTimeout(scroll_data, 5000);
+      }
+
+      scroll_data();
     </script>
   {% block javascript %}{% endblock %}
 

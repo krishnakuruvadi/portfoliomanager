@@ -73,19 +73,22 @@ def fund_insights(request):
     data = dict()
     category = dict()
     blend = dict()
+    total = 0
     for folio in queryset:
         if folio.fund.category:
             category[folio.fund.category] = add_two(category.get(folio.fund.category, 0), folio.latest_value)
         else:
-            category['Other'] = add_two(category.get('Other', 0), folio.latest_value)
+            category['Unknown'] = add_two(category.get('Unknown', 0), folio.latest_value)
         if folio.fund.investment_style:
-            blend[folio.fund.investment_style] = add_two(category.get(folio.fund.investment_style, 0) , folio.latest_value)
+            blend[folio.fund.investment_style] = add_two(blend.get(folio.fund.investment_style, 0) , folio.latest_value)
         else:
-            blend['Other'] = add_two(category.get('Other', 0), folio.latest_value)
-    
+            blend['Unknown'] = add_two(blend.get('Unknown', 0), folio.latest_value)
+        total = add_two(total, folio.latest_value)
+
     data['blend_labels'] = list()
     data['blend_vals'] = list()
     data['blend_colors'] = list()
+    data['blend_percents'] = list()
     for k,v in blend.items():
         if v:
             data['blend_labels'].append(k)
@@ -93,10 +96,14 @@ def fund_insights(request):
             import random
             r = lambda: random.randint(0,255)
             data['blend_colors'].append('#{:02x}{:02x}{:02x}'.format(r(), r(), r()))
+            h = float(v)*100/float(total)
+            h = int(round(h))
+            data['blend_percents'].append(h)
     
     data['category_labels'] = list()
     data['category_vals'] = list()
     data['category_colors'] = list()
+    data['category_percents'] = list()
     for k,v in category.items():
         if v:
             data['category_labels'].append(k)
@@ -104,6 +111,9 @@ def fund_insights(request):
             import random
             r = lambda: random.randint(0,255)
             data['category_colors'].append('#{:02x}{:02x}{:02x}'.format(r(), r(), r()))
+            h = float(v)*100/float(total)
+            h = int(round(h))
+            data['category_percents'].append(h)
     print('returning:', data)
     return render(request, template, data)
 
@@ -157,11 +167,11 @@ def fund_returns(request):
 
 def add_two(first, second):
     if first and second:
-        return first+second
+        return int(first+second)
     if first:
-        return first
+        return int(first)
     if second:
-        return second
+        return int(second)
     return None
 
 def add_folio(request):
