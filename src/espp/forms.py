@@ -3,6 +3,8 @@ from django.forms import SelectDateWidget, ChoiceField
 from .models import Espp
 import datetime
 from shared.handle_get import *
+from goal.goal_helper import get_goal_id_name_mapping_for_user
+
 
 class EsppModelForm(forms.ModelForm):
     class Meta:
@@ -38,12 +40,13 @@ class EsppModelForm(forms.ModelForm):
         for k,v in users.items():
             self.fields['user'].choices.append((k, v))
         print("in form user is ", self.instance.user)
-        goal_list = get_all_goals_id_to_name_mapping()
-        for k,v in goal_list.items():
-            self.fields['goal'].choices.append((k, v))
-        if self.instance.goal:
-            #self.instance.goal = get_goal_name_from_id(self.instance.goal)
-            self.initial['goal'] = self.instance.goal
+        if self.instance.user:
+            goal_list = get_goal_id_name_mapping_for_user(self.instance.user)
+            for k,v in goal_list.items():
+                self.fields['goal'].choices.append((k, v))
+            if self.instance.goal:
+                #self.instance.goal = get_goal_name_from_id(self.instance.goal)
+                self.initial['goal'] = self.instance.goal
     
     def clean_goal(self):
         goal = self.cleaned_data['goal']

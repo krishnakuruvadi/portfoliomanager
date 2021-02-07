@@ -46,6 +46,13 @@ class GoalDetailView(DetailView):
         print(data['object'])
         data['user_str'] = get_user_name_from_id(data['object'].user)
         data['target_date'] = data['object'].start_date+relativedelta(months=data['object'].time_period)
+        data['progress_data'] = dict()
+        id = data['object'].id
+        chart_data, ret = get_goal_yearly_contrib(id, None)
+        data['progress_data']['chart_data'] = chart_data
+        data['progress_data']['avg_growth'] = ret.get('avg_growth', 0)
+        data['progress_data']['avg_contrib'] = ret.get('avg_contrib', 0)
+        print("GoalProgressData - returning:", data)
         return data
 
 class GoalDeleteView(DeleteView):
@@ -249,7 +256,6 @@ def update_goal(request, id):
                 return render(request, template, context=context) 
     except Goal.DoesNotExist:
         pass
-
 
 class GoalNames(APIView):
     authentication_classes = []

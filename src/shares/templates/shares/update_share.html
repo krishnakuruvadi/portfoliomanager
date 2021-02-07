@@ -65,88 +65,22 @@
 
 {% endblock content %}
 
+{% block ajaxcalls %}
+          {
+            url      : '/goal/get-goals/{{user|safe}}',
+            data     : null,
+            callback : get_goals_and_set_goal
+          },
+{% endblock ajaxcalls %}
+
 {% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
   <script>
-    var users = {{users|safe}}
-    var sel_user = '{{user|safe}}'
-    var userdropdown = document.getElementById('id_user');
-    var opt = document.createElement('option');
-    // create text node to add to option element (opt)
-    opt.appendChild( document.createTextNode('') );
-    // set value property of opt
-    opt.value = ''; 
-    // add opt to end of select box (sel)
-    userdropdown.appendChild(opt);
-    console.log(users);
-    console.log(sel_user)
-    for (x in users) {
-      user = users[x]
-      // create new option element
-      var opt = document.createElement('option');
-      // create text node to add to option element (opt)
-      opt.appendChild( document.createTextNode(user) );
-      // set value property of opt
-      opt.value = x;
-      if (opt.value == sel_user) {
-        opt.selected = true;
-      }
-      // add opt to end of select box (sel)
-      userdropdown.appendChild(opt);
+    set_user_list({{users|safe}}, '{{user|safe}}');
+
+    function get_goals_and_set_goal(response) {
+      set_goals(response, '{{goal|safe}}');
     }
-    if (sel_user != '' && sel_user != 'AnonymousUser') {
-      var sel_goal = '{{goal|safe}}'
-      console.log(sel_goal)
-      $.ajax({
-        url: '/goal/get-goals/'+sel_user,
-        success: function (response) {
-          console.log(response)
-          var  new_options = response.goal_list;
-          $('#id_goal').empty();
-          $('#id_goal')
-            .append($('<option>', { value : '' })
-            .text(''));
-          $.each(new_options, function(key, value) {
-              console.log(key,value)
-              if(sel_goal == key) {
-                $('#id_goal')
-                  .append($('<option>', { value : key })
-                  .text(value)
-                  .attr('selected',true));
-              } else {
-                $('#id_goal')
-                  .append($('<option>', { value : key })
-                  .text(value));
-              }
-          });
-        }
-      });
-    } else {
-      $('#id_goal').empty();
-    }
-    $("#id_user").change(function () {
-        var user = $(this).val();
-        console.log(user)
-        if (user != '') {
-          $.ajax({
-            url: '/goal/get-goals/'+user,
-            success: function (response) {
-              console.log(response)
-              var  new_options = response.goal_list;
-              $('#id_goal').empty();
-              $('#id_goal')
-                .append($('<option>', { value : '' })
-                .text(''));
-              $.each(new_options, function(key, value) {
-                  console.log(key,value)
-                  $('#id_goal')
-                    .append($('<option>', { value : key })
-                    .text(value)); 
-              });
-            }
-          });
-        } else {
-          $('#id_goal').empty();
-        }
-    });
-</script>
+  </script>
 {% endblock %}

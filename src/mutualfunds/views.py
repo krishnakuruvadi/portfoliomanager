@@ -26,6 +26,7 @@ from rest_framework.response import Response
 from .mf_helper import insert_trans_entry
 from tasks.tasks import add_mf_transactions
 from .pull_kuvera import pull_kuvera
+from goal.goal_helper import get_goal_id_name_mapping_for_user
 
 # Create your views here.
 
@@ -409,12 +410,15 @@ def update_folio(request, id):
         
     else:
         users = get_all_users()
+
         context = {'users':users,
                    'folio':folio.folio,
                    'fund_name':folio.fund.name,
                    'user':folio.user,
                    'goal':folio.goal,
-                   'notes':folio.notes}
+                   'notes':folio.notes,
+                   'goals':get_goal_id_name_mapping_for_user(folio.user)}
+        print(context)
         return render(request, template, context)
     return HttpResponseRedirect("../")
 

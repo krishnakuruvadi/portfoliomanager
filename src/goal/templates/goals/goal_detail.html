@@ -98,25 +98,9 @@
   var distribution_colors = ["#f15664","#DC7633","#006f75","#92993c","#f9c5c6","#AA12E8","#e31219","#bfff00"]
   setChart()
 
-  var progress_endpoint = '/goal/api/chart/progress/{{object.id}}'
-  var progress_data = {}
-  $.ajax({
-    method:"GET",
-    url:progress_endpoint,
-    success: function(data){
-      console.log("data from progress api")
-      console.log(data)
-      progress_data = data
-      
-      //console.log('enabling additionalSimulation');
-      //document.getElementById('additionalSimulation').disabled = false;
-      setProgressChart()
-    },
-    error: function(error_data){
-      console.log("error")
-      console.log(error_data)
-    }
-  });
+  var progress_data = {{progress_data|safe}}
+  setProgressChart()
+
   $("#custom_growth").change(function () {
     console.log('change in custom growth detected')
     cgElem = document.getElementById("custom_growth")

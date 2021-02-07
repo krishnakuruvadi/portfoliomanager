@@ -135,33 +135,11 @@
 {% endblock content %}
 
 {% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
   <script>
-    var users = {{users|safe}}
-    var sel_user = '{{user|safe}}'
-    var userdropdown = document.getElementById('id_user');
-    var opt = document.createElement('option');
-    // create text node to add to option element (opt)
-    opt.appendChild( document.createTextNode('') );
-    // set value property of opt
-    opt.value = ''; 
-    // add opt to end of select box (sel)
-    userdropdown.appendChild(opt);
-    console.log(users);
-    console.log(sel_user)
-    for (x in users) {
-      user = users[x]
-      // create new option element
-      var opt = document.createElement('option');
-      // create text node to add to option element (opt)
-      opt.appendChild( document.createTextNode(user) );
-      // set value property of opt
-      opt.value = x;
-      if (opt.value == sel_user) {
-        opt.selected = true;
-      }
-      // add opt to end of select box (sel)
-      userdropdown.appendChild(opt);
-    }
+    set_user_list({{users|safe}}, '{{user|safe}}');
+    
     var exchange = '{{exchange|safe}}';
     var exchdropdown = document.getElementById('exchange');
     var exchs = ['BSE', 'NSE', 'NASDAQ', 'NYSE'];

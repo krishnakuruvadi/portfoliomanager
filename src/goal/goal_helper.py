@@ -95,3 +95,16 @@ def update_goal_contributions(id):
         goal_obj.save()
     except Exception as e:
         print(e)
+
+
+def get_goal_id_name_mapping_for_user(id):
+    data = dict()
+    try:
+        goal_list = dict()
+        goal_objs = Goal.objects.filter(user=id)
+        for goal_obj in goal_objs:
+            goal_list[goal_obj.id] = goal_obj.name
+        return goal_list
+    except Exception as e:
+        print(e)
+    return data

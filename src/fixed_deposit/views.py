@@ -14,6 +14,8 @@ from .fixed_deposit_helper import add_fd_entry, get_maturity_value
 from shared.handle_get import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from goal.goal_helper import get_goal_id_name_mapping_for_user
+
 # Create your views here.
 
 class FixedDepositListView(ListView):
@@ -140,7 +142,8 @@ def update_fixed_deposit(request, id):
             mat_date, val = get_maturity_value(int(principal), start_date, float(roi), int(time_period_days))
             print("calculated value", val)
             users = get_all_users()
-            context = {'users':users,'user':user, 'number':number, 'start_date':start_date, 'bank_name': bank_name, 'roi': roi,
+            goals = get_goal_id_name_mapping_for_user(user)
+            context = {'goals':goals, 'users':users,'user':user, 'number':number, 'start_date':start_date, 'bank_name': bank_name, 'roi': roi,
                 'time_period_days': time_period_days, 'principal': principal, 'final_val':val, 'notes': notes,
                 'goal':goal, 'mat_date':mat_date, 'operation': 'Edit Fixed Deposit'}
             return render(request, template, context=context)
@@ -150,7 +153,8 @@ def update_fixed_deposit(request, id):
             fd_obj = FixedDeposit.objects.get(id=id)
             # Always put date in %Y-%m-%d for chrome to show things properly
             users = get_all_users()
-            context = {'users':users,'user':fd_obj.user, 'number':fd_obj.number, 'start_date':fd_obj.start_date.strftime("%Y-%m-%d"), 'bank_name':fd_obj.bank_name,
+            goals = get_goal_id_name_mapping_for_user(fd_obj.user)
+            context = {'goals':goals, 'users':users,'user':fd_obj.user, 'number':fd_obj.number, 'start_date':fd_obj.start_date.strftime("%Y-%m-%d"), 'bank_name':fd_obj.bank_name,
                     'roi':fd_obj.roi, 'time_period_days': fd_obj.time_period, 'principal': fd_obj.principal, 'final_val':fd_obj.final_val,
                     'notes':fd_obj.notes, 'goal':fd_obj.goal, 'mat_date':fd_obj.mat_date.strftime("%Y-%m-%d"),
                     'operation': 'Edit Fixed Deposit'}
