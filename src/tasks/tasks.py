@@ -29,6 +29,7 @@ from shares.pull_zerodha import pull_zerodha
 from shares.shares_helper import shares_add_transactions, update_shares_latest_val
 from shared.financial import xirr
 from shared.nasdaq import Nasdaq
+from django.utils import timezone
 
 def set_task_state(name, state):
     try:
@@ -428,26 +429,36 @@ def add_share_transactions(broker, user, full_file_path):
 @db_periodic_task(crontab(minute='*/10'))
 def update_scroll_data():
     from nsetools import Nse
-    from common.models import ScrollData
+    from common.models import ScrollData, Preferences
+    pref_obj = Preferences.get_solo()
+    sel_indexes = list()
+    if pref_obj.indexes_to_scroll:
+        for index in pref_obj.indexes_to_scroll.split('|'):
+            sel_indexes.append(index)
+
     nse = Nse()
     for item in nse.get_index_list():
         data = nse.get_index_quote(item)
         if data:
-            print(data)
+            #print(data)
             scroll_item = None
             try:
                 scroll_item = ScrollData.objects.get(scrip=item)
-                scroll_item.last_updated = datetime.datetime.now()
+                scroll_item.last_updated = timezone.now()
                 scroll_item.val = data['lastPrice']
                 scroll_item.change = data['change']
                 scroll_item.percent = data['pChange']
-                scroll_item.save()
             except ScrollData.DoesNotExist:
                 scroll_item = ScrollData.objects.create(scrip=item,
-                                                        last_updated = datetime.datetime.now(),
+                                                        last_updated = timezone.now(),
                                                         val = data['lastPrice'],
                                                         change = data['change'],
                                                         percent = data['pChange'])
+            if len(sel_indexes) == 0 or item in sel_indexes:
+                scroll_item.display = True
+            else:
+                scroll_item.display = False
+            scroll_item.save()
     n = Nasdaq('')
     data = n.get_all_index()
     if data:
@@ -459,14 +470,17 @@ def update_scroll_data():
                 scroll_item.val = v['lastPrice']
                 scroll_item.change = v['change']
                 scroll_item.percent = v['pChange']
-                scroll_item.save()
             except ScrollData.DoesNotExist:
                 scroll_item = ScrollData.objects.create(scrip=v['name'],
                                                         last_updated = v['last_updated'],
                                                         val = v['lastPrice'],
                                                         change = v['change'],
                                                         percent = v['pChange'])
-
+            if len(sel_indexes) == 0 or v['name'] in sel_indexes:
+                scroll_item.display = True
+            else:
+                scroll_item.display = False
+            scroll_item.save()
 
 
 '''

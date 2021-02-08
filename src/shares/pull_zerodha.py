@@ -12,6 +12,7 @@ import pprint
 import json
 from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.keys import Keys
+import re
 
 def get_path_to_chrome_driver():
     path = pathlib.Path(__file__).parent.parent.parent.absolute()
@@ -45,19 +46,24 @@ def pull_zerodha(userid, passwd, pin):
     pin_element.send_keys(pin)
     submit_button = driver.find_element_by_xpath('//button[text()="Continue "]')
     submit_button.click()
+    time.sleep(5)
+    if driver.current_url != url:
+        driver.get(url)
+        time.sleep(5)
 
     try:
-        time.sleep(5)
-        from_date = datetime.date(year=2013,month=4,day=1)
-        while from_date < datetime.date.today():
-            next_date = from_date + relativedelta(months=12)
-            end_date = next_date + relativedelta(days=-1)
-            if end_date > datetime.date.today():
-                end_date = datetime.date.today()
-            date_string = from_date.strftime("%Y-%m-%d") + " ~ " + end_date.strftime("%Y-%m-%d")
+        time.sleep(5) 
+        #from_date = datetime.date(year=2013,month=4,day=1)
+        yr = datetime.date.today().year
+        while True:
+            from_date = datetime.date(year=yr, month=1, day=1)
+            to_date = datetime.date(year=yr, month=12, day=31)
+            if to_date > datetime.date.today():
+                to_date = datetime.date.today()
+            date_string = from_date.strftime("%Y-%m-%d") + " ~ " + to_date.strftime("%Y-%m-%d")
             print(date_string)
-            view_element =  WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[text()[contains(.,"View")]]')))
-
+            #view_element =  WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[text()[contains(.,"View")]]')))
+            view_element =  WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[@type="submit" and @class="btn-blue"]')))
             date_range = driver.find_element_by_name('date')
             date_range.clear()
             time.sleep(5)
@@ -67,11 +73,12 @@ def pull_zerodha(userid, passwd, pin):
             time.sleep(5)
             view_element.click()
             
-            WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[text()[contains(.,"View")]]')))
+            #WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[text()[contains(.,"View")]]')))
+            WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[@type="submit" and @class="btn-blue"]')))
             if len(driver.find_elements_by_xpath("//a[text()[contains(.,'CSV')]]")) > 0:
                 dload_elem = driver.find_element_by_xpath("//a[text()[contains(.,'CSV')]]")
                 dload_elem.click()
-                dload_file = os.path.join(dload_path, userid+'_tradebook_'+from_date.strftime("%Y-%m-%d") + "_to_" + end_date.strftime("%Y-%m-%d")+'.csv')
+                dload_file = os.path.join(dload_path, userid+'_tradebook_'+from_date.strftime("%Y-%m-%d") + "_to_" + to_date.strftime("%Y-%m-%d")+'.csv')
                 for _ in range(10):
                     if os.path.exists(dload_file):
                         break
@@ -79,7 +86,16 @@ def pull_zerodha(userid, passwd, pin):
                 dload_files.append(dload_file)
             else:
                 print(f'couldnt download any transactions for period {date_string}')
-            from_date = next_date
+                if len(driver.find_elements_by_xpath("//h3[@id='mainText' and @text='Something went wrong']")) > 0:
+                    break
+                if len(driver.find_elements_by_xpath("//h3[@id='mainText']"))>0:
+                    h3_elem = driver.find_element_by_xpath("//h3[@id='mainText']")
+                    print(f'h3 element found with text {h3_elem.text}')
+                src = driver.page_source
+                text_found = re.search(r'Something went wrong', src)
+                if text_found:
+                    break
+            yr = yr -1
 
         userid_elem = driver.find_element_by_xpath("//a[@class='dropdown-label user-id']")
         userid_elem.click()

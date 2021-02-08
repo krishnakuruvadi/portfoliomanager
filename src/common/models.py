@@ -140,9 +140,11 @@ class ScrollData(models.Model):
     change = models.DecimalField(max_digits=20, decimal_places=2, null=False)
     percent = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     last_updated = models.DateTimeField()
+    display = models.BooleanField(default=True)
 
     def __str__(self):
         return str(self.id) + ":" + self.scrip
 
 class Preferences(SingletonModel):
     timezone = models.CharField(max_length=100, default='Asia/Kolkata')
+    indexes_to_scroll = models.CharField(max_length=20000, null=True, blank=True)

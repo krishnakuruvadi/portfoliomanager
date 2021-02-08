@@ -7,6 +7,8 @@ from dateutil.parser import parse
 from pytz import timezone
 from common.helper import get_preferences
 from dateutil import tz
+from django.utils import timezone
+from shared.utils import get_float_or_zero_from_string
 
 class Nasdaq(Exchange):
     def __init__(self, stock):
@@ -50,7 +52,7 @@ class Nasdaq(Exchange):
                     latest_val = v.strip()
 
             if date and latest_val:
-                response[date] = float(latest_val.replace('$',''))
+                response[date] = get_float_or_zero_from_string(latest_val.replace('$',''))
         print('done with request')
         print(response)
         return response
@@ -78,9 +80,9 @@ class Nasdaq(Exchange):
             data['symbol'] = json_data['data']['symbol']
             data['name'] = json_data['data']['companyName']
             data['lastPrice'] = json_data['data']['primaryData']['lastSalePrice']
-            data['change'] = float(json_data['data']['primaryData']['netChange'])
+            data['change'] = get_float_or_zero_from_string(json_data['data']['primaryData']['netChange'])
             data['pChange'] = json_data['data']['primaryData']['percentageChange']
-            data['pChange'] = float(data['pChange'].replace('%',''))
+            data['pChange'] = get_float_or_zero_from_string(data['pChange'].replace('%',''))
             date_str = json_data['data']['primaryData']['lastTradeTimestamp']
             date_str = date_str.replace('DATA AS OF', '')
             date_str = date_str.replace(' ET', '')
@@ -110,7 +112,7 @@ class Nasdaq(Exchange):
             return None
         #print(get_response.content)
         json_data = get_response.json()
-        print(json_data)
+        #print(json_data)
         data = dict()
         if 'data' in json_data:
             for ind in json_data['data']:
@@ -118,9 +120,9 @@ class Nasdaq(Exchange):
                 data[symbol] = dict()
                 data[symbol]['name'] = ind['companyName']
                 data[symbol]['lastPrice'] = ind['lastSalePrice']
-                data[symbol]['change'] = float(ind['netChange'])
+                data[symbol]['change'] = get_float_or_zero_from_string(ind['netChange'])
                 data[symbol]['pChange'] = ind['percentageChange']
-                data[symbol]['pChange'] = float(data[symbol]['pChange'].replace('%',''))
+                data[symbol]['pChange'] = get_float_or_zero_from_string(data[symbol]['pChange'].replace('%',''))
                 try:
                     date_str = ind['lastTradeTimestamp']
                     date_str = date_str.replace('DATA AS OF', '')
@@ -131,5 +133,5 @@ class Nasdaq(Exchange):
                     to_zone = tz.tzutc()
                     data[symbol]['last_updated'] = date_obj.astimezone(to_zone).strftime("%Y-%m-%d %H:%M:%S")
                 except Exception as ex:
-                    data[symbol]['last_updated'] = datetime.datetime.now()
+                    data[symbol]['last_updated'] = timezone.now()
         return data

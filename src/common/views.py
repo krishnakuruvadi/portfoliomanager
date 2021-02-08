@@ -24,6 +24,8 @@ from dateutil import tz
 from pytz import timezone
 from common.helper import get_preferences
 from pytz import common_timezones
+from shared.nasdaq import Nasdaq
+from nsetools import Nse
 
 
 def common_list_view(request):
@@ -152,19 +154,20 @@ class ScrollDataView(APIView):
         data['scroll_data'] = list()
         scroll_objs = ScrollData.objects.all()
         for scroll_obj in scroll_objs:
-            obj = dict()
-            obj['scrip'] = scroll_obj.scrip
-            obj['val'] = scroll_obj.val
-            obj['change'] = scroll_obj.change
-            obj['percent'] = scroll_obj.percent
-            utc = scroll_obj.last_updated
-            from_zone = tz.tzutc()
-            utc = utc.replace(tzinfo=from_zone)
-            preferred_tz = get_preferences('timezone')
-            if not preferred_tz:
-                preferred_tz = 'Asia/Kolkata'
-            obj['last_updated'] = utc.astimezone(timezone(preferred_tz)).strftime("%Y-%m-%d %H:%M:%S")
-            data['scroll_data'].append(obj)
+            if scroll_obj.display:
+                obj = dict()
+                obj['scrip'] = scroll_obj.scrip
+                obj['val'] = scroll_obj.val
+                obj['change'] = scroll_obj.change
+                obj['percent'] = scroll_obj.percent
+                utc = scroll_obj.last_updated
+                from_zone = tz.tzutc()
+                utc = utc.replace(tzinfo=from_zone)
+                preferred_tz = get_preferences('timezone')
+                if not preferred_tz:
+                    preferred_tz = 'Asia/Kolkata'
+                obj['last_updated'] = utc.astimezone(timezone(preferred_tz)).strftime("%Y-%m-%d %H:%M:%S")
+                data['scroll_data'].append(obj)
         return Response(data)
 
 def preferences(request):
@@ -180,9 +183,39 @@ def preferences(request):
             else:
                 pref_obj.timezone = tz_pref
             pref_obj.save()
-    
+        sel_indexes = request.POST.getlist('index_scroll')
+        if sel_indexes:
+            sel_index_str = None
+            for sel_index in sel_indexes:
+                if not sel_index_str:
+                    sel_index_str = sel_index
+                else:
+                    sel_index_str = sel_index_str + '|' + sel_index
+            if sel_index_str:
+                print(f'sel_index_str {sel_index_str}')
+                pref_obj.indexes_to_scroll = sel_index_str
+                pref_obj.save()                
+ 
     tzs = list()
     for i_tz in common_timezones:
         tzs.append(i_tz)
-    context = {'tz': pref_obj.timezone, 'tzs':tzs}
+    avail_indexes = list()
+    n = Nasdaq('')
+    index_data = n.get_all_index()
+    for _,v in index_data.items():
+        avail_indexes.append(v['name'])
+    
+    nse = Nse()
+    for item in nse.get_index_list():
+        avail_indexes.append(item)
+    
+    sel_indexes = list()
+    if pref_obj.indexes_to_scroll:
+        for index in pref_obj.indexes_to_scroll.split('|'):
+            sel_indexes.append(index)
+    else:
+        for index in avail_indexes:
+            sel_indexes.append(index)
+
+    context = {'tz': pref_obj.timezone, 'tzs':tzs, 'indexes':avail_indexes, 'sel_indexes':sel_indexes}
     return render(request, template, context)
