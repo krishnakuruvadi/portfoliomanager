@@ -7,13 +7,14 @@
 
 {%block canvas %}{% endblock canvas %}
 
-{% block viewname %} {{object.number }} {% endblock viewname %}
-
-{% block content %}
+{% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'ppfs:ppf-list' %}">PPFs</a></li>
     <li><a href="#">{{ object.number }}</a></li>
   </ul>
+{% endblock viewname %}
+
+{% block content %}
   <table>
     <tr>
       <td>Number</td>
@@ -38,16 +39,22 @@
   </div>
 {% endblock content %}
 
+
+{% block ajaxcalls %}
+          {
+            url      : '/ppf/api/chart/data/{{ object.number }}',
+            data     : null,
+            callback : setChart
+          },
+{% endblock ajaxcalls %}
+
+
+{% block javascript %}
 <script>
-{% block jquery %}
-var endpoint = '/ppf/api/chart/data/{{ object.number }}'
-var principal_values = []
-var interest_values = []
-var bal_values = []
-$.ajax({
-  method: "GET",
-  url: endpoint,
-  success: function(data){
+  function setChart(data) {
+    var principal_values = []
+    var interest_values = []
+    var bal_values = []
     console.log(data)
     principal_values = data.ppf_trans_principal
     interest_values = data.ppf_trans_interest
@@ -61,86 +68,78 @@ $.ajax({
     console.log(interest_values)
     console.log("balance values")
     console.log(bal_values)
-    setChart()
-  },
-  error: function(error_data){
-    console.log("error")
-    console.log(error_data)
-  }
-})
-
-function setChart(){
-  var ctx = document.getElementById("myChart");
-  var config = {
-    type:    'line',
-    data:    {
-      datasets: [
-        {
-          label: "Balance",
-          data: bal_values,
-          fill: false,
-          borderColor: 'green'
-        },
-        {
-          label: "Principal",
-          data: principal_values,
-          fill: false,
-          borderColor: 'red'
-        },
-        {
-          label: "Interest",
-          data:  interest_values,
-          fill:  false,
-          borderColor: 'blue'
-        },
-        {
-          label: "Projeted Principal",
-          data: exp_principal_values,
-          fill: true,
-          borderColor: 'red'
-        },
-        {
-          label: "Projected Interest",
-          data:  exp_interest_values,
-          fill:  true,
-          borderColor: 'blue'
-        },
-        {
-          label: "Projected Balance",
-          data:  exp_bal_values,
-          fill:  true,
-          borderColor: 'green'
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      title:      {
-        display: true,
-        text:    "PPF"
-      },
-      scales:     {
-        xAxes: [{
-          type:       "time",
-          time:       {
-            format: 'YYYY-MM-DD',
-            tooltipFormat: 'll'
+  
+    var ctx = document.getElementById("myChart");
+    var config = {
+      type:    'line',
+      data:    {
+        datasets: [
+          {
+            label: "Balance",
+            data: bal_values,
+            fill: false,
+            borderColor: 'green'
           },
-          scaleLabel: {
-            display:     true,
-            labelString: 'Date'
+          {
+            label: "Principal",
+            data: principal_values,
+            fill: false,
+            borderColor: 'red'
+          },
+          {
+            label: "Interest",
+            data:  interest_values,
+            fill:  false,
+            borderColor: 'blue'
+          },
+          {
+            label: "Projeted Principal",
+            data: exp_principal_values,
+            fill: true,
+            borderColor: 'red'
+          },
+          {
+            label: "Projected Interest",
+            data:  exp_interest_values,
+            fill:  true,
+            borderColor: 'blue'
+          },
+          {
+            label: "Projected Balance",
+            data:  exp_bal_values,
+            fill:  true,
+            borderColor: 'green'
           }
-        }],
-        yAxes: [{
-          scaleLabel: {
-            display:     true,
-            labelString: 'Amount'
-          }
-        }]
+        ]
+      },
+      options: {
+        responsive: true,
+        title:      {
+          display: true,
+          text:    "PPF"
+        },
+        scales:     {
+          xAxes: [{
+            type:       "time",
+            time:       {
+              format: 'YYYY-MM-DD',
+              tooltipFormat: 'll'
+            },
+            scaleLabel: {
+              display:     true,
+              labelString: 'Date'
+            }
+          }],
+          yAxes: [{
+            scaleLabel: {
+              display:     true,
+              labelString: 'Amount'
+            }
+          }]
+        }
       }
-    }
-  };
-  var myChart = new Chart(ctx,config); 
-}
-{% endblock jquery %}
+    };
+    var myChart = new Chart(ctx,config); 
+  }
 </script>
+{% endblock javascript %}

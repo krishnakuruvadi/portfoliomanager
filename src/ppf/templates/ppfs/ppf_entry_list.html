@@ -5,10 +5,15 @@
     <a style="padding-left:25px;" href="../add-transaction"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
 {% endblock applicableactions %} 
 
-{% block viewname %} PPF Transactions {% endblock %} 
-
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'ppfs:ppf-list' %}">PPF</a></li>
+    <li><a href="#">PPF Transactions </a></li>
+  </ul>
+{% endblock %} 
+{% block canvas %}{% endblock canvas %}
 {% block content %}
-    <table class="table table-hover">
+    <table class="table table-hover" id="trans-table">
         <thead class="thead-dark">
             <tr>
             <th scope="col">#</th>
@@ -35,3 +40,13 @@
         </tbody>
     </table>
 {% endblock %}
+
+<script>
+    {% block jquery %}
+        $('#trans-table').DataTable({
+            "columnDefs": [
+                { "type": "date", "targets": [1] }
+            ]
+        });
+    {% endblock jquery %}
+  </script>

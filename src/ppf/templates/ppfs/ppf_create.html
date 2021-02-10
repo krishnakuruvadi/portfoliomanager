@@ -5,14 +5,6 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block viewname %}
-  {% if object %}
-    Update PPF
-  {% else %}
-    Create PPF
-  {% endif %}
-{% endblock viewname %}
-
-{% block content %}
   <ul class="breadcrumb">
     <li><a href="{% url 'ppfs:ppf-list' %}">PPFs</a></li>
     <li><a href="#">  {% if object %}
@@ -21,6 +13,9 @@
       Create PPF
     {% endif %}</a></li>
   </ul>
+{% endblock viewname %}
+
+{% block content %}
   <form action="." method="POST">
     {% csrf_token %} {{ form.as_p }}
     <input type="submit" value="Submit" class="btn btn-primary"/>&nbsp;<a href="../" class="btn btn-danger" role="button">Cancel</a>

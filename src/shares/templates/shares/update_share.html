@@ -4,7 +4,12 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} Update Share {% endblock viewname %}
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'shares:shares-list' %}">Shares</a></li>
+    <li><a href="#">Update Share</a></li>
+  </ul>
+{% endblock viewname %}
 
 {% block content %}
 <form method="POST">

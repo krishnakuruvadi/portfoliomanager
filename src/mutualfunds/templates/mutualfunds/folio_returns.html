@@ -1,19 +1,9 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} <ul class="nav nav-pills">
-  <li class="nav-item">
-    <a class="nav-link" href="../mutualfunds/">Folios</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link active" href="#">Funds & Returns</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="insights">Insights</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link disabled" href="#">Disabled</a>
-  </li>
-</ul>
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Mutual Funds</a></li>
+  </ul>
 {% endblock %} 
 
 {% block applicableactions %} 
@@ -25,7 +15,26 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
-<h4>All Folios</h4>
+<table class="table table-borderless">
+  <tr>
+    <td>
+      <ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link" href="../mutualfunds/">Folios</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Funds & Returns</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="insights">Insights</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" href="#">Disabled</a>
+        </li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
   <table class="table table-hover" id="folio-table">
     <thead class="thead-dark">

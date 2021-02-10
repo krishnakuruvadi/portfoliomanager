@@ -4,10 +4,14 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} Add PPF transaction {% endblock viewname %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'ppfs:ppf-list' %}">PPFs</a></li>
+    <li><a href="#">Add PPF transaction</a></li>
+  </ul>
+{% endblock viewname %}
 
 {% block content %}
-
   <form action="." method="POST">
     {% csrf_token %} {{ form.as_p }}
     <input type="submit" value="Submit" class="btn btn-primary"/>&nbsp;<a href="../" class="btn btn-danger" role="button">Cancel</a>

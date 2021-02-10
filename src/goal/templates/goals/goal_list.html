@@ -1,6 +1,10 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} Goals {% endblock %} 
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="#">Goals</a></li>
+  </ul>
+{% endblock %} 
 
 {% block applicableactions %}
     <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add Goal" style="font-size: 1.2em;"></i></a>

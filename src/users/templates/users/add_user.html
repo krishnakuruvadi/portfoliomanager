@@ -5,18 +5,19 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block viewname %}
-  {% if name %}
-    Update User
-  {% else %}
-    Add User
-  {% endif %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'users:user-list' %}">Users</a></li>
+    <li><a href="#">
+      {% if name %}
+        Update User
+      {% else %}
+        Add User
+      {% endif %}
+    </a></li>
+  </ul>
 {% endblock viewname %}
 
 {% block content %}
-  <ul class="breadcrumb">
-    <li><a href="{% url 'users:user-list' %}">Users</a></li>
-    <li><a href="#">Add User</a></li>
-  </ul>
   <form method="POST">
     {% csrf_token %}
     <div class="row">

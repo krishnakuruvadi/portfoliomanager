@@ -1,6 +1,11 @@
 {% extends 'base.html' %} 
 {% load template_filters %}
-{% block viewname %} Fixed Deposits {% endblock %} 
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Fixed Deposits</a></li>
+  </ul>
+{% endblock %} 
 
 {% block applicableactions %} 
     <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add Fixed Deposit" style="font-size: 1.2em;"></i></a>

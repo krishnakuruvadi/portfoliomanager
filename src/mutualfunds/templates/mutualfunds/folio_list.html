@@ -1,19 +1,9 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} <ul class="nav nav-pills">
-  <li class="nav-item">
-    <a class="nav-link active" href="#">Folios</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="returns">Funds & Returns</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="insights">Insights</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link disabled" href="#">Disabled</a>
-  </li>
-</ul>
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Mutual Funds</a></li>
+  </ul>
 {% endblock %} 
 
 {% block applicableactions %} 
@@ -29,7 +19,20 @@
 {% block content %}
 <table class="table table-borderless">
   <tr>
-    <td><h4>All Folios</h4></td>
+    <td><ul class="nav nav-pills">
+      <li class="nav-item">
+        <a class="nav-link active" href="#">Folios</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="returns">Funds & Returns</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="insights">Insights</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#">Disabled</a>
+      </li>
+    </ul></td>
     <td style="text-align:right"><b>Total Investment:</b> {{total_investment}} &nbsp;&nbsp;&nbsp;<b>Current Value:</b> {{latest_value}} &nbsp;&nbsp;&nbsp;<b>Gain:</b> {{total_gain}} &nbsp;&nbsp;&nbsp;<b>Last Updated:</b> {{as_on_date}}</td>
   </tr>
 </table>

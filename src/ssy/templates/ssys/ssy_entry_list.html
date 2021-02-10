@@ -5,7 +5,12 @@
     <a style="padding-left:25px;" href="../add-transaction"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
 {% endblock applicableactions %}
 
-{% block viewname %} SSY Transactions {% endblock %} 
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'ssys:ssy-list' %}">SSY</a></li>
+    <li><a href="#">Transactions</a></li>
+  </ul>
+{% endblock %} 
 
 {% block content %}
     <table class="table table-hover">

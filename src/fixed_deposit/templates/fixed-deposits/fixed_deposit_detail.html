@@ -4,13 +4,15 @@
 
 {%block canvas %}{% endblock canvas %}
 
-{% block viewname %} {{object.number }} {% endblock viewname %}
-
-{% block content %} 
+{% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'fixed-deposits:fixed-deposit-list' %}">Fixed Deposits</a></li>
     <li><a href="#">{{ object.number }}</a></li>
   </ul>
+{% endblock viewname %}
+
+{% block content %} 
+
   <table>
     <tr>
       <td>Id</td>

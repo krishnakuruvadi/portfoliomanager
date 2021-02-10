@@ -1,6 +1,10 @@
 {% extends 'base.html' %} 
 {% load template_filters %}
-{% block viewname %} Internals of Portfolio Manager {% endblock %} 
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Internals of Portfolio Manager </a></li>
+  </ul>
+{% endblock %} 
 
 {% block applicableactions %} {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}

@@ -24,7 +24,13 @@
 
 </style>
 {% endblock style %}
-{% block viewname %}Dashboard{% endblock viewname %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Dashboard</a></li>
+  </ul>
+{% endblock viewname %}
+
 {% block applicableactions %} 
   <div class="btn-toolbar mb-2 mb-md-0">
     <div class="btn-group mr-2">
@@ -92,22 +98,25 @@
 
 <script>
   {% block jquery %}
-    var debt_equity_labels = ['Debt', 'Equity']
-    var status_labels = ['Achieved', 'Remaining']
     var investmentdata = {{investment_data|safe}}
     var users = {{users|safe}}
     var all = {{all|safe}}
+    var debt_equity_labels = ['Debt' + ' (' + all.debt_per + '%)', 'Equity'+ ' (' + all.equity_per + '%)']
     var debt_equity = [all.debt, all.equity]
     var distribution_vals = all.distrib_vals
     var status_vals = [all.achieved, all.remaining]
     var distribution_labels = all.distrib_labels
     var distribution_colors = all.distrib_colors
+    var remaining_per = {{all.remaining_per|safe}}
+    var achieve_per = {{all.achieve_per|safe}}
+    var status_labels = ['Achieved' + ' (' + achieve_per + '%)', 'Remaining'+ ' (' + remaining_per + '%)']
+
     var x;
     var user;
     console.log("users")
     console.log(users)
     if (!jQuery.isEmptyObject(users)) {
-      setChart('all',debt_equity,distribution_vals, distribution_colors,status_vals)
+      setChart('all',debt_equity,distribution_vals, distribution_colors,status_vals, status_labels, debt_equity_labels)
     }
     for (x in users) {
         console.log(x)
@@ -116,11 +125,13 @@
         data = user['data']
         console.log(data)
         debt_equity = [data.debt, data.equity]
+        debt_equity_labels = ['Debt' + ' (' + data.debt_per + '%)', 'Equity'+ ' (' + data.equity_per + '%)']
         distribution_vals = data.distrib_vals
         distribution_labels = data.distrib_labels
         distribution_colors = data.distrib_colors
         status_vals = [data.achieved, data.remaining]
-        setChart(x, debt_equity,distribution_vals, distribution_colors,status_vals)
+        status_labels = ['Achieved' + ' (' + data.achieve_per + '%)', 'Remaining'+ ' (' + data.remaining_per + '%)']
+        setChart(x, debt_equity,distribution_vals, distribution_colors, status_vals, status_labels, debt_equity_labels)
     }
     document.getElementById("myChart").style.display="none"
     if (jQuery.isEmptyObject(users)) {
@@ -265,7 +276,7 @@
       var myChart = new Chart(ctx,config);
     }
 
-    function setChart(id, debt_equity,distribution_vals, distribution_colors,status_vals){
+    function setChart(id, debt_equity,distribution_vals, distribution_colors, status_vals, status_labels, debt_equity_labels){
       console.log(id)
       console.log(debt_equity)
       console.log(distribution_vals)

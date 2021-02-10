@@ -5,11 +5,16 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block viewname %}
-  {% if object %}
-    Update SSY
-  {% else %}
-    Create SSY
-  {% endif %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'ssys:ssy-list' %}">SSY</a></li>
+    <li><a href="#">
+      {% if object %}
+        Update SSY
+      {% else %}
+        Create SSY
+      {% endif %}
+    </a></li>
+  </ul>
 {% endblock viewname %}
 
 {% block content %}

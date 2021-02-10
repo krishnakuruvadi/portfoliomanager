@@ -9,7 +9,12 @@
 
 {%block canvas %}{% endblock canvas %}
 
-{% block viewname %} {{object.number }} {% endblock viewname %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'ssys:ssy-list' %}">SSY</a></li>
+    <li><a href="#">{{object.number }}</a></li>
+  </ul>
+{% endblock viewname %}
 
 {% block content %} 
   <table>

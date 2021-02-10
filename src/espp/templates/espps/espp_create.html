@@ -5,11 +5,16 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block viewname %}
-  {% if object %}
-    Update ESPP
-  {% else %}
-    Create ESPP
-  {% endif %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'espps:espp-list' %}">ESPP</a></li>
+    <li><a href="#">
+      {% if object %}
+        Update ESPP
+      {% else %}
+        Create ESPP
+      {% endif %}
+    </a></li>
+  </ul>
 {% endblock viewname %}
 
 {% block content %}

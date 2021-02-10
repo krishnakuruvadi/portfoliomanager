@@ -4,12 +4,17 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} 
-{% if object %}
-    Update EPF
-  {% else %}
-    Create EPF
-  {% endif %} 
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'epfs:epf-list' %}">EPFs</a></li>
+    <li><a href="#">
+      {% if object %}
+        Update EPF
+      {% else %}
+        Create EPF
+      {% endif %}
+    </a></li>
+  </ul>
 {% endblock viewname %}
 
 {% block content %}

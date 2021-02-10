@@ -4,13 +4,15 @@
 
 {%block canvas %}{% endblock canvas %}
 
-{% block viewname %} {{object.name }} {% endblock viewname %}
-
-{% block content %}
+{% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'goals:goal-list' %}">Goals</a></li>
     <li><a href="#">{{ object.name }}</a></li>
-  </ul>
+  </ul> 
+{% endblock viewname %}
+
+{% block content %}
+
 <div class="row">
   <div class='col-sm-4'>
     <table class="table table-condensed table-borderless" id="goal-table">

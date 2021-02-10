@@ -147,8 +147,15 @@
               </li>
             </ul>
           </nav-->
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h4 class="h4">{% block viewname %} replace me {% endblock %}</h4>
+          <div class="container">
+            <div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+              <div class="carousel-inner" id="carousel-scroll-me">
+              
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3"  style="height: 60px;background: rgb(238, 235, 235);display: block;padding: 0px 0px 0px 0px;">
+            {% block viewname %} replace me {% endblock %}
             <div class="btn-toolbar mb-2 mb-md-0">
               <div class="btn-group mr-2">
                 {% block applicableactions %} 
@@ -158,11 +165,6 @@
             </div>
           </div>
 
-          <div class="row no-gutters" style="margin-bottom: 10px;">
-            <div class='col-2' id='last-updated-scroll-data' style='text-align: center;'></div>
-            <div class='col-10'><marquee id="scroll-me"></marquee></div>
-          </div>
-     
           {% block canvas %} 
           <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
           {% endblock canvas %}
@@ -219,25 +221,7 @@
           url: scroll_data_api,
           success: function(data){
             //console.log(data);
-            var items = data['scroll_data'];
-            var sc = '';
-            var last_updated = '';
-            for(i=0;i<items.length;i++){
-              sc = sc + '<b>' + items[i]['scrip'] + '</b>\xa0\xa0';
-              sc = sc + items[i]['val'].toString() + '\xa0\xa0';
-              if(items[i]['change']>0) {
-                sc = sc + items[i]['change'].toString() + '\xa0(' + items[i]['percent'].toString() +'%)\xa0<span style="color:green"><i class="fas fa-arrow-up"></i></span>\xa0';
-              } else {
-                sc = sc + items[i]['change'].toString() + '\xa0(' + items[i]['percent'].toString() +'%)\xa0<span style="color:red"><i class="fas fa-arrow-down"></i></span>\xa0';
-              }
-              sc = sc + '\xa0\xa0';
-              last_updated = items[i]['last_updated']
-            }
-            //console.log(sc)
-            var el = document.getElementById('scroll-me');
-            el.innerHTML = sc;
-            var last_updated_el = document.getElementById('last-updated-scroll-data');
-            last_updated_el.innerHTML = last_updated
+            scroll_data_first(data);
           },
           error: function(error_data){
             console.log("error")
@@ -253,21 +237,42 @@
         var sc = '';
         var last_updated = '';
         for(i=0;i<items.length;i++){
-          sc = sc + '<b>' + items[i]['scrip'] + '</b>\xa0\xa0';
-          sc = sc + items[i]['val'].toString() + '\xa0\xa0';
-          if(items[i]['change']>0) {
-            sc = sc + items[i]['change'].toString() + '\xa0(' + items[i]['percent'].toString() +'%)\xa0<span style="color:green"><i class="fas fa-arrow-up"></i></span>\xa0';
-          } else {
-            sc = sc + items[i]['change'].toString() + '\xa0(' + items[i]['percent'].toString() +'%)\xa0<span style="color:red"><i class="fas fa-arrow-down"></i></span>\xa0';
+          if (i%5==0){
+            if(i==0) {
+              sc = sc + '<div class="carousel-item active"><div class="Row" style="display: table;border-spacing: 10px;">'; // carousel item
+            } else {
+              sc = sc + '<div class="carousel-item"><div class="Row" style="display: table;border-spacing: 10px;">'; // carousel item
+            }
           }
-          sc = sc + '\xa0\xa0';
+          if (items[i]['change'] < 0) {
+            sc = sc + '<div class="Column" style=" display: table-cell;background-color:red;">' // each index
+          } else {
+            sc = sc + '<div class="Column" style=" display: table-cell;background-color:green;">' // each index
+          }
+
+          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;">'; // outer row column of each index
+
+          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;">'+'<b>' + items[i]['scrip'] + '</b></div></div>';
+
+          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;">'; // row with val, change and change percent
+          sc = sc + items[i]['val'].toString() + '\xa0\xa0';
+          sc = sc + items[i]['change'].toString() + '\xa0(' + items[i]['percent'].toString() +'%)\xa0'
+
+          sc = sc + '</div></div>'; // row with val, change and change percent end
+          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;">'+'<small>As On ' + items[i]['last_updated'] + '</small></div></div>';
+
+
+          sc = sc + '</div></div>'; // outer row column of each index end
+
+          sc = sc + '</div>' // each index end
+          if (i%5==4){
+            sc = sc + '</div></div>'; // carousel item end
+          }
           last_updated = items[i]['last_updated']
         }
         //console.log(sc)
-        var el = document.getElementById('scroll-me');
+        var el = document.getElementById('carousel-scroll-me');
         el.innerHTML = sc;
-        var last_updated_el = document.getElementById('last-updated-scroll-data');
-        last_updated_el.innerHTML = last_updated
       }
 
       $(document).ready(function(){

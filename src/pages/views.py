@@ -47,6 +47,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             remaining = 0
         remaining_per = int(remaining*100/target)
         achieve_per = int(achieved*100/target)
+        
         context['users'][str(i)]['data'] = {
             "id": id,
             "debt": debt,
@@ -58,6 +59,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "remaining": remaining,
             "remaining_per": remaining_per,
             "achieve_per": achieve_per,
+            "debt_per": int(debt*100/(debt+equity+1)),
+            "equity_per": int(equity*100/(debt+equity+1)),
         }
         if len(all_distrib_vals) == 0 :
             all_distrib_vals = [0]*len(contrib['distrib_vals'])
@@ -84,6 +87,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "remaining": all_remaining,
             "remaining_per": all_remaining_per,
             "achieve_per": all_achieve_per,
+            "debt_per": int(all_debt*100/(all_debt+all_equity+1)),
+            "equity_per": int(all_equity*100/(all_debt+all_equity+1)),
         }
     try:
         investment_data = InvestmentData.objects.get(user='all')

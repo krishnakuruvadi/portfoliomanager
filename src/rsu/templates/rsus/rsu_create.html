@@ -5,11 +5,16 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block viewname %}
-  {% if object %}
-    Update RSU Award
-  {% else %}
-    Create RSU Award
-  {% endif %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'rsus:rsu-list' %}">ESPP</a></li>
+    <li><a href="#">
+      {% if object %}
+        Update RSU Award
+      {% else %}
+        Create RSU Award
+      {% endif %}
+    </a></li>
+  </ul> 
 {% endblock viewname %}
 
 {% block content %}

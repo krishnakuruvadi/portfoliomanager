@@ -1,6 +1,10 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} Users {% endblock %} 
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="#">Users</a></li>
+  </ul>
+{% endblock %} 
 
 {% block applicableactions %}
     <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add User" style="font-size: 1.2em;"></i></a>

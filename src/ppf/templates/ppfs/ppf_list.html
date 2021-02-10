@@ -1,6 +1,10 @@
 {% extends 'base.html' %} 
 {% load template_filters %}
-{% block viewname %} PPFs {% endblock %} 
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">PPFs</a></li>
+  </ul>
+{% endblock %} 
 
 {% block applicableactions %} 
     <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add PPF" style="font-size: 1.2em;"></i></a>

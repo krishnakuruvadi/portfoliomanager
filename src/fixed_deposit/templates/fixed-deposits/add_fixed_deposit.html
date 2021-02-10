@@ -4,13 +4,14 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} {{operation}} {% endblock viewname %}
-
-{% block content %}
+{% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'fixed-deposits:fixed-deposit-list' %}">Fixed Deposits</a></li>
     <li><a href="#">{{operation}}</a></li>
   </ul>
+{% endblock viewname %}
+
+{% block content %}
   <form method="POST">
     {% csrf_token %}
     <div class="row">

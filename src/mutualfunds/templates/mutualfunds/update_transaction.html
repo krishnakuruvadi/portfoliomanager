@@ -4,7 +4,12 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} {{operation}} {% endblock viewname %}
+{% block viewname %} 
+<ul class="breadcrumb">
+  <li><a href="{% url 'mutualfund:folio-list' %}">Mutual Funds</a></li>
+  <li><a href="#"> {{operation}}</a></li>
+</ul>
+{% endblock viewname %}
 
 {% block content %}
 

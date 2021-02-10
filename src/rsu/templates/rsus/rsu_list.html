@@ -1,6 +1,10 @@
 {% extends 'base.html' %} 
 {% load template_filters %}
-{% block viewname %} RSU Awards {% endblock %} 
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#"> RSU Awards </a></li>
+  </ul>
+{% endblock %} 
 
 {% block applicableactions %} 
     <a style="padding-right:20px;" href="create"><i class="fa fa-plus" aria-hidden="true" title="Add RSU Award" style="font-size: 1.2em;"></i></a>

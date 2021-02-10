@@ -4,13 +4,15 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} Upload Transactions {% endblock viewname %}
-
-{% block content %}
+{% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'shares:shares-list' %}">Shares</a></li>
     <li><a href="#">Upload Transactions</a></li>
   </ul>
+{% endblock viewname %}
+
+{% block content %}
+
 <table class="table table-condensed table-borderless">
   <tr>
     <td>
