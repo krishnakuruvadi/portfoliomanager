@@ -10,6 +10,7 @@ from .nasdaq import Nasdaq
 from .yahoo_finance_2 import YahooFinance2
 from mftool import Mftool
 from common.models import Stock
+from django.db import IntegrityError
 
 
 def get_latest_vals(stock, exchange, start, end):
@@ -34,11 +35,14 @@ def get_mf_vals(amfi_code, start, end):
             vals = mf.get_scheme_historical_nav_year(amfi_code,start.year)
             if vals:
                 data = vals['data']
-                print(" data in get_mf_vals ", amfi_code, data)
+                #print(f' data in get_mf_vals for code {amfi_code} : {data}')
                 for entry in data:
-                    entry_date = datetime.datetime.strptime(entry['date'], "%d-%m-%Y").date()
-                    if entry_date >= start and entry_date <= end:
-                        response[entry_date] = float(entry['nav'])
+                    if 'date' in entry.keys():
+                        entry_date = datetime.datetime.strptime(entry['date'], "%d-%m-%Y").date()
+                        if entry_date >= start and entry_date <= end:
+                            response[entry_date] = float(entry['nav'])
+                    if 'Error' in entry.keys():
+                        break
                 break
         except Exception as ex:
             print(ex)
@@ -53,7 +57,7 @@ def get_historical_year_mf_vals(amfi_code, year):
             vals = mf.get_scheme_historical_nav_year(amfi_code,year)
             if vals:
                 data = vals['data']
-                print(" data in get_mf_vals ", amfi_code, data)
+                #print(" data in get_mf_vals ", amfi_code, data)
                 for entry in data:
                     entry_date = datetime.datetime.strptime(entry['date'], "%d-%m-%Y").date()
                     if entry_date.day in [27,28,29,30,31,1] or (entry_date.year == today.year and abs((today - entry_date).days) <= 5):
@@ -62,6 +66,8 @@ def get_historical_year_mf_vals(amfi_code, year):
                             code = MutualFund.objects.get(code=amfi_code)
                             new_entry = HistoricalMFPrice(code=code, date=entry_date, nav=nav)
                             new_entry.save()
+                        except IntegrityError:
+                            pass
                         except Exception as ex:
                             print("error getting historical mf vals for mutual fund object with code ", amfi_code, ex)
                             pass

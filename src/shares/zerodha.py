@@ -42,7 +42,7 @@ class Zerodha:
                             trans["notes"] = 'order id:'+last_order
                             yield trans
 
-                        tran_date = get_date_or_none_from_string(row['trade_date'])
+                        tran_date = get_datetime_or_none_from_string(row['trade_date'])
                         exchange = row['exchange']
                         trans_type = 'Sell' if row['trade_type']=='sell' else 'Buy'
                         last_order = row['order_id']

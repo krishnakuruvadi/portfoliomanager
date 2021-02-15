@@ -38,6 +38,7 @@ urlpatterns = [
     path('calculator/', include('calculator.urls')),
     path('api/chart/investmentdata/', GetInvestmentData.as_view()),
     path('alerts/', include('alerts.urls')),
+    path('markets/', include('markets.urls')),
     path('tasks/', include('tasks.urls'))
 ]
 

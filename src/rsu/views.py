@@ -179,13 +179,13 @@ def add_vest(request,id):
     if request.method == 'POST':
         print(request.POST)
         if "submit" in request.POST:
-            vest_date = get_date_or_none_from_string(request.POST.get('vest_date'))
+            vest_date = get_datetime_or_none_from_string(request.POST.get('vest_date'))
             fmv = get_float_or_none_from_string(request.POST.get('fmv'))
             aquisition_price = get_float_or_none_from_string(request.POST.get('aquisition_price'))
             shares_vested = get_int_or_none_from_string(request.POST.get('shares_vested'))
             shares_for_sale = get_int_or_none_from_string(request.POST.get('shares_for_sale'))
             total_aquisition_price = get_float_or_none_from_string(request.POST.get('total_aquisition_price'))
-            sell_date = get_date_or_none_from_string(request.POST.get('sell_date'))
+            sell_date = get_datetime_or_none_from_string(request.POST.get('sell_date'))
             sell_price = get_float_or_none_from_string(request.POST.get('sell_price'))
             sell_conversion_rate = get_float_or_none_from_string(request.POST.get('sell_conversion_rate'))
             total_sell_price = get_float_or_none_from_string(request.POST.get('total_sell_price'))
@@ -216,13 +216,13 @@ def update_vest(request,id,vestid):
     if request.method == 'POST':
         print(request.POST)
         if "submit" in request.POST:
-            rsu_obj.vest_date = get_date_or_none_from_string(request.POST.get('vest_date'))
+            rsu_obj.vest_date = get_datetime_or_none_from_string(request.POST.get('vest_date'))
             rsu_obj.fmv = get_float_or_none_from_string(request.POST.get('fmv'))
             rsu_obj.aquisition_price = get_float_or_none_from_string(request.POST.get('aquisition_price'))
             rsu_obj.shares_vested = get_int_or_none_from_string(request.POST.get('shares_vested'))
             rsu_obj.shares_for_sale = get_int_or_none_from_string(request.POST.get('shares_for_sale'))
             rsu_obj.total_aquisition_price = get_float_or_none_from_string(request.POST.get('total_aquisition_price'))
-            rsu_obj.sell_date = get_date_or_none_from_string(request.POST.get('sell_date'))
+            rsu_obj.sell_date = get_datetime_or_none_from_string(request.POST.get('sell_date'))
             rsu_obj.sell_price = get_float_or_none_from_string(request.POST.get('sell_price'))
             rsu_obj.sell_conversion_rate = get_float_or_none_from_string(request.POST.get('sell_conversion_rate'))
             rsu_obj.total_sell_price = get_float_or_none_from_string(request.POST.get('total_sell_price'))

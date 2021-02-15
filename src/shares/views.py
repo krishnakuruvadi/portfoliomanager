@@ -186,7 +186,7 @@ def add_transaction(request):
             symbol = request.POST['symbol']
             user = request.POST['user']
             print('user is of type:',type(user))
-            trans_date = get_date_or_none_from_string(request.POST['trans_date'])
+            trans_date = get_datetime_or_none_from_string(request.POST['trans_date'])
             trans_type = request.POST['trans_type']
             price = get_float_or_none_from_string(request.POST['price'])
             quantity = get_float_or_none_from_string(request.POST['quantity'])
@@ -200,7 +200,7 @@ def add_transaction(request):
             exchange = request.POST['exchange']
             symbol = request.POST['symbol']
             user = request.POST['user']
-            trans_date = get_date_or_none_from_string(request.POST['trans_date'])
+            trans_date = get_datetime_or_none_from_string(request.POST['trans_date'])
             exchange_rate = 1
             if exchange == 'NASDAQ' or exchange == 'NYSE':
                 exchange_rate = get_forex_rate(trans_date, 'USD', 'INR')
@@ -218,7 +218,7 @@ def update_transaction(request,id):
     trans = Transactions.objects.get(id=id)
 
     if request.method == 'POST':
-        trans.trans_date = get_date_or_none_from_string(request.POST['trans_date'])
+        trans.trans_date = get_datetime_or_none_from_string(request.POST['trans_date'])
         trans.trans_type = request.POST['trans_type']
         trans.quantity = get_float_or_none_from_string(request.POST['quantity'])
         trans.conversion_rate = get_float_or_none_from_string(request.POST['conversion_rate'])

@@ -11,7 +11,7 @@ import time
 from django.db.models import Q
 from mftool import Mftool
 from common.helper import update_mf_scheme_codes, update_category_returns
-from shared.utils import get_float_or_zero_from_string, get_float_or_none_from_string, get_int_or_none_from_string
+from shared.utils import get_float_or_zero_from_string, get_float_or_none_from_string, get_int_or_none_from_string, get_date_or_none_from_string, convert_date_to_string
 from common.bsestar import download_bsestar_schemes
 from shared.handle_get import *
 from shared.handle_chart_data import get_investment_data
@@ -30,6 +30,13 @@ from shares.shares_helper import shares_add_transactions, update_shares_latest_v
 from shared.financial import xirr
 from shared.nasdaq import Nasdaq
 from django.utils import timezone
+from nsetools import Nse
+from common.models import ScrollData, Preferences
+import requests
+from bs4 import BeautifulSoup
+from json.decoder import JSONDecodeError
+from markets.models import PEMonthy, PBMonthy
+from django.db import IntegrityError
 
 def set_task_state(name, state):
     try:
@@ -428,8 +435,6 @@ def add_share_transactions(broker, user, full_file_path):
 
 @db_periodic_task(crontab(minute='*/10'))
 def update_scroll_data():
-    from nsetools import Nse
-    from common.models import ScrollData, Preferences
     pref_obj = Preferences.get_solo()
     sel_indexes = list()
     if pref_obj.indexes_to_scroll:
@@ -482,6 +487,185 @@ def update_scroll_data():
                 scroll_item.display = False
             scroll_item.save()
 
+@db_periodic_task(crontab(minute='10', hour='1-5', day='1-5'))
+def get_pe():
+    pref_obj = Preferences.get_solo()
+    sel_indexes = list()
+    if pref_obj.indexes_to_scroll:
+            for index in pref_obj.indexes_to_scroll.split('|'):
+                sel_indexes.append(index)
+    nse = Nse()
+    avail_indices = ["NIFTY 50","NIFTY NEXT 50","NIFTY100 LIQUID 15","NIFTY MIDCAP LIQUID 15","NIFTY 100","NIFTY 200","NIFTY 500","NIFTY500 MULTICAP 50:25:25","NIFTY MIDCAP 150","NIFTY MIDCAP 50","NIFTY FULL MIDCAP 100",
+					"NIFTY MIDCAP 100","NIFTY SMALLCAP 250","NIFTY SMALLCAP 50","NIFTY FULL SMALLCAP 100", "NIFTY SMALLCAP 100", "NIFTY LargeMidcap 250", "NIFTY MIDSMALLCAP 400",
+                    "NIFTY AUTO","NIFTY BANK","NIFTY CONSUMER DURABLES","NIFTY FINANCIAL SERVICES","NIFTY FINANCIAL SERVICES 25/50","NIFTY FMCG","Nifty Healthcare Index","NIFTY IT","NIFTY MEDIA","NIFTY METAL",
+			        "NIFTY OIL &amp; GAS","NIFTY PHARMA","NIFTY PRIVATE BANK","NIFTY PSU BANK","NIFTY TATA GROUP 25% CAP", "NIFTY100 LIQUID 15",
+			        "NIFTY REALTY", "NIFTY COMMODITIES", "Nifty INDIA CONSUMPTION", "NIFTY CPSE",  "NIFTY ENERGY",  "NIFTY100 ESG",  "NIFTY100 Enhanced ESG", "NIFTY100 ESG SECTOR LEADERS", "NIFTY INFRASTRUCTURE",
+	                "NIFTY MNC", "NIFTY PSE", "NIFTY SME EMERGE", "NIFTY SERVICES SECTOR", "NIFTY SHARIAH 25", "NIFTY50 SHARIAH", "NIFTY500 SHARIAH", "NIFTY ADITYA BIRLA GROUP", "NIFTY MAHINDRA GROUP", "NIFTY TATA GROUP",
+                    "NIFTY MIDCAP LIQUID 15",	"NIFTY500 VALUE 50", "NIFTY MIDCAP150 QUALITY 50", "NIFTY ALPHA LOW-VOLATILITY 30", "NIFTY QUALITY LOW-VOLATILITY 30", "NIFTY ALPHA QUALITY LOW-VOLATILITY 30",	
+                    "NIFTY ALPHA QUALITY VALUE LOW-VOLATILITY 30", "NIFTY50 Equal Weight", "NIFTY100 Equal Weight", "NIFTY100 LOW VOLATILITY 30", "NIFTY200 MOMENTUM 30", "NIFTY ALPHA 50",
+		            "NIFTY DIVIDEND OPPORTUNITIES 50", "NIFTY HIGH BETA 50","NIFTY LOW VOLATILITY 50","NIFTY100 QUALITY 30","NIFTY50 VALUE 20",	"NIFTY GROWTH SECTORS 15"]
+    for item in nse.get_index_list():
+        if item in sel_indexes and item in avail_indices:
+            fp = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            pe_file = os.path.join(fp, 'media', 'pe-ratio', item+'.json')
+            print(f'opening file {pe_file}')
+            if not os.path.exists(pe_file):
+                f = open(pe_file, "w")
+                f.close()
+            data = dict()
+            pe_start = datetime.date(year=1999, month=1, day=1)
+            with open(pe_file) as f:
+                try:
+                    data = json.load(f)
+                    for k,_ in data.items():
+                        k_date = get_date_or_none_from_string(k,'%d-%b-%Y')
+                        if k_date > pe_start:
+                            pe_start = k_date
+                except JSONDecodeError:
+                    pass
+            while pe_start < datetime.date.today():
+                collect_end_date = pe_start+relativedelta(months=3) + relativedelta(days=-1)
+                if collect_end_date >= datetime.date.today():
+                    collect_end_date = datetime.date.today() + relativedelta(days=-1)
+                url = 'https://www1.nseindia.com/products/dynaContent/equities/indices/historical_pepb.jsp?indexName=' + item.replace(' ', '%20')
+                url += '&fromDate=' + convert_date_to_string(pe_start, '%d-%m-%Y') + '&toDate=' + convert_date_to_string(collect_end_date, '%d-%m-%Y')
+                url += '&yield1=pe&yield2=pb&yield3=dy&yield4=all'
+                print(f'getting url {url}')
+
+                headers = {
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Connection': 'keep-alive',
+                    'Host': 'www1.nseindia.com',
+                    'sec-ch-ua': '"Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"',
+                    'sec-ch-ua-mobile': '?0',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'none',
+                    'Sec-Fetch-User': '?1',
+                    'Upgrade-Insecure-Requests': '1',
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'
+                }
+                page = requests.get(url, headers=headers, timeout=10)
+                print('finished get')
+                soup = BeautifulSoup(page.text, 'html.parser')
+                print('finished souping')
+                pe_start = collect_end_date+ relativedelta(days=1)
+                table = soup.find('table')
+                if not table:
+                    print('no table. continuing')
+                    continue
+                print('found table')
+
+                table_body = table.find('tbody')
+                if not table_body:
+                    print('no table body. continuing')
+                    continue
+                print('found table body')
+                rows = table_body.find_all('tr')
+                if not rows:
+                    print('no row. continuing')
+                    continue
+                print('found rows')
+                row_count = 0
+                for row in rows:
+                    print('in a row')
+                    cols = row.find_all('td')
+                    cols = [ele.text.strip() for ele in cols]
+
+                    print(cols)
+                    if row_count > 2:
+                        data[cols[0]] = dict()
+                        data[cols[0]]['p/e'] = get_float_or_none_from_string(cols[1])
+                        data[cols[0]]['p/b'] = get_float_or_none_from_string(cols[2])
+                        data[cols[0]]['div yield'] = get_float_or_none_from_string(cols[3])
+                    row_count = row_count+1
+                
+            with open(pe_file, 'w') as outfile:
+                json.dump(data, outfile)
+
+@db_periodic_task(crontab(minute='10', hour='1-5', day='1-5'))
+def update_pe():
+    pref_obj = Preferences.get_solo()
+    sel_indexes = list()
+    if pref_obj.indexes_to_scroll:
+        for index in pref_obj.indexes_to_scroll.split('|'):
+            sel_indexes.append(index)
+        for index in sel_indexes:
+            fp = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            pe_file = os.path.join(fp, 'media', 'pe-ratio', index+'.json')
+            print(f'opening file {pe_file}')
+            if not os.path.exists(pe_file):
+                print(f'file not found {pe_file}')
+                continue
+            yearly_pe_vals = dict()
+            yearly_pb_vals = dict()
+
+            with open(pe_file) as f:
+                try:
+                    data = json.load(f)
+                    for k,v in data.items():
+                        if v['p/e']:
+                            k_date = get_date_or_none_from_string(k,'%d-%b-%Y')
+                            if k_date.year not in yearly_pe_vals:
+                                yearly_pe_vals[k_date.year] = dict()
+                            if k_date.month not in yearly_pe_vals[k_date.year]:
+                                yearly_pe_vals[k_date.year][k_date.month] = {'min':v['p/e'], 'max':v['p/e'], 'total':v['p/e'], 'num':1}
+                            else:
+                                if v['p/e'] < yearly_pe_vals[k_date.year][k_date.month]['min']:
+                                    yearly_pe_vals[k_date.year][k_date.month]['min'] = v['p/e']
+                                if v['p/e'] > yearly_pe_vals[k_date.year][k_date.month]['max']:
+                                    yearly_pe_vals[k_date.year][k_date.month]['max'] = v['p/e']
+                                yearly_pe_vals[k_date.year][k_date.month]['num'] = yearly_pe_vals[k_date.year][k_date.month]['num'] + 1
+                                yearly_pe_vals[k_date.year][k_date.month]['total'] = yearly_pe_vals[k_date.year][k_date.month]['total'] + v['p/e']
+                        if v['p/b']:
+                            k_date = get_date_or_none_from_string(k,'%d-%b-%Y')
+                            if k_date.year not in yearly_pb_vals:
+                                yearly_pb_vals[k_date.year] = dict()
+                            if k_date.month not in yearly_pb_vals[k_date.year]:
+                                yearly_pb_vals[k_date.year][k_date.month] = {'min':v['p/b'], 'max':v['p/b'], 'total':v['p/b'], 'num':1}
+                            else:
+                                if v['p/b'] < yearly_pb_vals[k_date.year][k_date.month]['min']:
+                                    yearly_pb_vals[k_date.year][k_date.month]['min'] = v['p/b']
+                                if v['p/b'] > yearly_pb_vals[k_date.year][k_date.month]['max']:
+                                    yearly_pb_vals[k_date.year][k_date.month]['max'] = v['p/b']
+                                yearly_pb_vals[k_date.year][k_date.month]['num'] = yearly_pb_vals[k_date.year][k_date.month]['num'] + 1
+                                yearly_pb_vals[k_date.year][k_date.month]['total'] = yearly_pb_vals[k_date.year][k_date.month]['total'] + v['p/b']
+                        
+                except Exception as ex:
+                    print('exception during updating pe')
+                    print(ex)
+            print(yearly_pe_vals)
+            for year, val in yearly_pe_vals.items():
+                for k,v in val.items():
+                    try:
+                        PEMonthy.objects.create(
+                            index_name=index,
+                            month=k,
+                            year=year,
+                            pe_max=v['max'],
+                            pe_min=v['min'],
+                            pe_avg=v['total']/v['num']
+                        )
+                    except IntegrityError:
+                        pass
+            print(yearly_pb_vals)
+            for year, val in yearly_pb_vals.items():
+                for k,v in val.items():
+                    try:
+                        PBMonthy.objects.create(
+                            index_name=index,
+                            month=k,
+                            year=year,
+                            pb_max=v['max'],
+                            pb_min=v['min'],
+                            pb_avg=v['total']/v['num']
+                        )
+                    except IntegrityError:
+                        pass
+
+                        
 
 '''
 #  example code below

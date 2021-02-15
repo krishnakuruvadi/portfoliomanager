@@ -214,7 +214,7 @@ def add_transaction(request, id):
     folio = Folio.objects.get(id=id)
     user = get_user_name_from_id(folio.user)
     if request.method == 'POST':
-        trans_date = get_date_or_none_from_string(request.POST['trans_date'])
+        trans_date = get_datetime_or_none_from_string(request.POST['trans_date'])
         trans_type = request.POST['trans_type']
         price = get_float_or_none_from_string(request.POST['price'])
         units = get_float_or_none_from_string(request.POST['units'])
@@ -235,7 +235,7 @@ def update_transaction(request, id):
         #fund = request.POST['fund']
         #user = request.POST['user']
         #print('user is of type:',type(user))
-        transaction.trans_date = get_date_or_none_from_string(request.POST['trans_date'])
+        transaction.trans_date = get_datetime_or_none_from_string(request.POST['trans_date'])
         transaction.trans_type = request.POST['trans_type']
         transaction.price = get_float_or_none_from_string(request.POST['price'])
         transaction.units = get_float_or_none_from_string(request.POST['units'])

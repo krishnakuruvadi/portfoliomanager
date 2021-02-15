@@ -1,0 +1,143 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'markets:markets-home' %}">Markets</a></li>
+    <li><a href="#">PE Ratio</a></li>
+  </ul> 
+{% endblock viewname %}
+
+{% block content %}
+
+    {% if pe_vals %}
+        <div>
+            {% for key, value in pe_vals.items %}
+            <div class="row">
+                <div class='col-sm-6'>
+                    <canvas id="{{key}}_pe_chart" width="500" height="500"></canvas>
+                </div>
+                <div class='col-sm-6'>
+                    <canvas id="{{key}}_pb_chart" width="500" height="500"></canvas>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        No Data found to display
+    {% endif %}
+{% endblock content %}
+
+{% block scriptlibrary %}
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.0.0-alpha4/dist/chartjs-chart-matrix.min.js"></script>
+{% endblock scriptlibrary %}
+
+<script>
+    {% block jquery %}
+    var pe_vals = {{pe_vals|safe}}
+    console.log(pe_vals)
+    for (x in pe_vals) {
+        pe = pe_vals[x];
+        setPEChart(x, pe);
+    }
+    var pb_vals = {{pb_vals|safe}}
+    console.log(pb_vals)
+    for (x in pb_vals) {
+        pb = pb_vals[x];
+        setPBChart(x, pb);
+    }
+
+    function setPEChart(id, pe) {
+        console.log(pe);
+        var ctx = document.getElementById(id+'_pe_chart').getContext('2d');
+        var config = {
+            type:    'line',
+            data:    {
+                datasets: [
+                    {
+                    label: "PE",
+                    data: pe,
+                    fill: false,
+                    borderColor: '#92993c'
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                title:      {
+                    display: true,
+                    text:    id + " PE Ratio"
+                },
+                scales:     {
+                    xAxes: [{
+                        type:       "time",
+                        time:       {
+                            format: 'YYYY/MM',
+                            tooltipFormat: 'll'
+                        },
+                        scaleLabel: {
+                            display:     true,
+                            labelString: 'Date'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display:     true,
+                            labelString: 'Value'
+                        }
+                    }]
+                }
+            }
+        };
+        var myChart = new Chart(ctx,config);
+    }
+
+    function setPBChart(id, pb) {
+        console.log(pb);
+        var ctx = document.getElementById(id+'_pb_chart').getContext('2d');
+        var config = {
+            type:    'line',
+            data:    {
+                datasets: [
+                    {
+                    label: "PB",
+                    data: pb,
+                    fill: false,
+                    borderColor: '#92993c'
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                title:      {
+                    display: true,
+                    text:    id + " PB Ratio"
+                },
+                scales:     {
+                    xAxes: [{
+                        type:       "time",
+                        time:       {
+                            format: 'YYYY/MM',
+                            tooltipFormat: 'll'
+                        },
+                        scaleLabel: {
+                            display:     true,
+                            labelString: 'Date'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display:     true,
+                            labelString: 'Value'
+                        }
+                    }]
+                }
+            }
+        };
+        var myChart = new Chart(ctx,config);
+    }
+    {% endblock jquery %}
+</script>

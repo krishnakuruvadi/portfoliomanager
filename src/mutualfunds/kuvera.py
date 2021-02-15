@@ -30,7 +30,7 @@ class Kuvera:
                         if 'Folio Number'in k:
                             folio = v.strip()
                         elif 'Date'in k:
-                            trans_date = get_date_or_none_from_string(v.strip()) #2020-03-19
+                            trans_date = get_datetime_or_none_from_string(v.strip()) #2020-03-19
                         elif 'Name of the Fund'in k:
                             fund_name = v.strip()
                         elif 'Order'in k:

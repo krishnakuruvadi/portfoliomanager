@@ -29,7 +29,7 @@ def get_int_or_none_from_string(input):
     return None
 
 # default format expected of kind 2020-06-01
-def get_date_or_none_from_string(input, format='%Y-%m-%d'):
+def get_datetime_or_none_from_string(input, format='%Y-%m-%d'):
     if input != None and input != '':
         try:
             res = datetime.datetime.strptime(input, format)
@@ -38,8 +38,18 @@ def get_date_or_none_from_string(input, format='%Y-%m-%d'):
             print('error converting ', input, ' to date')
     return None
 
+# default format expected of kind 2020-06-01
+def get_date_or_none_from_string(input, format='%Y-%m-%d'):
+    if input != None and input != '':
+        try:
+            res = datetime.datetime.strptime(input, format).date()
+            return res
+        except Exception as e:
+            print('error converting ', input, ' to date' + str(e))
+    return None
+
 def convert_date_to_string(input, format='%Y-%m-%d'):
-    return input.strftime("%Y-%m-%d")
+    return input.strftime(format)
 
 '''
 today = datetime.date.today()
