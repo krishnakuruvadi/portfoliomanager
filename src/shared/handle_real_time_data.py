@@ -16,7 +16,8 @@ from django.db import IntegrityError
 def get_latest_vals(stock, exchange, start, end):
     print("inside get_latest_vals exchange ", exchange, "start date:", start, " end date:", end)
     if exchange == 'NASDAQ':
-        response = Nasdaq(stock).get_historical_value(start, end)
+        #response = Nasdaq(stock).get_historical_value(start, end)
+        response = Nasdaq(stock).get_latest_val()
         return response
     if exchange == 'NSE':
         #response = Nse(stock).get_historical_value(start, end)

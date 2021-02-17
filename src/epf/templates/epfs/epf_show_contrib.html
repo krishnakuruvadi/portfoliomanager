@@ -6,14 +6,15 @@
 
 {%block canvas %}{% endblock canvas %}
 
-{% block viewname %} {{object.number }} : {{object.company}} : {{object.fy}} {% endblock viewname %}
+{% block viewname %} 
+    <ul class="breadcrumb">
+        <li><a href="{% url 'epfs:epf-list' %}">EPFs</a></li>
+        <li><a href="{% url 'epfs:epf-detail' object.id %}">{{ object.company }}</a></li>
+        <li><a href="#">{{object.fy}}</a></li>
+    </ul>
+{% endblock viewname %}
 
 {% block content %}
-  <ul class="breadcrumb">
-    <li><a href="{% url 'epfs:epf-list' %}">EPFs</a></li>
-    <li><a href="{% url 'epfs:epf-detail' object.id %}">{{ object.company }}</a></li>
-    <li><a href="#">{{object.fy}}</a></li>
-  </ul>
     <table class="table table-striped">
         <thead>
             <tr>

@@ -135,3 +135,63 @@ class Nasdaq(Exchange):
                 except Exception as ex:
                     data[symbol]['last_updated'] = timezone.now()
         return data
+    
+    def get_latest_val(self):
+        get_response = None
+        for i in range(5):
+            urlData = "https://api.nasdaq.com/api/quote/" + self.stock + "/info?assetclass=stocks"
+            print("accessing "+urlData)
+            '''
+            headers = {
+                'Content-Type': "application/x-www-form-urlencoded",
+                'User-Agent': "PostmanRuntime/7.13.0",
+                'Accept': "*/*",
+                'Cache-Control': "no-cache",
+                'Host': "www.nasdaq.com",
+                'accept-encoding': "gzip, deflate",
+                'content-length': "166",
+                'Connection': "close",
+                'cache-control': "no-cache"
+            }
+            '''
+            headers =  {
+                'Accept': 'application/json, text/plain, */*',
+                'DNT': "1",
+                'Origin': 'https://www.nasdaq.com/',
+                'Sec-Fetch-Mode': 'cors',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'
+            }
+            get_response = requests.request('GET', urlData, headers=headers)
+            #print(get_response)
+            if get_response.status_code == 200:
+                break
+        if get_response.status_code != 200:
+            print(get_response)
+            return None
+        json_data = get_response.json()
+        #print(json_data)
+        data = dict()
+        if 'data' in json_data:
+            if 'secondaryData' in json_data['data'] and  json_data['data']['secondaryData']:
+                timestamp = json_data['data']['secondaryData']['lastTradeTimestamp']
+                if 'ON' in timestamp:
+                    pos = timestamp.find('ON')
+                    timestamp = timestamp[pos+3:]
+                    #print(timestamp)
+                    date = datetime.datetime.strptime(timestamp, "%b %d, %Y").date()
+                    data[date] = json_data['data']['secondaryData']['lastSalePrice']
+            if 'primaryData' in json_data['data'] and  json_data['data']['primaryData']:
+                timestamp = json_data['data']['primaryData']['lastTradeTimestamp']
+                if 'ON' in timestamp:
+                    pos = timestamp.find('ON')
+                    timestamp = timestamp[pos+3:]
+                if 'OF'in timestamp:
+                    pos = timestamp.find('OF')
+                    timestamp = timestamp[pos+3:]
+                #print(timestamp)
+                date = datetime.datetime.strptime(timestamp, "%b %d, %Y").date()
+                latest_val = json_data['data']['primaryData']['lastSalePrice']
+                data[date] = get_float_or_zero_from_string(latest_val.replace('$',''))
+        #print('done with request')
+        #print(data)
+        return data

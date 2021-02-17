@@ -90,7 +90,7 @@ class PpfEntryListView(ListView):
 
     def get_queryset(self):
         self.number = get_object_or_404(Ppf, number=self.kwargs['id'])
-        return PpfEntry.objects.filter(number=self.number)
+        return PpfEntry.objects.filter(number=self.number).order_by('-trans_date')
 
 class PpfAddEntryView(CreateView):
     template_name = 'ppfs/ppf_add_trans.html'
