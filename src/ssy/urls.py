@@ -1,11 +1,11 @@
 from django.urls import path
 
 from .views import (
-    SsyCreateView,
+    add_ssy,
     SsyDeleteView,
     SsyListView,
     SsyDetailView,
-    SsyUpdateView,
+    update_ssy,
     SsyEntryListView,
     upload_ssy_trans,
     SsyAddEntryView,
@@ -16,9 +16,9 @@ from .views import (
 app_name = 'ssys'
 urlpatterns = [
     path('', SsyListView.as_view(), name='ssy-list'),
-    path('create/', SsyCreateView.as_view(), name='ssy-create'),
+    path('create/', add_ssy, name='ssy-create'),
     path('<id>/', SsyDetailView.as_view(), name='ssy-detail'),
-    path('<id>/update/', SsyUpdateView.as_view(), name='ssy-update'),
+    path('<id>/update/', update_ssy, name='ssy-update'),
     path('<id>/delete/', SsyDeleteView.as_view(), name='ssy-delete'),
     path('<id>/transactions/', SsyEntryListView.as_view(), name='ssy-entry-list'),
     path('<id>/upload-transactions/', upload_ssy_trans, name='ssy-upload-trans'),

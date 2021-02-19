@@ -4,7 +4,13 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} Add SSY transaction {% endblock viewname %}
+{% block viewname %} 
+<ul class="breadcrumb">
+  <li><a href="{% url 'ssys:ssy-list' %}">SSY</a></li>
+  <li><a href="#">Add SSY transaction</a></li>
+</ul>
+ 
+{% endblock viewname %}
 
 {% block content %}
 

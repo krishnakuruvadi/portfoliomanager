@@ -12,8 +12,10 @@
   </ul>
 {% endblock %} 
 
+{% block canvas %}{% endblock canvas %}
+
 {% block content %}
-    <table class="table table-hover">
+    <table class="table table-hover" id="trans-table">
         <thead class="thead-dark">
             <tr>
             <th scope="col">#</th>
@@ -40,3 +42,13 @@
         </tbody>
     </table>
 {% endblock %}
+
+<script>
+    {% block jquery %}
+        $('#trans-table').DataTable({
+            "columnDefs": [
+                { "type": "date", "targets": [1] }
+            ]
+        });
+    {% endblock jquery %}
+  </script>

@@ -17,24 +17,70 @@ from rest_framework.response import Response
 
 from dateutil.relativedelta import relativedelta
 import datetime
-from .forms import SsyModelForm, SsyEntryModelForm
+from .forms import SsyEntryModelForm
 from .models import Ssy, SsyEntry
 from .ssy_helper import ssy_add_transactions
-import decimal
+from decimal import Decimal
 from shared.handle_get import *
+from goal.goal_helper import get_goal_id_name_mapping_for_user
+from django.http import HttpResponseRedirect
 
-class SsyCreateView(CreateView):
+
+def add_ssy(request):
     template_name = 'ssys/ssy_create.html'
-    form_class = SsyModelForm
-    queryset = Ssy.objects.all() # <blog>/<modelname>_list.html
-    #success_url = '/'
+    if request.method == 'POST':
+        print(request.POST)
+        number = request.POST['number']
+        start_date = request.POST['start_date']
+        user = request.POST['user']
+        goal = request.POST['goal']
+        if goal != '':
+            goal_id = Decimal(goal)
+        else:
+            goal_id = None
+        Ssy.objects.create(
+            number=number,
+            start_date=start_date,
+            user=user,
+            goal=goal_id
+        )
 
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
+    users = get_all_users()
+    context = {'users':users, 'operation': 'Add Fixed Deposit'}
+    return render(request, template_name, context)
 
-    def get_success_url(self):
-        return reverse('ssys:ssy-list')
+
+def update_ssy(request, id):
+    template_name = 'ssys/ssy_update.html'
+    if request.method == 'POST':
+        try:
+            print(request.POST)
+            ssy_obj = Ssy.objects.get(number=id)
+            ssy_obj.start_date = request.POST['start_date']
+            ssy_obj.user = request.POST['user']
+            goal = request.POST['goal']
+            if goal != '':
+                goal_id = Decimal(goal)
+            else:
+                goal_id = None
+            ssy_obj.goal = goal_id
+            ssy_obj.save()
+            return HttpResponseRedirect("../")
+        except Ssy.DoesNotExist:
+                pass
+    else:
+        try:
+            ssy_obj = Ssy.objects.get(number=id)
+            # Always put date in %Y-%m-%d for chrome to show things properly
+            users = get_all_users()
+            goals = get_goal_id_name_mapping_for_user(ssy_obj.user)
+            context = {'goals':goals, 'users':users,'user':ssy_obj.user, 'number':ssy_obj.number, 'start_date':ssy_obj.start_date.strftime("%Y-%m-%d"),
+                    'notes':ssy_obj.notes, 'goal':ssy_obj.goal,
+                    'operation': 'Edit SSY'}
+        except Ssy.DoesNotExist:
+            context = {'operation': 'Edit SSY'}
+    print(context)
+    return render(request, template_name, context)
 
 class SsyListView(ListView):
     template_name = 'ssys/ssy_list.html'
@@ -62,19 +108,6 @@ class SsyDetailView(DetailView):
         data['user_str'] = get_user_name_from_id(data['object'].user)
         return data
 
-class SsyUpdateView(UpdateView):
-    template_name = 'ssys/ssy_create.html'
-    form_class = SsyModelForm
-
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Ssy, number=id_)
-
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
-
-
 class SsyDeleteView(DeleteView):
     template_name = 'ssys/ssy_delete.html'
     
@@ -90,7 +123,7 @@ class SsyEntryListView(ListView):
 
     def get_queryset(self):
         self.number = get_object_or_404(Ssy, number=self.kwargs['id'])
-        return SsyEntry.objects.filter(number=self.number)
+        return SsyEntry.objects.filter(number=self.number).order_by('-trans_date')
 
 class SsyAddEntryView(CreateView):
     template_name = 'ssys/ssy_add_trans.html'
@@ -179,7 +212,7 @@ class ChartData(APIView):
                 ssy_data_bal.append(bal)
             
             avg_principal = int(principal/years_completed)
-            print("average payment", avg_principal)
+            print(f" total paid {principal} over {years_completed} years with average payment {avg_principal}")
             ssy_exp_bal = list()
             ssy_exp_interest = list()
             ssy_exp_principal = list()
@@ -207,7 +240,7 @@ class ChartData(APIView):
                 bal['x'] = prin['x']
                 principal = principal + avg_principal
                 prin['y'] = principal
-                interest = interest + int((prin['y'] + interest) *decimal.Decimal(projected_rate/100))
+                interest = interest + int((prin['y'] + interest) * Decimal(projected_rate/100))
                 inter['y'] = interest
                 bal['y'] = prin['y'] + inter['y']
                 print("on ", prin['x'], prin['y'], inter['y'], bal['y'])

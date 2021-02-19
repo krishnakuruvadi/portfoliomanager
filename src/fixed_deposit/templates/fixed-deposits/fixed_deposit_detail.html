@@ -13,7 +13,7 @@
 
 {% block content %} 
 
-  <table>
+  <table class="table table-borderless" style="width:50%">
     <tr>
       <td>Id</td>
       <td>{{ object.id }}</td>
@@ -57,33 +57,24 @@
 </div>
 {% endblock content %}
 
-<script>
-  {% block jquery %}
-    var endpoint = '/fixed-deposit/api/chart/data/{{ object.id }}'
-    var principal_values = []
-    var interest_values = []
-    var bal_values = []
-    $.ajax({
-      method: "GET",
-      url: endpoint,
-      success: function(data){
-        console.log(data)
-        amount_values = data.amount_values
-        exp_amount_values = data.exp_amount_values
-        console.log("amount values")
-        console.log(amount_values)
-        console.log("expected amount values")
-        console.log(exp_amount_values)
+{% block ajaxcalls %}
+          {
+            url      : '/fixed-deposit/api/chart/data/{{ object.id }}',
+            data     : null,
+            callback : setChart
+          },
+{% endblock ajaxcalls %}
 
-        setChart()
-      },
-      error: function(error_data){
-        console.log("error")
-        console.log(error_data)
-      }
-    })
-
-    function setChart(){
+{% block javascript %}
+  <script>
+    function setChart(data) {
+      console.log(data)
+      amount_values = data.amount_values
+      exp_amount_values = data.exp_amount_values
+      console.log("amount values")
+      console.log(amount_values)
+      console.log("expected amount values")
+      console.log(exp_amount_values)
       var ctx = document.getElementById("myChart");
       var config = {
         type:    'line',
@@ -132,5 +123,5 @@
       };
       var myChart = new Chart(ctx,config); 
     }
-  {% endblock jquery %}
-</script>
+  </script>
+{% endblock javascript %}

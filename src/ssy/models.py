@@ -7,7 +7,7 @@ class Ssy(models.Model):
     number = models.CharField(max_length=20, primary_key=True)
     start_date = models.DateField()
     user = models.IntegerField()
-    goal =  models.IntegerField(null=True)
+    goal = models.IntegerField(null=True)
     notes = models.CharField(max_length=40, null=True, blank=True)
 
     def get_absolute_url(self):
