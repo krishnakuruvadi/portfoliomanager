@@ -15,7 +15,7 @@
 
 {% block content %}
 
-  <table>
+  <table class="table table-borderless" style="width:50%">
     <tr>
       <td>#</td>
       <td>{{ object.id }}</td>
@@ -35,6 +35,18 @@
     <tr>
       <td>Goal</td>
       <td>{{ goal_str }}</td>
+    </tr>
+    <tr>
+      <td>Employee Contribution</td>
+      <td>{{ employee_contrib }}</td>
+    </tr>
+    <tr>
+      <td>Employer Contribution</td>
+      <td>{{ employer_contrib }}</td>
+    </tr>
+    <tr>
+      <td>Interest Accumulated</td>
+      <td>{{ interest }}</td>
     </tr>
   </table>
 

@@ -52,7 +52,16 @@ class GoalDetailView(DetailView):
         data['progress_data']['chart_data'] = chart_data
         data['progress_data']['avg_growth'] = ret.get('avg_growth', 0)
         data['progress_data']['avg_contrib'] = ret.get('avg_contrib', 0)
+        data['final_projection'] = ret.get('final_projection', 0)
+        total_contribution = ret.get('total_contribution', 0)
+        contrib_percent = int(total_contribution*100/float(data['object'].final_val))
+        project_percent = int(data['final_projection']*100/float(data['object'].final_val))
+        remaining_percent = 100 - contrib_percent - project_percent
+        if remaining_percent < 0:
+            remaining_percent = 0
+        data['status_line'] = [contrib_percent, project_percent, remaining_percent]
         print("GoalProgressData - returning:", data)
+        print(data)
         return data
 
 class GoalDeleteView(DeleteView):

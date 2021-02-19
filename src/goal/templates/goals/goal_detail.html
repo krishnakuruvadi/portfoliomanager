@@ -41,8 +41,26 @@
         <td>Inflation</td>
         <td colspan=2>{{ object.inflation }}%</td>
       </tr>
+      <tr>
+        <td>Status</td>
+        <td colspan=2>
+          <!--canvas id="statusLineChart" width="200" height="200"></canvas-->
+          <div class="row" id="progressLine">
+            <!--div class="app-goals-bar__left-bar" style="width: 11%; background: rgb(239, 49, 137) none repeat scroll 0% 0%;">11</div--> 
+            <!--div class="app-goals-bar__right-bar" style="width: 89%; background: rgb(237, 230, 233) none repeat scroll 0% 0%;">89</div-->
+          </div>
+          
+          <div class="row" style="padding-top: 5px;">
+            <div id="rectangle" style="width:25px;height:17px;background:green"></div>&nbsp;Achieved&nbsp;&nbsp;
+            <div id="rectangle" style="width:25px;height:17px;background:grey"></div>&nbsp;Projected&nbsp;&nbsp;
+            <div id="rectangle" style="width:25px;height:17px;background:red"></div>&nbsp;Remaining
+          </div>
+        </td>
+      </tr>
     </table>
+
   </div>
+
   <div class='col-sm-2'></div>
   <div class='col-sm-4'>
     <canvas id="progressChart" width="200" height="200"></canvas>
@@ -73,16 +91,14 @@
 </div>
 <br><br><br>
 <div class="row">
-  <div class='col-sm-2'>
-    <canvas id="classificationChart" width="200" height="200"></canvas>
+  <div class='col-sm-3'>
+    <canvas id="classificationChart" width="300" height="200"></canvas>
   </div>
-  <div class='col-sm-2'></div>
-  <div class='col-sm-2'>
-    <canvas id="distributionChart" width="200" height="200"></canvas>
+  <div class='col-sm-4'>
+    <canvas id="distributionChart" width="300" height="150"></canvas>
   </div>
-  <div class='col-sm-2'></div>
-  <div class='col-sm-2'>
-    <canvas id="statusChart" width="200" height="200"></canvas>
+  <div class='col-sm-3'>
+    <canvas id="statusChart" width="300" height="200"></canvas>
   </div>
 </div>
 {% endblock content %}
@@ -102,6 +118,31 @@
 
   var progress_data = {{progress_data|safe}}
   setProgressChart()
+  var status_line = {{status_line|safe}}
+  setStatusLineChart(status_line)
+
+  function setStatusLineChart(status_line) {
+    colors = ['green','grey', 'red']
+    div_parent_elem = document.getElementById("progressLine")
+
+    for (x in status_line) {
+      entry = status_line[x]
+      color = colors[x]
+      const newDiv = document.createElement("div");
+
+      // and give it some content
+      const newContent = document.createTextNode(entry);
+
+      // add the text node to the newly created div
+      newDiv.appendChild(newContent);
+      newDiv.style.width=entry.toString()+'%';
+      newDiv.style.height='20px';
+      newDiv.style.textAlign='center';
+      newDiv.style.background=color+' none repeat scroll 0% 0%';
+      //style="width: 11%; background: rgb(239, 49, 137) none repeat scroll 0% 0%;"
+      div_parent_elem.appendChild(newDiv)
+    }
+  }
 
   $("#custom_growth").change(function () {
     console.log('change in custom growth detected')
@@ -175,7 +216,7 @@
     };
     var ctx2 = document.getElementById('distributionChart').getContext('2d');
     var config2 = {
-      type: 'pie',
+      type: 'doughnut',
       data: {
         datasets: [{
           data: distribution_vals,

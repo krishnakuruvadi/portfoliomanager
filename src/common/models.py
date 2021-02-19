@@ -148,3 +148,4 @@ class ScrollData(models.Model):
 class Preferences(SingletonModel):
     timezone = models.CharField(max_length=100, default='Asia/Kolkata')
     indexes_to_scroll = models.CharField(max_length=20000, null=True, blank=True)
+    document_backup_locn = models.CharField(max_length=20000, null=True, blank=True)

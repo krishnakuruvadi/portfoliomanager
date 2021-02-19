@@ -334,6 +334,7 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
             else:
                 total[yr]['Projected'] = (float(total_contribution)+float(avg_contrib))*(1+float(avg_growth))
             deduct[yr]['Projected'] = 0
+            ret['final_projection'] = int(total[yr]['Projected'])
 
     print('contrib', contrib)
     print('deduct', deduct)

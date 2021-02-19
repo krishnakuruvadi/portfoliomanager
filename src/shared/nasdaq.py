@@ -188,10 +188,12 @@ class Nasdaq(Exchange):
                 if 'OF'in timestamp:
                     pos = timestamp.find('OF')
                     timestamp = timestamp[pos+3:]
+                    timestamp = timestamp.replace(' ET', '')
                 #print(timestamp)
-                date = datetime.datetime.strptime(timestamp, "%b %d, %Y").date()
+                #date = datetime.datetime.strptime(timestamp, "%b %d, %Y").date()
+                date_obj = parse(timestamp).date()
                 latest_val = json_data['data']['primaryData']['lastSalePrice']
-                data[date] = get_float_or_zero_from_string(latest_val.replace('$',''))
+                data[date_obj] = get_float_or_zero_from_string(latest_val.replace('$',''))
         #print('done with request')
         #print(data)
         return data

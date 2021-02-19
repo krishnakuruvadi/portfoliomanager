@@ -67,6 +67,19 @@ class EpfDetailView(DetailView):
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
+        id_ = self.kwargs.get("id")
+        epf_obj = get_object_or_404(Epf, id=id_)
+        contribs = EpfEntry.objects.filter(epf_id=epf_obj)
+        em_contrib = 0
+        er_contrib = 0
+        interest = 0
+        for contrib in contribs:
+            em_contrib = em_contrib + contrib.employee_contribution
+            er_contrib = er_contrib + contrib.employer_contribution
+            interest = interest + contrib.interest_contribution
+        data['employee_contrib'] = em_contrib
+        data['employer_contrib'] = er_contrib
+        data['interest'] = interest
         return data
 
 class EpfUpdateView(UpdateView):

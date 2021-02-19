@@ -182,7 +182,6 @@ def preferences(request):
                 pref_obj.timezone = tz_pref[0]
             else:
                 pref_obj.timezone = tz_pref
-            pref_obj.save()
         sel_indexes = request.POST.getlist('index_scroll')
         if sel_indexes:
             sel_index_str = None
@@ -194,7 +193,8 @@ def preferences(request):
             if sel_index_str:
                 print(f'sel_index_str {sel_index_str}')
                 pref_obj.indexes_to_scroll = sel_index_str
-                pref_obj.save()                
+        pref_obj.document_backup_locn = request.POST.get('timezone')
+        pref_obj.save()
  
     tzs = list()
     for i_tz in common_timezones:
@@ -217,5 +217,10 @@ def preferences(request):
         for index in avail_indexes:
             sel_indexes.append(index)
 
-    context = {'tz': pref_obj.timezone, 'tzs':tzs, 'indexes':avail_indexes, 'sel_indexes':sel_indexes}
+    context = {
+        'tz': pref_obj.timezone, 
+        'tzs':tzs, 'indexes':avail_indexes, 
+        'sel_indexes':sel_indexes, 
+        'document_backup_locn':'' if not pref_obj.document_backup_locn else pref_obj.document_backup_locn
+    }
     return render(request, template, context)
