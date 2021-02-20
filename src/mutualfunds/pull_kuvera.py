@@ -25,7 +25,7 @@ def get_path_to_chrome_driver():
     return path
 
 
-def pull_kuvera(user, email, passwd):
+def pull_kuvera(user, email, passwd, pull_user_name):
     url = 'https://kuvera.in/reports/transactions'
     chrome_options = webdriver.ChromeOptions()
     dload_path = pathlib.Path(__file__).parent.parent.absolute()
@@ -47,6 +47,26 @@ def pull_kuvera(user, email, passwd):
         passwd_elem.send_keys(passwd)
         submit_button = driver.find_element_by_xpath('//button[text()="LOGIN"]')
         submit_button.click()
+        time.sleep(10)
+        user_cont = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//div[contains(@class,'username-container')]")))
+        user_cont.click()
+        time.sleep(3)
+        user_name_div = driver.find_element_by_xpath("//div[contains(@class,'b-nav-dropdown__user__name')]")
+        if user_name_div.text != pull_user_name:
+            user_found = False
+            span_elems = driver.find_elements_by_xpath("//span[contains(@class,'b-nav-dropdown__account__subtext')]")
+            for span_elem in span_elems:
+                if span_elem.text == pull_user_name:
+                    span_elem.click()
+                    time.sleep(5)
+                    user_found = True
+            if not user_found:
+                print(f'user {pull_user_name} not found')
+                return None
+        else:
+            user_name_div.click()
+        print(f'user {pull_user_name} found')
+        time.sleep(5)
         dload = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//img[contains(@src,'download.svg')]")))
         time.sleep(5)
         dload = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//img[contains(@src,'download.svg')]")))

@@ -155,7 +155,7 @@
               </li>
             </ul>
           </nav-->
-          <div class="container">
+          <div class="container" style=" padding: 1px 1px 1px 1px;">
             <div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
               <div class="carousel-inner" id="carousel-scroll-me">
               
@@ -243,7 +243,6 @@
         //console.log(data);
         var items = data['scroll_data'];
         var sc = '';
-        var last_updated = '';
         for(i=0;i<items.length;i++){
           if (i%5==0){
             if(i==0) {
@@ -253,9 +252,9 @@
             }
           }
           if (items[i]['change'] < 0) {
-            sc = sc + '<div class="Column" style=" display: table-cell;background-color:red;">' // each index
+            sc = sc + '<div class="Column" style=" display: table-cell;border: 2px solid red;border-radius: 25px;padding: 1px; ">' // each index
           } else {
-            sc = sc + '<div class="Column" style=" display: table-cell;background-color:green;">' // each index
+            sc = sc + '<div class="Column" style=" display: table-cell;border: 2px solid green;border-radius: 25px;padding: 1px;">' // each index
           }
 
           sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;">'; // outer row column of each index
@@ -276,7 +275,6 @@
           if (i%5==4){
             sc = sc + '</div></div>'; // carousel item end
           }
-          last_updated = items[i]['last_updated']
         }
         //console.log(sc)
         var el = document.getElementById('carousel-scroll-me');

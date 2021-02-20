@@ -105,17 +105,18 @@ class Nasdaq(Exchange):
                  'Sec-Fetch-Mode': 'cors',
                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'}
             get_response = requests.request('GET', urlData, headers=headers)
-            print(get_response)
+            #print(get_response)
             if get_response.status_code == 200:
                 break
         if get_response.status_code != 200:
             return None
         #print(get_response.content)
         json_data = get_response.json()
-        #print(json_data)
+        #print(f"json_data {json_data}")
         data = dict()
         if 'data' in json_data:
             for ind in json_data['data']:
+                #print(f"ind {ind}")
                 symbol = ind['symbol']
                 data[symbol] = dict()
                 data[symbol]['name'] = ind['companyName']
@@ -125,14 +126,17 @@ class Nasdaq(Exchange):
                 data[symbol]['pChange'] = get_float_or_zero_from_string(data[symbol]['pChange'].replace('%',''))
                 try:
                     date_str = ind['lastTradeTimestamp']
-                    date_str = date_str.replace('DATA AS OF', '')
-                    date_str = date_str.replace(' ET', '')
-                    date_obj = parse(date_str)
-                    from_zone = timezone('America/Cancun')
-                    date_obj = date_obj.replace(tzinfo=from_zone)
-                    to_zone = tz.tzutc()
-                    data[symbol]['last_updated'] = date_obj.astimezone(to_zone).strftime("%Y-%m-%d %H:%M:%S")
+                    if 'Market Closed' not in date_str:
+                        date_str = date_str.replace('DATA AS OF', '')
+                        date_str = date_str.replace(' ET', '')
+                        date_obj = parse(date_str)
+                        from_zone = tz.gettz('America/Cancun')
+                        date_obj = date_obj.replace(tzinfo=from_zone)
+                        to_zone = tz.tzutc()
+                        data[symbol]['last_updated'] = date_obj.astimezone(to_zone).strftime("%Y-%m-%d %H:%M:%S")
                 except Exception as ex:
+                    print("exception converting timestamp")
+                    print(ex)
                     data[symbol]['last_updated'] = timezone.now()
         return data
     

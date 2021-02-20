@@ -445,14 +445,17 @@ def update_scroll_data():
     for item in nse.get_index_list():
         data = nse.get_index_quote(item)
         if data:
-            #print(data)
+            #print(f"data {data}")
             scroll_item = None
             try:
                 scroll_item = ScrollData.objects.get(scrip=item)
-                scroll_item.last_updated = timezone.now()
-                scroll_item.val = data['lastPrice']
-                scroll_item.change = data['change']
-                scroll_item.percent = data['pChange']
+                if float(scroll_item.val) != data['lastPrice']:
+                    print(f"NSE scroll_item.val {scroll_item.val} data['lastPrice'] {data['lastPrice']}")
+                    scroll_item.last_updated = timezone.now()
+                    scroll_item.val = data['lastPrice']
+                    scroll_item.change = data['change']
+                    scroll_item.percent = data['pChange']
+                    scroll_item.save()
             except ScrollData.DoesNotExist:
                 scroll_item = ScrollData.objects.create(scrip=item,
                                                         last_updated = timezone.now(),
@@ -460,21 +463,30 @@ def update_scroll_data():
                                                         change = data['change'],
                                                         percent = data['pChange'])
             if len(sel_indexes) == 0 or item in sel_indexes:
-                scroll_item.display = True
+                if scroll_item.display != True:
+                    scroll_item.display = True
+                    scroll_item.save()
             else:
-                scroll_item.display = False
-            scroll_item.save()
+                if scroll_item.display != False:
+                    scroll_item.display = False
+                    scroll_item.save()
+        else:
+            print(f'no data for NSE {item}')
     n = Nasdaq('')
     data = n.get_all_index()
     if data:
+        print(f"data {data}")
         for k, v in data.items():
             scroll_item = None
             try:
                 scroll_item = ScrollData.objects.get(scrip=v['name'])
-                scroll_item.last_updated = v['last_updated']
-                scroll_item.val = v['lastPrice']
-                scroll_item.change = v['change']
-                scroll_item.percent = v['pChange']
+                if float(scroll_item.val) != float(v['lastPrice']):
+                    print(f"NASDAQ scroll_item.val {scroll_item.val} v['lastPrice'] {v['lastPrice']}")
+                    scroll_item.last_updated = v['last_updated']
+                    scroll_item.val = v['lastPrice']
+                    scroll_item.change = v['change']
+                    scroll_item.percent = v['pChange']
+                    scroll_item.save()
             except ScrollData.DoesNotExist:
                 scroll_item = ScrollData.objects.create(scrip=v['name'],
                                                         last_updated = v['last_updated'],
@@ -482,10 +494,13 @@ def update_scroll_data():
                                                         change = v['change'],
                                                         percent = v['pChange'])
             if len(sel_indexes) == 0 or v['name'] in sel_indexes:
-                scroll_item.display = True
+                if scroll_item.display != True:
+                    scroll_item.display = True
+                    scroll_item.save()
             else:
-                scroll_item.display = False
-            scroll_item.save()
+                if scroll_item.display != False:
+                    scroll_item.display = False
+                    scroll_item.save()
 
 @db_periodic_task(crontab(minute='10', hour='1-5', day='1-5'))
 def get_pe():

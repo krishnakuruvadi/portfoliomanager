@@ -373,11 +373,12 @@ def upload_transactions(request):
             pull_broker = request.POST.get('pullBrokerControlSelect')
             pull_emailid = request.POST.get('pull-email-id')
             pull_passwd = request.POST.get('pull-passwd')
+            pull_user_name = request.POST.get('pull_kuvera_acc_name')
             print('user:',pull_user)
             print('broker:',pull_broker)
             print('emailid:',pull_emailid)
             print('passwd:',pull_passwd)
-            pull_kuvera(pull_user, pull_emailid, pull_passwd)
+            pull_kuvera(pull_user, pull_emailid, pull_passwd, pull_user_name)
         else:
             uploaded_file = request.FILES['document']
             user = request.POST['user']
