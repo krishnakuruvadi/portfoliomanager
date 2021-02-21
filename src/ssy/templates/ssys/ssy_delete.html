@@ -1,6 +1,11 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} Delete SSY {% endblock %}
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'ssys:ssy-list' %}">SSY</a></li>
+    <li><a href="#">Delete SSY</a></li>
+  </ul>
+{% endblock %}
 
 
 {% block canvas %}{% endblock canvas %}

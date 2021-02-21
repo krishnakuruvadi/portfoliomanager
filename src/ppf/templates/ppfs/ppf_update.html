@@ -7,11 +7,7 @@
 {% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'ppfs:ppf-list' %}">PPFs</a></li>
-    <li><a href="#">  {% if object %}
-      Update PPF
-    {% else %}
-      Create PPF
-    {% endif %}</a></li>
+    <li><a href="#">Update PPF</a></li>
   </ul>
 {% endblock viewname %}
 
@@ -25,7 +21,7 @@
       <label for="number" class="col-sm-3 col-form-label">Number</label>
       <div class="col-sm-3">
         <div class="md-form mt-0">
-          <input type="text" id="number" name="number" value="{{number}}">
+          {{number}}
         </div>
       </div>
     </div>
@@ -71,6 +67,14 @@
 </form>
 
 {% endblock content %}
+
+{% block ajaxcalls %}
+          {
+            url      : '/goal/get-goals/{{user|safe}}',
+            data     : null,
+            callback : get_goals_and_set_goal
+          },
+{% endblock ajaxcalls %}
 
 {% block javascript %}
   {% load static %}

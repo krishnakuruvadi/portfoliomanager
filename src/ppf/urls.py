@@ -1,11 +1,11 @@
 from django.urls import path
 
 from .views import (
-    PpfCreateView,
+    add_ppf,
     PpfDeleteView,
     PpfDetailView,
     PpfListView,
-    PpfUpdateView,
+    update_ppf,
     PpfEntryListView,
     upload_ppf_trans,
     PpfAddEntryView,
@@ -17,9 +17,9 @@ from .views import (
 app_name = 'ppfs'
 urlpatterns = [
     path('', PpfListView.as_view(), name='ppf-list'),
-    path('create/', PpfCreateView.as_view(), name='ppf-create'),
+    path('create/', add_ppf, name='ppf-create'),
     path('<id>/', PpfDetailView.as_view(), name='ppf-detail'),
-    path('<id>/update/', PpfUpdateView.as_view(), name='ppf-update'),
+    path('<id>/update/', update_ppf, name='ppf-update'),
     path('<id>/delete/', PpfDeleteView.as_view(), name='ppf-delete'),
     path('<id>/transactions/', PpfEntryListView.as_view(), name='ppf-entry-list'),
     path('<id>/upload-transactions/', upload_ppf_trans, name='ppf-upload-trans'),

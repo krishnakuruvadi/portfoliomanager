@@ -46,7 +46,7 @@ def add_ssy(request):
         )
 
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add Fixed Deposit'}
+    context = {'users':users, 'operation': 'Add SSY'}
     return render(request, template_name, context)
 
 

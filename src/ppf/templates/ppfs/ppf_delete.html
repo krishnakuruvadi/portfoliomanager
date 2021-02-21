@@ -1,6 +1,11 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} Delete PPF {% endblock %}
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'ppfs:ppf-list' %}">PPF</a></li>
+    <li><a href="#">Delete PPF</a></li>
+  </ul>
+{% endblock %}
 
 
 {% block canvas %}{% endblock canvas %}

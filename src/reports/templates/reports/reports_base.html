@@ -2,7 +2,11 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} Reports {% endblock viewname %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Reports</a></li>
+  </ul>
+{% endblock viewname %}
 
 {% block style %}
 <style>
@@ -29,37 +33,82 @@ a:link {
   {% include "reports/summary.html" %}
 {% endblock content %}
 
-{% block jquery %}
+{% block ajaxcalls %}
+          {
+            url      : '/user/api/get/users',
+            data     : null,
+            callback : get_users_and_set_report
+          },
+          {
+            url      : '/goal/api/get/current/{{user_id|safe}}',
+            data     : null,
+            callback : get_goals_and_set_report
+          },
+          {
+            url      : '/fixed-deposit/api/get/current/{{user_id|safe}}',
+            data     : null,
+            callback : get_fd_and_set_report
+          },
+          {
+            url      : '/epf/api/get/current/{{user_id|safe}}',
+            data     : null,
+            callback : get_epf_and_set_report
+          },
+          {
+            url      : '/espp/api/get/current/{{user_id|safe}}',
+            data     : null,
+            callback : get_espp_and_set_report
+          },
+          {
+            url      : '/shares/api/get/current/{{user_id|safe}}',
+            data     : null,
+            callback : get_shares_and_set_report
+          },
+          {
+            url      : '/mutualfunds/api/get/current/{{user_id|safe}}',
+            data     : null,
+            callback : get_mf_and_set_report
+          },
+          {
+            url      : '/rsu/api/get/current/{{user_id|safe}}',
+            data     : null,
+            callback : get_rsu_and_set_report
+          },
+          {
+            url      : '/ssy/api/get/current/{{user_id|safe}}',
+            data     : null,
+            callback : get_ssy_and_set_report
+          },
+          {
+            url      : '/ppf/api/get/current/{{user_id|safe}}',
+            data     : null,
+            callback : get_ppf_and_set_report
+          },
+{% endblock ajaxcalls %}
+
+{% block javascript %}
+<script>
 {% include "reports/summary.js" %}
 
-    var user_ep = '/user/api/get/users'
-    $.ajax({
-      method: "GET",
-      url: user_ep,
-      success: function(user_list_data){
-        console.log(user_list_data)
-        var tabs = document.getElementById("summary-tabs")
-        console.log(tabs)
-        var i;
-        var user_list = user_list_data['user_list']
-        for (i=0;i<user_list.length;i++) {
-            var li_item = document.createElement("LI");
-            li_item.className = "nav-item";
-            a_item = document.createElement("A");
-            a_item.classList.add("nav-link");
-            var user_link = "user/" + user_list[i]['id'].toString();
-            a_item.setAttribute("href", user_link);
-            console.log(user_link)
-            var text_item = document.createTextNode(user_list[i]['name']);
-            a_item.appendChild(text_item);
-            li_item.appendChild(a_item);
-            tabs.appendChild(li_item);
-        }
-        
-      },
-      error: function(error_data){
-        console.log("error")
-        console.log(error_data)
-      }
-    })
-{% endblock jquery %}
+  function get_users_and_set_report(user_list_data) {
+    console.log(user_list_data)
+    var tabs = document.getElementById("summary-tabs")
+    console.log(tabs)
+    var i;
+    var user_list = user_list_data['user_list']
+    for (i=0;i<user_list.length;i++) {
+      var li_item = document.createElement('LI');
+      li_item.className = "nav-item";
+      a_item = document.createElement("A");
+      a_item.classList.add("nav-link");
+      var user_link = "user/" + user_list[i]['id'].toString();
+      a_item.setAttribute("href", user_link);
+      console.log(user_link)
+      var text_item = document.createTextNode(user_list[i]['name']);
+      a_item.appendChild(text_item);
+      li_item.appendChild(a_item);
+      tabs.appendChild(li_item);
+    }
+  }
+</script>
+{% endblock javascript %}

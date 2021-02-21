@@ -122,6 +122,7 @@ def add_goal(request):
 def add_retirement_goal(request):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
     template = 'goals/add_retirement_goal.html'
+    operation = 'Create Retirement Goal'
     if request.method == 'POST':
         print(request.POST)
         if "submit" in request.POST:
@@ -160,13 +161,14 @@ def add_retirement_goal(request):
             context = {'users':users, 'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
                         'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':corpus,
                         'expense_period': expense_period, 'roi_corpus':post_returns, 'labels':json.dumps(dates), 
-                        'corpus_vals': corpus_vals, 'expense_vals': expense_vals}
+                        'corpus_vals': corpus_vals, 'expense_vals': expense_vals, 'operation':operation}
             return render(request, template, context=context)
     users = get_all_users()
-    context = {'users':users}
+    context = {'users':users, "labels":None, "data":None, 'operation':operation}
     return render(request, template, context)
 
 def update_goal(request, id):
+    operation = 'Edit Goal'
     try:
         goal_obj = Goal.objects.get(id=id)
         if goal_obj.recurring_pay_goal:
@@ -207,7 +209,7 @@ def update_goal(request, id):
                     context = {'users':users, 'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
                                 'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':corpus,
                                 'expense_period': expense_period, 'roi_corpus':post_returns, 'labels':json.dumps(dates), 
-                                'corpus_vals': corpus_vals, 'expense_vals': expense_vals}
+                                'corpus_vals': corpus_vals, 'expense_vals': expense_vals, 'operation':operation}
                     return render(request, template, context=context)
                 return HttpResponseRedirect("../")
             else:
@@ -218,7 +220,7 @@ def update_goal(request, id):
                             'inflation':goal_obj.inflation, 'final_val':goal_obj.final_val,
                             'expense_period': int(goal_obj.expense_period/12), 'roi_corpus':goal_obj.post_returns,
                             'notes':goal_obj.notes, 'recurring_pay_goal': goal_obj.recurring_pay_goal, 'labels':json.dumps(dates),
-                            'corpus_vals': corpus_vals, 'expense_vals': expense_vals}
+                            'corpus_vals': corpus_vals, 'expense_vals': expense_vals, 'operation':operation}
                 return render(request, template, context=context) 
         else:
             template = 'goals/add_goal.html'
@@ -252,7 +254,7 @@ def update_goal(request, id):
                     print("calculated value", val)
                     users = get_all_users()
                     context = {'users':users, 'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
-                        'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val}
+                        'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val, 'operation':operation}
                     return render(request, template, context=context)
                 return HttpResponseRedirect("../")
             else:
@@ -261,7 +263,7 @@ def update_goal(request, id):
                             'time_period': goal_obj.time_period, 'curr_val': goal_obj.curr_val,
                             'inflation':goal_obj.inflation, 'final_val':goal_obj.final_val,
                             'expense_period': goal_obj.expense_period, 'roi_corpus':goal_obj.post_returns,
-                            'notes':goal_obj.notes, 'recurring_pay_goal': goal_obj.recurring_pay_goal}
+                            'notes':goal_obj.notes, 'recurring_pay_goal': goal_obj.recurring_pay_goal, 'operation':operation}
                 return render(request, template, context=context) 
     except Goal.DoesNotExist:
         pass

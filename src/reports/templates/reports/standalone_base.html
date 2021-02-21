@@ -43,11 +43,98 @@
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.js"></script>
+
     <script>
       $(document).ready(function(){
-        {% block jquery %}jquery data base{% endblock jquery %}
-      })
-    </script>
-    {% block javascript %}{% endblock %}
+          //setup an array of AJAX options,
+          //each object will specify information for a single AJAX request
+          var ajaxes  = [
+              {
+                  url      : '/goal/api/get/current/{{user_id|safe}}',
+                  data     : null,
+                  callback : get_goals_and_set_report
+                },
+                {
+                  url      : '/fixed-deposit/api/get/current/{{user_id|safe}}',
+                  data     : null,
+                  callback : get_fd_and_set_report
+                },
+                {
+                  url      : '/epf/api/get/current/{{user_id|safe}}',
+                  data     : null,
+                  callback : get_epf_and_set_report
+                },
+                {
+                  url      : '/espp/api/get/current/{{user_id|safe}}',
+                  data     : null,
+                  callback : get_espp_and_set_report
+                },
+                {
+                  url      : '/shares/api/get/current/{{user_id|safe}}',
+                  data     : null,
+                  callback : get_shares_and_set_report
+                },
+                {
+                  url      : '/mutualfunds/api/get/current/{{user_id|safe}}',
+                  data     : null,
+                  callback : get_mf_and_set_report
+                },
+                {
+                  url      : '/rsu/api/get/current/{{user_id|safe}}',
+                  data     : null,
+                  callback : get_rsu_and_set_report
+                },
+                {
+                  url      : '/ssy/api/get/current/{{user_id|safe}}',
+                  data     : null,
+                  callback : get_ssy_and_set_report
+                },
+                {
+                  url      : '/ppf/api/get/current/{{user_id|safe}}',
+                  data     : null,
+                  callback : get_ppf_and_set_report
+                }
+          ]
+      
+          //run the AJAX function for the first time once `document.ready` fires
+          do_ajax(ajaxes, 0);
+        });
+
+          //declare your function to run AJAX requests
+          function do_ajax(ajaxes, current) {
+
+            //check to make sure there are more requests to make
+            if (current < ajaxes.length) {
+              //make the AJAX request with the given info from the array of objects
+              $.ajax({
+                  url      : ajaxes[current].url,
+                  data     : ajaxes[current].data,
+                  success  : function (serverResponse) {
+      
+                      //once a successful response has been received,
+                      //no HTTP error or timeout reached,
+                      //run the callback for this request
+                      ajaxes[current].callback(serverResponse);
+      
+                  },
+                  complete : function () {
+      
+                      //increment the `current` counter
+                      //and recursively call our do_ajax() function again.
+                      current++;
+                      do_ajax(ajaxes, current);
+      
+                      //note that the "success" callback will fire
+                      //before the "complete" callback
+      
+                  }
+              });
+            }
+          }
+      
+      {% include "reports/summary.js" %}
+      </script>
+      
+      
   </body>
 </html>

@@ -377,7 +377,7 @@ def upload_transactions(request):
             print('user:',pull_user)
             print('broker:',pull_broker)
             print('emailid:',pull_emailid)
-            print('passwd:',pull_passwd)
+            #print('passwd:',pull_passwd)
             pull_kuvera(pull_user, pull_emailid, pull_passwd, pull_user_name)
         else:
             uploaded_file = request.FILES['document']

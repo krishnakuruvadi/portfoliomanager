@@ -5,18 +5,14 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block viewname %}
-    {% if name %}
-        Update Recurring Pay Goal
-    {% else %}
-        Add Recurring Pay Goal
-    {% endif %}
+    <ul class="breadcrumb">
+        <li><a href="{% url 'goals:goal-list' %}">Goals</a></li>
+        <li><a href="#">{{operation}}</a></li>
+    </ul>
 {% endblock viewname %}
 
 {% block content %}
-  <ul class="breadcrumb">
-    <li><a href="{% url 'goals:goal-list' %}">Goals</a></li>
-    <li><a href="#">Add Recurring Goal</a></li>
-  </ul>
+
   <form method="POST">
     {% csrf_token %} 
     <div class="row">
@@ -41,7 +37,7 @@
                 <label for="user" class="col-sm-3 col-form-label">User</label>
                 <div class="col-sm-3">
                     <div class="md-form mt-0">
-                        <select id="user" name="user" class="form-control"></select>
+                        <select id="id_user" name="user" class="form-control"></select>
                     </div>
                 </div>
             </div>
@@ -114,63 +110,51 @@
 {% endblock content %}
 
 {% block javascript %}
+    {% load static %}
+    <script src="{% static 'common.js' %}"></script>
     <script>
-        var users = {{users|safe}}
-        var sel_user = '{{user|safe}}'
-        var userdropdown = document.getElementById('user');
-        var opt = document.createElement('option');
-        // create text node to add to option element (opt)
-        opt.appendChild( document.createTextNode('') );
-        // set value property of opt
-        opt.value = ''; 
-        // add opt to end of select box (sel)
-        userdropdown.appendChild(opt);
-        console.log(users);
-        for (x in users) {
-            user = users[x]
-            console.log(user)
-            // create new option element
-            var opt = document.createElement('option');
-            // create text node to add to option element (opt)
-            opt.appendChild( document.createTextNode(user) );
-            // set value property of opt
-            opt.value = x;
-            if (opt.value == sel_user) {
-                opt.selected = true;
-            }
-            // add opt to end of select box (sel)
-            userdropdown.appendChild(opt);
-        }
+    set_user_list({{users|safe}}, '{{user|safe}}');
+
+    function get_goals_and_set_goal(response) {
+        set_goals(response, '{{goal|safe}}');
+    }
     </script>
 {% endblock javascript %}
 
 <script>
     {% block jquery %}
-    
-    console.log({{ labels|safe }})
-    new Chart(document.getElementById("bar-chart-grouped"), {
-        type: 'bar',
-        data: {
-        labels: {{ labels|safe }},
-        datasets: [
-            {
-            label: "Corpus",
-            backgroundColor: "#3e95cd",
-            data: {{corpus_vals}}
-            }, 
-            {
-            label: "Expenses",
-            backgroundColor: "#8e5ea2",
-            data: {{expense_vals}}
+    {%if labels %}
+        setChart({{labels|safe}}, {{corpus_vals}}, {{expense_vals}})
+    {% endif %}
+
+    function setChart(labels, corpus_vals, expense_vals) {
+        console.log(labels)
+        console.log(corpus_vals)
+        console.log(expense_vals)
+        new Chart(document.getElementById("bar-chart-grouped"), {
+            type: 'bar',
+            data: {
+            labels: labels,
+            datasets: [
+                {
+                label: "Corpus",
+                backgroundColor: "#3e95cd",
+                data: corpus_vals
+                }, 
+                {
+                label: "Expenses",
+                backgroundColor: "#8e5ea2",
+                data: expense_vals
+                }
+            ]
+            },
+            options: {
+            title: {
+                display: true,
+                text: 'Corpus Depletion'
             }
-        ]
-        },
-        options: {
-        title: {
-            display: true,
-            text: 'Corpus Depletion'
-        }
-        }
-    });
+            }
+        });
+    }
     {% endblock jquery %}
 </script>

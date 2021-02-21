@@ -18,23 +18,36 @@ import datetime
 from .forms import PpfModelForm, PpfEntryModelForm
 from .models import Ppf, PpfEntry
 from .ppf_helper import ppf_add_transactions
-import decimal
+from decimal import Decimal
 from shared.handle_get import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import HttpResponseRedirect
+from goal.goal_helper import get_goal_id_name_mapping_for_user
 
-class PpfCreateView(CreateView):
+
+def add_ppf(request):
     template_name = 'ppfs/ppf_create.html'
-    form_class = PpfModelForm
-    queryset = Ppf.objects.all() # <blog>/<modelname>_list.html
-    #success_url = '/'
+    if request.method == 'POST':
+        print(request.POST)
+        number = request.POST['number']
+        start_date = request.POST['start_date']
+        user = request.POST['user']
+        goal = request.POST['goal']
+        if goal != '':
+            goal_id = Decimal(goal)
+        else:
+            goal_id = None
+        Ppf.objects.create(
+            number=number,
+            start_date=start_date,
+            user=user,
+            goal=goal_id
+        )
 
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('ppfs:ppf-list')
+    users = get_all_users()
+    context = {'users':users, 'operation': 'Add PPF'}
+    return render(request, template_name, context)
 
 class PpfListView(ListView):
     template_name = 'ppfs/ppf_list.html'
@@ -62,17 +75,37 @@ class PpfDetailView(DetailView):
         data['user_str'] = get_user_name_from_id(data['object'].user)
         return data
 
-class PpfUpdateView(UpdateView):
-    template_name = 'ppfs/ppf_create.html'
-    form_class = PpfModelForm
-
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Ppf, number=id_)
-
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
+def update_ppf(request, id):
+    template_name = 'ppfs/ppf_update.html'
+    if request.method == 'POST':
+        try:
+            print(request.POST)
+            ppf_obj = Ppf.objects.get(number=id)
+            ppf_obj.start_date = request.POST['start_date']
+            ppf_obj.user = request.POST['user']
+            goal = request.POST['goal']
+            if goal != '':
+                goal_id = Decimal(goal)
+            else:
+                goal_id = None
+            ppf_obj.goal = goal_id
+            ppf_obj.save()
+            return HttpResponseRedirect("../")
+        except Ppf.DoesNotExist:
+                pass
+    else:
+        try:
+            ppf_obj = Ppf.objects.get(number=id)
+            # Always put date in %Y-%m-%d for chrome to show things properly
+            users = get_all_users()
+            goals = get_goal_id_name_mapping_for_user(ppf_obj.user)
+            context = {'goals':goals, 'users':users,'user':ppf_obj.user, 'number':ppf_obj.number, 'start_date':ppf_obj.start_date.strftime("%Y-%m-%d"),
+                    'notes':ppf_obj.notes, 'goal':ppf_obj.goal,
+                    'operation': 'Edit PPF'}
+        except Ppf.DoesNotExist:
+            context = {'operation': 'Edit PPF'}
+    print(context)
+    return render(request, template_name, context)
 
 
 class PpfDeleteView(DeleteView):
@@ -205,7 +238,7 @@ class ChartData(APIView):
                 bal['x'] = prin['x']
                 principal = principal + avg_principal
                 prin['y'] = principal
-                interest = interest + int((prin['y'] + interest) *decimal.Decimal(projected_rate/100))
+                interest = interest + int((prin['y'] + interest) * Decimal(projected_rate/100))
                 inter['y'] = interest
                 bal['y'] = prin['y'] + inter['y']
                 print("on ", prin['x'], prin['y'], inter['y'], bal['y'])

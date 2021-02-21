@@ -1,10 +1,6 @@
     sel_usr = '{{user_id|safe}}'
 
-    var goal_ep = '/goal/api/get/current/{{user_id|safe}}'
-    $.ajax({
-      method: "GET",
-      url: goal_ep,
-      success: function(goal_data){
+      function get_goals_and_set_report(goal_data){
         console.log(goal_data)
         var table = document.getElementById("goal-table")
         var i;
@@ -39,19 +35,9 @@
         if (goal_data.length == 0) {
           document.getElementById("goal").style.display="none"
         }
-      },
-      error: function(error_data){
-        document.getElementById("goal").style.display="none"
-        console.log("error")
-        console.log(error_data)
       }
-    })
 
-    var fd_ep = '/fixed-deposit/api/get/current/{{user_id|safe}}'
-    $.ajax({
-      method: "GET",
-      url: fd_ep,
-      success: function(fd_data){
+      function get_fd_and_set_report(fd_data){
         console.log(fd_data)
         var table = document.getElementById("fd-table")
         var i;
@@ -82,19 +68,9 @@
         if (fd_data.length == 0) {
           document.getElementById("fd").style.display="none"
         }
-      },
-      error: function(error_data){
-        document.getElementById("fd").style.display="none"
-        console.log("error")
-        console.log(error_data)
       }
-    })
 
-    var epf_ep = '/epf/api/get/current/{{user_id|safe}}'
-    $.ajax({
-      method: "GET",
-      url: epf_ep,
-      success: function(epf_data){
+      function get_epf_and_set_report (epf_data){
         console.log(epf_data)
         var table = document.getElementById("epf-table")
         var i;
@@ -125,19 +101,9 @@
         if (epf_data.length == 0) {
           document.getElementById("epf").style.display="none"
         }
-      },
-      error: function(error_data){
-        document.getElementById("epf").style.display="none"
-        console.log("error")
-        console.log(error_data)
       }
-    })
 
-    var espp_ep = '/espp/api/get/current/{{user_id|safe}}'
-    $.ajax({
-      method: "GET",
-      url: espp_ep,
-      success: function(espp_data){
+      function get_espp_and_set_report(espp_data){
         console.log(espp_data)
         var table = document.getElementById("espp-table")
         var i;
@@ -167,19 +133,9 @@
         if (espp_entries.length == 0) {
           document.getElementById("espp").style.display="none"
         }
-      },
-      error: function(error_data){
-        document.getElementById("espp").style.display="none"
-        console.log("error")
-        console.log(error_data)
       }
-    })
 
-    var ppf_ep = '/ppf/api/get/current/{{user_id|safe}}'
-    $.ajax({
-      method: "GET",
-      url: ppf_ep,
-      success: function(ppf_data){
+      function get_ppf_and_set_report(ppf_data){
         console.log(ppf_data)
         var table = document.getElementById("ppf-table")
         var i;
@@ -206,19 +162,9 @@
         if (ppf_data.length == 0) {
           document.getElementById("ppf").style.display="none"
         }
-      },
-      error: function(error_data){
-        document.getElementById("ppf").style.display="none"
-        console.log("error")
-        console.log(error_data)
       }
-    })
 
-    var ssy_ep = '/ssy/api/get/current/{{user_id|safe}}'
-    $.ajax({
-      method: "GET",
-      url: ssy_ep,
-      success: function(ssy_data){
+      function get_ssy_and_set_report(ssy_data){
         console.log(ssy_data)
         var table = document.getElementById("ssy-table")
         var i;
@@ -245,19 +191,9 @@
         if (ssy_data.length == 0) {
           document.getElementById("ssy").style.display="none"
         }
-      },
-      error: function(error_data){
-        document.getElementById("ssy").style.display="none"
-        console.log("error")
-        console.log(error_data)
       }
-    })
 
-    var rsu_ep = '/rsu/api/get/current/{{user_id|safe}}'
-    $.ajax({
-      method: "GET",
-      url: rsu_ep,
-      success: function(rsu_data){
+      function get_rsu_and_set_report(rsu_data){
         console.log(rsu_data)
         var table = document.getElementById("rsu-table")
         var i;
@@ -283,19 +219,9 @@
         if (rsu_entries.length == 0) {
           document.getElementById("rsu").style.display="none"
         }
-      },
-      error: function(error_data){
-        document.getElementById("rsu").style.display="none"
-        console.log("error")
-        console.log(error_data)
       }
-    })
 
-    var mf_ep = '/mutualfunds/api/get/current/{{user_id|safe}}'
-    $.ajax({
-      method: "GET",
-      url: mf_ep,
-      success: function(mf_data){
+      function get_mf_and_set_report(mf_data){
         console.log(mf_data)
         var table = document.getElementById("mf-table")
         var i;
@@ -331,19 +257,9 @@
         if (mf_entries.length == 0) {
           document.getElementById("mf").style.display="none"
         }
-      },
-      error: function(error_data){
-        document.getElementById("mf").style.display="none"
-        console.log("error")
-        console.log(error_data)
       }
-    })
 
-    var share_ep = '/shares/api/get/current/{{user_id|safe}}'
-    $.ajax({
-      method: "GET",
-      url: share_ep,
-      success: function(share_data){
+      function get_shares_and_set_report(share_data){
         console.log(share_data)
         var table = document.getElementById("stock-table")
         var i;
@@ -379,10 +295,4 @@
         if (share_entries.length == 0) {
           document.getElementById("stock").style.display="none"
         }
-      },
-      error: function(error_data){
-        document.getElementById("stock").style.display="none"
-        console.log("error")
-        console.log(error_data)
       }
-    })
