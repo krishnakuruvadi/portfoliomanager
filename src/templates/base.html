@@ -259,13 +259,13 @@
 
           sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;">'; // outer row column of each index
 
-          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;">'+'<b>' + items[i]['scrip'] + '</b></div></div>';
+          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;"><strong><small>' + items[i]['scrip'] + '</small></strong></div></div>';
 
-          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;">'; // row with val, change and change percent
+          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;"><small>'; // row with val, change and change percent
           sc = sc + items[i]['val'].toString() + '\xa0\xa0';
           sc = sc + items[i]['change'].toString() + '\xa0(' + items[i]['percent'].toString() +'%)\xa0'
 
-          sc = sc + '</div></div>'; // row with val, change and change percent end
+          sc = sc + '</small></div></div>'; // row with val, change and change percent end
           sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;">'+'<small>As On ' + items[i]['last_updated'] + '</small></div></div>';
 
 

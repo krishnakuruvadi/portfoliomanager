@@ -7,7 +7,7 @@ from django.views.generic import (
 )
 from .models import Stock, MutualFund, HistoricalStockPrice, HistoricalMFPrice, ScrollData, Preferences
 from .helper import update_mf_scheme_codes
-from shared.handle_real_time_data import get_latest_vals, get_historical_mf_nav
+from shared.handle_real_time_data import get_latest_vals, get_historical_mf_nav, get_forex_rate
 from dateutil.relativedelta import relativedelta
 import datetime
 from mftool import Mftool
@@ -26,6 +26,7 @@ from common.helper import get_preferences
 from pytz import common_timezones
 from shared.nasdaq import Nasdaq
 from nsetools import Nse
+from shared.utils import *
 
 
 def common_list_view(request):
@@ -168,6 +169,17 @@ class ScrollDataView(APIView):
                     preferred_tz = 'Asia/Kolkata'
                 obj['last_updated'] = utc.astimezone(timezone(preferred_tz)).strftime("%Y-%m-%d %H:%M:%S")
                 data['scroll_data'].append(obj)
+        return Response(data)
+
+class ForexDataView(APIView):
+    authentication_classes = []
+    permission_classes = []
+    def get(self, request, year, month, day, from_currency, to_currency, format=None):
+        data = dict()
+        date = datetime.date(year=year, month=month, day=day)
+        ret = get_forex_rate(date, from_currency, to_currency)
+        print(ret)
+        data[convert_date_to_string(date)] = ret
         return Response(data)
 
 def preferences(request):

@@ -1,6 +1,11 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} Delete ESPP {% endblock %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'espps:espp-list' %}">ESPP</a></li>
+    <li><a href="#">Delete ESPP</a></li>
+  </ul>
+{% endblock %}
 
 
 {% block canvas %}{% endblock canvas %}

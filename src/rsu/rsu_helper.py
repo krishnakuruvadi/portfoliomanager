@@ -11,9 +11,9 @@ def update_latest_vals(rsu_obj):
     start = datetime.date.today()+relativedelta(days=-5)
     end = datetime.date.today()
     rsu_award = rsu_obj.award
-    total_for_sale = 0
-    latest_conversion_rate = 0
-    latest_price = 0
+    #total_for_sale = 0
+    #latest_conversion_rate = 0
+    #latest_price = 0
 
     vals = get_latest_vals(rsu_award.symbol, rsu_award.exchange, start, end)
     if vals:
@@ -26,14 +26,17 @@ def update_latest_vals(rsu_obj):
                         rsu_obj.latest_conversion_rate = get_forex_rate(k, 'USD', 'INR')
                     else:
                         rsu_obj.latest_conversion_rate = 1
-                    rsu_obj.latest_value = float(rsu_obj.latest_price) * float(rsu_obj.latest_conversion_rate) * float(rsu_obj.shares_for_sale)
-                    rsu_obj.save()
+    rsu_obj.latest_value = float(rsu_obj.latest_price) * float(rsu_obj.latest_conversion_rate) * float(rsu_obj.shares_for_sale)
+    rsu_obj.save()
+    '''
                     total_for_sale += rsu_obj.shares_for_sale
                     rsu_award.as_on_date = k
                     latest_conversion_rate = rsu_obj.latest_conversion_rate
                     latest_price = rsu_obj.latest_price
+    print(f'award {rsu_award.award_id} total_for_sale {float(total_for_sale)} latest_price {float(latest_price)} latest_conversion_rate {float(latest_conversion_rate)}')
     rsu_award.latest_value = float(total_for_sale)*float(latest_price)*float(latest_conversion_rate)
     print('done with request')
+    '''
 
 def get_rsu_award_latest_vals():
     ret = dict()
@@ -59,7 +62,10 @@ def get_rsu_award_latest_vals():
                 shares_vested = rsu_obj.shares_vested
             else:
                 shares_vested += rsu_obj.shares_vested
-            latest_value = rsu_obj.latest_value
+            if not latest_value:
+                latest_value = rsu_obj.latest_value
+            else:
+                latest_value += rsu_obj.latest_value
         if as_on_date:
             ret[rsu_award.id] = {'as_on_date':as_on_date, 'latest_conversion_rate':latest_conversion_rate, 'latest_price':latest_price}
             ret[rsu_award.id]['shares_for_sale'] = shares_for_sale

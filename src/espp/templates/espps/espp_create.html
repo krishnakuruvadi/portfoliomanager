@@ -18,7 +18,6 @@
 {% endblock viewname %}
 
 {% block content %}
-
   <form action="." method="POST" class="form-horizontal">
     {% csrf_token %}
     {% for field in form %}
@@ -38,10 +37,71 @@
     <input type="submit" value="Submit" class="btn btn-primary"/>&nbsp;<a href="../" class="btn btn-danger" role="button">Cancel</a>
 
   </form>
-
 {% endblock content %}
 
 {% block javascript %}
   {% load static %}
   <script src="{% static 'common.js' %}"></script>
+  <script>
+    function update_forex_rate_fetch_btn_status() {
+      //console.log('inside update_forex_rate')
+      var exch_elem = document.getElementById("id_exchange");
+      //console.log('exch_elem value', exch_elem.value)
+      var dt_elem = document.getElementById("id_purchase_date");
+      //console.log('conv_elem value', dt_elem.value)
+      if (dt_elem.value && exch_elem.value) {
+        var conv_btn = document.getElementById("id_forex_fetch");
+        conv_btn.disabled = false;
+      } else {
+        var conv_btn = document.getElementById("id_forex_fetch");
+        conv_btn.disabled = true;
+      }
+      conv_elem = document.getElementById("id_purchase_conversion_rate");
+      conv_elem.value = '';
+    }
+    function get_forex_rate_and_populate() {
+      //console.log('fetch button clicked');
+      dt = document.getElementById("id_purchase_date").value;
+      var parts = dt.split('-');
+      var year = parts[0];
+      var month = parts[1];
+      var day = parts[2];
+      console.log(year, month, day);
+      exch = document.getElementById("id_exchange").value;
+      console.log(exch)
+      if (exch == 'NASDAQ' || exch == 'NYSE') {
+        var val = get_forex_rate(year, month, day, 'USD', 'INR');
+        console.log('received forex rate as ', val)
+        conv_elem = document.getElementById("id_purchase_conversion_rate");
+        conv_elem.value = val;
+      } else {
+        conv_elem = document.getElementById("id_purchase_conversion_rate");
+        conv_elem.value = 1;
+      }
+    }
+  </script>
 {% endblock javascript %}
+
+{% block jquery %}
+      var conv_elem = document.getElementById("id_purchase_conversion_rate");
+      var parent = conv_elem.parentNode;
+      var btn = document.createElement("BUTTON");
+      btn.classList.add("btn");
+      btn.id ='id_forex_fetch';
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fab fa-get-pocket"></i>';
+      btn.onclick = function(){
+        get_forex_rate_and_populate();
+        return false;
+      };
+
+      parent.appendChild(btn);
+      $("#id_exchange").change(function () {
+        //console.log( $(this).val() );
+        update_forex_rate_fetch_btn_status();
+      });
+      $("#id_purchase_date").change(function () {
+        //console.log( $(this).val() );
+        update_forex_rate_fetch_btn_status();
+      });
+{% endblock jquery %}

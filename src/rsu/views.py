@@ -43,6 +43,29 @@ class RsuCreateView(CreateView):
         #add_common_stock(self.object.exchange, self.object.symbol, self.object.purchase_date)
         return HttpResponseRedirect(self.get_success_url())
 
+class RsuUpdateView(UpdateView):
+    template_name = 'rsus/rsu_create.html'
+    form_class = RsuModelForm
+
+    def get_object(self):
+        id_ = self.kwargs.get("id")
+        return get_object_or_404(RSUAward, id=id_)
+    '''
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        return super().form_valid(form)
+    '''
+    
+    def get_success_url(self):
+        return reverse('rsus:rsu-list')
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        #self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
+        self.object.save()
+        form.save_m2m()
+        return HttpResponseRedirect(self.get_success_url())
+
 class RsuListView(ListView):
     template_name = 'rsus/rsu_list.html'
     queryset = RSUAward.objects.all() # <blog>/<modelname>_list.html
@@ -103,25 +126,6 @@ class RsuVestDetailView(DetailView):
         data = super().get_context_data(**kwargs)
         print(data)
         return data
-
-class RsuUpdateView(UpdateView):
-    template_name = 'rsus/rsu_create.html'
-    form_class = RsuModelForm
-
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(RSUAward, id=id_)
-    '''
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
-    '''
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        #self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
-        self.object.save()
-        form.save_m2m()
-        return HttpResponseRedirect(self.get_success_url())
 
 def refresh_rsu_trans(request):
     template = '../../rsu/'

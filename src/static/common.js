@@ -62,3 +62,26 @@ function set_goals(response, sel_goal) {
         }
     });
 }
+
+function get_forex_rate(from_year, from_month, from_day, from_currency, to_currency) {
+    forex_ep = '/common/api/get-forex/'+from_year+'/'+from_month+'/'+from_day+'/'+from_currency+'/'+to_currency;
+    console.log('getting forex rate', forex_ep)
+    var ret = 1;
+    $.ajax({
+        method:"GET",
+        url:forex_ep,
+        async: false,
+        success: function(data){
+          console.log(data)
+          for (val in data) {
+            console.log('returning ', data[val]);
+            ret = data[val];
+          }
+        },
+        error: function(error_data){
+          console.log("error")
+          console.log(error_data)
+        }
+    })
+    return ret;
+}

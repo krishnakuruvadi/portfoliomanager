@@ -209,13 +209,12 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
             cash_flows.append((espp_obj.sell_date, float(espp_obj.total_sell_price)))
         else:
             cash_flows.append((espp_obj.purchase_date, -1*float(espp_obj.total_purchase_price)))
-        for i in range (espp_obj.purchase_date.year, end_year):
+        for i in range (espp_obj.purchase_date.year, end_year+1):
             year_end_value = 0
             end_date = datetime.datetime.now()
             if i != datetime.datetime.now().year:
                 end_date = datetime.datetime.strptime(str(i)+'-12-31', '%Y-%m-%d').date()
             year_end_value_vals = get_historical_stock_price_based_on_symbol(espp_obj.symbol, espp_obj.exchange, end_date+relativedelta(days=-5), end_date)
-            print('espp year_end_value',year_end_value_vals)
             if year_end_value_vals:
                 conv_rate = 1
                 if espp_obj.exchange == 'NASDAQ' or espp_obj.exchange == 'NYSE':
@@ -223,8 +222,10 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                     if conv_val:
                         conv_rate = conv_val
                 for k,v in year_end_value_vals.items():
-                    year_end_value = v*conv_rate*espp_obj.shares_purchased
+                    year_end_value = float(v)*float(conv_rate)*float(espp_obj.shares_purchased)
                     break
+            print(f'espp year_end_value {i} {year_end_value}')
+
             add_or_create(i, 'ESPP', contrib, deduct, total, 0, 0, year_end_value)
 
     year_end_mf = dict()
@@ -296,7 +297,7 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
             if yr in contrib:
                 for _,amt in contrib[yr].items():
                     total_contribution += amt
-
+    #print('total @299', total)
     if total_contribution:        
         avg_contrib = total_contribution/total_years
         latest_value = 0

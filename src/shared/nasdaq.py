@@ -15,6 +15,40 @@ class Nasdaq(Exchange):
         self.name = 'Nasdaq'
         self.stock = stock
 
+    def get_alternate_historical_value(self, start, end):
+        get_response = None
+        #https://api.nasdaq.com/api/quote/CSCO/historical?assetclass=stocks&fromdate=2021-02-18&limit=9999&todate=2021-02-21
+        urlData = 'https://api.nasdaq.com/api/quote/'+self.stock+'/historical?assetclass=stocks&fromdate='
+        urlData += start.strftime('%Y-%m-%d')+ '&limit=9999&todate='
+        urlData += end.strftime('%Y-%m-%d')
+        for i in range(5):
+            print("accessing "+urlData)
+            headers = {
+                'Content-Type': "application/x-www-form-urlencoded",
+                'User-Agent': "PostmanRuntime/7.13.0",
+                'Accept': "*/*",
+                'Cache-Control': "no-cache",
+                'Host': "www.nasdaq.com",
+                'accept-encoding': "gzip, deflate",
+                'content-length': "166",
+                'Connection': "close",
+                'cache-control': "no-cache"
+            }
+            get_response = requests.request('GET', urlData, headers=headers)
+            print(get_response)
+            if get_response.status_code == 200:
+                break
+        if get_response.status_code != 200:
+            return None
+        json_data = get_response.json()
+        data = dict()
+        if 'data' in json_data:
+            if 'tradesTable' in json_data['data']:
+                for row in json_data['data']['tradesTable']['rows']:
+                    data[row['date']] = row['close']
+                return data
+        return None
+
     def get_historical_value(self, start, end):
         get_response = None
         for i in range(5):
@@ -38,7 +72,8 @@ class Nasdaq(Exchange):
             if get_response.status_code == 200:
                 break
         if get_response.status_code != 200:
-            return None
+            ret = self.get_alternate_historical_value(start, end)
+            return ret
         text = get_response.iter_lines()
         reader = csv.DictReader(codecs.iterdecode(text, 'utf-8'), delimiter=',')
         response = dict()
@@ -176,6 +211,9 @@ class Nasdaq(Exchange):
         #print(json_data)
         data = dict()
         if 'data' in json_data:
+            if not json_data['data']:
+                print(f'returning none since json_data[data] is None')
+                return None
             if 'secondaryData' in json_data['data'] and  json_data['data']['secondaryData']:
                 timestamp = json_data['data']['secondaryData']['lastTradeTimestamp']
                 if 'ON' in timestamp:
@@ -200,4 +238,5 @@ class Nasdaq(Exchange):
                 data[date_obj] = get_float_or_zero_from_string(latest_val.replace('$',''))
         #print('done with request')
         #print(data)
+        print(f'returning {data} from get_latest_val')
         return data

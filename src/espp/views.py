@@ -93,7 +93,8 @@ class EsppUpdateView(UpdateView):
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
-        self.object.total_sell_price = self.object.sell_price*self.object.shares_purchased*self.object.sell_conversion_rate
+        if self.object.sell_price:
+            self.object.total_sell_price = self.object.sell_price*self.object.shares_purchased*self.object.sell_conversion_rate
         self.object.save()
         form.save_m2m()
         return HttpResponseRedirect(self.get_success_url())

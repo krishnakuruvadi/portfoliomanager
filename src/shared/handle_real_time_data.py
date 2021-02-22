@@ -18,6 +18,8 @@ def get_latest_vals(stock, exchange, start, end):
     if exchange == 'NASDAQ':
         #response = Nasdaq(stock).get_historical_value(start, end)
         response = Nasdaq(stock).get_latest_val()
+        if not response:
+            response = Nasdaq(stock).get_historical_value(start, end)
         return response
     if exchange == 'NSE':
         #response = Nse(stock).get_historical_value(start, end)
@@ -104,7 +106,9 @@ def get_historical_stock_price_based_on_symbol(symbol, exchange, start, end):
         vals = get_historical_stock_price(stock, start, end)
         if vals:
             return vals[0]
-    except:
+    except Exception as ex:
+        print('exception', ex)
+        print(f'no historical value for {symbol}/{exchange} between {start} and {end}')
         return None
 
 def get_historical_stock_price(stock, start, end):
@@ -122,8 +126,24 @@ def get_historical_stock_price(stock, start, end):
         if not get_vals:
             return ret_vals
         for k,v in get_vals.items():
-            if k >= start and k<= end:
-                new_entry = HistoricalStockPrice(symbol=stock, date=k, price=v)
+            new_date = k
+            if isinstance(new_date, datetime.datetime):
+                new_date = new_date.date()
+            else:
+                print('new_date is already of type date')
+
+            if isinstance(start, datetime.datetime):
+                start = start.date()
+            else:
+                print('start is already of type date')
+
+            if isinstance(end, datetime.datetime):
+                end = end.date()
+            else:
+                print('end is already of type date')
+                
+            if new_date >= start and new_date<= end:
+                new_entry = HistoricalStockPrice(symbol=stock, date=new_date, price=v)
                 new_entry.save()
         start_date = end
         while(start_date>start):

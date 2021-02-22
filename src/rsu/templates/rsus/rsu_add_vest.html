@@ -5,7 +5,11 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block viewname %}
-    Add RSU Vest 
+<ul class="breadcrumb">
+  <li><a href="{% url 'rsus:rsu-list' %}">RSU</a></li>
+  <li><a href="#">{{award_id}}</a></li>
+  <li><a href="#">Add RSU Vest</a></li>
+</ul> 
 {% endblock viewname %}
 
 {% block content %}

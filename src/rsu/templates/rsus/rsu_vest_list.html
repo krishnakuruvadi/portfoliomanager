@@ -1,5 +1,10 @@
 {% extends 'base.html' %} 
-{% block viewname %} RSU Award Vest Information {% endblock %} 
+{% block viewname %} 
+<ul class="breadcrumb">
+  <li><a href="{% url 'rsus:rsu-list' %}">RSU</a></li>
+  <li><a href="#">{{award_id}}</a></li>
+</ul> 
+{% endblock %} 
 
 {% block applicableactions %} 
     <a style="padding-right:20px;" href="create"><i class="fa fa-plus" aria-hidden="true" title="Add RSU Vest" style="font-size: 1.2em;"></i></a>

@@ -14,7 +14,8 @@ from .views import (
     MfDetailView,
     get_mutual_funds,
     ScrollDataView,
-    preferences
+    preferences,
+    ForexDataView
 )
 # Create your views here.
 
@@ -34,5 +35,6 @@ urlpatterns = [
     path('mf/<id>/', MfDetailView.as_view(), name='mf-detail'),
     path('mf/', MFListView.as_view(), name='mf-list'),
     path('preferences', preferences, name='preference'),
-    path('api/get/scrolldata', ScrollDataView.as_view())
+    path('api/get/scrolldata', ScrollDataView.as_view()),
+    path('api/get-forex/<int:year>/<int:month>/<int:day>/<str:from_currency>/<str:to_currency>', ForexDataView.as_view())
 ]
