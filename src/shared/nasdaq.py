@@ -168,7 +168,7 @@ class Nasdaq(Exchange):
                         from_zone = tz.gettz('America/Cancun')
                         date_obj = date_obj.replace(tzinfo=from_zone)
                         to_zone = tz.tzutc()
-                        data[symbol]['last_updated'] = date_obj.astimezone(to_zone).strftime("%Y-%m-%d %H:%M:%S")
+                        data[symbol]['last_updated'] = date_obj.astimezone(to_zone)#.strftime("%Y-%m-%d %H:%M:%S")
                 except Exception as ex:
                     print("exception converting timestamp")
                     print(ex)
@@ -222,20 +222,25 @@ class Nasdaq(Exchange):
                     #print(timestamp)
                     date = datetime.datetime.strptime(timestamp, "%b %d, %Y").date()
                     data[date] = json_data['data']['secondaryData']['lastSalePrice']
-            if 'primaryData' in json_data['data'] and  json_data['data']['primaryData']:
-                timestamp = json_data['data']['primaryData']['lastTradeTimestamp']
-                if 'ON' in timestamp:
-                    pos = timestamp.find('ON')
-                    timestamp = timestamp[pos+3:]
-                if 'OF'in timestamp:
-                    pos = timestamp.find('OF')
-                    timestamp = timestamp[pos+3:]
-                    timestamp = timestamp.replace(' ET', '')
-                #print(timestamp)
-                #date = datetime.datetime.strptime(timestamp, "%b %d, %Y").date()
-                date_obj = parse(timestamp).date()
-                latest_val = json_data['data']['primaryData']['lastSalePrice']
-                data[date_obj] = get_float_or_zero_from_string(latest_val.replace('$',''))
+                    
+            try:
+                if 'primaryData' in json_data['data'] and  json_data['data']['primaryData']:
+                    timestamp = json_data['data']['primaryData']['lastTradeTimestamp']
+                    if 'ON' in timestamp:
+                        pos = timestamp.find('ON')
+                        timestamp = timestamp[pos+3:]
+                    if 'OF'in timestamp:
+                        pos = timestamp.find('OF')
+                        timestamp = timestamp[pos+3:]
+                        timestamp = timestamp.replace(' ET', '')
+                        timestamp = timestamp.replace(' - AFTER HOURS', '')
+                    #print(timestamp)
+                    #date = datetime.datetime.strptime(timestamp, "%b %d, %Y").date()
+                    date_obj = parse(timestamp).date()
+                    latest_val = json_data['data']['primaryData']['lastSalePrice']
+                    data[date_obj] = get_float_or_zero_from_string(latest_val.replace('$',''))
+            except Exception as ex:
+                print(f'error getting value for {self.stock}: {ex}')
         #print('done with request')
         #print(data)
         print(f'returning {data} from get_latest_val')

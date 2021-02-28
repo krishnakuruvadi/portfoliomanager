@@ -11,7 +11,7 @@ import time
 from django.db.models import Q
 from mftool import Mftool
 from common.helper import update_mf_scheme_codes, update_category_returns
-from shared.utils import get_float_or_zero_from_string, get_float_or_none_from_string, get_int_or_none_from_string, get_date_or_none_from_string, convert_date_to_string
+from shared.utils import get_float_or_zero_from_string, get_float_or_none_from_string, get_int_or_none_from_string, get_date_or_none_from_string, convert_date_to_string, get_diff
 from common.bsestar import download_bsestar_schemes
 from shared.handle_get import *
 from shared.handle_chart_data import get_investment_data
@@ -445,16 +445,20 @@ def update_scroll_data():
     for item in nse.get_index_list():
         data = nse.get_index_quote(item)
         if data:
-            #print(f"data {data}")
+            print(f"data {data}")
             scroll_item = None
             try:
                 scroll_item = ScrollData.objects.get(scrip=item)
-                if float(scroll_item.val) != data['lastPrice']:
+                if get_diff(float(scroll_item.val), data['lastPrice']) > 0.1:
                     print(f"NSE scroll_item.val {scroll_item.val} data['lastPrice'] {data['lastPrice']}")
                     scroll_item.last_updated = timezone.now()
                     scroll_item.val = data['lastPrice']
                     scroll_item.change = data['change']
+                    if not scroll_item.change:
+                        scroll_item.change = 0
                     scroll_item.percent = data['pChange']
+                    if not scroll_item.percent:
+                        scroll_item.percent = 0
                     scroll_item.save()
             except ScrollData.DoesNotExist:
                 scroll_item = ScrollData.objects.create(scrip=item,
@@ -480,7 +484,7 @@ def update_scroll_data():
             scroll_item = None
             try:
                 scroll_item = ScrollData.objects.get(scrip=v['name'])
-                if float(scroll_item.val) != float(v['lastPrice']):
+                if get_diff(float(scroll_item.val), float(v['lastPrice'])) > 0.1:
                     print(f"NASDAQ scroll_item.val {scroll_item.val} v['lastPrice'] {v['lastPrice']}")
                     scroll_item.last_updated = v['last_updated']
                     scroll_item.val = v['lastPrice']

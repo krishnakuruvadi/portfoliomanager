@@ -32,6 +32,22 @@
       <td>Goal</td>
       <td>{{ goal_str }}</td>
     </tr>
+    <tr>
+      <td>Principal</td>
+      <td>{{ principal }}</td>
+    </tr>
+    <tr>
+      <td>Interest</td>
+      <td>{{ interest }}</td>
+    </tr>
+    <tr>
+      <td>Total</td>
+      <td>{{ total }}</td>
+    </tr>
+    <tr>
+      <td>ROI</td>
+      <td>{{ roi }} %</td>
+    </tr>
   </table>
 
   <div class='col-sm-6'>
@@ -93,7 +109,7 @@
             borderColor: 'blue'
           },
           {
-            label: "Projeted Principal",
+            label: "Projected Principal",
             data: exp_principal_values,
             fill: true,
             borderColor: 'red'

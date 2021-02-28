@@ -17,7 +17,7 @@ from dateutil.relativedelta import relativedelta
 import datetime
 from .forms import PpfModelForm, PpfEntryModelForm
 from .models import Ppf, PpfEntry
-from .ppf_helper import ppf_add_transactions
+from .ppf_helper import ppf_add_transactions, get_ppf_details
 from decimal import Decimal
 from shared.handle_get import *
 from rest_framework.views import APIView
@@ -58,6 +58,17 @@ class PpfListView(ListView):
         print(data)
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
         data['user_name_mapping'] = get_all_users()
+        data['total'] = dict()
+        data['principal'] = dict()
+        data['interest'] = dict()
+        data['roi'] = dict()
+        for ppf_obj in Ppf.objects.all():
+            data[ppf_obj.number] = dict()
+            ppf_details = get_ppf_details(ppf_obj.number)
+            data['total'][ppf_obj.number] = ppf_details['total']
+            data['principal'][ppf_obj.number] = ppf_details['principal']
+            data['interest'][ppf_obj.number] = ppf_details['interest']
+            data['roi'][ppf_obj.number] = ppf_details['roi']
         return data
 
 class PpfDetailView(DetailView):
@@ -73,6 +84,11 @@ class PpfDetailView(DetailView):
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
+        ppf_details = get_ppf_details(data['object'].number)
+        data['total'] = ppf_details['total']
+        data['principal'] = ppf_details['principal']
+        data['interest'] = ppf_details['interest']
+        data['roi'] = ppf_details['roi']
         return data
 
 def update_ppf(request, id):
@@ -183,7 +199,7 @@ class ChartData(APIView):
             interest = 0
             principal = 0
             first_date = datetime.date.today()
-            for entry in PpfEntry.objects.filter(number=id):
+            for entry in PpfEntry.objects.filter(number=id).order_by('trans_date'):
                 #ppf_data_dates.append(entry.trans_date)
                 if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
                     if entry.interest_component:

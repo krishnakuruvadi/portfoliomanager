@@ -20,6 +20,10 @@
         <th scope="col">Start Date</th>
         <th scope="col">User</th>
         <th scope="col">Goal</th>
+        <th scope="col">Principal</th>
+        <th scope="col">Interest</th>
+        <th scope="col">Total</th>
+        <th scope="col">ROI</th>
         <th scope="col"></th>
       </tr>
     </thead>
@@ -34,6 +38,10 @@
         <td>{{ instance.start_date }}</td>
         <td>{{ user_name_mapping|lookup:instance.user }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
+        <td>{{ principal|lookup:instance.number }}</td>
+        <td>{{ interest|lookup:instance.number }}</td>
+        <td>{{ total|lookup:instance.number }}</td>
+        <td>{{ roi|lookup:instance.number }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
           <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>

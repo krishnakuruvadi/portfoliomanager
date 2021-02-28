@@ -19,7 +19,7 @@ from dateutil.relativedelta import relativedelta
 import datetime
 from .forms import SsyEntryModelForm
 from .models import Ssy, SsyEntry
-from .ssy_helper import ssy_add_transactions
+from .ssy_helper import ssy_add_transactions, get_ssy_details
 from decimal import Decimal
 from shared.handle_get import *
 from goal.goal_helper import get_goal_id_name_mapping_for_user
@@ -91,6 +91,17 @@ class SsyListView(ListView):
         print(data)
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
         data['user_name_mapping'] = get_all_users()
+        data['total'] = dict()
+        data['principal'] = dict()
+        data['interest'] = dict()
+        data['roi'] = dict()
+        for ssy_obj in Ssy.objects.all():
+            data[ssy_obj.number] = dict()
+            ssy_details = get_ssy_details(ssy_obj.number)
+            data['total'][ssy_obj.number] = ssy_details['total']
+            data['principal'][ssy_obj.number] = ssy_details['principal']
+            data['interest'][ssy_obj.number] = ssy_details['interest']
+            data['roi'][ssy_obj.number] = ssy_details['roi']
         return data
 
 class SsyDetailView(DetailView):
@@ -106,6 +117,11 @@ class SsyDetailView(DetailView):
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
+        ssy_details = get_ssy_details(data['object'].number)
+        data['total'] = ssy_details['total']
+        data['principal'] = ssy_details['principal']
+        data['interest'] = ssy_details['interest']
+        data['roi'] = ssy_details['roi']
         return data
 
 class SsyDeleteView(DeleteView):
@@ -185,7 +201,7 @@ class ChartData(APIView):
             interest = 0
             principal = 0
             first_date = datetime.date.today()
-            for entry in SsyEntry.objects.filter(number=id):
+            for entry in SsyEntry.objects.filter(number=id).order_by('trans_date'):
                 #ssy_data_dates.append(entry.trans_date)
                 if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
                     if entry.interest_component:

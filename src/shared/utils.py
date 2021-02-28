@@ -51,6 +51,11 @@ def get_date_or_none_from_string(input, format='%Y-%m-%d'):
 def convert_date_to_string(input, format='%Y-%m-%d'):
     return input.strftime(format)
 
+def get_diff(x,y):
+    if x>y:
+        return x-y
+    return y-x
+    
 '''
 today = datetime.date.today()
 vals, dates = get_monthly_projected_vals_and_dates(today, 100, 12, 8)
