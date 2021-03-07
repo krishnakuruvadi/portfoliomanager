@@ -23,7 +23,7 @@ from common.models import MutualFund, MFYearlyReturns, MFCategoryReturns
 from .kuvera import Kuvera
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .mf_helper import insert_trans_entry
+from .mf_helper import insert_trans_entry, calculate_xirr_all_users
 from tasks.tasks import add_mf_transactions
 from .pull_kuvera import pull_kuvera
 from goal.goal_helper import get_goal_id_name_mapping_for_user
@@ -56,9 +56,12 @@ class FolioListView(ListView):
             total_investment += folio_obj.buy_value
             total_gain += folio_obj.gain
         data['as_on_date'] = as_on_date
-        data['total_gain'] = total_gain
-        data['total_investment'] = total_investment
-        data['latest_value'] = latest_value
+        data['total_gain'] = round(total_gain, 2)
+        data['total_investment'] = round(total_investment, 2)
+        data['latest_value'] = round(latest_value, 2)
+        cur_ret, all_ret = calculate_xirr_all_users()
+        data['curr_ret'] = cur_ret
+        data['all_ret'] = all_ret
         return data
 
 class FolioTransactionsListView(ListView):

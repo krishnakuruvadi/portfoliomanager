@@ -1,9 +1,11 @@
 from .kuvera import Kuvera
+from .coin import Coin
 from .models import Folio, MutualFundTransaction
 from common.models import MutualFund
 from shared.utils import *
 from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
+from shared.financial import xirr
 
 
 def mf_add_transactions(broker, user, full_file_path):
@@ -21,6 +23,21 @@ def mf_add_transactions(broker, user, full_file_path):
                                trans["trans_date"],
                                None,
                                'KUVERA',
+                               1.0,
+                               trans["trans_value"])
+    if broker == 'COIN ZERODHA':
+        coin_helper = Coin(full_file_path)
+        for trans in coin_helper.get_transactions():
+            print("trans is", trans)
+            insert_trans_entry(trans["folio"],
+                               trans['fund'],
+                               user,
+                               trans["trans_type"],
+                               trans["units"],
+                               trans["nav"],
+                               trans["trans_date"],
+                               None,
+                               broker,
                                1.0,
                                trans["trans_value"])
     fs = FileSystemStorage()
@@ -51,6 +68,14 @@ def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes,
     if not trans_price:
         trans_price = price*units*conversion_rate
     try:
+        trans = MutualFundTransaction.objects.filter(folio=folio_obj,
+                                             trans_date=date,
+                                             trans_type=trans_type,
+                                             price=price,
+                                             units=units)
+        if len(trans) > 0:
+            print('Transaction exists')
+            return
         MutualFundTransaction.objects.create(folio=folio_obj,
                                              trans_date=date,
                                              trans_type=trans_type,
@@ -84,3 +109,38 @@ def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes,
         print('Transaction exists', ex)
     except Exception as exc:
         print('Exception occured during adding transaction', exc, folio, fund, user, trans_type, units, price, date)
+
+def calculate_xirr_all_users():
+    folios = Folio.objects.all()
+    curr_folio_returns, all_folio_returns = calculate_xirr(folios)
+    return round(curr_folio_returns, 2), round(all_folio_returns, 2)
+
+def calculate_xirr(folios):
+    current_folio_cash_flows = list()
+    all_folio_cash_flows = list()
+
+    folios_list = list()
+    for folio in folios:
+        folios_list.append(folio.folio)
+    
+    for trans in MutualFundTransaction.objects.all():
+        if trans.folio.folio in folios_list:
+            all_folio_cash_flows.append((trans.trans_date, float(trans.trans_price) if trans.trans_type=='Sell' else float(-1*trans.trans_price)))
+
+        if trans.folio.units and trans.folio.units > 0:
+            current_folio_cash_flows.append((trans.trans_date, float(trans.trans_price) if trans.trans_type=='Sell' else float(-1*trans.trans_price)))
+    
+    for folio in folios:
+        if folio.latest_value and folio.latest_value > 0:
+            all_folio_cash_flows.append((datetime.date.today(), float(folio.latest_value)))
+            current_folio_cash_flows.append((datetime.date.today(), float(folio.latest_value)))
+
+    curr_folio_returns = 0
+    all_folio_returns = 0
+
+    if len(all_folio_cash_flows) > 0:
+        all_folio_returns = round(xirr(all_folio_cash_flows, 0.1)*100, 2)
+    if len(current_folio_cash_flows) > 0:
+        curr_folio_returns = round(xirr(current_folio_cash_flows, 0.1)*100, 2)
+    print(f'returning {curr_folio_returns}, {all_folio_returns}')
+    return curr_folio_returns, all_folio_returns

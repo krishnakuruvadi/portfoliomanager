@@ -46,7 +46,7 @@ class Zerodha:
                         exchange = row['exchange']
                         trans_type = 'Sell' if row['trade_type']=='sell' else 'Buy'
                         last_order = row['order_id']
-                        symbol = row['tradingsymbol']
+                        symbol = row['symbol']
                         symbol = symbol[0:None if -1==symbol.find('-') else symbol.find('-')]
                         qty = int(get_float_or_none_from_string(row['quantity']))
                         price = get_float_or_none_from_string(row['price'])
