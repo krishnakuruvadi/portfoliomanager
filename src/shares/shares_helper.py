@@ -45,7 +45,10 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
             new_buy_value = float(share_obj.buy_value) + trans_price
             share_obj.quantity = new_qty
             share_obj.buy_value = new_buy_value
-            share_obj.buy_price = new_buy_value/float(new_qty)
+            if new_qty > 0:
+                share_obj.buy_price = new_buy_value/float(new_qty)
+            else:
+                share_obj.buy_price = 0
             share_obj.save()
         else:
             new_qty = float(share_obj.quantity)-quantity
@@ -53,7 +56,10 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
                 new_buy_value = float(share_obj.buy_value) - trans_price
                 share_obj.quantity = new_qty
                 share_obj.buy_value = new_buy_value
-                share_obj.buy_price = new_buy_value/float(new_qty)
+                if new_qty > 0:
+                    share_obj.buy_price = new_buy_value/float(new_qty)
+                else:
+                    share_obj.buy_price = 0
                 share_obj.save()
             else:
                 share_obj.quantity = 0

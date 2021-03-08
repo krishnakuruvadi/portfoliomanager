@@ -13,6 +13,8 @@ import json
 from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.keys import Keys
 import re
+from alerts.alert_helper import create_alert, Severity
+
 
 def get_path_to_chrome_driver():
     path = pathlib.Path(__file__).parent.parent.parent.absolute()
@@ -23,6 +25,23 @@ def get_path_to_chrome_driver():
     print('path to chrome driver ', path)
     return path
 
+def get_files_in_dir(dir):
+    file_list = list()
+    for file in os.listdir(dir):
+        path = os.path.join(dir, file)
+        file_list.append(path)
+
+    return file_list
+
+def get_new_files_added(dir, existing_list):
+    new_file_list = list()
+    for file in os.listdir(dir):
+        path = os.path.join(dir, file)
+        if path not in existing_list:
+            new_file_list.append(path)
+    return new_file_list
+
+
 def pull_zerodha(userid, passwd, pin):
     dload_files = list()
     url = 'https://console.zerodha.com/reports/tradebook'
@@ -30,6 +49,7 @@ def pull_zerodha(userid, passwd, pin):
     dload_path = pathlib.Path(__file__).parent.parent.absolute()
     dload_path = os.path.join(dload_path, 'media')
     prefs = {'download.default_directory' : dload_path}
+    files_in_dload_dir = get_files_in_dir(dload_path)
     chrome_options.add_experimental_option('prefs', prefs)
     driver = webdriver.Chrome(executable_path=get_path_to_chrome_driver(), chrome_options=chrome_options)
     driver.get(url)
@@ -74,16 +94,37 @@ def pull_zerodha(userid, passwd, pin):
             view_element.click()
             
             #WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[text()[contains(.,"View")]]')))
-            WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[@type="submit" and @class="btn-blue"]')))
+            WebDriverWait(driver,60).until(EC.element_to_be_clickable((By.XPATH, '//button[@type="submit" and @class="btn-blue"]')))
             if len(driver.find_elements_by_xpath("//a[text()[contains(.,'CSV')]]")) > 0:
                 dload_elem = driver.find_element_by_xpath("//a[text()[contains(.,'CSV')]]")
                 dload_elem.click()
                 dload_file = os.path.join(dload_path, userid+'_tradebook_'+from_date.strftime("%Y-%m-%d") + "_to_" + to_date.strftime("%Y-%m-%d")+'.csv')
+                file_found = False
                 for _ in range(10):
                     if os.path.exists(dload_file):
+                        print(f'file found {dload_file}.  Will parse for transactions.')
+                        file_found = True
+                        dload_files.append(dload_file)
                         break
                     time.sleep(1)
-                dload_files.append(dload_file)
+                if not file_found:
+                    new_file_list = get_new_files_added(dload_path,files_in_dload_dir)
+                    
+                    if len(new_file_list) == 1:
+                        dload_files.append(new_file_list[0])
+                        files_in_dload_dir.append(new_file_list[0])
+                        print(f'file found {new_file_list[0]}.  Will parse for transactions.')
+
+                    if len(new_file_list) > 1:
+                        description = ''
+                        for fil in new_file_list:
+                            description = description + fil
+                        create_alert(
+                            summary='Failure to get transactions for ' + userid + '.  More than one file found',
+                            content= description,
+                            severity=Severity.error
+                        )
+                
             else:
                 print(f'couldnt download any transactions for period {date_string}')
                 if len(driver.find_elements_by_xpath("//h3[@id='mainText' and @text='Something went wrong']")) > 0:

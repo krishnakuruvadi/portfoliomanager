@@ -19,7 +19,7 @@ import json
 from shared.handle_delete import delete_goal
 from shared.handle_get import *
 from shared.handle_chart_data import get_goal_contributions, get_goal_yearly_contrib
-
+from shared.financial import *
 
 # Create your views here.
 
@@ -60,6 +60,16 @@ class GoalDetailView(DetailView):
         if remaining_percent < 0:
             remaining_percent = 0
         data['status_line'] = [contrib_percent, project_percent, remaining_percent]
+        data['status_text'] = ''
+        if ret.get('avg_growth', 0) > 0:
+            yrly_investment_reqd = get_required_yrly_investment(total_contribution,ret.get('avg_growth'), data['target_date'], data['object'].final_val)
+            data['status_text'] = data['status_text'] + ' If '+str(yrly_investment_reqd) + ' per year is invested at '+ str(ret.get('avg_growth', 0))
+            data['status_text'] = data['status_text'] + '% you will reach target.'
+        if ret.get('avg_contrib', 0) > 0:
+            growth_reqd = get_required_xirr(total_contribution, ret.get('avg_contrib', 0), data['target_date'], data['object'].final_val)
+            data['status_text'] = data['status_text'] + ' Current investment of '+ str(ret.get('avg_contrib', 0)) + ' per year should grow at ' + str(growth_reqd) + '% to reach target.'
+        if data['status_text'] == '':
+            data['status_text'] = 'Currently investing ' + str(ret.get('avg_contrib', 0)) + ' per year.'
         print("GoalProgressData - returning:", data)
         print(data)
         return data

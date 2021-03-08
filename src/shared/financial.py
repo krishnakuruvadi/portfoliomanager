@@ -1,5 +1,6 @@
 import datetime
-from scipy import optimize 
+from scipy import optimize
+from dateutil.relativedelta import relativedelta
 
 def secant_method(tol, f, x0):
     """
@@ -78,3 +79,98 @@ def xirr(cashflows,guess=0.1):
     return optimize.newton(lambda r: xnpv(r,cashflows),guess)
 
 # Source: https://github.com/peliot/XIRR-and-XNPV/blob/master/financial.py
+
+def get_required_xirr(initial_amt, yrly_investment, target_date, target_amt):
+    yrly_investment = float(yrly_investment)
+    target_amt = float(target_amt)
+    initial_amt = float(initial_amt)
+    cash_flows = list()
+    cash_flows.append((datetime.date.today(), -1*initial_amt))
+    for year in range(datetime.date.today().year, target_date.year):
+        cash_flows.append((datetime.date(year=year, month=12, day=31), -1*yrly_investment))
+    cash_flows.append((target_date, target_amt))
+    return round(xirr(cash_flows)*100, 2)
+
+def get_required_yrly_investment(initial_amt, xirr, target_date, target_amt):
+    target_amt = float(target_amt)
+    rd = relativedelta(target_date, datetime.date.today())
+    print(rd)
+    period_months = rd.years*12+rd.months
+    
+    if period_months == 0:
+        period_months = 1
+    initial_amt_final_return = get_fd_final_val(initial_amt, 'fd_compound_yearly', period_months, xirr)
+    remaining_amt = target_amt - initial_amt_final_return
+    print(f'{remaining_amt} remaining of {target_amt}')
+    if remaining_amt > 0:
+        yrly_investment = remaining_amt/2
+        diff = remaining_amt/2
+        i=0
+        while (i<40):
+            val = rd_calc_final_val(yrly_investment, period_months, xirr, 'rd_compound_yearly')
+            print(f'{yrly_investment} invested monthly compounds to {val} after {period_months} months if compounded yearly at {xirr}')
+            diff = float(val)/float(remaining_amt)
+            if val > remaining_amt and  diff > 1.00000000000000005:
+                yrly_investment = yrly_investment/(val/remaining_amt)
+                diff = diff/2
+            elif diff < 0.9:
+                yrly_investment = yrly_investment *(val/remaining_amt)
+                diff = diff/2
+            else:
+                return round(yrly_investment*12, 2)
+            i = i+1
+    return round(yrly_investment*12, 2)
+
+def rd_calc_final_val(rd_prin, rd_time, rd_roi, rd_compound):
+    n = 1
+    every = 12
+    if rd_compound == 'rd_compound_qtr':
+        n = 4
+        every = 3
+    if rd_compound == 'rd_compound_half':
+        n = 2
+        every = 6
+    rd_time = float(rd_time)
+    rd_roi = float(rd_roi)
+    
+    val = 0
+    p = 0
+    i = 0
+    for t in range(int(rd_time)):
+        p = p + rd_prin
+        i = i + p*rd_roi/(100*12)
+        if t != 0 and t % every == 0:
+            p = p + i
+            i = 0
+    val = p + i
+    
+    return val
+
+
+'''
+input:
+  fd_prin: principal
+  fd_compound: 'fd_compound_qtr' or 'fd_compound_half' or 'fd_compound_yearly'. Default is 'fd_compound_yearly'
+  fd_time: time period left in months
+  fd_roi: rate of interest
+returns:
+  final amount of the initial investment
+'''
+def get_fd_final_val(fd_prin, fd_compound, fd_time, fd_roi):
+    n = 1
+    if fd_compound == 'fd_compound_qtr':
+        n = 4
+    if fd_compound == 'fd_compound_half':
+        n = 2
+    fd_time = float(fd_time)
+    fd_roi = float(fd_roi)
+    val = fd_prin * (((1 + (fd_roi/(100.0 * n))) ** (n*(fd_time/12))))
+    return val
+
+'''
+initial_amt = 0
+xir = 6.5
+target_date = datetime.date.today()+relativedelta(years=12, months=6)
+target_amt = 302144
+print(get_required_yrly_investment(initial_amt, xir, target_date, target_amt))
+'''

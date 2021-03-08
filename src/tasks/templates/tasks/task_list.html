@@ -12,7 +12,7 @@
 
 {% block content %}
 
-  <table class="table table-hover table-condensed">
+  <table class="table table-hover table-condensed" id="tasks-table">
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
@@ -26,7 +26,7 @@
     <tbody>
       {% for instance in object_list %}
       <tr>
-        <th scope="row">{{ instance.id }}</th>
+        <td scope="row">{{ instance.id }}</td>
         <td>{{ instance.description }}</td>
         <td>{{ task_state_mapping|lookup:instance.current_state }}</td>
         <td>{{ instance.last_run }}</td>
@@ -48,3 +48,9 @@
     })
 </script>
 {% endblock javascript %}
+
+<script>
+  {% block jquery %}
+  $('#tasks-table').DataTable();
+  {% endblock jquery %}
+</script>
