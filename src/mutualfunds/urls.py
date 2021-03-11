@@ -17,7 +17,8 @@ from .views import (
     update_transaction,
     fund_returns,
     fund_insights,
-    delete_folios
+    delete_folios,
+    sip_list
     #ChartData
 )
 
@@ -33,6 +34,7 @@ urlpatterns = [
     path('transaction/<id>/delete', TransactionDeleteView.as_view(), name='transaction-delete'),
     path('returns', fund_returns, name='fund-returns'),
     path('insights', fund_insights, name='fund-insights'),
+    path('sip', sip_list, name='sips'),
     path('<id>/', FolioDetailView.as_view(), name='folio-detail'),
     path('<id>/update', update_folio, name='folio-update'),
     path('<id>/delete', FolioDeleteView.as_view(), name='folio-delete'),

@@ -18,7 +18,7 @@ from shared.utils import *
 from shared.handle_get import *
 from shared.handle_real_time_data import get_latest_vals, get_forex_rate, get_historical_mf_nav
 from django.db import IntegrityError
-from .models import Folio, MutualFundTransaction
+from .models import Folio, MutualFundTransaction, Sip
 from common.models import MutualFund, MFYearlyReturns, MFCategoryReturns
 from .kuvera import Kuvera
 from rest_framework.views import APIView
@@ -69,7 +69,37 @@ class FolioTransactionsListView(ListView):
     ordering = ['-trans_date']
     def get_queryset(self):
         #folio = get_object_or_404(Folio, id=self.kwargs['id'])
-        return MutualFundTransaction.objects.filter(folio__id=self.kwargs['id'])
+        return MutualFundTransaction.objects.order_by('-trans_date').filter(folio__id=self.kwargs['id'])
+
+def sip_list(request):
+    template = 'mutualfunds/sip_list.html'
+    queryset = Sip.objects.all()
+    data = dict()
+    data['sips'] = list()
+    amount = 0
+    for sip in queryset:
+        s = dict()
+        s['folio'] = sip.folio.folio
+        s['date'] = sip.sip_date
+        s['amount'] = sip.amount
+        s['user'] = sip.folio.user
+        s['name'] = sip.folio.fund.name
+        s['broker'] = ''
+        brokers = set(())
+        for trans in MutualFundTransaction.objects.filter(folio=sip.folio):
+            if trans.broker and trans.broker != '':
+                brokers.add(trans.broker)
+        for b in brokers:
+            if s['broker'] == '':
+                s['broker'] = b
+            else:
+                s['broker'] = s['broker'] + ',' + b
+        amount = amount + sip.amount
+        data['sips'].append(s)
+    data['sip_count'] = len(data['sips'])
+    data['sip_amount'] = amount
+    data['user_name_mapping'] = get_all_users()
+    return render(request, template, data)
 
 def fund_insights(request):
     template = 'mutualfunds/investment_insights.html'

@@ -163,12 +163,22 @@ class Nasdaq(Exchange):
                     date_str = ind['lastTradeTimestamp']
                     if 'Market Closed' not in date_str:
                         date_str = date_str.replace('DATA AS OF', '')
-                        date_str = date_str.replace(' ET', '')
-                        date_obj = parse(date_str)
-                        from_zone = tz.gettz('America/Cancun')
-                        date_obj = date_obj.replace(tzinfo=from_zone)
-                        to_zone = tz.tzutc()
-                        data[symbol]['last_updated'] = date_obj.astimezone(to_zone)#.strftime("%Y-%m-%d %H:%M:%S")
+                        if date_str.endswith('CET'):
+                            date_str = date_str.replace(' CET', '')
+                            date_obj = parse(date_str)
+                            from_zone = tz.gettz('CET')
+                            date_obj = date_obj.replace(tzinfo=from_zone)
+                            to_zone = tz.tzutc()
+                            data[symbol]['last_updated'] = date_obj.astimezone(to_zone)#.strftime("%Y-%m-%d %H:%M:%S")
+                        else:
+                            date_str = date_str.replace(' ET', '')
+                            date_obj = parse(date_str)
+                            from_zone = tz.gettz('America/Cancun')
+                            date_obj = date_obj.replace(tzinfo=from_zone)
+                            to_zone = tz.tzutc()
+                            data[symbol]['last_updated'] = date_obj.astimezone(to_zone)#.strftime("%Y-%m-%d %H:%M:%S")
+                    else:
+                        data[symbol]['last_updated'] = None
                 except Exception as ex:
                     print("exception converting timestamp")
                     print(ex)

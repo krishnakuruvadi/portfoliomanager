@@ -1,11 +1,12 @@
 from .kuvera import Kuvera
 from .coin import Coin
-from .models import Folio, MutualFundTransaction
+from .models import Folio, MutualFundTransaction, Sip
 from common.models import MutualFund
 from shared.utils import *
 from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 from shared.financial import xirr
+from alerts.alert_helper import create_alert, Severity
 
 
 def mf_add_transactions(broker, user, full_file_path):
@@ -144,3 +145,40 @@ def calculate_xirr(folios):
         curr_folio_returns = round(xirr(current_folio_cash_flows, 0.1)*100, 2)
     print(f'returning {curr_folio_returns}, {all_folio_returns}')
     return curr_folio_returns, all_folio_returns
+
+def mf_add_or_update_sip(sips):
+    for k,v in sips.items():
+        try:
+            print(f"name {v['name']}")
+
+            folios = Folio.objects.filter(folio=k)
+            folio = None
+            if len(folios) > 1:
+                for f in folios:
+                    if f.fund.kuvera_name == v['name']:
+                        folio = f
+            else:
+                folio = folios[0]
+            if not folio:
+                description = 'Unable to decide on Folio with number '+k+' and name ' + v['name']
+                create_alert(
+                    summary='Folio:' + k + ' Failure to add a sip',
+                    content= description,
+                    severity=Severity.error
+                )
+            try:
+                sip = Sip.objects.get(folio=folio)
+                sip.amount = v['amount']
+                sip.sip_date = v['date']
+                sip.save()
+            except Sip.DoesNotExist:
+                Sip.objects.create(folio=folio, sip_date=v['date'], amount=v['amount'])
+        except Folio.DoesNotExist:
+            description = 'Folio by that number doesnt exist'
+            create_alert(
+                summary='Folio:' + k + ' Failure to add a sip since no folio by that number found',
+                content= description,
+                severity=Severity.error
+            )
+        except Exception as ex:
+            print(f'failed while adding sip for {k}', ex)

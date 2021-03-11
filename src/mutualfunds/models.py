@@ -2,7 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from common.models import MutualFund
-
+from django.core.validators import MinValueValidator, MaxValueValidator
 # Create your models here.
 
 TRANSACTION_TYPE_CHOICES = [
@@ -48,3 +48,10 @@ class MutualFundTransaction(models.Model):
     def get_absolute_url(self):
         return reverse('mutualfund:transaction-detail', args=[str(self.id)])
 
+class Sip(models.Model):
+    folio = models.OneToOneField(Folio,on_delete=models.CASCADE, primary_key=True)
+    sip_date = models.PositiveIntegerField(_('SIP Date'), validators=[MinValueValidator(1), MaxValueValidator(31)])
+    amount = models.DecimalField(max_digits=20, decimal_places=4)
+    
+    def __str__(self):
+        return str(self.folio.folio) + " : " + str(self.sip_date) + ", " + str(self.amount)

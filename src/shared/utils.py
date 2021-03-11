@@ -7,7 +7,7 @@ def get_float_or_zero_from_string(input):
             res = float(input)
             return res
         except Exception as e:
-            print('error converting ', input, ' to float')
+            print('error converting ', input, ' to float. returning 0')
     return 0
 
 def get_float_or_none_from_string(input):
@@ -16,7 +16,7 @@ def get_float_or_none_from_string(input):
             res = float(input)
             return res
         except Exception as e:
-            print('error converting ', input, ' to float')
+            print('error converting ', input, ' to float. returning none')
     return None
 
 def get_int_or_none_from_string(input):
@@ -25,7 +25,7 @@ def get_int_or_none_from_string(input):
             res = int(input)
             return res
         except Exception as e:
-            print('error converting ', input, ' to int')
+            print('error converting ', input, ' to int. returning none')
     return None
 
 # default format expected of kind 2020-06-01
@@ -35,7 +35,7 @@ def get_datetime_or_none_from_string(input, format='%Y-%m-%d'):
             res = datetime.datetime.strptime(input, format)
             return res
         except Exception as e:
-            print('error converting ', input, ' to date')
+            print('error converting ', input, ' to date. returning none')
     return None
 
 # default format expected of kind 2020-06-01
@@ -45,7 +45,7 @@ def get_date_or_none_from_string(input, format='%Y-%m-%d'):
             res = datetime.datetime.strptime(input, format).date()
             return res
         except Exception as e:
-            print('error converting ', input, ' to date' + str(e))
+            print('error converting ', input, ' to date. returning none' + str(e))
     return None
 
 def convert_date_to_string(input, format='%Y-%m-%d'):

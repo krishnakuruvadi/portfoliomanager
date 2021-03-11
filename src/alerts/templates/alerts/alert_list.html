@@ -51,8 +51,6 @@
         </td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}transactions"><i class="far fa-file-alt" aria-hidden="true"></i></a>
         </td>
       </tr>
       {% endfor %}
@@ -73,6 +71,8 @@
 
 <script>
   {% block jquery %}
-  $('#alerts-table').DataTable();
+  $('#alerts-table').DataTable({
+        "order": [[ 0, "desc" ]]
+    } );
   {% endblock jquery %}
 </script>

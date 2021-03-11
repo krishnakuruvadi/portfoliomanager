@@ -5,10 +5,15 @@
 
 {%block canvas %}{% endblock canvas %}
 
-{% block viewname %} {{object.number }} : {{object.company}} {% endblock viewname %}
+{% block viewname %} 
+<ul class="breadcrumb">
+  <li><a href="../">Alerts</a></li>
+  <li><a href="#">{{ object.id }}</a></li>
+</ul>
+{% endblock viewname %}
 
 {% block content %} 
-  <table>
+  <table class="table table-borderless" style="width:75%">
     <tr>
       <td>#</td>
       <td>{{ object.id }}</td>
