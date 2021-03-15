@@ -14,7 +14,7 @@ import json
 from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.keys import Keys
 from tasks.tasks import add_mf_transactions
-from .mf_helper import mf_add_or_update_sip
+from .mf_helper import mf_add_or_update_sip_kuvera
 
 def get_path_to_chrome_driver():
     path = pathlib.Path(__file__).parent.parent.parent.absolute()
@@ -68,7 +68,7 @@ def pull_kuvera(user, email, passwd, pull_user_name):
             user_name_div.click()
         print(f'user {pull_user_name} found')
         time.sleep(5)
-        '''
+        
         dload = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//img[contains(@src,'download.svg')]")))
         time.sleep(5)
         dload = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//img[contains(@src,'download.svg')]")))
@@ -78,9 +78,9 @@ def pull_kuvera(user, email, passwd, pull_user_name):
                 break
             time.sleep(1)
         add_mf_transactions('KUVERA', user, dload_file)
-        '''
+        
         sips = pull_sip(driver)
-        mf_add_or_update_sip(sips)
+        mf_add_or_update_sip_kuvera(sips)
         for i in range(5):
             try:
                 user_cont = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//div[contains(@class,'username-container')]")))
@@ -106,7 +106,7 @@ def pull_kuvera(user, email, passwd, pull_user_name):
 
 def pull_sip(driver):
     print('start pull_sip')
-    sips = dict()
+    sips = list()
     try:
         sip_url = 'https://kuvera.in/systematic/sip'
         driver.get(sip_url)
@@ -143,11 +143,13 @@ def pull_sip(driver):
 
                         if date and amount and folio:
                             print(f'folio {folio} date {date} amount {amount}')
-                            sips[folio] = dict()
-                            sips[folio]['date'] = int(date.strip().replace('nd', '').replace('st', '').replace('rd', '').replace('nd', '').replace('th', ''))
+                            sip = dict()
+                            sip['folio'] = folio
+                            sip['date'] = int(date.strip().replace('nd', '').replace('st', '').replace('rd', '').replace('nd', '').replace('th', ''))
                             amount = amount[0:amount.find('<span')].replace(',','').replace('₹','').strip()
-                            sips[folio]['amount'] = float(amount)
-                            sips[folio]['name'] = name
+                            sip['amount'] = float(amount)
+                            sip['name'] = name
+                            sips.append(sip)
                         else:
                             print('one or more in folio, date, amount is none')
                     else:

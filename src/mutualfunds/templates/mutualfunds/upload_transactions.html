@@ -43,7 +43,7 @@
               <label for="file" class="col-sm-3 col-form-label">File</label>
               <div class="col-sm-6">
                 <div class="md-form mt-0">
-                  <input type="file" name="document" required>
+                  <input type="file" name="document" id="document" required>
                 </div>
               </div>
             </div>
@@ -51,7 +51,7 @@
             <div class="form-group row">
               <div class="col-sm-9">
                 <div class="md-form mt-0">
-                  <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                  <button type="submit" class="btn btn-primary" id="submit" name="submit">Submit</button>
                   <a href="../" class="btn btn-danger" role="button">Cancel</a>
                 </div>
               </div>
@@ -87,10 +87,10 @@
             </div>
           
             <div class="form-group row">
-              <label for="pull-emailid" class="col-sm-3 col-form-label">E-Mail</label>
+              <label for="pull-emailid" id="label-pull-emailid" class="col-sm-3 col-form-label">E-Mail</label>
               <div class="col-sm-6">
                 <div class="md-form mt-0">
-                  <input type="text" id="id_pull_email_id" name="pull-email-id" placeholder="Broker E-Mail ID" size="50">
+                  <input type="text" id="id_pull_email_id" name="pull-email-id" size="50">
                 </div>
               </div>
             </div>
@@ -103,10 +103,10 @@
             </div>
 
             <div class="form-group row">
-              <label for="pull-kuvera-name" class="col-sm-3 col-form-label">Kuvera User Account Name</label>
+              <label for="pull-kuvera-name" class="col-sm-3 col-form-label" id="label-pull-kuvera-name">Kuvera User Account Name</label>
               <div class="col-sm-6">
                 <div class="md-form mt-0">
-                  <input type="text" id="id_pull_kuvera_acc_name" name="pull_kuvera_acc_name" placeholder="KUVERA Account Name" size="50">
+                  <input type="text" id="id_pull_kuvera_acc_name" name="pull_kuvera_acc_name"  size="50">
                 </div>
               </div>
             </div>
@@ -114,7 +114,7 @@
             <div class="form-group row">
               <div class="col-sm-6">
                 <div class="md-form mt-0">
-                  <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                  <button type="submit" class="btn btn-primary" id="pull-submit" name="pull-submit">Submit</button>
                 <a href="../" class="btn btn-danger" role="button">Cancel</a>
               </div>
             </div>
@@ -154,6 +154,62 @@
         // add opt to end of select box (sel)
         el.appendChild(opt);
       }
+    }
+    updatePullSegment();
+    updateFileUploadSegment();
+    $("#id_pull_user").change(function () {
+      updatePullSegment();
+    });
+    $("#pullBrokerControlSelect").change(function () {
+      updatePullSegment();
+    });
+    $("#id_pull_email_id").change(function () {
+      updatePullSegment();
+    });
+    $("#id_pull_passwd").change(function () {
+      updatePullSegment();
+    });
+    $("#id_pull_kuvera_acc_name").change(function () {
+      updatePullSegment();
+    });
+    function updatePullSegment() {
+      var broker = document.getElementById('pullBrokerControlSelect').value;
+      console.log(broker);
+      if (broker == 'KUVERA') {
+        document.getElementById('label-pull-emailid').innerHTML='E-Mail';
+        document.getElementById('label-pull-kuvera-name').innerHTML='Kuvera User Account Name';
+      }
+      if (broker == 'COIN ZERODHA') {
+        document.getElementById('label-pull-emailid').innerHTML='User ID';
+        document.getElementById('label-pull-kuvera-name').innerHTML='2FA';
+      }
+      var user = document.getElementById('id_pull_user').value;
+      var userid = document.getElementById('id_pull_email_id').value;
+      var passwd = document.getElementById('id_pull_passwd').value;
+      var twofa = document.getElementById('id_pull_kuvera_acc_name').value;
+      document.getElementById('pull-submit').disabled=true;
+      if ((user!='') && (broker!='') && (userid!='') && (passwd!='') && (twofa!='')) {
+        document.getElementById('pull-submit').disabled=false;
+      }
+    }
+    $("#id_user").change(function () {
+      updateFileUploadSegment();
+    });
+    $("#brokerControlSelect").change(function () {
+      updateFileUploadSegment();
+    });
+    $("#document").change(function () {
+      updateFileUploadSegment();
+    });
+    function updateFileUploadSegment() {
+      var broker = document.getElementById('brokerControlSelect').value;
+      var user = document.getElementById('id_user').value;
+      var doc = document.getElementById('document').value;
+      document.getElementById('submit').disabled=true;
+      if ((user!='') && (broker!='') && (doc!='')) {
+        document.getElementById('submit').disabled=false;
+      }
+
     }
   </script>
 {% endblock %}

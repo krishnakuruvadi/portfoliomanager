@@ -21,6 +21,7 @@ from django.db import IntegrityError
 from .models import Folio, MutualFundTransaction, Sip
 from common.models import MutualFund, MFYearlyReturns, MFCategoryReturns
 from .kuvera import Kuvera
+from .pull_coin import pull_coin
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .mf_helper import insert_trans_entry, calculate_xirr_all_users
@@ -411,7 +412,10 @@ def upload_transactions(request):
             print('broker:',pull_broker)
             print('emailid:',pull_emailid)
             #print('passwd:',pull_passwd)
-            pull_kuvera(pull_user, pull_emailid, pull_passwd, pull_user_name)
+            if pull_broker == 'KUVERA':
+                pull_kuvera(pull_user, pull_emailid, pull_passwd, pull_user_name)
+            elif pull_broker == 'COIN ZERODHA':
+                pull_coin(pull_user, pull_emailid, pull_passwd, pull_user_name)
         else:
             uploaded_file = request.FILES['document']
             user = request.POST['user']
