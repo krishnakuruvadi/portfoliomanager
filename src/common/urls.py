@@ -15,7 +15,13 @@ from .views import (
     get_mutual_funds,
     ScrollDataView,
     preferences,
-    ForexDataView
+    ForexDataView,
+    password_list_view,
+    password_detail_view,
+    password_add_view,
+    password_trash,
+    PasswordDeleteView,
+    update_password
 )
 # Create your views here.
 
@@ -26,7 +32,12 @@ urlpatterns = [
     path('stocks/<id>/', StockDetailView.as_view(), name='stock-detail'),
     path('stocks/refresh', refresh, name='refresh'),
     path('stocks/<id>/historical-prices', HistoricalStockPriceList.as_view(), name='historical-stock-price-list'),
-
+    path('passwords/', password_list_view, name='passwords-list'),
+    path('passwords/add', password_add_view, name='password-add'),
+    path('passwords/trash', password_trash, name='password-trash'),
+    path('passwords/<id>/', password_detail_view, name='password-detail'),
+    path('passwords/<id>/delete', PasswordDeleteView.as_view(), name='password-delete'),
+    path('passwords/<id>/update', update_password, name='password-update'),
     path('mf/refresh', mf_refresh, name='mf-refresh'),
     path('mf/<id>/historical-prices', HistoricalMFPriceList.as_view(), name='historical-mf-price-list'),
     path('mf/trash', mf_trash, name='mf-trash'),

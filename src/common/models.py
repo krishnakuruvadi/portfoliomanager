@@ -149,3 +149,21 @@ class Preferences(SingletonModel):
     timezone = models.CharField(max_length=100, default='Asia/Kolkata')
     indexes_to_scroll = models.CharField(max_length=20000, null=True, blank=True)
     document_backup_locn = models.CharField(max_length=20000, null=True, blank=True)
+
+
+class Passwords(models.Model):
+    class Meta:
+        unique_together = (('user','user_id','source'),)
+    user = models.IntegerField()
+    user_id = models.CharField(max_length=50)
+    #password = models.CharField(max_length=50)
+    #additional_password = models.CharField(max_length=50)
+    password = models.BinaryField()
+    additional_password = models.BinaryField(null=True)
+    additional_input = models.CharField(max_length=50)
+    source = models.CharField(max_length=50)
+    last_updated = models.DateField()
+    notes = models.CharField(max_length=40, null=True, blank=True)
+
+    def get_absolute_url(self):
+        return reverse("common:password-detail", kwargs={'id': self.id})

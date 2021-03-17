@@ -1,7 +1,17 @@
 from mftool import Mftool
 import datetime
-from common.models import MutualFund, MFCategoryReturns, Preferences
+from common.models import MutualFund, MFCategoryReturns, Preferences, Passwords
 from shared.utils import get_float_or_none_from_string
+import pathlib
+import base64
+import os
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import shutil
+import json
+from django.conf import settings
+
 
 def update_mf_scheme_codes():
     print("inside update_mf_scheme_codes")
@@ -127,3 +137,151 @@ def get_preferences(key):
     if hasattr(config, key):
         return getattr(config, key)
     return None
+
+def get_password(id, token):
+    pass_file = get_password_file()
+    if not os.path.exists(pass_file):
+        return None
+    data = None
+    with open(pass_file) as f:
+        data = json.load(f)
+    if not data:
+        return None
+    key = load_key(id)
+    if not key:
+        return None
+    f = Fernet(key)
+    decrypted_passwd = f.decrypt(token)
+    passwd = decrypted_passwd.decode()
+    return passwd
+
+def add_or_edit_password(user, source, user_id, passwd, additional_passwd, input_additional_field, notes):
+    pass_file = get_password_file()
+    if not os.path.exists(pass_file):
+        return 'ERROR: Password file not found'
+    data = None
+    with open(pass_file) as f:
+        data = json.load(f)
+    try:
+        existing_password = Passwords.objects.get(user=user, user_id=user_id, source=source)
+        token, token2, _ = encrypt_password(passwd, additional_passwd, existing_password.id)
+        existing_password.password = token
+        existing_password.additional_password = token2
+        existing_password.additional_input = input_additional_field
+        existing_password.notes = notes
+        existing_password.last_updated=datetime.date.today()
+        existing_password.save()
+    except Passwords.DoesNotExist:
+        token, token2, f = encrypt_password(passwd, additional_passwd, None)
+
+        passwd_obj = Passwords.objects.create(
+            user=user,
+            user_id=user_id,
+            password=token,
+            additional_password=token2,
+            additional_input=input_additional_field,
+            source=source,
+            notes=notes,
+            last_updated=datetime.date.today()
+        )
+        write_key(passwd_obj.id, f)
+
+def get_secrets_path():
+    path = os.path.join(settings.MEDIA_ROOT, "secrets")
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
+
+def get_password_file():
+    password_file = "passwords.json"
+    path = os.path.join(get_secrets_path(), password_file)
+    return path
+
+def add_master_password(password):
+    data = dict()
+    data['masterPassword'] = password
+    pass_file = get_password_file()
+    if not os.path.exists(pass_file):
+        with open(pass_file, 'w') as json_file:
+            json.dump(data, json_file)
+    else:
+        print('Password file exists.  Cant change master password')
+
+def get_master_password():
+    pass_file = get_password_file()
+    if not os.path.exists(pass_file):
+        return None
+    data = None
+    with open(pass_file) as f:
+        data = json.load(f)
+    
+    if 'masterPassword' in data:
+        return data['masterPassword']
+    return None
+
+def encrypt_password(passwd, additional_passwd, id):
+    master_passwd = get_master_password().encode()
+    password = passwd.encode()
+    if not id:
+        salt = os.urandom(16)
+        kdf = PBKDF2HMAC (
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(master_passwd))
+        f = Fernet(key)
+    else:
+        f = load_key(id)
+    if not f:
+        return None, None, None
+    token = f.encrypt(password)
+    #token = token.encode('base64')
+    token2 = None
+    if additional_passwd and additional_passwd != '':
+        additional_password = additional_passwd.encode('utf_8')
+        token2 = f.encrypt(additional_password)
+        #token2 = token2.encode('base64')
+    return token, token2, key
+
+def write_key(id, f):
+    key_path = os.path.join(get_secrets_path(), str(id)+'.key')
+    with open(key_path, "wb") as key_file:
+        key_file.write(f)
+
+def load_key(id):
+    """
+    Load the previously generated key
+    """
+    key_path = os.path.join(get_secrets_path(), str(id)+'.key')
+    if not os.path.exists(key_path):
+        return None
+
+    return open(key_path, "rb").read()
+
+def get_supported_mf_brokers():
+    brokers = list()
+    brokers.append('KUVERA')
+    brokers.append('COIN ZERODHA')
+    return brokers
+
+'''
+returns list of dicts containing details of passwords
+'''
+def get_mf_passwords():
+    passwords = list()
+    brokers = get_supported_mf_brokers()
+    password_objs = Passwords.objects.all()
+    for po in password_objs:
+        if po.source in brokers:
+            pw = dict()
+            pw['broker'] = po.source
+            pw['user'] = po.user
+            pw['user_id'] = po.user_id
+            pw['password'] = get_password(po.id, po.password)
+            if po.additional_password:
+                pw['password2'] = get_password(po.id, po.additional_password)
+            pw['additional_field'] = po.additional_input
+            passwords.append(pw)
+    return passwords

@@ -3,10 +3,11 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import (
     ListView,
-    DetailView
+    DetailView,
+    DeleteView
 )
-from .models import Stock, MutualFund, HistoricalStockPrice, HistoricalMFPrice, ScrollData, Preferences
-from .helper import update_mf_scheme_codes
+from .models import Stock, MutualFund, HistoricalStockPrice, HistoricalMFPrice, ScrollData, Preferences, Passwords
+from .helper import *
 from shared.handle_real_time_data import get_latest_vals, get_historical_mf_nav, get_forex_rate
 from dateutil.relativedelta import relativedelta
 import datetime
@@ -27,6 +28,10 @@ from pytz import common_timezones
 from shared.nasdaq import Nasdaq
 from nsetools import Nse
 from shared.utils import *
+from .bsestar import update_bsestar_schemes
+from shared.handle_get import *
+import os
+import shutil
 
 
 def common_list_view(request):
@@ -100,7 +105,112 @@ class MfDetailView(DetailView):
     def get_object(self):
         id_ = self.kwargs.get("id")
         return get_object_or_404(MutualFund, id=id_)
+
+def update_password(request, id):
+    template = 'common/update_password.html'
+    password = Passwords.objects.get(id=int(id))
+
+    if request.method == 'POST':
+        passwd = request.POST.get('passwd')
+        additional_passwd = request.POST.get('additional_passwd')
+        input_additional_field = request.POST.get('input_additional_field')
+        notes = request.POST.get('notes')
+        add_or_edit_password(password.user, password.source, password.user_id, passwd, additional_passwd, input_additional_field, notes)
+        return HttpResponseRedirect(reverse('common:passwords-list'))
+    context = {'user': password.user, 'source':password.source, 'user_id':password.user_id, 'notes':password.notes, 'input_additional_field':password.additional_input}
+    return render(request, template, context)
+
+def password_add_view(request):
+    err = None
+    mp = get_master_password()
+    template = 'common/add_master_password.html'
+    if mp:
+        template = 'common/add_password.html'
+    if request.method == 'POST':
+        if mp:
+            user = request.POST.get('user')
+            source = request.POST.get('pullSourceControlSelect')
+            user_id = request.POST.get('user_id')
+            passwd = request.POST.get('passwd')
+            additional_passwd = request.POST.get('additional_passwd')
+            input_additional_field = request.POST.get('input_additional_field')
+            notes = request.POST.get('notes')
+            print(f'{user}, {source}, {user_id}, {passwd}, {additional_passwd}, {input_additional_field}')
+            #token, token2, salt = encrypt_password(passwd, additional_passwd)
+            #print(f'{token}, {token2}, {salt}')
+            add_or_edit_password(user, source, user_id, passwd, additional_passwd, input_additional_field, notes)
+
+        else:
+            passwd = request.POST.get('passwd')
+            reenter_passwd = request.POST.get('re_enter_passwd')
+            if passwd == reenter_passwd:
+                add_master_password(passwd)
+            else:
+                err = "ERROR: Passwords dont match"
+                print(err)
+    context = dict()
+    context['error'] = err
+    mp = get_master_password()
+    template = 'common/add_master_password.html'
+    if mp:
+        users = get_all_users()
+        context['users'] = users
+        template = 'common/add_password.html'
+
+    return render(request, template, context)
+
+
+def password_detail_view(request):
+    template = 'common/password_detail.html'
+    password_obj = Passwords.objects.get(id=request.GET.get('id'))
+    p = dict()
+    p['user'] = password_obj.user
+    p['source'] = password_obj.source
+    p['user_id'] = password_obj.user_id
+    return render(request, template, p)
+
+def password_list_view(request):
+    template = 'common/password_list.html'
+    password_objs = Passwords.objects.all()
+    context = dict()
+    passwords = list()
+    for password_obj in password_objs:
+        p = dict()
+        p['id'] = password_obj.id
+        p['user'] = password_obj.user
+        p['source'] = password_obj.source
+        p['user_id'] = password_obj.user_id
+        p['last_updated'] = password_obj.last_updated
+        passwords.append(p)
+    context['passwords'] = passwords
+    context['user_name_mapping'] = get_all_users()
+    return render(request, template, context)
+
+def password_trash(request):
+    template = 'common/password_trash.html'
+    print('inside password_trash request.method',request.method)
+    if request.method == 'POST':
+        Passwords.objects.all().delete()
+        secrets_path = get_secrets_path()
+        if os.path.exists(secrets_path):
+            try:
+                shutil.rmtree(secrets_path)
+            except OSError as e:
+                print("Error: %s : %s" % (secrets_path, e.strerror))
+        return HttpResponseRedirect(reverse('common:passwords-list'))
+    return render(request, template)
+
+class PasswordDeleteView(DeleteView):
+    def get_object(self):
+        id_ = self.kwargs.get("id")
+        return get_object_or_404(Passwords, id=id_)
+
+    def get_success_url(self):
+        return reverse('common:passwords-list')
     
+    def get(self, *args, **kwargs):
+        return self.post(*args, **kwargs)
+
 def mf_trash(request):
     template = 'common/mf_trash.html'
     print('inside mf_trash request.method',request.method)
