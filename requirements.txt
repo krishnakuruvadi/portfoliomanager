@@ -13,7 +13,7 @@ constantly==15.1.0
 cryptography==3.4.4
 daphne==3.0.1
 dateutils==0.6.8
-Django==2.2.14
+Django==2.2.19
 django-solo==1.1.5
 djangorestframework==3.11.0
 huey==2.3.0
