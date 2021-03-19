@@ -15,7 +15,7 @@ daphne==3.0.1
 dateutils==0.6.8
 Django==2.2.19
 django-solo==1.1.5
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 huey==2.3.0
 hyperlink==20.0.1
 idna==2.9
