@@ -7,7 +7,7 @@ beautifulsoup4==4.9.1
 bs4==0.0.1
 certifi==2020.4.5.1
 cffi==1.14.4
-channels==3.0.2
+channels==3.0.3
 chardet==3.0.4
 constantly==15.1.0
 cryptography==3.4.4
