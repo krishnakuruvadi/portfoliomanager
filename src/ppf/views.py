@@ -24,6 +24,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponseRedirect
 from goal.goal_helper import get_goal_id_name_mapping_for_user
+from tasks.tasks import pull_ppf_trans_from_bank
 
 
 def add_ppf(request):
@@ -169,17 +170,23 @@ class PpfAddEntryView(CreateView):
 def upload_ppf_trans(request, id):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
     if request.method == 'POST':
-        uploaded_file = request.FILES['document']
-        print(uploaded_file)
-        print(request.POST.get('bankFormControlSelect'))
-        print(id)
-        fs = FileSystemStorage()
-        file_locn = fs.save(uploaded_file.name, uploaded_file)
-        print(file_locn)
-        print(settings.MEDIA_ROOT)
-        full_file_path = settings.MEDIA_ROOT + '/' + file_locn
-        ppf_add_transactions(request.POST.get('bankFormControlSelect'), full_file_path)
-        fs.delete(file_locn)
+        if "pull-submit" in request.POST:
+            bank = request.POST.get('pullBankControlSelect')
+            user_id = request.POST.get('pull-user-id')
+            passwd = request.POST.get('pull-passwd')
+            pull_ppf_trans_from_bank(id, bank, user_id, passwd)
+        else:
+            uploaded_file = request.FILES['document']
+            print(uploaded_file)
+            print(request.POST.get('bankFormControlSelect'))
+            print(id)
+            fs = FileSystemStorage()
+            file_locn = fs.save(uploaded_file.name, uploaded_file)
+            print(file_locn)
+            print(settings.MEDIA_ROOT)
+            full_file_path = settings.MEDIA_ROOT + '/' + file_locn
+            ppf_add_transactions(request.POST.get('bankFormControlSelect'), full_file_path)
+            fs.delete(file_locn)
     return render(request, 'ppfs/ppf_add_entries.html')
 
 class ChartData(APIView):

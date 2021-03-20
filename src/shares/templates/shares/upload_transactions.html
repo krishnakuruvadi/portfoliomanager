@@ -108,7 +108,7 @@
               </div>
             </div>
             
-            <div class="form-group row">
+            <div class="form-group row" id="div_2fa">
               <label for="pull-2fa" class="col-sm-3 col-form-label">2FA</label>
               <div class="col-sm-9">
                 <div class="col-sm-9">
@@ -163,6 +163,7 @@
       }
     }
     document.getElementById('pull-submit').disabled=true;
+    updatePullSubmitButtonStatus()
     $("#id_pull_user").change(function () {
       updatePullSubmitButtonStatus();
     });
@@ -184,9 +185,24 @@
       var userid = document.getElementById('id_pull_user_id').value;
       var passwd = document.getElementById('id_pull_passwd').value;
       var twofa = document.getElementById('id_pull_2fa').value;
-      if ((user!='') && (broker!='') && (userid!='') && (passwd!='') && (twofa!='')) {
-        document.getElementById('pull-submit').disabled=false;
+      document.getElementById('pull-submit').disabled=true;
+      if ((user!='') && (broker!='') && (userid!='') && (passwd!='')) {
+        if ((broker != 'ROBINHOOD') && (twofa!='')) {
+          document.getElementById('pull-submit').disabled=false;
+        }
+        if (broker == 'ROBINHOOD') {
+          document.getElementById('pull-submit').disabled=false;
+        }
       }
+      var el = document.getElementById("div_2fa");
+
+      if (broker == 'ROBINHOOD') {
+        el.style.display = "none";
+      }
+      if (broker == 'ZERODHA') {
+        el.style.display = null;
+      }
+
     }
 
   </script>

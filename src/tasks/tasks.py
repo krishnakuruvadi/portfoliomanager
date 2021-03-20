@@ -37,6 +37,8 @@ from bs4 import BeautifulSoup
 from json.decoder import JSONDecodeError
 from markets.models import PEMonthy, PBMonthy
 from django.db import IntegrityError
+from common.helper import get_mf_passwords
+from .tasks_helper import *
 
 def set_task_state(name, state):
     try:
@@ -214,6 +216,24 @@ def add_mf_transactions(broker, user, full_file_path):
     set_task_state('add_mf_transactions', TaskState.Running)
     mf_add_transactions(broker, user, full_file_path)
     set_task_state('add_mf_transactions', TaskState.Successful)
+
+@db_periodic_task(crontab(minute='*/30', hour='*/4'))
+def pull_mf_transactions():
+    from mutualfunds.pull_kuvera import pull_kuvera
+    from mutualfunds.pull_coin import pull_coin
+    if is_task_run_today('pull_mf_transactions'):
+        print('pull_mf_transactions task already run today successfully.  Not trying again')
+        return
+    set_task_state('pull_mf_transactions', TaskState.Running)
+    passwords = get_mf_passwords()
+    for passwd in passwords:
+        if passwd['broker'] == 'KUVERA':
+            #print(f"Pulling Kuvera for {passwd['user']} with user id {passwd['user_id']} and password {passwd['password']} with KUVERA username {passwd['additional_field']}")
+            pull_kuvera(passwd['user'], passwd['user_id'], passwd['password'], passwd['additional_field'])
+        elif passwd['broker'] == 'COIN ZERODHA':
+            #print(f"Pulling COIN for {passwd['user']} with user id {passwd['user_id']} and password {passwd['password']} with 2fa {passwd['password2']}")
+            pull_coin(passwd['user'], passwd['user_id'], passwd['password'], passwd['password2'])
+    set_task_state('pull_mf_transactions', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='0', hour='2'))
 def update_mf_mapping():
@@ -422,11 +442,33 @@ def mf_update_blend():
 
 @db_task()
 def pull_share_trans_from_broker(user, broker, user_id, passwd, pass_2fa):
-    print(f'user {user} broker {broker} userid {user_id} password {passwd} 2fa {pass_2fa}')
+    print(f'user {user} broker {broker} userid {user_id}')
     if broker == 'ZERODHA':
         files = pull_zerodha(user_id, passwd, pass_2fa)
         for dload_file in files:
             add_share_transactions(broker, user, dload_file)
+
+@db_task()
+def pull_ppf_trans_from_bank(number, bank, user_id, passwd):
+    print(f'number {number} bank {bank} userid {user_id}')
+    if bank == 'SBI':
+        from ppf.ppf_sbi_pull import pull_transactions
+        trans = pull_transactions(user_id, passwd, number)
+        print(trans)
+        add_transactions_sbi_ppf(number, trans)
+    else:
+        print(f'unsupported bank {bank}')
+
+@db_task()
+def pull_ssy_trans_from_bank(number, bank, user_id, passwd):
+    print(f'number {number} bank {bank} userid {user_id}')
+    if bank == 'SBI':
+        from ssy.ssy_helper import pull_transactions
+        trans = pull_transactions(user_id, passwd, number)
+        print(trans)
+        add_transactions_sbi_ssy(number, trans)
+    else:
+        print(f'unsupported bank {bank}')
 
 @db_task()
 def add_share_transactions(broker, user, full_file_path):
@@ -442,7 +484,9 @@ def update_scroll_data():
             sel_indexes.append(index)
 
     nse = Nse()
+    print('getting index list for nse')
     for item in nse.get_index_list():
+        print(f'getting data of index {item} from nse')
         data = nse.get_index_quote(item)
         if data:
             print(f"data {data}")
@@ -486,7 +530,10 @@ def update_scroll_data():
                 scroll_item = ScrollData.objects.get(scrip=v['name'])
                 if get_diff(float(scroll_item.val), float(v['lastPrice'])) > 0.1:
                     print(f"NASDAQ scroll_item.val {scroll_item.val} v['lastPrice'] {v['lastPrice']}")
-                    scroll_item.last_updated = v['last_updated']
+                    if 'last_updated' in v and v['last_updated']:
+                        scroll_item.last_updated = v['last_updated']
+                    else:
+                        scroll_item.last_updated = timezone.now()
                     scroll_item.val = v['lastPrice']
                     scroll_item.change = v['change']
                     scroll_item.percent = v['pChange']

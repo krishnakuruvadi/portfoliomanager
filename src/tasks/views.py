@@ -36,17 +36,20 @@ class TaskListView(ListView):
             'update_mf_mapping': {
                 'description': 'Update any missing mapping info between AMFII, BSE STaR and KUVERA'
             },
-            'update_goal_contrib':{
+            'update_goal_contrib': {
                 'description': 'Update different investment data for each goal'
             },
-            'analyse_mf':{
-                'description':'Analyse different Mutual Funds where users have active investment'
+            'analyse_mf': {
+                'description': 'Analyse different Mutual Funds where users have active investment'
             },
-            'update_shares_latest_vals':{
-                'description':'Get latest vals of shares'
+            'update_shares_latest_vals': {
+                'description': 'Get latest vals of shares'
             },
-            'mf_update_blend':{
-                'description':'Update latest blend of Mutual Funds'
+            'mf_update_blend': {
+                'description': 'Update latest blend of Mutual Funds'
+            },
+            'pull_mf_transactions': {
+                'description': 'Pulls mutual fund transactions from supported broker if passwords are stored'
             }
         }
         for task in available_tasks.keys():

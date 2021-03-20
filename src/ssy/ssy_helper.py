@@ -3,6 +3,7 @@ from .models import SsyEntry, Ssy
 from django.db import IntegrityError
 from shared.financial import xirr
 import datetime
+from ppf.ppf_sbi_pull import pull_sbi_transactions
 
 def ssy_add_transactions(bank, file_locn):
     if bank == 'SBI':
@@ -63,3 +64,8 @@ def get_ssy_details(number):
         return {'number': ssy_num, 'total': total, 'principal':principal, 'interest':interest, 'roi':roi}
     except Ssy.DoesNotExist:
         return None
+
+def pull_transactions(user, password, number):
+    print(f'pulling transactions for SSY {number}')
+    ssy_obj = Ssy.objects.get(number=number)
+    return pull_sbi_transactions(user, password, number, ssy_obj.start_date)

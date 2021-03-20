@@ -200,11 +200,11 @@ def add_contribution(request, id):
                 context = get_fy_details(fy[0:4])
                 context['fy_list']=fy_list
                 context['sel_fy'] = fy
-                context['object'] = {'number':epf_obj.number, 'company':epf_obj.company}
+                context['object'] = {'id':epf_obj.id, 'number':epf_obj.number, 'company':epf_obj.company}
                 print(context)
                 return render(request, template, context)
     
-    context = {'fy_list':fy_list, 'object': {'number':epf_obj.number, 'company':epf_obj.company, 'sel_fy':'select'}}
+    context = {'fy_list':fy_list, 'object': {'id':epf_obj.id, 'number':epf_obj.number, 'company':epf_obj.company, 'sel_fy':'select'}}
     return render(request, template, context)
 
 def get_contrib_values(epf_id):
