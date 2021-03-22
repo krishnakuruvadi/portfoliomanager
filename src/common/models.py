@@ -21,6 +21,9 @@ class Stock(models.Model):
     
     def get_absolute_url(self):
         return reverse("common:stock-detail", kwargs={'id': self.id})
+    
+    def __str__(self):
+        return str(self.id) + ":" + self.exchange + ":" + self.symbol
 
 
 class HistoricalStockPrice(models.Model):
@@ -30,6 +33,8 @@ class HistoricalStockPrice(models.Model):
     date = models.DateField(_('Date'), )
     price = models.DecimalField(_('Price'), max_digits=20, decimal_places=2, null=False)
     #face_value = models.DecimalField(_('Face Value'), max_digits=20, decimal_places=2, null=False)
+    def __str__(self):
+        return str(self.id) + ":" + self.symbol.exchange + ":" + self.symbol.symbol + " " + self.date + " " + self.price
 
 
 class MutualFund(models.Model):

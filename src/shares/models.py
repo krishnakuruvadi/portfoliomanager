@@ -9,6 +9,7 @@ EXCHANGE_CHOICES = [
     ('NYSE', 'NYSE'),
     ('BSE', 'BSE'),
     ('NSE', 'NSE'),
+    ('NSE/BSE', 'NSE/BSE')
 ]
 
 TRANSACTION_TYPE_CHOICES = [
@@ -32,6 +33,7 @@ class Share(models.Model):
     as_on_date = models.DateField(_('As On Date'), blank=True, null=True)
     gain = models.DecimalField(_('Gain'), max_digits=20, decimal_places=2, null=True, blank=True)
     notes = models.CharField(max_length=80, null=True, blank=True)
+    realised_gain = models.DecimalField(_('Realised Gain'), max_digits=20, decimal_places=2, null=True, blank=True)
     
     def get_absolute_url(self):
         return reverse('shares:share-detail', args=[str(self.id)])
@@ -39,7 +41,7 @@ class Share(models.Model):
 
 class Transactions(models.Model):
     class Meta:
-        unique_together = (('share','trans_date','trans_type','broker'),)
+        unique_together = (('share','trans_date','price','quantity','trans_type','broker'),)
     share = models.ForeignKey('Share',on_delete=models.CASCADE)
     trans_date = models.DateField(_('Transaction Date'), )
     trans_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE_CHOICES)
@@ -52,4 +54,4 @@ class Transactions(models.Model):
     
     def get_absolute_url(self):
         return reverse('shares:transaction-detail', args=[str(self.id)])
-
+    

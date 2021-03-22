@@ -4,7 +4,13 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} {{operation}} {% endblock viewname %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'shares:shares-list' %}">Shares</a></li>
+    <li><a href="#">{{symbol}}</a></li>
+    <li><a href="#">{{operation}} </a></li>
+  </ul>
+{% endblock viewname %}
 
 {% block content %}
 

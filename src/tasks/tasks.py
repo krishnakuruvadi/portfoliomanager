@@ -26,7 +26,7 @@ from goal.goal_helper import update_all_goals_contributions
 from .models import Task, TaskState
 from alerts.alert_helper import create_alert, Severity
 from shares.pull_zerodha import pull_zerodha
-from shares.shares_helper import shares_add_transactions, update_shares_latest_val
+from shares.shares_helper import shares_add_transactions, update_shares_latest_val, check_discrepancies
 from shared.financial import xirr
 from shared.nasdaq import Nasdaq
 from django.utils import timezone
@@ -287,6 +287,7 @@ def update_goal_contrib():
 def update_shares_latest_vals():
     set_task_state('update_shares_latest_vals', TaskState.Running)
     update_shares_latest_val()
+    check_discrepancies()
     set_task_state('update_shares_latest_vals', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='35', hour='2'))
@@ -474,6 +475,7 @@ def pull_ssy_trans_from_bank(number, bank, user_id, passwd):
 def add_share_transactions(broker, user, full_file_path):
     shares_add_transactions(broker, user, full_file_path)
     os.remove(full_file_path)
+    check_discrepancies()
 
 @db_periodic_task(crontab(minute='*/10'))
 def update_scroll_data():

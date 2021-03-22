@@ -3,8 +3,8 @@
 {% block viewname %} 
   <ul class="breadcrumb">
     <li><a href="{% url 'shares:shares-list' %}">Shares </a></li>
-    <li><a href="#">{{ object.symbol }}</a></li>
-    <li><a href="#">Delete Share</a></li>
+    <li><a href="#">{{ object.share.symbol }}</a></li>
+    <li><a href="#">Delete Transaction</a></li>
   </ul>
 {% endblock %}
 
@@ -13,11 +13,11 @@
 
 {% block applicableactions %} {% endblock applicableactions %} 
 {% block content %}
-
+{{ object. }}
 <form method="POST">
   {% csrf_token %}
-  <h2>Do you want to delete the Share {{ object.symbol }}?</h2>
-  <p><input type="submit" value="Submit" class="btn btn-danger"/>&nbsp;<a href="{% url 'shares:shares-list' %}" class="btn btn-primary" role="button">Cancel</a></p>
+  <h2>Do you want to delete the transaction?</h2>
+  <p><input type="submit" value="Submit" class="btn btn-danger"/>&nbsp;<a href="../../" class="btn btn-primary" role="button">Cancel</a></p>
 </form>
 
 {% endblock %}

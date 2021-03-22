@@ -15,7 +15,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from .models import Share, Transactions
-from .shares_helper import insert_trans_entry, shares_add_transactions, reconcile_share, update_shares_latest_val
+from .shares_helper import *
 from shared.utils import *
 from shared.handle_get import *
 from shared.handle_real_time_data import get_latest_vals, get_forex_rate
@@ -43,8 +43,11 @@ class SharesListView(ListView):
         latest_value = 0
         as_on_date= None
         total_gain = 0
+        realised_gain = 0
         share_objs = Share.objects.all()
         for share_obj in share_objs:
+            if share_obj.realised_gain:
+                realised_gain = realised_gain + float(share_obj.realised_gain)
             if not share_obj.latest_value:
                 continue
             if not as_on_date:
@@ -59,6 +62,7 @@ class SharesListView(ListView):
         data['total_gain'] = total_gain
         data['total_investment'] = total_investment
         data['latest_value'] = latest_value
+        data['realised_gain'] = round(realised_gain, 2)
         return data
 
 class ShareTransactionsListView(ListView):
@@ -222,10 +226,10 @@ def update_transaction(request,id):
         trans.trans_type = request.POST['trans_type']
         trans.quantity = get_float_or_none_from_string(request.POST['quantity'])
         trans.conversion_rate = get_float_or_none_from_string(request.POST['conversion_rate'])
+        trans.price = get_float_or_none_from_string(request.POST['price'])
         trans_price = get_float_or_none_from_string(request.POST['trans_price'])
-        trans.price = trans_price
         if not trans_price:
-            trans_price = trans.trans_price*trans.quantity*trans.conversion_rate
+            trans_price = trans.price*trans.quantity*trans.conversion_rate
         trans.trans_price = trans_price
         trans.broker = request.POST['broker']
         trans.notes = request.POST['notes']
@@ -242,7 +246,9 @@ def update_transaction(request,id):
 
 def refresh(request):
     print("inside refresh")
+    reconcile_shares()
     update_shares_latest_val()
+    check_discrepancies()
     print('done with request')
     return HttpResponseRedirect(reverse('shares:shares-list'))
 

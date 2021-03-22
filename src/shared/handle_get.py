@@ -9,6 +9,8 @@ from shares.models import Transactions
 from mutualfunds.models import MutualFundTransaction
 import calendar
 import datetime
+import os
+import pathlib
 
 def get_all_users_names_as_list():
     users_list = list()
@@ -107,3 +109,29 @@ def get_start_day_across_portfolio():
     
     new_start_day = datetime.date(start_day.year, start_day.month, 1)
     return new_start_day
+
+
+def get_path_to_chrome_driver():
+    path = pathlib.Path(__file__).parent.parent.parent.absolute()
+    for file in os.listdir(path):
+        if "chromedriver" in file.lower():
+            path = os.path.join(path, file)
+            break
+    print('path to chrome driver ', path)
+    return path
+
+def get_files_in_dir(dir):
+    file_list = list()
+    for file in os.listdir(dir):
+        path = os.path.join(dir, file)
+        file_list.append(path)
+
+    return file_list
+
+def get_new_files_added(dir, existing_list):
+    new_file_list = list()
+    for file in os.listdir(dir):
+        path = os.path.join(dir, file)
+        if path not in existing_list:
+            new_file_list.append(path)
+    return new_file_list
