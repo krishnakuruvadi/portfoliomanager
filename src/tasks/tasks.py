@@ -448,7 +448,8 @@ def pull_share_trans_from_broker(user, broker, user_id, passwd, pass_2fa):
         files = pull_zerodha(user_id, passwd, pass_2fa)
         for dload_file in files:
             add_share_transactions(broker, user, dload_file)
-
+    check_discrepancies()
+    
 @db_task()
 def pull_ppf_trans_from_bank(number, bank, user_id, passwd):
     print(f'number {number} bank {bank} userid {user_id}')
@@ -475,7 +476,6 @@ def pull_ssy_trans_from_bank(number, bank, user_id, passwd):
 def add_share_transactions(broker, user, full_file_path):
     shares_add_transactions(broker, user, full_file_path)
     os.remove(full_file_path)
-    check_discrepancies()
 
 @db_periodic_task(crontab(minute='*/10'))
 def update_scroll_data():

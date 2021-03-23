@@ -19,62 +19,52 @@ def shares_add_transactions(broker, user, full_file_path):
         print(f'unsupported broker {broker}')
 
 def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate=1, trans_price=None):
-    share_obj = None
     try:
-        share_obj = Share.objects.get(exchange=exchange, symbol=symbol)
-    except Share.DoesNotExist:
-        print("Couldnt find share object exchange:", exchange, " symbol:", symbol)
-        nse_bse_data = None
-        if exchange == 'NSE':
-            nse_bse_data = get_nse_bse(symbol, None, None)
-        else:
-            nse_bse_data = get_nse_bse(None, symbol, None)
-        if nse_bse_data:
-            print(f'checking if {nse_bse_data["nse"]} with isin exists {nse_bse_data["isin"]}')
-            isin_objs = Share.objects.filter(exchange='NSE/BSE',
-                                            symbol=nse_bse_data['nse'])
-            if len(isin_objs) == 1:
-                share_obj = isin_objs[0]
+        share_obj = None
+        try:
+            share_obj = Share.objects.get(exchange=exchange, symbol=symbol)
+        except Share.DoesNotExist:
+            print("Couldnt find share object exchange:", exchange, " symbol:", symbol)
+            nse_bse_data = None
+            if exchange == 'NSE':
+                nse_bse_data = get_nse_bse(symbol, None, None)
             else:
-                print(f'share {nse_bse_data["nse"]} with isin {nse_bse_data["isin"]} doesnt exist')
+                nse_bse_data = get_nse_bse(None, symbol, None)
+            if nse_bse_data and 'isin' in nse_bse_data:
+                print(f'checking if {symbol} with isin exists {nse_bse_data["isin"]}')
+                isin_objs = Share.objects.filter(exchange='NSE/BSE',
+                                                symbol=nse_bse_data['nse'])
+                if len(isin_objs) == 1:
+                    share_obj = isin_objs[0]
+                else:
+                    print(f'share {nse_bse_data["nse"]} with isin {nse_bse_data["isin"]} doesnt exist')
 
-        if not share_obj:
-            share_obj = Share.objects.create(exchange=exchange,
-                                            symbol=symbol,
-                                            user=user,
-                                            quantity=0,
-                                            buy_price=0,
-                                            buy_value=0,
-                                            gain=0,
-                                            realised_gain=0
-                                            )
-    if not trans_price:
-        trans_price = price*quantity*conversion_rate
-    try:
-        Transactions.objects.create(share=share_obj,
-                                    trans_date=date,
-                                    trans_type=trans_type,
-                                    price=price,
-                                    quantity=quantity,
-                                    conversion_rate=conversion_rate,
-                                    trans_price=trans_price,
-                                    broker=broker,
-                                    notes=notes)
-        '''
-        if trans_type == 'Buy':
-            new_qty = float(share_obj.quantity)+quantity
-            new_buy_value = float(share_obj.buy_value) + trans_price
-            share_obj.quantity = new_qty
-            share_obj.buy_value = new_buy_value
-            if new_qty > 0:
-                share_obj.buy_price = new_buy_value/float(new_qty)
-            else:
-                share_obj.buy_price = 0
-            share_obj.save()
-        else:
-            new_qty = float(share_obj.quantity)-quantity
-            if new_qty:
-                new_buy_value = float(share_obj.buy_value) - trans_price
+            if not share_obj:
+                share_obj = Share.objects.create(exchange=exchange,
+                                                symbol=symbol,
+                                                user=user,
+                                                quantity=0,
+                                                buy_price=0,
+                                                buy_value=0,
+                                                gain=0,
+                                                realised_gain=0
+                                                )
+        if not trans_price:
+            trans_price = price*quantity*conversion_rate
+        try:
+            Transactions.objects.create(share=share_obj,
+                                        trans_date=date,
+                                        trans_type=trans_type,
+                                        price=price,
+                                        quantity=quantity,
+                                        conversion_rate=conversion_rate,
+                                        trans_price=trans_price,
+                                        broker=broker,
+                                        notes=notes)
+            '''
+            if trans_type == 'Buy':
+                new_qty = float(share_obj.quantity)+quantity
+                new_buy_value = float(share_obj.buy_value) + trans_price
                 share_obj.quantity = new_qty
                 share_obj.buy_value = new_buy_value
                 if new_qty > 0:
@@ -83,14 +73,34 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
                     share_obj.buy_price = 0
                 share_obj.save()
             else:
-                share_obj.quantity = 0
-                share_obj.buy_value = 0
-                share_obj.buy_price = 0
-                share_obj.save()
-        '''
-        reconcile_share(share_obj)
-    except IntegrityError:
-        print('Transaction exists')
+                new_qty = float(share_obj.quantity)-quantity
+                if new_qty:
+                    new_buy_value = float(share_obj.buy_value) - trans_price
+                    share_obj.quantity = new_qty
+                    share_obj.buy_value = new_buy_value
+                    if new_qty > 0:
+                        share_obj.buy_price = new_buy_value/float(new_qty)
+                    else:
+                        share_obj.buy_price = 0
+                    share_obj.save()
+                else:
+                    share_obj.quantity = 0
+                    share_obj.buy_value = 0
+                    share_obj.buy_price = 0
+                    share_obj.save()
+            '''
+            reconcile_share(share_obj)
+        except IntegrityError:
+            print('Transaction exists')
+    except Exception as ex:
+        print(f'failed to add transaction {exchange}, {symbol}, {user}, {trans_type}, {quantity}, {price}, {date}, {notes}, {broker}')
+        print(ex)
+        description = 'failed to add transaction for ' + exchange + ':' + symbol + ' for user ' + {user}
+        create_alert(
+                summary=exchange + ':' + symbol + ' - Failed to add transaction',
+                content=description,
+                severity=Severity.warning
+        )
 
 def merge_bse_nse():
     merge_data = list()
@@ -213,7 +223,7 @@ def check_discrepancies():
         if total_shares < 0:
             description='Selling more than available. This affects other calculations. Please correct'
             create_alert(
-                summary=share_obj.symbol + ' Quantity adding up to -ve number. This affects other calculations.',
+                summary=share_obj.symbol + ' Quantity adding up to ' + str(total_shares) + '. This affects other calculations.',
                 content=description,
                 severity=Severity.warning
             )

@@ -78,3 +78,11 @@ order_id : 1000000001972846
 trade_id : 448584
 order_execution_time : 2019-06-25T10:03:53
 '''
+
+'''
+from shares.zerodha import Zerodha
+file_path = '<<<fill here>>>'
+z = Zerodha(file_path)
+for trans in z.get_transactions():
+    print(trans)
+'''

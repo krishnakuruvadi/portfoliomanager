@@ -1,6 +1,12 @@
 {% extends 'base.html' %} 
 {% load template_filters %}
-{% block viewname %} Mutual Funds Being Tracked{% endblock %} 
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+    <li><a href="{% url 'common:mf-list' %}">Mutual Funds</a></li>
+    <li><a href="#">{{ object.name }}</a></li>
+  </ul>
+{% endblock %} 
 
 {% block applicableactions %}
     <a href="mf/refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
@@ -8,11 +14,6 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
-  <ul class="breadcrumb">
-    <li><a href="{% url 'common:common-list' %}">Internals</a></li>
-    <li><a href="{% url 'common:mf-list' %}">Mutual Funds</a></li>
-    <li><a href="#">{{ object.name }}</a></li>
-  </ul>
   <table class="table table-hover">
     <thead class="thead-dark">
       <tr>

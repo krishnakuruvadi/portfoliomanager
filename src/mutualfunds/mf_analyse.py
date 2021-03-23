@@ -74,12 +74,12 @@ def get_token_and_ms_code(driver):
             token_search = re.search('.*access_token=(.*)&clientId.*', url, re.IGNORECASE)
             if token_search:
                 token = token_search.group(1)
-                print(token)
+                print(f'token {token}')
             if 'v2/' in log["params"]['documentURL']:
                 code_search = re.search('.*v2/(.*)/data.*', url, re.IGNORECASE)
                 if code_search:
                     ms_code = code_search.group(1)
-                    print(ms_code)
+                    print(f'ms_code {ms_code}')
         if token != '' and ms_code != '':
             break
 
@@ -183,12 +183,20 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                                 isin_elems = driver.find_elements_by_class_name('sal-mip-quote__symbol')
                                 for isin_elem in isin_elems:
                                     if isin_elem.text == fund.isin or (fund.isin2 and isin_elem.text == fund.isin2):
+                                        if fund.isin2:
+                                            print('matching fund found for {fund.isin} or {fund.isin2}')
+                                        else:
+                                            print('matching fund found for {fund.isin}')
                                         data = dict()
                                         token, ms_code = get_token_and_ms_code(driver)
                                         if token != '' and ms_code != '':
                                             data = use_api_to_get_vals(token, ms_code)
+                                            print('Updated ms_code to {ms_code} for {fund.Name}')
                                             fund.ms_id = ms_code
                                             fund.save()
+                                        else:
+                                            print('not updated ms_code for {fund.Name}')
+
                                         is_elems = driver.find_elements_by_class_name('investment-style')
                                         for is_elem in is_elems:
                                             if is_elem.tag_name == 'svg':

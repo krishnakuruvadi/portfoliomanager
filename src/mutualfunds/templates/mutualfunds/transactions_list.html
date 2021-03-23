@@ -61,7 +61,8 @@
   $('#trans-table').DataTable({
     "columnDefs": [
       { "type": "date", "targets": [3] }
-    ]
+    ],
+    "order": [[ 3, "desc" ]]
   });
 {% endblock jquery %}
 </script>

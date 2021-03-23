@@ -29,7 +29,7 @@
 </table>
 <p></p>
 <p></p>
-  <table class="table table-hover">
+  <table class="table table-hover" id="vest-table">
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
@@ -77,3 +77,15 @@
     </tbody>
   </table>
 {% endblock %}
+
+<script>
+  {% block jquery %}
+  $('#vest-table').DataTable({
+        "columnDefs": [
+            { "type": "num", "targets": [0,2,3,4,5,6,8,9,10,11,12] },
+            { "type": "date", "targets": [1,7,13] }
+        ],
+        "order": [[ 1, "desc" ]]
+      });
+{% endblock jquery %}
+</script>
