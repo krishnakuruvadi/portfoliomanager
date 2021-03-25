@@ -1,8 +1,8 @@
 from django.contrib import admin
 from solo.admin import SingletonModelAdmin
 
-from .models import Stock, HistoricalStockPrice, MutualFund, HistoricalMFPrice, HistoricalForexRates, MFYearlyReturns, MFCategoryReturns, ScrollData, Preferences
-
+#from .models import Stock, HistoricalStockPrice, MutualFund, HistoricalMFPrice, HistoricalForexRates, MFYearlyReturns, MFCategoryReturns, ScrollData, Preferences
+from .models import *
 
 admin.site.register(Stock)
 admin.site.register(HistoricalStockPrice)
@@ -13,3 +13,6 @@ admin.site.register(MFYearlyReturns)
 admin.site.register(MFCategoryReturns)
 admin.site.register(ScrollData)
 admin.site.register(Preferences, SingletonModelAdmin)
+admin.site.register(Dividend)
+admin.site.register(Bonus)
+admin.site.register(Split)

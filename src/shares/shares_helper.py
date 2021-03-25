@@ -5,7 +5,8 @@ from shared.handle_real_time_data import get_latest_vals, get_forex_rate
 import datetime
 from dateutil.relativedelta import relativedelta
 from alerts.alert_helper import create_alert, Severity
-from .nse_bse import get_nse_bse
+from common.nse_bse import get_nse_bse
+from shared.handle_get import get_user_name_from_id
 
 
 def shares_add_transactions(broker, user, full_file_path):
@@ -33,7 +34,7 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
             if nse_bse_data and 'isin' in nse_bse_data:
                 print(f'checking if {symbol} with isin exists {nse_bse_data["isin"]}')
                 isin_objs = Share.objects.filter(exchange='NSE/BSE',
-                                                symbol=nse_bse_data['nse'])
+                                                symbol=nse_bse_data['isin'])
                 if len(isin_objs) == 1:
                     share_obj = isin_objs[0]
                 else:
@@ -95,7 +96,7 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
     except Exception as ex:
         print(f'failed to add transaction {exchange}, {symbol}, {user}, {trans_type}, {quantity}, {price}, {date}, {notes}, {broker}')
         print(ex)
-        description = 'failed to add transaction for ' + exchange + ':' + symbol + ' for user ' + {user}
+        description = 'failed to add transaction for ' + exchange + ':' + symbol + ' for user ' + get_user_name_from_id(user)
         create_alert(
                 summary=exchange + ':' + symbol + ' - Failed to add transaction',
                 content=description,

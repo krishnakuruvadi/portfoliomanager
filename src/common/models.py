@@ -12,6 +12,39 @@ EXCHANGE_CHOICES = [
     ('NSE', 'NSE'),
 ]
 
+class Bonus(models.Model):
+    class Meta:
+        unique_together = (('exchange', 'symbol', 'date'),)
+    exchange = models.CharField(max_length=10, choices=EXCHANGE_CHOICES)
+    symbol = models.CharField(max_length=20)
+    isin = models.CharField(max_length=20)
+    ratio_num = models.DecimalField( max_digits=20, decimal_places=2, null=False)
+    ratio_denom = models.DecimalField( max_digits=20, decimal_places=2, null=False)
+    date = models.DateField(null=False)
+    subject = models.CharField(max_length=200)
+
+class Split(models.Model):
+    class Meta:
+        unique_together = (('exchange', 'symbol', 'date'),)
+    exchange = models.CharField(max_length=10, choices=EXCHANGE_CHOICES)
+    symbol = models.CharField(max_length=20)
+    isin = models.CharField(max_length=20)
+    ratio_num = models.DecimalField( max_digits=20, decimal_places=2, null=False)
+    ratio_denom = models.DecimalField( max_digits=20, decimal_places=2, null=False)
+    date = models.DateField(null=False)
+    subject = models.CharField(max_length=200)
+
+class Dividend(models.Model):
+    class Meta:
+        unique_together = (('exchange', 'symbol', 'date'),)
+    exchange = models.CharField(max_length=10, choices=EXCHANGE_CHOICES)
+    symbol = models.CharField(max_length=20)
+    isin = models.CharField(max_length=20)
+    amount = models.DecimalField(max_digits=20, decimal_places=2, null=False)
+    date = models.DateField(null=False)
+    subject = models.CharField(max_length=200)
+
+
 class Stock(models.Model):
     class Meta:
         unique_together = (('exchange','symbol'),)
