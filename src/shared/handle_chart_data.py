@@ -100,10 +100,8 @@ def get_epf_amount_for_goal(id):
         amt = 0
         epf_trans = EpfEntry.objects.filter(epf_id=epf_id)
         for entry in epf_trans:
-            if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
-                amt += entry.employee_contribution + entry.employer_contribution + entry.interest_contribution
-            else:
-                amt -= entry.employee_contribution + entry.employer_contribution + entry.interest_contribution
+            amt += entry.employee_contribution + entry.employer_contribution + entry.interest_contribution
+            amt -= entry.withdrawl
         if amt < 0:
             amt = 0
         total_epf += amt
@@ -176,13 +174,10 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
         for epf_trans in EpfEntry.objects.filter(epf_id=epf_obj):
         #entry_date = (datetime.date(epf_trans.year + (epf_trans.month == 12), 
         #      (epf_trans.month + 1 if epf_trans.month < 12 else 1), 1) - datetime.timedelta(1)).strftime(format)
-        
-            if epf_trans.entry_type == 'CR':
-                add_or_create(epf_trans.trans_date.year, 'EPF', contrib, deduct, total, epf_trans.employer_contribution + epf_trans.employee_contribution, 0, epf_trans.employer_contribution + epf_trans.employee_contribution+ epf_trans.interest_contribution)
-                cash_flows.append((epf_trans.trans_date, -1*float(epf_trans.employer_contribution+ epf_trans.employee_contribution)))
-            else:
-                add_or_create(epf_trans.trans_date.year, 'EPF', contrib, deduct, total, 0, -1*(epf_trans.employer_contribution + epf_trans.employee_contribution), -1*(epf_trans.employer_contribution + epf_trans.employee_contribution+ epf_trans.interest_contribution))
-                cash_flows.append((epf_trans.trans_date, float(epf_trans.employer_contribution+ epf_trans.employee_contribution+ epf_trans.interest_contribution)))
+            add_or_create(epf_trans.trans_date.year, 'EPF', contrib, deduct, total, epf_trans.employer_contribution + epf_trans.employee_contribution, epf_trans.withdrawl, epf_trans.employer_contribution + epf_trans.employee_contribution+ epf_trans.interest_contribution-epf_trans.withdrawl)
+            cash_flows.append((epf_trans.trans_date, -1*float(epf_trans.employer_contribution+ epf_trans.employee_contribution)))
+            if epf_trans.withdrawl and epf_trans.withdrawl > 0:
+                cash_flows.append((epf_trans.trans_date, float(epf_trans.withdrawl)))
 
     for ssy_obj in Ssy.objects.filter(goal=goal_id):
         for ssy_trans in SsyEntry.objects.filter(number=ssy_obj):
@@ -492,10 +487,7 @@ def get_epf_amount_for_user(user_id):
         amt = 0
         epf_trans = EpfEntry.objects.filter(epf_id=epf_id)
         for entry in epf_trans:
-            if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
-                amt += entry.employee_contribution + entry.employer_contribution + entry.interest_contribution
-            else:
-                amt -= entry.employee_contribution + entry.employer_contribution + entry.interest_contribution
+            amt += entry.employee_contribution + entry.employer_contribution + entry.interest_contribution - entry.withdrawl
         if amt < 0:
             amt = 0
         total_epf += amt
@@ -569,12 +561,9 @@ def get_investment_data(start_date):
         print('Calculating for the month', data_start_date)
         total = 0
         data_end_date = data_start_date + relativedelta(months=+1)
-        epf_entries = EpfEntry.objects.filter(trans_date__range=(data_start_date, data_end_date))
+        epf_entries = EpfEntry.objects.filter(trans_date__year=data_start_date.year, trans_date__month=data_start_date.month)
         for epf_entry in epf_entries:
-            if epf_entry.entry_type.lower() == 'cr' or epf_entry.entry_type.lower() == 'credit':
-                total_epf += int(epf_entry.employee_contribution) + int(epf_entry.employer_contribution) + int(epf_entry.interest_contribution)
-            else:
-                total_epf -= int(epf_entry.employee_contribution) + int(epf_entry.employer_contribution) + int(epf_entry.interest_contribution)
+            total_epf += int(epf_entry.employee_contribution) + int(epf_entry.employer_contribution) + int(epf_entry.interest_contribution) - int(epf_entry.withdrawl)
         if total_epf != 0:
             if not epf_reset_on_zero:
                 epf_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
@@ -585,7 +574,7 @@ def get_investment_data(start_date):
             epf_reset_on_zero = False
             epf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
         
-        ppf_entries = PpfEntry.objects.filter(trans_date__range=(data_start_date, data_end_date))
+        ppf_entries = PpfEntry.objects.filter(trans_date__year=data_start_date.year, trans_date__month=data_start_date.month)
         for ppf_entry in ppf_entries:
             if ppf_entry.entry_type.lower() == 'cr' or ppf_entry.entry_type.lower() == 'credit':
                 total_ppf += int(ppf_entry.amount)

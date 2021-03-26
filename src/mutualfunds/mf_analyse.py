@@ -304,7 +304,7 @@ def grab_details(driver, data):
                             perfs = ['1D','1W','1M','3M','YTD','1Y','3Y','5Y','10Y','15Y','INCEPTION']
                             for i,col in enumerate(cols):
                                 data['performance'][perfs[i]] = col.text
-                                print('col innerHTML', col.get_attribute('innerHTML'))
+                                #print('col innerHTML', col.get_attribute('innerHTML'))
                 
                 tables = driver.find_elements_by_xpath("//table[@class='total-table no-return-rank']")
                 print('len of total tables', len(tables))
@@ -318,7 +318,7 @@ def grab_details(driver, data):
                         perfs = ['1D','1W','1M','3M','YTD','1Y','3Y','5Y','10Y','15Y','INCEPTION']
                         for i,col in enumerate(cols):
                             data['performance'][perfs[i]] = col.text
-                            print('col innerHTML', col.get_attribute('innerHTML'))
+                            #print('col innerHTML', col.get_attribute('innerHTML'))
                 break
 
 def use_api_to_get_vals(token, ms_code):

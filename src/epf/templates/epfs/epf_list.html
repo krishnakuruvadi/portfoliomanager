@@ -21,6 +21,11 @@
         <th scope="col">Start Date</th>
         <th scope="col">User</th>
         <th scope="col">Goal</th>
+        <th scope="col">Employee Contribution</th>
+        <th scope="col">Employer Contribution</th>
+        <th scope="col">Interest Contribution</th>
+        <th scope="col">Total</th>
+        <th scope="col">ROI</th>
         <th scope="col"></th>
       </tr>
     </thead>
@@ -36,6 +41,11 @@
         <td>{{ instance.start_date }}</td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
+        <td>{{ instance.employee_contribution }}</td>
+        <td>{{ instance.employer_contribution }}</td>
+        <td>{{ instance.interest_contribution }}</td>
+        <td>{{ instance.total }}</td>
+        <td>{{ instance.roi }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
           <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>

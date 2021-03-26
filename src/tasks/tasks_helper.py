@@ -10,7 +10,7 @@ from ssy.ssy_helper import insert_ssy_trans_entry
 def is_task_run_today(task_name):
     for task in Task.objects.all():
         if task.task_name == task_name:
-            if task.last_run.date() == datetime.date.today() and task.last_run_status == TaskState.Successful:
+            if task.last_run and task.last_run.date() == datetime.date.today() and task.last_run_status == TaskState.Successful:
                 return True
     return False
 

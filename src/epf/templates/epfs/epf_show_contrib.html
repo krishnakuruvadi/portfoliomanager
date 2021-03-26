@@ -18,10 +18,11 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Period</td>
-                <th>Employer Contribution</td>
-                <th>Employee Contribution</td>
+                <th>Period</th>
+                <th>Employer Contribution</th>
+                <th>Employee Contribution</th>
                 <th>Interest</td>
+                <th>Withdrawl</th>
             </tr>
         </thead>
         <tbody>
@@ -31,6 +32,7 @@
                 <td>{{fy.em_contrib}}</td>
                 <td>{{fy.er_contrib}}</td>
                 <td>{{fy.interest}}</td>
+                <td>{{fy.withdrawl}}</td>
             </tr>
         {% endfor %}
         </tbody>

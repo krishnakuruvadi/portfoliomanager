@@ -38,7 +38,7 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
                 if len(isin_objs) == 1:
                     share_obj = isin_objs[0]
                 else:
-                    print(f'share {nse_bse_data["nse"]} with isin {nse_bse_data["isin"]} doesnt exist')
+                    print(f'share with isin {nse_bse_data["isin"]} doesnt exist')
 
             if not share_obj:
                 share_obj = Share.objects.create(exchange=exchange,

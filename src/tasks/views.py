@@ -43,13 +43,16 @@ class TaskListView(ListView):
                 'description': 'Analyse different Mutual Funds where users have active investment'
             },
             'update_shares_latest_vals': {
-                'description': 'Get latest vals of shares'
+                'description': 'Reconcile and get latest vals of shares'
             },
             'mf_update_blend': {
                 'description': 'Update latest blend of Mutual Funds'
             },
             'pull_mf_transactions': {
                 'description': 'Pulls mutual fund transactions from supported broker if passwords are stored'
+            },
+            'update_latest_vals_epf_ssy_ppf': {
+                'description': 'Update latest values in PPF, EPF, SSY'
             }
         }
         for task in available_tasks.keys():

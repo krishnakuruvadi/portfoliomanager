@@ -13,27 +13,31 @@ class Epf(models.Model):
     user = models.IntegerField()
     goal =  models.IntegerField(null=True)
     notes = models.CharField(max_length=40, null=True, blank=True)
+    employee_contribution = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+    employer_contribution = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+    interest_contribution = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+    total = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+    roi = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
 
     def get_absolute_url(self):
         return reverse("epfs:epf-detail", kwargs={'id': self.id})
 
 class EpfEntry(models.Model):
-    CREDIT = 'CR'
-    DEBIT = 'DR'
-    ENTRY_TYPE_CHOICES = (
-        (CREDIT, 'Credit'),
-        (DEBIT, 'Debit'),
-        )
     epf_id = models.ForeignKey('Epf', on_delete=models.CASCADE)
     trans_date = models.DateField(null=False)
     notes = models.CharField(max_length=40)
     reference = models.CharField(max_length=20)
-    entry_type = models.CharField(max_length=2, choices=ENTRY_TYPE_CHOICES, default=CREDIT, null=False)
     employee_contribution = models.DecimalField(max_digits=20, decimal_places=2, null=False, default=0)
     employer_contribution = models.DecimalField(max_digits=20, decimal_places=2, null=False, default=0)
     interest_contribution = models.DecimalField(max_digits=20, decimal_places=2, null=False, default=0)
+    withdrawl = models.DecimalField(max_digits=20, decimal_places=2, null=False, default=0)
+
     class Meta:
-        unique_together = ('epf_id', 'trans_date','entry_type')
+        unique_together = ('epf_id', 'trans_date')
 
     def get_absolute_url(self):
         return reverse("epfentries:epf-entry-detail", kwargs={"id": self.epf_id})
+    
+    def __str__(self):
+        return str(self.trans_date) + ":" + str(self.employee_contribution) + ":" + str(self.employer_contribution) + " " + str(self.interest_contribution) + " " + str(self.withdrawl)
+

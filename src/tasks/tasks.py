@@ -26,7 +26,7 @@ from goal.goal_helper import update_all_goals_contributions
 from .models import Task, TaskState
 from alerts.alert_helper import create_alert, Severity
 from shares.pull_zerodha import pull_zerodha
-from shares.shares_helper import shares_add_transactions, update_shares_latest_val, check_discrepancies
+from shares.shares_helper import shares_add_transactions, update_shares_latest_val, check_discrepancies, reconcile_shares
 from shared.financial import xirr
 from shared.nasdaq import Nasdaq
 from django.utils import timezone
@@ -39,6 +39,7 @@ from markets.models import PEMonthy, PBMonthy
 from django.db import IntegrityError
 from common.helper import get_mf_passwords
 from .tasks_helper import *
+
 
 def set_task_state(name, state):
     try:
@@ -286,6 +287,7 @@ def update_goal_contrib():
 @db_periodic_task(crontab(minute='22', hour='2'))
 def update_shares_latest_vals():
     set_task_state('update_shares_latest_vals', TaskState.Running)
+    reconcile_shares()
     update_shares_latest_val()
     check_discrepancies()
     set_task_state('update_shares_latest_vals', TaskState.Successful)
@@ -449,7 +451,7 @@ def pull_share_trans_from_broker(user, broker, user_id, passwd, pass_2fa):
         for dload_file in files:
             add_share_transactions(broker, user, dload_file)
     check_discrepancies()
-    
+
 @db_task()
 def pull_ppf_trans_from_bank(number, bank, user_id, passwd):
     print(f'number {number} bank {bank} userid {user_id}')
@@ -733,7 +735,16 @@ def update_pe():
                     except IntegrityError:
                         pass
 
-                        
+@db_periodic_task(crontab(minute='10', hour='1-12', day='10-15'))
+def update_latest_vals_epf_ssy_ppf():
+    from epf.epf_helper import update_epf_vals
+    from ppf.ppf_helper import update_ppf_vals
+    from ssy.ssy_helper import update_ssy_vals
+
+    update_epf_vals()
+    update_ssy_vals()
+    update_ppf_vals()
+
 
 '''
 #  example code below

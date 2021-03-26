@@ -16,9 +16,9 @@
     <form method="POST">
         {% csrf_token %}
         <div class="row">
-        <div class='col-sm-9'>
+        <div class='col-sm-12'>
             <div class="form-group row">
-                <label for="company" class="col-sm-4 col-form-label">{{object.company}}: {{object.number}}</label>
+                <label for="company" class="col-sm-3 col-form-label">{{object.company}}: {{object.number}}</label>
                 <label for="fy" class="col-sm-1 col-form-label text-right">FY</label>
                 <div class="col-sm-6">
                     <div class="md-form mt-0">
@@ -37,132 +37,145 @@
             </div>
             <hr>
             <div class="form-group row">
-                <label for="heading" class="col-sm-2 col-form-label">Month</label>
+                <label for="heading" class="col-sm-1 col-form-label">Month</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <label class="col-sm-3 col-form-label">Employee contribution</label>
-                        <label class="col-sm-3 col-form-label">Employer contribution</label>
-                        <label class="col-sm-3 col-form-label">Interest</label>
+                        <label class="col-sm-2 col-form-label">Employee contribution</label>
+                        <label class="col-sm-2 col-form-label">Employer contribution</label>
+                        <label class="col-sm-2 col-form-label">Interest</label>
+                        <label class="col-sm-2 col-form-label">Withdrawl</label>
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="apr" class="col-sm-2 col-form-label">April</label>
+                <label for="apr" class="col-sm-1 col-form-label">April</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="apr_em" name="apr_em" value="{{apr_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="apr_er" name="apr_er" value="{{apr_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="apr_int" name="apr_int" value="{{apr_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="apr_em" name="apr_em" value="{{apr_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="apr_er" name="apr_er" value="{{apr_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="apr_int" name="apr_int" value="{{apr_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="apr_wd" name="apr_wd" value="{{apr_wd}}">
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="may" class="col-sm-2 col-form-label">May</label>
+                <label for="may" class="col-sm-1 col-form-label">May</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="may_em" name="may_em" value="{{may_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="may_er" name="may_er" value="{{may_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="may_int" name="may_int" value="{{may_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="may_em" name="may_em" value="{{may_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="may_er" name="may_er" value="{{may_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="may_int" name="may_int" value="{{may_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="may_wd" name="may_wd" value="{{may_wd}}">
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="jun" class="col-sm-2 col-form-label">June</label>
+                <label for="jun" class="col-sm-1 col-form-label">June</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="jun_em" name="jun_em" value="{{jun_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="jun_er" name="jun_er" value="{{jun_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="jun_int" name="jun_int" value="{{jun_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jun_em" name="jun_em" value="{{jun_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jun_er" name="jun_er" value="{{jun_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jun_int" name="jun_int" value="{{jun_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jun_wd" name="jun_wd" value="{{jun_wd}}">
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="jul" class="col-sm-2 col-form-label">July</label>
+                <label for="jul" class="col-sm-1 col-form-label">July</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="jul_em" name="jul_em" value="{{jul_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="jul_er" name="jul_er" value="{{jul_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="jul_int" name="jul_int" value="{{jul_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jul_em" name="jul_em" value="{{jul_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jul_er" name="jul_er" value="{{jul_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jul_int" name="jul_int" value="{{jul_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jul_wd" name="jul_wd" value="{{jul_wd}}">
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="aug" class="col-sm-2 col-form-label">August</label>
+                <label for="aug" class="col-sm-1 col-form-label">August</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="aug_em" name="aug_em" value="{{aug_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="aug_er" name="aug_er" value="{{aug_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="aug_int" name="aug_int" value="{{aug_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="aug_em" name="aug_em" value="{{aug_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="aug_er" name="aug_er" value="{{aug_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="aug_int" name="aug_int" value="{{aug_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="aug_wd" name="aug_wd" value="{{aug_wd}}">
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="sep" class="col-sm-2 col-form-label">September</label>
+                <label for="sep" class="col-sm-1 col-form-label">September</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="sep_em" name="sep_em" value="{{sep_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="sep_er" name="sep_er" value="{{sep_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="sep_int" name="sep_int" value="{{sep_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="sep_em" name="sep_em" value="{{sep_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="sep_er" name="sep_er" value="{{sep_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="sep_int" name="sep_int" value="{{sep_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="sep_wd" name="sep_wd" value="{{sep_wd}}">
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="oct" class="col-sm-2 col-form-label">October</label>
+                <label for="oct" class="col-sm-1 col-form-label">October</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="oct_em" name="oct_em" value="{{oct_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="oct_er" name="oct_er" value="{{oct_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="oct_int" name="oct_int" value="{{oct_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="oct_em" name="oct_em" value="{{oct_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="oct_er" name="oct_er" value="{{oct_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="oct_int" name="oct_int" value="{{oct_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="oct_wd" name="oct_wd" value="{{oct_wd}}">
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="nov" class="col-sm-2 col-form-label">November</label>
+                <label for="nov" class="col-sm-1 col-form-label">November</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="nov_em" name="nov_em" value="{{nov_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="nov_er" name="nov_er" value="{{nov_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="nov_int" name="nov_int" value="{{nov_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="nov_em" name="nov_em" value="{{nov_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="nov_er" name="nov_er" value="{{nov_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="nov_int" name="nov_int" value="{{nov_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="nov_wd" name="nov_wd" value="{{nov_wd}}">
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="dec" class="col-sm-2 col-form-label">December</label>
+                <label for="dec" class="col-sm-1 col-form-label">December</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="dec_em" name="dec_em" value="{{dec_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="dec_er" name="dec_er" value="{{dec_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="dec_int" name="dec_int" value="{{dec_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="dec_em" name="dec_em" value="{{dec_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="dec_er" name="dec_er" value="{{dec_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="dec_int" name="dec_int" value="{{dec_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="dec_wd" name="dec_wd" value="{{dec_wd}}">
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="jan" class="col-sm-2 col-form-label">January</label>
+                <label for="jan" class="col-sm-1 col-form-label">January</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="jan_em" name="jan_em" value="{{jan_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="jan_er" name="jan_er" value="{{jan_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="jan_int" name="jan_int" value="{{jan_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jan_em" name="jan_em" value="{{jan_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jan_er" name="jan_er" value="{{jan_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jan_int" name="jan_int" value="{{jan_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="jan_wd" name="jan_wd" value="{{jan_wd}}">
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="feb" class="col-sm-2 col-form-label">February</label>
+                <label for="feb" class="col-sm-1 col-form-label">February</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="feb_em" name="feb_em" value="{{feb_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="feb_er" name="feb_er" value="{{feb_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="feb_int" name="feb_int" value="{{feb_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="feb_em" name="feb_em" value="{{feb_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="feb_er" name="feb_er" value="{{feb_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="feb_int" name="feb_int" value="{{feb_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="feb_wd" name="feb_wd" value="{{feb_wd}}">
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="mar" class="col-sm-2 col-form-label">March</label>
+                <label for="mar" class="col-sm-1 col-form-label">March</label>
                 <div class="col-sm-9">
                     <div class="md-form mt-0">
-                        <input class="col-sm-3 col-form-label" type="text" id="mar_em" name="mar_em" value="{{mar_em}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="mar_er" name="mar_er" value="{{mar_er}}">
-                        <input class="col-sm-3 col-form-label" type="text" id="mar_int" name="mar_int" value="{{mar_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="mar_em" name="mar_em" value="{{mar_em}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="mar_er" name="mar_er" value="{{mar_er}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="mar_int" name="mar_int" value="{{mar_int}}">
+                        <input class="col-sm-2 col-form-label" type="text" id="mar_wd" name="mar_wd" value="{{mar_wd}}">
                     </div>
                 </div>
             </div>

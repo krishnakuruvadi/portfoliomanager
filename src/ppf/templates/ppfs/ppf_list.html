@@ -38,9 +38,9 @@
         <td>{{ instance.start_date }}</td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
-        <td>{{ principal|lookup:instance.number }}</td>
-        <td>{{ interest|lookup:instance.number }}</td>
-        <td>{{ total|lookup:instance.number }}</td>
+        <td>{{ instance.contribution }}</td>
+        <td>{{ instance.interest_contribution }}</td>
+        <td>{{ instance.total }}</td>
         <td>{{ roi|lookup:instance.number }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>

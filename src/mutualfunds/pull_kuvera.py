@@ -160,5 +160,5 @@ def pull_sip(driver):
 
 def get_div_content(el):
     content = el.get_attribute('innerHTML')
-    print(f'innerHTML {content}')
+    #print(f'innerHTML {content}')
     return content.strip()

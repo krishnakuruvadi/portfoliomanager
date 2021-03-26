@@ -9,6 +9,10 @@ class Ssy(models.Model):
     user = models.IntegerField()
     goal = models.IntegerField(null=True)
     notes = models.CharField(max_length=40, null=True, blank=True)
+    contribution = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+    interest_contribution = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+    total = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+    roi = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
 
     def get_absolute_url(self):
         return reverse("ssys:ssy-detail", kwargs={'id': self.number})

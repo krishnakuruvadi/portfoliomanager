@@ -64,3 +64,18 @@ def get_ppf_details(number):
         return {'number': ppf_num, 'total': total, 'principal':principal, 'interest':interest, 'roi':roi}
     except Ppf.DoesNotExist:
         return None
+
+def update_ppf_vals():
+    for ppf_obj in Ppf.objects.all():
+        contribs = PpfEntry.objects.filter(number=ppf_obj)
+        self_contrib = 0
+        interest = 0
+        for contrib in contribs:
+            if contrib.interest_component:
+                interest = interest + contrib.amount
+            else:
+                self_contrib = self_contrib + contrib.amount
+        ppf_obj.contribution = self_contrib
+        ppf_obj.interest_contribution = interest
+        ppf_obj.total = self_contrib + interest
+        ppf_obj.save()

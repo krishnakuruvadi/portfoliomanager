@@ -69,3 +69,12 @@ def pull_transactions(user, password, number):
     print(f'pulling transactions for SSY {number}')
     ssy_obj = Ssy.objects.get(number=number)
     return pull_sbi_transactions(user, password, number, ssy_obj.start_date)
+
+def update_ssy_vals():
+    for ssy_obj in Ssy.objects.all():
+        res = get_ssy_details(ssy_obj.number)
+        ssy_obj.contribution = res['principal']
+        ssy_obj.interest_contribution = res['interest']
+        ssy_obj.total = res['total']
+        ssy_obj.roi = res['roi']
+        ssy_obj.save()
