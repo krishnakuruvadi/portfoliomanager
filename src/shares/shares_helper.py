@@ -2,6 +2,7 @@ from .models import Share, Transactions
 from .zerodha import Zerodha
 from django.db import IntegrityError
 from shared.handle_real_time_data import get_latest_vals, get_forex_rate
+from shared.utils import get_date_or_none_from_string, get_float_or_zero_from_string
 import datetime
 from dateutil.relativedelta import relativedelta
 from alerts.alert_helper import create_alert, Severity
@@ -182,24 +183,25 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
         try:
             share_obj = Share.objects.get(exchange=exchange, symbol=symbol)
         except Share.DoesNotExist:
-            print("Couldnt find share object exchange:", exchange, " symbol:", symbol)
-            nse_bse_data = None
-            if exchange == 'NSE':
-                nse_bse_data = get_nse_bse(symbol, None, None)
-            else:
-                nse_bse_data = get_nse_bse(None, symbol, None)
-                if not nse_bse_data:
-                    isin = get_isin_from_bhav_copy(symbol, date)
-                    if isin:
-                        nse_bse_data = get_nse_bse(None, None, isin)
-            if nse_bse_data and 'isin' in nse_bse_data:
-                print(f'checking if {symbol} with isin exists {nse_bse_data["isin"]}')
-                isin_objs = Share.objects.filter(exchange='NSE/BSE',
-                                                symbol=nse_bse_data['isin'])
-                if len(isin_objs) == 1:
-                    share_obj = isin_objs[0]
+            if exchange == 'NSE' or exchange == 'BSE':
+                print("Couldnt find share object exchange:", exchange, " symbol:", symbol)
+                nse_bse_data = None
+                if exchange == 'NSE':
+                    nse_bse_data = get_nse_bse(symbol, None, None)
                 else:
-                    print(f'share with isin {nse_bse_data["isin"]} doesnt exist')
+                    nse_bse_data = get_nse_bse(None, symbol, None)
+                    if not nse_bse_data:
+                        isin = get_isin_from_bhav_copy(symbol, date)
+                        if isin:
+                            nse_bse_data = get_nse_bse(None, None, isin)
+                if nse_bse_data and 'isin' in nse_bse_data:
+                    print(f'checking if {symbol} with isin exists {nse_bse_data["isin"]}')
+                    isin_objs = Share.objects.filter(exchange='NSE/BSE',
+                                                    symbol=nse_bse_data['isin'])
+                    if len(isin_objs) == 1:
+                        share_obj = isin_objs[0]
+                    else:
+                        print(f'share with isin {nse_bse_data["isin"]} doesnt exist')
 
             if not share_obj:
                 share_obj = Share.objects.create(exchange=exchange,
@@ -417,3 +419,47 @@ def update_shares_latest_val():
             share_obj.save()
         else:
             print(f'ignoring {share_obj.symbol} with -ve quantity')
+
+def add_untracked_transactions():
+    trans_path = os.path.join(settings.MEDIA_ROOT,'untracked_shares_transactions')
+    if os.path.exists(trans_path):
+        trans_file = os.path.join(trans_path, 'transactions.csv')
+        if os.path.exists(trans_file):
+            with open(trans_file, 'r') as csv_file:
+                csv_reader = csv.DictReader(csv_file)
+                for row in csv_reader:
+                    if row['trading_symbol'] != 'IGNORETRANS':
+                        print(row)
+                        #user,exchange,trade_date,trading_symbol,segment,trade_type,quantity,price,order_id,notes,broker
+                        try:
+                            exchange = row['exchange']
+                            symbol = row['trading_symbol']
+                            trans_type = row['trade_type']
+                            user = int(row['user'])
+                            user_name = get_user_name_from_id(user)
+                            if not user_name:
+                                raise Exception('User %s doesnt exist' %str(user))
+                            broker = row['broker']
+                            notes = row['notes']
+                            date = get_date_or_none_from_string(row['trade_date'],format='%d/%m/%Y')
+                            quantity = get_float_or_zero_from_string(row['quantity'])
+                            price = get_float_or_zero_from_string(row['price'])
+                            if row['order_id'] and row['order_id'] != '':
+                                if not notes or notes == '':
+                                    notes = 'order id:' + row['order_id']
+                                else:
+                                    notes = notes + '. order id:' + row['order_id'] 
+                                
+                            if exchange == 'NSE' or exchange == 'BSE':
+                                conversion_rate = 1
+                            elif exchange == 'NASDAQ' or exchange == 'NYSE':
+                                conversion_rate = get_forex_rate(date, 'USD', 'INR')
+                            else:
+                                raise Exception('unsupported exchange %s' %exchange)
+                            insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate)
+                        except Exception as ex:
+                            print(f'Exception adding transaction {ex}')
+        else:
+            print(f'untracked shares transactions file not present')
+    else:
+        print(f'untracked shares transactions folder not present')

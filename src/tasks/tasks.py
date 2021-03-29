@@ -26,7 +26,7 @@ from goal.goal_helper import update_all_goals_contributions
 from .models import Task, TaskState
 from alerts.alert_helper import create_alert, Severity
 from shares.pull_zerodha import pull_zerodha
-from shares.shares_helper import shares_add_transactions, update_shares_latest_val, check_discrepancies, reconcile_shares
+from shares.shares_helper import shares_add_transactions, update_shares_latest_val, check_discrepancies, reconcile_shares, add_untracked_transactions
 from shared.financial import xirr
 from shared.nasdaq import Nasdaq
 from django.utils import timezone
@@ -285,6 +285,7 @@ def update_goal_contrib():
 @db_periodic_task(crontab(minute='22', hour='2'))
 def update_shares_latest_vals():
     set_task_state('update_shares_latest_vals', TaskState.Running)
+    add_untracked_transactions()
     reconcile_shares()
     update_shares_latest_val()
     set_task_state('update_shares_latest_vals', TaskState.Successful)
