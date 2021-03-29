@@ -7,6 +7,14 @@ from dateutil.relativedelta import relativedelta
 from alerts.alert_helper import create_alert, Severity
 from common.nse_bse import get_nse_bse
 from shared.handle_get import get_user_name_from_id
+from nsetools import Nse
+from bs4 import BeautifulSoup as bs
+import requests
+from django.conf import settings
+import os
+import zipfile
+import csv
+import json
 
 
 def shares_add_transactions(broker, user, full_file_path):
@@ -18,6 +26,155 @@ def shares_add_transactions(broker, user, full_file_path):
                 trans["exchange"], trans["symbol"], user, trans["type"], trans["quantity"], trans["price"], trans["date"], trans["notes"], 'ZERODHA')
     else:
         print(f'unsupported broker {broker}')
+
+def check_nse_valid(symbol):
+    nse = Nse()
+    data = nse.get_quote(symbol)
+    print(data)
+    if not data:
+        return False
+    return True, data['isinCode']
+
+def clean_string(text):
+    return ''.join([i if ord(i) < 128 else ' ' for i in text])
+
+def get_bse_headers():
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 Edg/83.0.478.45'
+    }
+    return headers
+
+def download_url(url, save_path, chunk_size=128):
+    print(f'getting url {url}')
+    r = requests.get(url, headers=get_bse_headers(), stream=True)
+    if r.status_code == 200:
+        with open(save_path, 'wb') as fd:
+            for chunk in r.iter_content(chunk_size=chunk_size):
+                fd.write(chunk)
+        return True
+    return False
+
+def get_bhav_path():
+    return os.path.join(settings.MEDIA_ROOT, 'bhav_copy')
+
+def get_bhav_copy(date):
+    if date > datetime.date(year=2007, month=1, day=2):
+        csv_zip_file_name='eq'+date.strftime('%d%m%y')+'_csv.zip'
+        bhav_copy_url = 'https://www.bseindia.com/download/BhavCopy/Equity/' + csv_zip_file_name
+        bc_path = get_bhav_path()
+        if not os.path.exists(bc_path):
+            os.makedirs(bc_path)
+        bc_zip_file = os.path.join(bc_path,csv_zip_file_name)
+        bc_file = os.path.join(bc_path,'EQ'+date.strftime('%d%m%y')+'.CSV')
+        if not os.path.exists(bc_zip_file):
+            if download_url(bhav_copy_url, bc_zip_file):
+                with zipfile.ZipFile(os.path.join(bc_path,bc_zip_file), 'r') as zip_ref:
+                    zip_ref.extractall(bc_path)
+                return bc_file
+            else:
+                print(f'failed to download bhav copy for date {date}')
+        else:
+            if os.path.exists(bc_file):
+                return bc_file
+            elif os.path.exists(bc_zip_file):
+                with zipfile.ZipFile(os.path.join(bc_path,bc_zip_file), 'r') as zip_ref:
+                    zip_ref.extractall(bc_path)
+                return bc_file
+    return None
+
+
+def check_bse_valid(symbol, bse_code):
+    headers = get_bse_headers()
+    if symbol:
+        url = 'https://api.bseindia.com/Msource/90D/getQouteSearch.aspx?Type=EQ&text=' + symbol + '&flag=gq'
+    elif bse_code:
+        url = 'https://api.bseindia.com/Msource/90D/getQouteSearch.aspx?Type=EQ&text=' + bse_code + '&flag=gq'
+    else:
+        return False, None, None
+
+    res = requests.get(url, headers=headers)
+    c = res.content
+    soup = bs(c, "lxml")
+    for span in soup('span'):
+        decoded = span.decode_contents()
+        decoded = decoded.replace('<strong>','').replace('</strong>','')
+        decoded = clean_string(decoded)
+        print(f'decoded {decoded}')
+        splitcontent = decoded.split(' ')
+        for s in splitcontent:
+            print(s)
+        isin = None
+        if symbol:
+            if splitcontent[0] == symbol:
+                for sp in splitcontent:
+                    if sp != '' and sp != symbol:
+                        if not isin:
+                            isin = sp
+                        else:
+                            bse_code = sp
+                return True, isin, bse_code
+
+        else:
+            found = False
+            for sp in splitcontent:
+                if sp == bse_code:
+                    found = True
+            if found:
+                for sp in splitcontent:
+                    if sp != '' and sp != bse_code:
+                        if not symbol:
+                            symbol = sp
+                        else:
+                            isin = sp
+                        
+                return True, isin, bse_code
+
+    return False, None, None
+
+def check_valid(exchange, symbol, date):
+    if exchange == 'NSE':
+        valid, isin = check_nse_valid(symbol)
+    elif exchange == 'BSE':
+        valid, isin, bse_code = check_bse_valid(symbol, None)
+        if not valid:
+            get_isin_from_bhav_copy(symbol, date)
+    elif exchange == 'NASDAQ':
+        return symbol
+    return None
+
+def get_isin_from_bhav_copy(symbol, date):
+    isin_file = os.path.join(get_bhav_path(), 'bse_isin.json')
+    if os.path.exists(isin_file):
+        with open(isin_file) as f:
+            data = json.load(f)
+            if symbol in data:
+                return data[symbol]['isin']
+    bc = get_bhav_copy(date)
+    try:
+        if bc:
+            with open(bc, 'r') as csv_file:
+                csv_reader = csv.DictReader(csv_file)
+                for row in csv_reader:
+                    if row['SC_NAME'] == symbol or row['SC_NAME'].replace(' ','').replace('.','') == symbol.replace(' ','').replace('.',''):
+                        valid, isin, bse_code = check_bse_valid(None, row['SC_CODE'])
+                        if valid:
+                            data = None
+                            if os.path.exists(isin_file):
+                                with open(isin_file) as f:
+                                    data = json.load(f)
+                            else:
+                                data = dict()
+                            if not symbol in data:
+                                data[symbol] = dict()
+                            data[symbol]['isin'] = isin
+                            with open(isin_file, 'w') as json_file:
+                                json.dump(data, json_file)
+                            return isin
+    except Exception as ex:
+        print(f'Exception opening {bc} : {ex}')
+
+    print(f'No isin for {symbol} on {date}')
+    return None
 
 def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate=1, trans_price=None):
     try:
@@ -31,6 +188,10 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
                 nse_bse_data = get_nse_bse(symbol, None, None)
             else:
                 nse_bse_data = get_nse_bse(None, symbol, None)
+                if not nse_bse_data:
+                    isin = get_isin_from_bhav_copy(symbol, date)
+                    if isin:
+                        nse_bse_data = get_nse_bse(None, None, isin)
             if nse_bse_data and 'isin' in nse_bse_data:
                 print(f'checking if {symbol} with isin exists {nse_bse_data["isin"]}')
                 isin_objs = Share.objects.filter(exchange='NSE/BSE',
@@ -62,34 +223,6 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
                                         trans_price=trans_price,
                                         broker=broker,
                                         notes=notes)
-            '''
-            if trans_type == 'Buy':
-                new_qty = float(share_obj.quantity)+quantity
-                new_buy_value = float(share_obj.buy_value) + trans_price
-                share_obj.quantity = new_qty
-                share_obj.buy_value = new_buy_value
-                if new_qty > 0:
-                    share_obj.buy_price = new_buy_value/float(new_qty)
-                else:
-                    share_obj.buy_price = 0
-                share_obj.save()
-            else:
-                new_qty = float(share_obj.quantity)-quantity
-                if new_qty:
-                    new_buy_value = float(share_obj.buy_value) - trans_price
-                    share_obj.quantity = new_qty
-                    share_obj.buy_value = new_buy_value
-                    if new_qty > 0:
-                        share_obj.buy_price = new_buy_value/float(new_qty)
-                    else:
-                        share_obj.buy_price = 0
-                    share_obj.save()
-                else:
-                    share_obj.quantity = 0
-                    share_obj.buy_value = 0
-                    share_obj.buy_price = 0
-                    share_obj.save()
-            '''
             reconcile_share(share_obj)
         except IntegrityError:
             print('Transaction exists')
@@ -122,9 +255,17 @@ def merge_bse_nse():
                 merge_content['nse'] = share_obj.id
                 merge_content['isin'] = isin_shares[0].id
                 merge_data.append(merge_content)
+        else:
+            print(f'couldnt find data for nse symbol {share_obj.symbol}')
     share_objs = Share.objects.filter(exchange='BSE')
     for share_obj in share_objs:
-        nse_bse_data = get_nse_bse(share_obj.symbol, None, None)
+        nse_bse_data = get_nse_bse(None, share_obj.symbol, None)
+        if not nse_bse_data:
+            trans = Transactions.objects.filter(share=share_obj)
+            if len(trans) > 0:
+                isin = get_isin_from_bhav_copy(share_obj.symbol, trans[0].trans_date)
+                if isin:
+                    nse_bse_data = get_nse_bse(None, None, isin)
         if nse_bse_data:
             isin_shares = Share.objects.filter(exchange='NSE/BSE', symbol=nse_bse_data['bse'], user=share_obj.user)
             if isin_shares:
@@ -132,6 +273,15 @@ def merge_bse_nse():
                 merge_content['bse'] = share_obj.id
                 merge_content['isin'] = isin_shares[0].id
                 merge_data.append(merge_content)
+            if 'nse' in nse_bse_data:
+                nse_shares = Share.objects.filter(exchange='NSE', symbol=nse_bse_data['nse'], user=share_obj.user)
+                if nse_shares:
+                    merge_content = dict()
+                    merge_content['bse'] = share_obj.id
+                    merge_content['nse'] = nse_shares[0].id
+                    merge_data.append(merge_content)
+        else:
+            print(f'couldnt find data for bse symbol {share_obj.symbol}')
     if len(merge_data) > 0:
         print(f'Merge data {merge_data}')
         for merge_inst in merge_data:
@@ -173,9 +323,11 @@ def merge_bse_nse():
 
 
 def reconcile_shares():
+    merge_bse_nse()
     share_objs = Share.objects.all()
     for share_obj in share_objs:
         reconcile_share(share_obj)
+    check_discrepancies()
 
 def reconcile_share(share_obj):
     quantity = 0
@@ -252,7 +404,7 @@ def update_shares_latest_val():
                     else:
                         share_obj.conversion_rate = 1
                     share_obj.latest_value = float(latest_val) * float(share_obj.conversion_rate) * float(share_obj.quantity)
-                    share_obj.latest_price = float(latest_val)# * float(share_obj.conversion_rate)
+                    share_obj.latest_price = float(latest_val)
                     share_obj.save()
                 if share_obj.latest_value: 
                     share_obj.gain=float(share_obj.latest_value)-float(share_obj.buy_value)

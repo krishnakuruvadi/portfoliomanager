@@ -214,9 +214,7 @@ def clean_db():
 
 @task()
 def add_mf_transactions(broker, user, full_file_path):
-    set_task_state('add_mf_transactions', TaskState.Running)
     mf_add_transactions(broker, user, full_file_path)
-    set_task_state('add_mf_transactions', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='*/30', hour='*/4'))
 def pull_mf_transactions():
@@ -289,7 +287,6 @@ def update_shares_latest_vals():
     set_task_state('update_shares_latest_vals', TaskState.Running)
     reconcile_shares()
     update_shares_latest_val()
-    check_discrepancies()
     set_task_state('update_shares_latest_vals', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='35', hour='2'))

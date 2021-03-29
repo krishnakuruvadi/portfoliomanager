@@ -28,3 +28,6 @@ class Task(models.Model):
 
     def get_absolute_url(self):
         return reverse("tasks:task-detail", kwargs={'id': self.id})
+    
+    def __str__(self):
+        return str(self.id) + ': ' + self.task_name + ' Last Run:' + str(self.last_run) + ' Last Run Status:' + self.TASK_STATE_CHOICES[self.last_run_status][1]
