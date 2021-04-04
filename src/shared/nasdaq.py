@@ -151,38 +151,45 @@ class Nasdaq(Exchange):
         data = dict()
         if 'data' in json_data:
             for ind in json_data['data']:
-                #print(f"ind {ind}")
-                symbol = ind['symbol']
-                data[symbol] = dict()
-                data[symbol]['name'] = ind['companyName']
-                data[symbol]['lastPrice'] = ind['lastSalePrice']
-                data[symbol]['change'] = get_float_or_zero_from_string(ind['netChange'])
-                data[symbol]['pChange'] = ind['percentageChange']
-                data[symbol]['pChange'] = get_float_or_zero_from_string(data[symbol]['pChange'].replace('%',''))
                 try:
-                    date_str = ind['lastTradeTimestamp']
-                    if 'Market Closed' not in date_str:
-                        date_str = date_str.replace('DATA AS OF', '')
-                        if date_str.endswith('CET'):
-                            date_str = date_str.replace(' CET', '')
-                            date_obj = parse(date_str)
-                            from_zone = tz.gettz('CET')
-                            date_obj = date_obj.replace(tzinfo=from_zone)
-                            to_zone = tz.tzutc()
-                            data[symbol]['last_updated'] = date_obj.astimezone(to_zone)#.strftime("%Y-%m-%d %H:%M:%S")
+                    #print(f"ind {ind}")
+                    symbol = ind['symbol']
+                    data[symbol] = dict()
+                    data[symbol]['name'] = ind['companyName']
+                    data[symbol]['lastPrice'] = ind['lastSalePrice']
+                    data[symbol]['change'] = get_float_or_zero_from_string(ind['netChange'])
+                    data[symbol]['pChange'] = ind['percentageChange']
+                    if data[symbol]['pChange']:
+                        data[symbol]['pChange'] = get_float_or_zero_from_string(data[symbol]['pChange'].replace('%',''))
+                    try:
+                        date_str = ind['lastTradeTimestamp']
+                        if 'Market Closed' not in date_str:
+                            if date_str.startswith('DATA AS OF'):
+                                date_str = date_str.replace('DATA AS OF', '')
+                            elif date_str.startswith('AS OF'):
+                                date_str = date_str.replace('AS OF', '')
+                            if date_str.endswith('CET'):
+                                date_str = date_str.replace(' CET', '')
+                                date_obj = parse(date_str)
+                                from_zone = tz.gettz('CET')
+                                date_obj = date_obj.replace(tzinfo=from_zone)
+                                to_zone = tz.tzutc()
+                                data[symbol]['last_updated'] = date_obj.astimezone(to_zone)#.strftime("%Y-%m-%d %H:%M:%S")
+                            else:
+                                date_str = date_str.replace(' ET', '')
+                                date_obj = parse(date_str)
+                                from_zone = tz.gettz('America/Cancun')
+                                date_obj = date_obj.replace(tzinfo=from_zone)
+                                to_zone = tz.tzutc()
+                                data[symbol]['last_updated'] = date_obj.astimezone(to_zone)#.strftime("%Y-%m-%d %H:%M:%S")
                         else:
-                            date_str = date_str.replace(' ET', '')
-                            date_obj = parse(date_str)
-                            from_zone = tz.gettz('America/Cancun')
-                            date_obj = date_obj.replace(tzinfo=from_zone)
-                            to_zone = tz.tzutc()
-                            data[symbol]['last_updated'] = date_obj.astimezone(to_zone)#.strftime("%Y-%m-%d %H:%M:%S")
-                    else:
-                        data[symbol]['last_updated'] = None
+                            data[symbol]['last_updated'] = None
+                    except Exception as ex:
+                        print("exception converting timestamp")
+                        print(ex)
+                        data[symbol]['last_updated'] = timezone.now()
                 except Exception as ex:
-                    print("exception converting timestamp")
-                    print(ex)
-                    data[symbol]['last_updated'] = timezone.now()
+                    print(f'Exception getting details {ex}: {ind}')
         return data
     
     def get_latest_val(self):

@@ -1,5 +1,8 @@
 import datetime
 from dateutil.relativedelta import relativedelta
+from dateutil import tz
+from pytz import timezone
+from pytz import common_timezones
 
 def get_float_or_zero_from_string(input):
     if input != None and input != '':
@@ -80,3 +83,12 @@ def get_monthly_projected_vals_and_dates(start_date, start_amount, period, infla
             dates.append(new_date.strftime(format))
     return vals, dates
 
+def get_preferred_tz(utc_date_time):
+    from common.helper import get_preferences
+
+    from_zone = tz.tzutc()
+    utc_date_time = utc_date_time.replace(tzinfo=from_zone)
+    preferred_tz = get_preferences('timezone')
+    if not preferred_tz:
+        preferred_tz = 'Asia/Kolkata'
+    return utc_date_time.astimezone(timezone(preferred_tz)).strftime("%Y-%m-%d %H:%M:%S")

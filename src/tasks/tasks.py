@@ -442,13 +442,41 @@ def mf_update_blend():
     set_task_state('mf_update_blend', TaskState.Successful)
 
 @db_task()
+def pull_share_trans_from_rh(user, broker, user_id, passwd, challenge_type, challenge_read_file):
+    from shares.shares_helper import insert_trans_entry
+    print(f'user {user} broker {broker} userid {user_id}')
+    if broker == 'ROBINHOOD':
+        from shares.pull_robinhood import Robinhood
+        rh = Robinhood(user_id, passwd, challenge_type, None, challenge_read_file)
+        try:
+            rh.login()
+            orders = rh.get_orders()
+            for k,v in orders.items():
+                for ord in v:
+                    try:
+                        insert_trans_entry('NASDAQ', k, user, ord['type'], ord['quantity'], ord['price'], ord['date'], None, 'ROBINHOOD', ord['conv_price'], ord['trans_price'], ord['div_reinv'])
+                    except IntegrityError:
+                        print(f'transaction exists')
+
+        except Exception as ex:
+            print(f'Exception pulling transactions {ex}')
+        rh.remove_old_challenge()
+        rh.logout()
+        
+        check_discrepancies()
+    else:
+        print('Unsupported broker')
+
+@db_task()
 def pull_share_trans_from_broker(user, broker, user_id, passwd, pass_2fa):
     print(f'user {user} broker {broker} userid {user_id}')
     if broker == 'ZERODHA':
         files = pull_zerodha(user_id, passwd, pass_2fa)
         for dload_file in files:
             add_share_transactions(broker, user, dload_file)
-    check_discrepancies()
+        check_discrepancies()
+    else:
+        print('Unsupported broker')
 
 @db_task()
 def pull_ppf_trans_from_bank(number, bank, user_id, passwd):
@@ -527,33 +555,39 @@ def update_scroll_data():
     if data:
         print(f"data {data}")
         for k, v in data.items():
-            scroll_item = None
+            if not v['last_updated']:
+                print(f'last updated is none.  Not updating {v["name"]}')
+                continue
             try:
-                scroll_item = ScrollData.objects.get(scrip=v['name'])
-                if get_diff(float(scroll_item.val), float(v['lastPrice'])) > 0.1:
-                    print(f"NASDAQ scroll_item.val {scroll_item.val} v['lastPrice'] {v['lastPrice']}")
-                    if 'last_updated' in v and v['last_updated']:
-                        scroll_item.last_updated = v['last_updated']
-                    else:
-                        scroll_item.last_updated = timezone.now()
-                    scroll_item.val = v['lastPrice']
-                    scroll_item.change = v['change']
-                    scroll_item.percent = v['pChange']
-                    scroll_item.save()
-            except ScrollData.DoesNotExist:
-                scroll_item = ScrollData.objects.create(scrip=v['name'],
-                                                        last_updated = v['last_updated'],
-                                                        val = v['lastPrice'],
-                                                        change = v['change'],
-                                                        percent = v['pChange'])
-            if len(sel_indexes) == 0 or v['name'] in sel_indexes:
-                if scroll_item.display != True:
-                    scroll_item.display = True
-                    scroll_item.save()
-            else:
-                if scroll_item.display != False:
-                    scroll_item.display = False
-                    scroll_item.save()
+                scroll_item = None
+                try:
+                    scroll_item = ScrollData.objects.get(scrip=v['name'])
+                    if get_diff(float(scroll_item.val), float(v['lastPrice'])) > 0.1:
+                        print(f"NASDAQ scroll_item.val {scroll_item.val} v['lastPrice'] {v['lastPrice']}")
+                        if 'last_updated' in v and v['last_updated']:
+                            scroll_item.last_updated = v['last_updated']
+                        else:
+                            scroll_item.last_updated = timezone.now()
+                        scroll_item.val = v['lastPrice']
+                        scroll_item.change = v['change']
+                        scroll_item.percent = v['pChange']
+                        scroll_item.save()
+                except ScrollData.DoesNotExist:
+                    scroll_item = ScrollData.objects.create(scrip=v['name'],
+                                                            last_updated = v['last_updated'],
+                                                            val = v['lastPrice'],
+                                                            change = v['change'],
+                                                            percent = v['pChange'])
+                if len(sel_indexes) == 0 or v['name'] in sel_indexes:
+                    if scroll_item.display != True:
+                        scroll_item.display = True
+                        scroll_item.save()
+                else:
+                    if scroll_item.display != False:
+                        scroll_item.display = False
+                        scroll_item.save()
+            except Exception as ex:
+                print(f'Exception {ex} adding index with content {v}')
 
 @db_periodic_task(crontab(minute='10', hour='1-5', day='1-5'))
 def get_pe():

@@ -177,7 +177,7 @@ def get_isin_from_bhav_copy(symbol, date):
     print(f'No isin for {symbol} on {date}')
     return None
 
-def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate=1, trans_price=None):
+def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate=1, trans_price=None, div_reinv=False):
     try:
         share_obj = None
         try:
@@ -224,7 +224,8 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
                                         conversion_rate=conversion_rate,
                                         trans_price=trans_price,
                                         broker=broker,
-                                        notes=notes)
+                                        notes=notes,
+                                        div_reinv=div_reinv)
             reconcile_share(share_obj)
         except IntegrityError:
             print('Transaction exists')

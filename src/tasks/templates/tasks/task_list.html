@@ -24,15 +24,15 @@
       </tr>
     </thead>
     <tbody>
-      {% for instance in object_list %}
+      {% for instance in task_list %}
       <tr>
         <td scope="row">{{ instance.id }}</td>
         <td>{{ instance.description }}</td>
-        <td>{{ task_state_mapping|lookup:instance.current_state }}</td>
+        <td>{{ instance.current_state }}</td>
         <td>{{ instance.last_run }}</td>
-        <td>{{ task_state_mapping|lookup:instance.last_run_status }}</td>
+        <td>{{ instance.last_run_status }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}run" class="confirm-run"><i class="fa fa-location-arrow" aria-hidden="true"></i> </a>
+          <a href="{% url 'tasks:run-task' instance.id %}" class="confirm-run"><i class="fa fa-location-arrow" aria-hidden="true"></i> </a>
         </td>
       </tr>
       {% endfor %}
@@ -42,7 +42,6 @@
 
 {% block javascript %}
   <script>
-    console.log({{task_state_mapping|safe}})
     $(document).on('click', '.confirm-run', function(){
       return confirm('Are you sure you want to run this?');
     })

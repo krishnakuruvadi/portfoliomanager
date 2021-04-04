@@ -6,69 +6,75 @@ from django.views.generic import (
     DetailView
 )
 from .tasks import *
+from shared.utils import get_preferred_tz
 
 # Create your views here.
-class TaskListView(ListView):
+def get_tasks(request):
     template_name = 'tasks/task_list.html'
-    queryset = Task.objects.all()
     
-    def get_context_data(self, **kwargs):
-
-        available_tasks = {
-            'get_mf_navs': {
-                'description':'Get Mutual Fund latest NAV'
-            },
-            'update_mf': {
-                'description':'Update Mutual Fund investment with latest value'
-            },
-            'update_espp': {
-                'description':'Update ESPP investment with latest value'
-            },
-            'update_mf_schemes': {
-                'description':'Check and update latest mutual schemes from fund houses from AMFII'
-            },
-            'update_bse_star_schemes': {
-                'description':'Check and update latest mutual schemes from fund houses from BSE STaR' 
-            },
-            'update_investment_data':{
-                'description':'Update investment data for home view chart'
-            },
-            'update_mf_mapping': {
-                'description': 'Update any missing mapping info between AMFII, BSE STaR and KUVERA'
-            },
-            'update_goal_contrib': {
-                'description': 'Update different investment data for each goal'
-            },
-            'analyse_mf': {
-                'description': 'Analyse different Mutual Funds where users have active investment'
-            },
-            'update_shares_latest_vals': {
-                'description': 'Reconcile and get latest vals of shares'
-            },
-            'mf_update_blend': {
-                'description': 'Update latest blend of Mutual Funds'
-            },
-            'pull_mf_transactions': {
-                'description': 'Pulls mutual fund transactions from supported broker if passwords are stored'
-            },
-            'update_latest_vals_epf_ssy_ppf': {
-                'description': 'Update latest values in PPF, EPF, SSY'
-            }
+    available_tasks = {
+        'get_mf_navs': {
+            'description':'Get Mutual Fund latest NAV'
+        },
+        'update_mf': {
+            'description':'Update Mutual Fund investment with latest value'
+        },
+        'update_espp': {
+            'description':'Update ESPP investment with latest value'
+        },
+        'update_mf_schemes': {
+            'description':'Check and update latest mutual schemes from fund houses from AMFII'
+        },
+        'update_bse_star_schemes': {
+            'description':'Check and update latest mutual schemes from fund houses from BSE STaR' 
+        },
+        'update_investment_data':{
+            'description':'Update investment data for home view chart'
+        },
+        'update_mf_mapping': {
+            'description': 'Update any missing mapping info between AMFII, BSE STaR and KUVERA'
+        },
+        'update_goal_contrib': {
+            'description': 'Update different investment data for each goal'
+        },
+        'analyse_mf': {
+            'description': 'Analyse different Mutual Funds where users have active investment'
+        },
+        'update_shares_latest_vals': {
+            'description': 'Reconcile and get latest vals of shares'
+        },
+        'mf_update_blend': {
+            'description': 'Update latest blend of Mutual Funds'
+        },
+        'pull_mf_transactions': {
+            'description': 'Pulls mutual fund transactions from supported broker if passwords are stored'
+        },
+        'update_latest_vals_epf_ssy_ppf': {
+            'description': 'Update latest values in PPF, EPF, SSY'
         }
-        for task in available_tasks.keys():
-            found = False
-            for task_obj in Task.objects.all():
-                if task_obj.task_name == task:
-                    found = True
-            if not found:
-                Task.objects.create(
-                    task_name = task,
-                    description = available_tasks[task]['description']
-                )
-        data = super().get_context_data(**kwargs)
-        data['task_state_mapping'] = get_task_state_to_name_mapping()
-        print(data)
-        return data
+    }
+    for task in available_tasks.keys():
+        found = False
+        for task_obj in Task.objects.all():
+            if task_obj.task_name == task:
+                found = True
+        if not found:
+            Task.objects.create(
+                task_name = task,
+                description = available_tasks[task]['description']
+            )
+    task_list = list()
+    for task_obj in Task.objects.all():
+        task = dict()
+        task['id'] = task_obj.id
+        task['description'] = task_obj.description
+        task['current_state'] = Task.TASK_STATE_CHOICES[task_obj.current_state][1]
+        if task_obj.last_run:
+            task['last_run'] = get_preferred_tz(task_obj.last_run)
+        task['last_run_status'] = Task.TASK_STATE_CHOICES[task_obj.last_run_status][1]
+        task_list.append(task)
+    context = {'task_list':task_list}
+    return render(request, template_name, context)
 
 def get_task_state_to_name_mapping():
     task_sate_mapping = dict()

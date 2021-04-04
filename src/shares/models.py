@@ -51,6 +51,7 @@ class Transactions(models.Model):
     trans_price = models.DecimalField(_('Total Price'), max_digits=20, decimal_places=2, null=True, blank=True)    
     broker = models.CharField(max_length=20, blank=True, null=True)
     notes = models.CharField(max_length=80, null=True, blank=True)
+    div_reinv = models.BooleanField(default=False)
     
     def get_absolute_url(self):
         return reverse('shares:transaction-detail', args=[str(self.id)])

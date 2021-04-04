@@ -68,6 +68,7 @@
         {% csrf_token %}
         <div class="row">
           <div class='col-sm-12'>
+            <label for="pull-message" id="pull-message" style="color:blue"></label>
             
             <div class="form-group row">
               <label for="pull-user" class="col-sm-3 col-form-label">User</label>
@@ -78,7 +79,7 @@
               </div>
             </div>
             
-            <div class="form-group row">
+            <div class="form-group row" id="div_pull_broker">
               <label for="pullBrokerFormControlSelect" class="col-sm-3 col-form-label">Broker</label>
               <div class="col-sm-9">
                 <div class="col-sm-9">
@@ -90,7 +91,7 @@
               </div>
             </div>
             
-            <div class="form-group row">
+            <div class="form-group row" id="div_pull_user_id">
               <label for="pull-userid" class="col-sm-3 col-form-label">User ID</label>
               <div class="col-sm-9">
                 <div class="col-sm-9">
@@ -99,7 +100,7 @@
               </div>
             </div>
             
-            <div class="form-group row">
+            <div class="form-group row" id="div_pull_passwd">
               <label for="pull-passwd" class="col-sm-3 col-form-label">Password</label>
               <div class="col-sm-9">
                 <div class="col-sm-9">
@@ -116,6 +117,28 @@
                 </div>
               </div>
             </div>
+
+            <div class="form-group row" id="div_challenge_type">
+              <label for="pull-ct" class="col-sm-3 col-form-label">Challenge Type</label>
+              <div class="col-sm-9">
+                <div class="col-sm-9">
+                  <select class="form-control" id="id_pull_ct" name="challenge-type">
+                    <option>SMS</option>
+                    <option>E-Mail</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row" id="div_rt">
+              <label for="pull-rt" class="col-sm-3 col-form-label">Challenge Answer</label>
+              <div class="col-sm-9">
+                <div class="col-sm-9">
+                  <input type="text" id="id_pull_rti" name="run-time-input">
+                </div>
+              </div>
+            </div>
+
             
             <div class="form-group row">
               <div class="col-sm-9">
@@ -136,8 +159,15 @@
 
 {% block javascript %}
   <script>
-    var users = {{users|safe}}
-    var userds = ['id_user', 'id_pull_user']
+    var get_challenge = "{{get_challenge|safe}}";
+    var pull_message = "{{pull_message|safe}}";
+    if (pull_message != "") {
+      document.getElementById("pull-message").innerHTML = "<red>"+pull_message+"</red>";
+    } else {
+      document.getElementById("pull-message").style.display = "none";
+    }
+    var users = {{users|safe}};
+    var userds = ['id_user', 'id_pull_user'];
     for (userd in userds) {
       var el = document.getElementById(userds[userd]);
       var opt = document.createElement('option');
@@ -179,30 +209,58 @@
     $("#id_pull_2fa").change(function () {
       updatePullSubmitButtonStatus();
     });
+    $("#id_pull_rti").change(function () {
+      updatePullSubmitButtonStatus();
+    });
     function updatePullSubmitButtonStatus() {
       var user = document.getElementById('id_pull_user').value;
       var broker = document.getElementById('pullBrokerControlSelect').value;
       var userid = document.getElementById('id_pull_user_id').value;
       var passwd = document.getElementById('id_pull_passwd').value;
       var twofa = document.getElementById('id_pull_2fa').value;
+      var challenge_type = document.getElementById('id_pull_ct').value;
+      var rti = document.getElementById('id_pull_rti').value;
+      var rt_ans_section = document.getElementById("div_rt");
+      var twofa_elem = document.getElementById("div_2fa");
+      var challenge_type_section = document.getElementById("div_challenge_type");
+      var pull_broker_section = document.getElementById("div_pull_broker");
+
       document.getElementById('pull-submit').disabled=true;
-      if ((user!='') && (broker!='') && (userid!='') && (passwd!='')) {
-        if ((broker != 'ROBINHOOD') && (twofa!='')) {
-          document.getElementById('pull-submit').disabled=false;
-        }
-        if (broker == 'ROBINHOOD') {
-          document.getElementById('pull-submit').disabled=false;
-        }
-      }
-      var el = document.getElementById("div_2fa");
-
+      
       if (broker == 'ROBINHOOD') {
-        el.style.display = "none";
+        twofa_elem.style.display = "none";
+        if (get_challenge == "1") {
+          rt_ans_section.style.display = null;
+          pull_broker_section.style.display="none";
+          document.getElementById('pullBrokerControlSelect').disabled=true;
+          document.getElementById("id_pull_passwd").disabled=true;
+          document.getElementById("id_pull_user_id").disabled=true;
+          if (rti != "") {
+            document.getElementById('pull-submit').disabled=false;
+          } else {
+            document.getElementById('pull-submit').disabled=true;
+          }
+        } else {
+          rt_ans_section.style.display = "none";
+          pull_broker_section.style.display=null;
+          challenge_type_section.style.display = null;
+          document.getElementById('pullBrokerControlSelect').disabled=false;
+          document.getElementById("id_pull_passwd").disabled=false;
+          document.getElementById("id_pull_user_id").disabled=false;
+          if ((user!='') && (broker!='') && (userid!='') && (passwd!='')) {
+            document.getElementById('pull-submit').disabled=false;
+          }
+        }
       }
-      if (broker == 'ZERODHA') {
-        el.style.display = null;
+      if (broker == "ZERODHA") {
+        twofa_elem.style.display = null;
+        rt_ans_elem.style.display = "none";
+        if ((user!='') && (broker!='') && (userid!='') && (passwd!='') && (twofa!='')) {
+          document.getElementById('pull-submit').disabled=false;
+        } else {
+          document.getElementById('pull-submit').disabled=true;
+        }
       }
-
     }
 
   </script>

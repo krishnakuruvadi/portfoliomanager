@@ -23,7 +23,9 @@ from .zerodha import Zerodha
 from django.db import IntegrityError
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from tasks.tasks import pull_share_trans_from_broker
+from tasks.tasks import pull_share_trans_from_broker, pull_share_trans_from_rh
+from django.conf import settings
+import time
 # Create your views here.
 
 class TransactionsListView(ListView):
@@ -156,15 +158,53 @@ def update_share(request, id):
 def upload_transactions(request):
     template = 'shares/upload_transactions.html'
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
+    get_challenge = 0
+    pull_message = ''
+    ca = None
+    challenge_read_file = os.path.join(settings.MEDIA_ROOT, 'secrets', 'rh_challenge')
+    user_id = None
     if request.method == 'POST':
         print(request.POST)
         if "pull-submit" in request.POST:
-            user = request.POST['pull-user']
-            broker = request.POST.get('pullBrokerControlSelect')
+            if 'pullBrokerControlSelect' in request.POST:
+                broker = request.POST.get('pullBrokerControlSelect')
+            else:
+                broker = 'ROBINHOOD'
             user_id = request.POST.get('pull-user-id')
             passwd = request.POST.get('pull-passwd')
             pass_2fa = request.POST.get('pull-2fa')
-            pull_share_trans_from_broker(user, broker, user_id, passwd, pass_2fa)
+            ct = request.POST.get('challenge-type')
+            challenge_type = 'by_sms'
+            if ct == 'E-Mail':
+                challenge_type = 'by_email'
+            if broker == 'ROBINHOOD':
+                if os.path.exists(challenge_read_file):
+                    with open(challenge_read_file, 'w') as f:
+                        ca = request.POST.get('run-time-input')
+                        print(f'writing {ca} to {challenge_read_file}')
+                        f.write(ca)
+                else:
+                    user = request.POST['pull-user']
+                    print(f'logging in:  {broker}')
+                    pull_share_trans_from_rh(user, broker, user_id, passwd, challenge_type, challenge_read_file)
+                    attempts=0
+                    while attempts < 5:
+                        print(f'checking if login was successful {datetime.datetime.now()} file {challenge_read_file} attempt {str(attempts)}')
+                        if os.path.exists(challenge_read_file):        
+                            break
+                        attempts += 1
+                        time.sleep(10)
+                    if os.path.exists(challenge_read_file):
+                        print('login successful')
+                        pull_message = 'Login Successful.  Enter challenge answer'
+                        get_challenge = 1
+                    else:
+                        pull_message = 'login failed'
+            elif broker == 'ZERODHA':
+                user = request.POST['pull-user']
+                pull_share_trans_from_broker(user, broker, user_id, passwd, pass_2fa)
+            else:
+                print('Unsupported broker')
         else:
             uploaded_file = request.FILES['document']
             user = request.POST['user']
@@ -179,7 +219,12 @@ def upload_transactions(request):
             shares_add_transactions(broker, user, full_file_path)
             fs.delete(file_locn)
     users = get_all_users()
-    context = {'users':users}
+    if not get_challenge and not ca:
+        if os.path.exists(challenge_read_file):
+            os.remove(challenge_read_file)
+    context = {'users':users, 'get_challenge':get_challenge, 'pull_message':pull_message}
+    if user_id:
+        context['user'] = user_id
     return render(request, template, context)
 
 def add_transaction(request):
