@@ -1,0 +1,30 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Markets</a></li>
+  </ul> 
+{% endblock viewname %}
+
+{% block content %}
+  <table class="table table-borderless">
+    <tr>
+      <td><ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Markets</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'markets:pe-view' %}">Valuation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'markets:news-view' %}">News</a>
+        </li>
+      </ul></td>
+    </tr>
+    <tr></tr>
+  </table>
+{% endblock content %}

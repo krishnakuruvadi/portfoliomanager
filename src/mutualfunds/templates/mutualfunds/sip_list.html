@@ -17,28 +17,28 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
-<table class="table table-borderless">
-  <tr>
-    <td><ul class="nav nav-pills">
-      <li class="nav-item">
-        <a class="nav-link" href="../mutualfunds/">Folios</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="returns">Funds & Returns</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="insights">Insights</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link active" href="#">SIP</a>
-      </li>
-    </ul></td>
-  </tr>
-  <tr></tr>
-  <tr>
-    <td style="text-align:right"><b>Total SIP:</b> {{sip_count}} &nbsp;&nbsp;&nbsp;<b>Total Amount:</b> {{sip_amount}} </td>
-  </tr>
-</table>
+  <table class="table table-borderless">
+    <tr>
+      <td><ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link" href="../mutualfunds/">Folios</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="returns">Funds & Returns</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="insights">Insights</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">SIP</a>
+        </li>
+      </ul></td>
+    </tr>
+    <tr></tr>
+    <tr>
+      <td style="text-align:right"><b>Total SIP:</b> {{sip_count}} &nbsp;&nbsp;&nbsp;<b>Total Amount:</b> {{sip_amount}} </td>
+    </tr>
+  </table>
   <table class="table table-hover" id="sip-table">
     <thead class="thead-dark">
       <tr>

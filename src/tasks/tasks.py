@@ -777,6 +777,10 @@ def update_latest_vals_epf_ssy_ppf():
     update_ssy_vals()
     update_ppf_vals()
 
+@db_periodic_task(crontab(minute='30', hour='*/6'))
+def poll_market_news():
+    from markets.markets_helper import get_news
+    get_news()
 
 '''
 #  example code below

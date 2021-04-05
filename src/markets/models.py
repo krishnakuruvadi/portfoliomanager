@@ -24,3 +24,14 @@ class PBMonthy(models.Model):
 
     class Meta:
         unique_together = (('index_name','month', 'year'),)
+
+class News(models.Model):
+    exchange = models.CharField(max_length=60)
+    symbol = models.CharField(max_length=60)
+    text = models.CharField(max_length=6000)
+    date = models.DateField()
+    link = models.CharField(max_length=6000)
+    source = models.CharField(max_length=60)
+
+    class Meta:
+        unique_together = (('exchange','symbol','text','date','source'),)

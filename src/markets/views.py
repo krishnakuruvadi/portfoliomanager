@@ -1,12 +1,35 @@
 from django.shortcuts import render
-from .models import PEMonthy, PBMonthy
+from .models import PEMonthy, PBMonthy, News
 from common.models import Preferences
 from shared.utils import get_float_or_zero_from_string, convert_date_to_string
-
+from newspaper import Article
+import datetime
 # Create your views here.
 
 def markets_home(request):
-    pass
+    template = 'markets/markets_home.html'
+    context = {}
+
+    print(context)
+    return render(request, template, context)
+
+def news_view(request):
+    template = 'markets/news.html'
+    
+    context = dict()
+    context['news'] = list()
+    for news in News.objects.all().order_by('-date'):
+        n = dict()
+        n['date'] = news.date
+        n['link'] = news.link
+        n['exchange'] = news.exchange
+        n['symbol'] = news.symbol
+        n['source'] = news.source
+        n['text'] = news.text
+        context['news'].append(n)
+
+    print(context)
+    return render(request, template, context)
 
 def pe_view(request):
     template = 'markets/pe_view.html'
@@ -17,8 +40,8 @@ def pe_view(request):
     pref_obj = Preferences.get_solo()
     sel_indexes = list()
     if pref_obj.indexes_to_scroll:
-            for index in pref_obj.indexes_to_scroll.split('|'):
-                sel_indexes.append(index)
+        for index in pref_obj.indexes_to_scroll.split('|'):
+            sel_indexes.append(index)
     pe_vals = dict()
     pb_vals = dict()
     for index in sel_indexes:

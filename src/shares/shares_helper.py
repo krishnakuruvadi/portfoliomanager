@@ -464,3 +464,12 @@ def add_untracked_transactions():
             print(f'untracked shares transactions file not present')
     else:
         print(f'untracked shares transactions folder not present')
+
+def get_invested_shares():
+    ret = list()
+    for share in Share.objects.all():
+        s = dict()
+        s['exchange'] = share.exchange
+        s['symbol'] = share.symbol
+        ret.append(s)
+    return ret
