@@ -75,9 +75,11 @@ def pull_zerodha(userid, passwd, pin):
         time.sleep(5) 
         #from_date = datetime.date(year=2013,month=4,day=1)
         yr = datetime.date.today().year
+        if datetime.date.today().month < 4:
+            yr -= 1
         while True:
-            from_date = datetime.date(year=yr, month=1, day=1)
-            to_date = datetime.date(year=yr, month=12, day=31)
+            from_date = datetime.date(year=yr, month=4, day=1)
+            to_date = datetime.date(year=yr+1, month=3, day=31)
             if to_date > datetime.date.today():
                 to_date = datetime.date.today()
             date_string = from_date.strftime("%Y-%m-%d") + " ~ " + to_date.strftime("%Y-%m-%d")

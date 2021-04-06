@@ -288,39 +288,92 @@ def merge_bse_nse():
     if len(merge_data) > 0:
         print(f'Merge data {merge_data}')
         for merge_inst in merge_data:
+            print(f'handling {merge_inst}')
             if 'nse' in merge_inst and 'bse' in merge_inst:
-                nse_share_obj = Share.objects.get(id=merge_inst['nse'])
-                print(f'{nse_share_obj.symbol} : merging {merge_inst["bse"]} into {merge_inst["nse"]}')
-                nse_share_obj.exchange = 'NSE/BSE'
-                nse_share_obj.save()
-                print('changed exchange to NSE/BSE')
-                bse_share_obj = Share.objects.get(id=merge_inst['bse'])
-                bse_transactions = Transactions.objects.filter(share=bse_share_obj)
-                for trans in bse_transactions:
-                    trans.share=nse_share_obj
-                    trans.save()
-                    print('mapped bse transaction to NSE/BSE object')
-                bse_share_obj.delete()
+                try:
+                    nse_share_obj = Share.objects.get(id=merge_inst['nse'])
+                    try:
+                        isin_obj = Share.objects.get(exchange='NSE/BSE', symbol=nse_share_obj.symbol)
+                        for trans in Transactions.objects.filter(share=nse_share_obj):
+                            try:
+                                trans.share=isin_obj
+                                trans.save()
+                            except IntegrityError:
+                                print(f'Transaction exists.  Deleting instead')
+                                trans.delete()
+                        try:
+                            bse_share_obj = Share.objects.get(id=merge_inst['bse'])
+                            bse_transactions = Transactions.objects.filter(share=bse_share_obj)
+                            for trans in bse_transactions:
+                                try:
+                                    trans.share=nse_share_obj
+                                    trans.save()
+                                    print('mapped bse transaction to NSE/BSE object')
+                                except IntegrityError:
+                                    print(f'Transaction exists.  Deleting instead')
+                                    trans.delete()
+                            print(f"deleting {bse_share_obj.exchange}: {bse_share_obj.symbol}")
+                            bse_share_obj.delete()
+                        except Share.DoesNotExist:
+                            print(f"Might be already deleted BSE: {merge_inst['bse']}")
+                        print(f"deleting {nse_share_obj.exchange}: {nse_share_obj.symbol}")
+                        nse_share_obj.delete()
+                    except Share.DoesNotExist:
+                        print(f'{nse_share_obj.symbol} : merging {merge_inst["bse"]} into {merge_inst["nse"]}')
+                        nse_share_obj.exchange = 'NSE/BSE'
+                        nse_share_obj.save()
+                        print('changed exchange to NSE/BSE')
+                        bse_share_obj = Share.objects.get(id=merge_inst['bse'])
+                        bse_transactions = Transactions.objects.filter(share=bse_share_obj)
+                        for trans in bse_transactions:
+                            try:
+                                trans.share=nse_share_obj
+                                trans.save()
+                                print('mapped bse transaction to NSE/BSE object')
+                            except IntegrityError:
+                                print(f'Transaction exists.  Deleting instead')
+                                trans.delete()
+                        print(f"deleting {bse_share_obj.exchange}: {bse_share_obj.symbol}")
+                        bse_share_obj.delete()
+                except Share.DoesNotExist:
+                    print(f"Might be already deleted NSE: {merge_inst['nse']}")
             elif 'nse' in merge_inst:
-                nse_share_obj = Share.objects.get(id=merge_inst['nse'])
-                isin_share_obj = Share.objects.get(id=merge_inst['isin'])
-                print(f'{nse_share_obj.symbol} : merging {merge_inst["nse"]} into {merge_inst["isin"]}')
-                nse_transactions = Transactions.objects.filter(share=nse_share_obj)
-                for trans in nse_transactions:
-                    trans.share=isin_share_obj
-                    trans.save()
-                    print('mapped nse transaction to NSE/BSE object')
-                nse_share_obj.delete()
+                try:
+                    nse_share_obj = Share.objects.get(id=merge_inst['nse'])
+                    isin_share_obj = Share.objects.get(id=merge_inst['isin'])
+                    print(f'{nse_share_obj.symbol} : merging {merge_inst["nse"]} into {merge_inst["isin"]}')
+                    nse_transactions = Transactions.objects.filter(share=nse_share_obj)
+                    for trans in nse_transactions:
+                        try:
+                            trans.share=isin_share_obj
+                            trans.save()
+                            print('mapped nse transaction to NSE/BSE object')
+                        except IntegrityError:
+                            print(f'Transaction exists.  Deleting instead')
+                            trans.delete()
+                    print(f"deleting {nse_share_obj.exchange}: {nse_share_obj.symbol}")
+                    nse_share_obj.delete()
+                except Share.DoesNotExist:
+                    print(f"Might be already deleted NSE: {merge_inst['nse']}")
+
             else:
-                bse_share_obj = Share.objects.get(id=merge_inst['bse'])
-                isin_share_obj = Share.objects.get(id=merge_inst['isin'])
-                print(f'{bse_share_obj.symbol} : merging {merge_inst["bse"]} into {merge_inst["isin"]}')
-                bse_transactions = Transactions.objects.filter(share=bse_share_obj)
-                for trans in bse_transactions:
-                    trans.share=isin_share_obj
-                    trans.save()
-                    print('mapped bse transaction to NSE/BSE object')
-                bse_share_obj.delete()
+                try:
+                    bse_share_obj = Share.objects.get(id=merge_inst['bse'])
+                    isin_share_obj = Share.objects.get(id=merge_inst['isin'])
+                    print(f'{bse_share_obj.symbol} : merging {merge_inst["bse"]} into {merge_inst["isin"]}')
+                    bse_transactions = Transactions.objects.filter(share=bse_share_obj)
+                    for trans in bse_transactions:
+                        try:
+                            trans.share=isin_share_obj
+                            trans.save()
+                            print('mapped bse transaction to NSE/BSE object')
+                        except IntegrityError:
+                            print(f'Transaction exists.  Deleting instead')
+                            trans.delete()
+                    print(f"deleting {bse_share_obj.exchange}: {bse_share_obj.symbol}")
+                    bse_share_obj.delete()
+                except Share.DoesNotExist:
+                    print(f"Might be already deleted BSE: {merge_inst['bse']}")
     else:
         print('nothing to merge')
 
@@ -436,6 +489,7 @@ def add_untracked_transactions():
                             exchange = row['exchange']
                             symbol = row['trading_symbol']
                             trans_type = row['trade_type']
+                            trans_type = 'Buy' if trans_type.lower()=='buy' else 'Sell'
                             user = int(row['user'])
                             user_name = get_user_name_from_id(user)
                             if not user_name:
@@ -473,3 +527,12 @@ def get_invested_shares():
         s['symbol'] = share.symbol
         ret.append(s)
     return ret
+
+def pull_and_store_corporate_actions():
+    from common.shares_helper import pull_corporate_actions, process_corporate_actions, store_corporate_actions
+    for share in Share.objects.all():
+        transactions = Transactions.objects.filter(share=share).order_by('trans_date')
+        from_date = transactions[0].trans_date
+        pull_corporate_actions(share.symbol, share.exchange, from_date, datetime.date.today())
+    process_corporate_actions()
+    store_corporate_actions()

@@ -1,18 +1,18 @@
 from django.urls import path
 
 from .views import (
-    AlertsListView,
     AlertsDetailView,
     AlertsDeleteView,
     toggle_seen,
     delete_all,
-    read_all
+    read_all,
+    get_alerts
 )
 
 app_name = 'alerts'
 
 urlpatterns = [
-    path('', AlertsListView.as_view(), name='alerts-list'),
+    path('', get_alerts, name='alerts-list'),
     path('delete', delete_all, name='delete-all'),
     path('read', read_all, name='read-all'),
     path('<id>/', AlertsDetailView.as_view(), name='alert-detail'),

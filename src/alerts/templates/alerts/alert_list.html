@@ -25,7 +25,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for instance in object_list %}
+      {% for instance in alerts %}
       <tr>
         <td><a href="{{ instance.get_absolute_url }}">{{ instance.id }}</a></td>
         <td style="text-align:center">

@@ -254,7 +254,8 @@
       }
       if (broker == "ZERODHA") {
         twofa_elem.style.display = null;
-        rt_ans_elem.style.display = "none";
+        rt_ans_section.style.display = "none";
+        challenge_type_section.style.display = "none";
         if ((user!='') && (broker!='') && (userid!='') && (passwd!='') && (twofa!='')) {
           document.getElementById('pull-submit').disabled=false;
         } else {

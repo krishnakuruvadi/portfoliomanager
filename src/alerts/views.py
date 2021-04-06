@@ -9,20 +9,28 @@ from . import models
 from shared.handle_get import *
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from shared.utils import get_preferred_tz
 
 
 # Create your views here.
 
-class AlertsListView(ListView):
-    template_name = 'alerts/alerts_list.html'
+def get_alerts(request):
+    template = 'alerts/alert_list.html'
     queryset = models.Alert.objects.all()
+    context = dict()
+    context['alerts'] = list()
+    for a in queryset:
+        e = dict()
+        e['seen'] = a.seen
+        e['action_url'] = a.action_url
+        e['time'] = get_preferred_tz(a.time)
+        e['content'] = a.content
+        e['summary'] = a.summary
+        e['severity'] = a.severity
+        e['id'] = a.id
+        context['alerts'].append(e)
 
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        print(data)
-        data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
-        data['user_name_mapping'] = get_all_users()
-        return data
+    return render(request, template, context)
 
 class AlertsDetailView(DetailView):
     template_name = 'alerts/alert_detail.html'

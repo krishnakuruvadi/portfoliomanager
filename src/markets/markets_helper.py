@@ -38,5 +38,4 @@ def get_news():
                             print(f'stale news from {res["date"]}')
             except Exception as ex:
                 print(f"Exception {ex} while getting news from MC for {ish['exchange']} {ish['symbol']}")
-        if total_results > 100:
-            return
+
