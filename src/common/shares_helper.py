@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from shared.utils import *
 from .models import Dividend, Bonus, Split
 from .nse_bse import get_nse_bse
+import traceback
 
 def pull_corporate_actions(symbol, exchange, from_date, to_date):
     dest_path = os.path.join(settings.MEDIA_ROOT, 'corporateActions')
@@ -21,7 +22,8 @@ def pull_corporate_actions(symbol, exchange, from_date, to_date):
             }
             page = requests.get('https://www.nseindia.com/', timeout=5, headers=headers)
             cookie = page.cookies
-            url = 'https://www.nseindia.com/api/corporates-corporateActions?index=equities&symbol=' + symbol
+            fin_symbol = symbol.replace('&','%26')
+            url = 'https://www.nseindia.com/api/corporates-corporateActions?index=equities&symbol=' + fin_symbol
             if from_date:
                 url = url + '&from_date=' + from_date.strftime('%d-%m-%Y') + '&to_date=' + datetime.date.today().strftime('%d-%m-%Y') #01-01-2005&to_date=31-12-2020'
             r = requests.get(url, headers=headers, cookies=cookie, timeout=10)
@@ -71,7 +73,27 @@ def process_corporate_actions():
                             print(f'failed to convert to date {entry}')
                             continue
                         sub = entry['subject']
-                        if 'split' in sub.lower():
+                        if 'bonus' in sub.lower():
+                            nums = find_numbers_in_string(sub)
+                            if len(nums) > 0:
+                                if not 'bonus' in existing_data:
+                                    existing_data['bonus'] = list()
+                                found = False
+                                for item in existing_data['bonus']:
+                                    if item['date'] == dt.strftime('%d-%b-%Y'):
+                                        found = True
+                                        break
+                                if not found:
+                                    bonus = dict()
+                                    bonus['date'] = dt.strftime('%d-%b-%Y')
+                                    bonus['from'] = int(nums[0])
+                                    bonus['to'] = int(nums[1])
+                                    bonus['subject'] = sub
+                                    existing_data['bonus'].append(bonus)
+                                print(f'{dt}: Bonus {int(nums[0])} to {int(nums[1])}')
+                            else:
+                                print(f'failed to find bonus ratio {sub}')
+                        elif 'split' in sub.lower():
                             nums = find_numbers_in_string(sub)
                             if len(nums) > 0:
                                 print(f'{dt}: Split {int(nums[0])} to {int(nums[1])}')
@@ -111,26 +133,6 @@ def process_corporate_actions():
                                     existing_data['dividend'].append(dividend)
                             else:
                                 print(f'failed to find dividend {sub}')
-                        elif 'bonus' in sub.lower():
-                            nums = find_numbers_in_string(sub)
-                            if len(nums) > 0:
-                                if not 'bonus' in existing_data:
-                                    existing_data['bonus'] = list()
-                                found = False
-                                for item in existing_data['bonus']:
-                                    if item['date'] == dt.strftime('%d-%b-%Y'):
-                                        found = True
-                                        break
-                                if not found:
-                                    bonus = dict()
-                                    bonus['date'] = dt.strftime('%d-%b-%Y')
-                                    bonus['from'] = int(nums[0])
-                                    bonus['to'] = int(nums[1])
-                                    bonus['subject'] = sub
-                                    existing_data['bonus'].append(bonus)
-                                print(f'{dt}: Bonus {int(nums[0])} to {int(nums[1])}')
-                            else:
-                                print(f'failed to find bonus ratio {sub}')
 
                         else:
                             print(f'couldnt classify as dividend or split or bonus {entry}')
@@ -147,53 +149,83 @@ def process_corporate_actions():
 
 def find_numbers_in_string(inp):
     nums = list()
-    for i in inp.split():
-        almost_num = False
-        if i.lower().startswith('rs') and i.lower() != 'rs' and not i.lower().endswith('rs') and not i.lower().endswith('rs.'):
-            almost_num = True
-            temp = i.lower()
-            temp = temp.replace('rs.', '')
-            temp = temp.replace('rs', '')
-            if temp.startswith('.'):
-                temp = temp[1:]
-        elif 'rs' in i.lower() and i.lower() != 'rs' and not i.lower().endswith('rs') and not i.lower().endswith('rs.'):
-            almost_num = True
-            temp = i.lower()
-            temp = temp[temp.find('rs')+2:]
-            temp = temp[0:temp.find(' ')]
-            if temp.startswith('.'):
-                temp = temp[1:]
-        elif i.lower().startswith('re') and i.lower() != 're' and not i.lower().endswith('re') and not i.lower().endswith('re.'):
-            almost_num = True
-            temp = i.lower()
-            temp = temp.replace('re.', '')
-            temp = temp.replace('re', '')
-            if temp.startswith('.'):
-                temp = temp[1:]
-        elif 're' in i.lower() and i.lower() != 're' and not i.lower().endswith('re') and not i.lower().endswith('re.'):
-            almost_num = True
-            temp = i.lower()
-            temp = temp[temp.find('re')+2:]
-            temp = temp[0:temp.find(' ')]
-            if temp.startswith('.'):
-                temp = temp[1:]
-        else:
-            temp = i
+    try:
+        for i in inp.split():
+            almost_num = False
+            if i.lower().startswith('rs') and i.lower() != 'rs' and not i.lower().endswith('rs') and not i.lower().endswith('rs.'):
+                almost_num = True
+                temp = i.lower()
+                temp = temp.replace('rs.', '')
+                temp = temp.replace('rs', '')
+                if temp.startswith('.'):
+                    temp = temp[1:]
+            elif 'rs' in i.lower() and i.lower() != 'rs' and not i.lower().endswith('rs') and not i.lower().endswith('rs.'):
+                almost_num = True
+                temp = i.lower()
+                temp = temp[temp.find('rs')+2:]
+                temp = temp[0:temp.find(' ')]
+                if temp.startswith('.'):
+                    temp = temp[1:]
+            elif i.lower().startswith('re') and i.lower() != 're' and not i.lower().endswith('re') and not i.lower().endswith('re.'):
+                almost_num = True
+                temp = i.lower()
+                temp = temp.replace('re.', '')
+                temp = temp.replace('re', '')
+                if temp.startswith('.'):
+                    temp = temp[1:]
+            elif 're' in i.lower() and i.lower() != 're' and not i.lower().endswith('re') and not i.lower().endswith('re.'):
+                almost_num = True
+                temp = i.lower()
+                temp = temp[temp.find('re')+2:]
+                temp = temp[0:temp.find(' ')]
+                if temp.startswith('.'):
+                    temp = temp[1:]
+            else:
+                temp = i
 
-        temp = temp.replace('/-', '')
-        temp = temp.replace('/', '')
-        if ':' in temp:
-            splits = temp.split(':')
-            nums.append(get_int_or_none_from_string(splits[0]))
-            nums.append(get_int_or_none_from_string(splits[1]))
+            temp = temp.replace('/-', '')
+            temp = temp.replace('/', '')
+            if ':' in temp:
+                splits = temp.split(':')
+                first_num = get_int_or_none_from_string(splits[0])
+                if not first_num:
+                    fn = splits[0]
+                    n = 0
+                    i = len(fn)-1
+                    while i >= 0:
+                        if fn[i] in ['0','1','2','3','4','5','6','7','8','9']:
+                            n = n+int(fn[i])*pow(10,len(fn)-(i+1))
+                        else:
+                            break
+                        i -= 1
+                    if n > 0:
+                        first_num=n
+                if first_num:
+                    second_num = get_int_or_none_from_string(splits[1])
+                    if not second_num:
+                        sn = splits[1]
+                        n = 0
+                        i = 0
+                        while i < len(sn):
+                            if sn[i] in ['0','1','2','3','4','5','6','7','8','9']:
+                                n = n*10+int(sn[i])
+                            else:
+                                break
+                            i+=1
+                        if n > 0:
+                            second_num=n
+                    if first_num and second_num:
+                        nums.append(first_num)
+                        nums.append(second_num)
 
-        res = get_float_or_none_from_string(temp, False)
-        if res:
-            if not res in nums:
-                nums.append(res)
-        elif almost_num:
-            print(f'looks like a number but couldnt convert {i}')
-
+            res = get_float_or_none_from_string(temp, False)
+            if res:
+                if not res in nums:
+                    nums.append(res)
+            elif almost_num:
+                print(f'looks like a number but couldnt convert {i}')
+    except Exception as ex:
+        print(f"Exception in finding numbers {ex}")
     return nums
 
 def store_corporate_actions():
@@ -287,5 +319,6 @@ def store_corporate_actions():
                             print('Split entry exists')
             except Exception as ex:
                 print(f'exception while processing {file_name}: {ex}')
+                traceback.print_exc()
     else:
         print(f'directory {dest_path} not present to process corporate actions')

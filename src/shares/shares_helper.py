@@ -386,42 +386,80 @@ def reconcile_shares():
     check_discrepancies()
 
 def reconcile_share(share_obj):
+    from common.models import Bonus, Split
     quantity = 0
     buy_value = 0
     buy_price = 0
-    sell_quantity = 0
     realised_gain = 0
-    sell_transactions = Transactions.objects.filter(share=share_obj, trans_type='Sell')
-    for trans in sell_transactions:
-        sell_quantity = sell_quantity + trans.quantity
-        realised_gain = realised_gain + trans.trans_price
-    
-    buy_transactions = Transactions.objects.filter(share=share_obj, trans_type='Buy').order_by('trans_date')
-    for trans in buy_transactions:
-        if sell_quantity > 0:
-            if sell_quantity > trans.quantity:
-                sell_quantity = sell_quantity - trans.quantity
-                realised_gain = realised_gain - trans.trans_price
-            else:
-                quantity = trans.quantity - sell_quantity
-                realised_gain = realised_gain - (trans.trans_price*sell_quantity/trans.quantity)
-                sell_quantity = 0
-                buy_value = quantity*trans.price*trans.conversion_rate
+    transactions = Transactions.objects.filter(share=share_obj).order_by('trans_date')
+    last_trans = None
+    for trans in transactions:
+        print(f"start at {str(quantity)}")
+        if last_trans and quantity>0:
+            bonus = Bonus.objects.filter(exchange=share_obj.exchange, symbol=share_obj.symbol, date__lte=trans.trans_date, date__gte=last_trans.trans_date)
+            for b in bonus:
+                quantity = quantity + (quantity*b.ratio_num)/b.ratio_denom
+                if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                    quantity = int(quantity)
+            split = Split.objects.filter(exchange=share_obj.exchange, symbol=share_obj.symbol, date__lte=trans.trans_date, date__gte=last_trans.trans_date)
+            for s in split:
+                quantity = (quantity*s.ratio_denom)/s.ratio_num
+                if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                    quantity = int(quantity)
+            print(f"After bonus and split at {str(quantity)}")
+        if trans.trans_type == 'Buy':
+            quantity += trans.quantity
+            buy_value += trans.trans_price
         else:
-            quantity = quantity + trans.quantity
-            buy_value = buy_value + trans.trans_price
+            if quantity != 0:
+                realised_gain += trans.trans_price - ((buy_value*trans.quantity)/quantity)
+            else:
+                realised_gain += trans.trans_price
+            quantity -= trans.quantity
+        print(f"After transaction {trans.trans_type} on {trans.trans_date} at {str(quantity)}")
+        last_trans = trans
+    
     if quantity > 0:
-        buy_price = buy_value/quantity
+        sqty = quantity
+        if last_trans:
+            bonus = Bonus.objects.filter(exchange=share_obj.exchange, symbol=share_obj.symbol, date__lte=datetime.date.today(), date__gte=last_trans.trans_date)
+            for b in bonus:
+                quantity = quantity + (quantity*b.ratio_num)/b.ratio_denom
+                if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                    quantity = int(quantity)
+            split = Split.objects.filter(exchange=share_obj.exchange, symbol=share_obj.symbol, date__lte=datetime.date.today(), date__gte=last_trans.trans_date)
+            for s in split:
+                quantity = (quantity*s.ratio_denom)/s.ratio_num
+                if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                    quantity = int(quantity)
+        if quantity > 0:
+            buy_price = buy_value/quantity
+        else:
+            print(f"weird that we started at {str(sqty)} and ended up with {str(quantity)} after bonus and split for {share_obj.symbol}")
+    elif quantity < 0:
+        description='Selling more than available. This affects other calculations. Please correct'
+        create_alert(
+            summary=share_obj.symbol + ' Quantity adding up to ' + str(quantity) + '. This affects other calculations.',
+            content=description,
+            severity=Severity.warning
+        )
+        quantity = 0
     else:
         buy_price = 0
+    print(f'ended up with {str(quantity)}')
     share_obj.quantity = quantity
     share_obj.buy_value = buy_value
     share_obj.buy_price = buy_price
     share_obj.realised_gain = realised_gain
+    if share_obj.latest_price and share_obj.conversion_rate:
+        share_obj.latest_value = share_obj.quantity*share_obj.latest_price*share_obj.conversion_rate
+        share_obj.gain = share_obj.latest_value-share_obj.buy_value
     share_obj.save()        
+
 
 def check_discrepancies():
     share_objs = Share.objects.all()
+    '''
     for share_obj in share_objs:
         total_shares = 0
         for trans in Transactions.objects.filter(share=share_obj):
@@ -436,6 +474,7 @@ def check_discrepancies():
                 content=description,
                 severity=Severity.warning
             )
+    '''
 
 def update_shares_latest_val():
     start = datetime.date.today()+relativedelta(days=-5)
@@ -533,6 +572,13 @@ def pull_and_store_corporate_actions():
     for share in Share.objects.all():
         transactions = Transactions.objects.filter(share=share).order_by('trans_date')
         from_date = transactions[0].trans_date
-        pull_corporate_actions(share.symbol, share.exchange, from_date, datetime.date.today())
+        if share.exchange == 'NSE/BSE':
+            pull_corporate_actions(share.symbol, 'NSE', from_date, datetime.date.today())
+        elif share.exchange == 'NSE':
+            pull_corporate_actions(share.symbol, share.exchange, from_date, datetime.date.today())
+        elif share.exchange == 'BSE':
+            print(f'not supported exchange BSE')
+        else:
+            print(f'not supported exchange {share.exchange}')
     process_corporate_actions()
     store_corporate_actions()

@@ -454,7 +454,8 @@ def pull_share_trans_from_rh(user, broker, user_id, passwd, challenge_type, chal
             for k,v in orders.items():
                 for ord in v:
                     try:
-                        insert_trans_entry('NASDAQ', k, user, ord['type'], ord['quantity'], ord['price'], ord['date'], None, 'ROBINHOOD', ord['conv_price'], ord['trans_price'], ord['div_reinv'])
+                        ot = 'Buy' if ord['type'].lower()=='buy' else 'Sell'
+                        insert_trans_entry('NASDAQ', k, user, ot, ord['quantity'], ord['price'], ord['date'], None, 'ROBINHOOD', ord['conv_price'], ord['trans_price'], ord['div_reinv'])
                     except IntegrityError:
                         print(f'transaction exists')
 
@@ -781,6 +782,11 @@ def update_latest_vals_epf_ssy_ppf():
 def poll_market_news():
     from markets.markets_helper import get_news
     get_news()
+
+@db_periodic_task(crontab(minute='30', hour='*/4', day='1-10'))
+def pull_corporate_actions_shares():
+    from shares.shares_helper import pull_and_store_corporate_actions
+    pull_and_store_corporate_actions()
 
 '''
 #  example code below

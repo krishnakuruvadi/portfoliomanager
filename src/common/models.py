@@ -22,6 +22,8 @@ class Bonus(models.Model):
     ratio_denom = models.DecimalField( max_digits=20, decimal_places=2, null=False)
     date = models.DateField(null=False)
     subject = models.CharField(max_length=200)
+    def __str__(self):
+        return self.symbol + '/' + self.exchange + ': ' + self.isin + ': ' + self.subject + ' on ' + str(self.date)
 
 class Split(models.Model):
     class Meta:
@@ -33,6 +35,9 @@ class Split(models.Model):
     ratio_denom = models.DecimalField( max_digits=20, decimal_places=2, null=False)
     date = models.DateField(null=False)
     subject = models.CharField(max_length=200)
+    
+    def __str__(self):
+        return self.symbol + '/' + self.exchange + ': ' + self.isin + ': ' + self.subject + ' on ' + str(self.date)
 
 class Dividend(models.Model):
     class Meta:
@@ -43,7 +48,8 @@ class Dividend(models.Model):
     amount = models.DecimalField(max_digits=20, decimal_places=2, null=False)
     date = models.DateField(null=False)
     subject = models.CharField(max_length=200)
-
+    def __str__(self):
+        return self.symbol + '/' + self.exchange + ': ' + self.isin + ': ' + str(self.amount) + ' on ' + str(self.date)
 
 class Stock(models.Model):
     class Meta:
