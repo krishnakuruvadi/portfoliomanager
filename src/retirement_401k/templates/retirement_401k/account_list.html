@@ -1,0 +1,72 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">401K</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add 401K Account" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover" id="accounts-table">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Company</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">End Date</th>
+        <th scope="col">User</th>
+        <th scope="col">Goal</th>
+        <th scope="col">Total Contribution ($)</th>
+        <th scope="col">Latest Value</th>
+        <th scope="col">As on Date</th>
+        <th scope="col">ROI</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in accounts %}
+      <tr>
+        <th scope="row">{{ instance.id }}</th>
+
+        <td>
+          <a href="{% url 'retirement_401k:account-detail' instance.id %}">{{ instance.company }}</a>
+        </td>
+        <td>{{ instance.start_date }}</td>
+        <td>{{ instance.end_date }}</td>
+        <td>{{ instance.user }}</td>
+        <td>{{ instance.goal }}</td>
+        <td>{{ instance.total }}</td>
+        <td>{{ instance.latest_value }}</td>
+        <td>{{ instance.as_on_date }}</td>
+        <td>{{ instance.roi }}</td>
+        <td>
+          <a href="{% url 'retirement_401k:account-delete' instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          <a href="{% url 'retirement_401k:account-update' instance.id %}"><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{% url 'retirement_401k:transaction-list' instance.id %}"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block javascript %}
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete this transaction?');
+    })
+</script>
+{% endblock javascript %}
+
+<script>
+  {% block jquery %}
+  $('#accounts-table').DataTable({
+        "order": [[ 0, "desc" ]]
+    } );
+  {% endblock jquery %}
+</script>

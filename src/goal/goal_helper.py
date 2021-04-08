@@ -92,6 +92,7 @@ def update_goal_contributions(id):
         goal_obj.rsu_conitrib = contrib['rsu']
         goal_obj.shares_conitrib = contrib['shares']
         goal_obj.mf_conitrib = contrib['mf']
+        goal_obj.r_401k_contribution = contrib.get('401k', 0)
         goal_obj.save()
     except Exception as e:
         print(e)

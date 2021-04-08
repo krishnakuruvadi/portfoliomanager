@@ -1,0 +1,69 @@
+{% extends 'base.html' %} 
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'retirement_401k:account-list' %}">401K</a></li>
+    <li><a href="{% url 'retirement_401k:account-detail' id %}">{{company}}</a></li>
+    <li><a href="#">Transactions</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %}
+    <a style="padding-left:25px;" href="{% url 'retirement_401k:transaction-add' id%}"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover" id="trans-table">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Date</th>
+        <th scope="col">Employee Contribution</th>
+        <th scope="col">Employer Contribution</th>
+        <th scope="col">Units</th>
+        <th scope="col">Broker</th>
+        <th scope="col">Notes</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in trans_list %}
+      <tr>
+        <td>{{ instance.id }}</td>
+        <td>{{ instance.trans_date }}</td>
+        <td>{{ instance.employee_contribution }}</td>
+        <td>{{ instance.employer_contribution }}</td>
+        <td>{{ instance.units }}</td>
+        <td>{{ instance.broker }}</td>
+        <td>{{ instance.notes }}</td>
+        <td>
+          <a href="{% url 'retirement_401k:transaction-delete' instance.id %}" class="confirm-delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
+          <a href="{% url 'retirement_401k:transaction-edit' instance.id %}" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block javascript %}
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete this transaction?');
+    })
+</script>
+{% endblock javascript %}
+
+
+<script>
+  {% block jquery %}
+  $('#trans-table').DataTable({
+        "columnDefs": [
+            { "type": "num", "targets": [0,2,3,4] },
+            { "type": "date", "targets": [1] }
+        ],
+        "order": [[ 3, "desc" ]]
+      });
+{% endblock jquery %}
+</script>

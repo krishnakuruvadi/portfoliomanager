@@ -16,6 +16,7 @@ from shared.handle_real_time_data import get_conversion_rate, get_historical_sto
 from shared.handle_create import add_common_stock
 from mutualfunds.models import Folio, MutualFundTransaction
 from shared.financial import xirr
+from retirement_401k.helper import get_401k_amount_for_goal
 
 def get_ppf_amount_for_goal(id):
     ppf_objs = Ppf.objects.filter(goal=id)
@@ -120,10 +121,17 @@ def get_goal_contributions(goal_id):
     contrib['mf'] = int(get_mf_amount_for_goal(goal_id))
     contrib['equity'] = contrib['espp']+contrib['rsu']+contrib['shares']+contrib['mf']
     contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
-    contrib['total'] = contrib['equity'] + contrib['debt']
     contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU','Shares','MutualFunds']
     contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu'],contrib['shares'],contrib['mf']]
     contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8','#e31219','#bfff00']
+    contrib['401k'] = int(get_401k_amount_for_goal(goal_id))
+    if contrib['401k'] > 0:
+        contrib['distrib_labels'].append('401K')
+        contrib['distrib_vals'].append(contrib['401k'])
+        contrib['distrib_colors'].append('#617688')
+        contrib['equity'] += contrib['401k']
+    contrib['total'] = contrib['equity'] + contrib['debt']
+
     print("contrib:", contrib)
     return contrib
 
@@ -263,16 +271,6 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                     add_or_create(yr, 'MutualFunds',contrib, deduct, total,0,0,v*qty)
     
     curr_yr = datetime.datetime.now().year
-    '''
-    sorted_years = sorted (contrib.keys(), reverse=True)
-    for i, val in enumerate(sorted_years):
-        if i != len(sorted_years)-1:
-            for j in range (i+1, len(sorted_years)):
-                print("val", val, " j", j, " sorted_years[j]", sorted_years[j])
-                total[val]['PPF'] = total[val].get('PPF', 0) + total[sorted_years[j]].get('PPF', 0)
-                total[val]['EPF'] = total[val].get('EPF', 0) + total[sorted_years[j]].get('EPF', 0)
-                total[val]['SSY'] = total[val].get('SSY', 0) + total[sorted_years[j]].get('SSY', 0)
-    '''
     if len(contrib.keys()):
         for i in range (curr_yr, min(contrib.keys())-1, -1):
             print('i:', i)
@@ -505,26 +503,45 @@ def get_user_contributions(user_id):
     try:
         user_obj = User.objects.get(id=user_id)
         contrib = dict()
+        contrib['distrib_colors'] = list()
+        contrib['distrib_vals'] = list()
+        contrib['distrib_labels'] = list()
         contrib['target'] = int(get_goal_target_for_user(user_id))
-        contrib['epf'] = int(get_epf_amount_for_user(user_id))
-        contrib['espp'] = int(get_espp_amount_for_user(user_id))
-        contrib['fd'] = int(get_fd_amount_for_user(user_id))
-        contrib['ppf'] =int(get_ppf_amount_for_user(user_id))
-        contrib['ssy'] =int(get_ssy_amount_for_user(user_id))
-        contrib['rsu'] = int(get_rsu_amount_for_user(user_id))
-        contrib['shares'] = int(get_shares_amount_for_user(user_id))
-        contrib['mf'] = int(get_mf_amount_for_user(user_id))
-        contrib['equity'] = contrib['espp']+contrib['rsu']+contrib['shares']+contrib['mf']
-        contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
+        contrib['EPF'] = int(get_epf_amount_for_user(user_id))
+        contrib['ESPP'] = int(get_espp_amount_for_user(user_id))
+        contrib['FD'] = int(get_fd_amount_for_user(user_id))
+        contrib['PPF'] =int(get_ppf_amount_for_user(user_id))
+        contrib['SSY'] =int(get_ssy_amount_for_user(user_id))
+        contrib['RSU'] = int(get_rsu_amount_for_user(user_id))
+        contrib['Shares'] = int(get_shares_amount_for_user(user_id))
+        contrib['MutualFunds'] = int(get_mf_amount_for_user(user_id))
+        contrib['equity'] = contrib['ESPP']+contrib['RSU']+contrib['Shares']+contrib['MutualFunds']
+        contrib['debt'] = contrib['EPF'] + contrib['FD'] + contrib['PPF'] + contrib['SSY']
         contrib['total'] = contrib['equity'] + contrib['debt']
-        contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU','Shares','MutualFunds']
-        contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu'],contrib['shares'],contrib['mf']]
-        contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8','#e31219','#bfff00']
+        
+        item_color_mapping = {
+            'EPF': '#f15664',
+            'ESPP': '#DC7633',
+            'FD': '#006f75',
+            'PPF':'#92993c',
+            'SSY':'#f9c5c6', 
+            'RSU': '#AA12E8', 
+            'Shares': '#e31219', 
+            'MutualFunds': '#bfff00'
+        }
+        for k,v in item_color_mapping.items():
+            if contrib[k] > 0:
+                contrib['distrib_vals'].append(contrib[k])
+                contrib['distrib_colors'].append(v)
+                contrib['distrib_labels'].append(k)
+
         print("contrib:", contrib)
         return contrib
     except User.DoesNotExist:
         print("User with id ", user_id, " does not exist" )
         pass
+    except Exception as ex:
+        print(f"Exception getting user contribution for user with id: {str(user_id)} {ex}")
 
 # home chart view
 def get_investment_data(start_date):

@@ -44,6 +44,56 @@ class GoalDetailView(DetailView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         print(data['object'])
+        data['distribution'] = {'labels':list(), 'vals':list(), 'colors':list()}
+        has_data = False
+        if data['object'].epf_conitrib > 0:
+            data['distribution']['labels'].append('EPF')
+            data['distribution']['vals'].append(float(data['object'].epf_conitrib))
+            data['distribution']['colors'].append("#f15664")
+            has_data = True
+        if data['object'].espp_conitrib > 0:
+            data['distribution']['labels'].append('ESPP')
+            data['distribution']['vals'].append(float(data['object'].espp_conitrib))
+            data['distribution']['colors'].append("#DC7633")
+            has_data = True
+        if data['object'].fd_conitrib > 0:
+            data['distribution']['labels'].append('FD')
+            data['distribution']['vals'].append(float(data['object'].fd_conitrib))
+            data['distribution']['colors'].append("#006f75")
+            has_data = True
+        if data['object'].ppf_conitrib > 0:
+            data['distribution']['labels'].append('PPF')
+            data['distribution']['vals'].append(float(data['object'].ppf_conitrib))
+            data['distribution']['colors'].append("#92993c")
+            has_data = True
+        if data['object'].ssy_conitrib > 0:
+            data['distribution']['labels'].append('SSY')
+            data['distribution']['vals'].append(float(data['object'].ssy_conitrib))
+            data['distribution']['colors'].append("#f9c5c6")
+            has_data = True
+        if data['object'].rsu_conitrib > 0:
+            data['distribution']['labels'].append('RSU')
+            data['distribution']['vals'].append(float(data['object'].rsu_conitrib))
+            data['distribution']['colors'].append("#AA12E8")
+            has_data = True
+        if data['object'].mf_conitrib > 0:
+            data['distribution']['labels'].append('MutualFunds')
+            data['distribution']['vals'].append(float(data['object'].mf_conitrib))
+            data['distribution']['colors'].append("#bfff00")
+            has_data = True
+        if data['object'].shares_conitrib > 0:
+            data['distribution']['labels'].append('Shares')
+            data['distribution']['vals'].append(float(data['object'].shares_conitrib))
+            data['distribution']['colors'].append("#e31219")
+            has_data = True
+        if data['object'].r_401k_contribution > 0:
+            data['distribution']['labels'].append('401K')
+            data['distribution']['vals'].append(float(data['object'].r_401k_contribution))
+            data['distribution']['colors'].append("#617688")
+            has_data = True        
+        if has_data:
+            print(data['distribution'])
+
         data['user_str'] = get_user_name_from_id(data['object'].user)
         data['target_date'] = data['object'].start_date+relativedelta(months=data['object'].time_period)
         data['progress_data'] = dict()
@@ -70,6 +120,12 @@ class GoalDetailView(DetailView):
             data['status_text'] = data['status_text'] + ' Current investment of '+ str(ret.get('avg_contrib', 0)) + ' per year should grow at ' + str(growth_reqd) + '% to reach target.'
         if data['status_text'] == '':
             data['status_text'] = 'Currently investing ' + str(ret.get('avg_contrib', 0)) + ' per year.'
+            yrly_investment_reqd = get_required_yrly_investment(0,12, data['target_date'], data['object'].final_val)
+            data['status_text'] = data['status_text'] + ' If '+str(yrly_investment_reqd) + ' per year is invested at '+ str(12)
+            data['status_text'] = data['status_text'] + '% you will reach target.'
+            yrly_investment_reqd = get_required_yrly_investment(0,8, data['target_date'], data['object'].final_val)
+            data['status_text'] = data['status_text'] + ' If '+str(yrly_investment_reqd) + ' per year is invested at '+ str(8)
+            data['status_text'] = data['status_text'] + '% you will reach target.'
         print("GoalProgressData - returning:", data)
         print(data)
         return data

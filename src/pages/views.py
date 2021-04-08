@@ -26,6 +26,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
     all_target = 0
     all_achieved = 0
     all_distrib_vals = list()
+    all_distrib = dict()
 
     i = 1
     for user in users:
@@ -62,12 +63,15 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "debt_per": int(debt*100/(debt+equity+1)),
             "equity_per": int(equity*100/(debt+equity+1)),
         }
-        if len(all_distrib_vals) == 0 :
-            all_distrib_vals = [0]*len(contrib['distrib_vals'])
-        for index, val in enumerate(contrib['distrib_vals']):
-            all_distrib_vals[index] += val
-        all_distrib_labels = contrib['distrib_labels']
-        all_distrib_colors = contrib['distrib_colors']
+
+        for d in range(len(contrib['distrib_labels'])):
+            if contrib['distrib_labels'][d] not in all_distrib:
+                all_distrib[contrib['distrib_labels'][d]] = dict()
+                all_distrib[contrib['distrib_labels'][d]]['color'] = contrib['distrib_colors'][d]
+                all_distrib[contrib['distrib_labels'][d]]['amount'] = contrib['distrib_vals'][d]
+            else:
+                all_distrib[contrib['distrib_labels'][d]]['amount'] += contrib['distrib_vals'][d]
+
         i = i + 1
     if all_target > 0:
         all_remaining = all_target - all_achieved
@@ -77,6 +81,10 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         all_remaining = all_target = all_achieved = 0
         all_remaining_per = all_achieve_per = 0
 
+    for k,v in all_distrib.items():
+        all_distrib_labels.append(k)
+        all_distrib_colors.append(v['color'])
+        all_distrib_vals.append(v['amount'])
     context['all'] = {
             "debt": all_debt,
             "equity": all_equity,
@@ -113,20 +121,10 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
 
     except InvestmentData.DoesNotExist:
         pass
-    #for user in users:
-    #start_date = get_start_day_across_portfolio()
-    #context['investment_data'] = get_investment_data(start_date)
+
     print("context", context)
-    #return HttpResponse("<h1>Hello World</h1>") # string of HTML code
     return render(request, "home.html", context)
 
-'''
-class ChartData(APIView):
-    authentication_classes = []
-    permission_classes = []
-
-    def get(self, request, format=None, id=None):
-'''
 
 class GetInvestmentData(APIView):
     authentication_classes = []

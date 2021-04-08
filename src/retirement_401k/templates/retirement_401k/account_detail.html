@@ -1,0 +1,56 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+    <a style="padding-left:25px;" href="add-transaction"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'retirement_401k:account-list' %}">401K</a></li>
+    <li><a href="#">{{ company }}</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+  <table class="table table-borderless" style="width:50%">
+    <tr>
+      <td>Company</td>
+      <td>{{ company }}</td>
+    </tr>
+    <tr>
+      <td>Start Date</td>
+      <td>{{ start_date }}</td>
+    </tr>
+    <tr>
+      <td>User</td>
+      <td>{{ user }}</td>
+    </tr>
+    <tr>
+      <td>Goal</td>
+      <td>{{ goal }}</td>
+    </tr>
+    <tr>
+      <td>Employee Contribution</td>
+      <td>${{ employee_contribution }}</td>
+    </tr>
+    <tr>
+      <td>Employer Contribution</td>
+      <td>${{ employer_contribution }}</td>
+    </tr>
+    <tr>
+      <td>Total</td>
+      <td>${{ total }}</td>
+    </tr>
+    <tr>
+      <td>ROI</td>
+      <td>{{ roi }}%</td>
+    </tr>
+    <tr>
+      <td>Latest Value</td>
+      <td>{{ latest_value }}</td>
+    </tr>
+  </table>
+{% endblock content %}
+

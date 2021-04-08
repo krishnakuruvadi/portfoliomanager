@@ -107,15 +107,16 @@
 
 <script>
   {% block jquery %}
+  console.log({{distribution|safe}})
   var debt_equity_labels = ['Debt', 'Equity']
   var debt_equity = [{{ object.debt_contrib}}, {{ object.equity_contrib}}]
 
   var status_labels = ['Achieved', 'Remaining']
   var status_vals = [{{ object.achieved_amt}}, {{ object.pending_amt}}]
     
-  var distribution_vals = [{{ object.epf_conitrib }}, {{ object.espp_conitrib }}, {{ object.fd_conitrib }}, {{ object.ppf_conitrib }}, {{ object.ssy_conitrib }}, {{ object.rsu_conitrib }}, {{ object.shares_conitrib }}, {{ object.mf_conitrib }}]
-  var distribution_labels = ["EPF", "ESPP", "FD", "PPF", "SSY", "RSU", "Shares", "MutualFunds"]
-  var distribution_colors = ["#f15664","#DC7633","#006f75","#92993c","#f9c5c6","#AA12E8","#e31219","#bfff00"]
+  var distribution_vals = {{distribution.vals | safe}}
+  var distribution_labels = {{distribution.labels | safe}}
+  var distribution_colors = {{distribution.colors | safe}}
   setChart()
 
   var progress_data = {{progress_data|safe}}

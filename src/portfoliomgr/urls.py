@@ -39,7 +39,8 @@ urlpatterns = [
     path('api/chart/investmentdata/', GetInvestmentData.as_view()),
     path('alerts/', include('alerts.urls')),
     path('markets/', include('markets.urls')),
-    path('tasks/', include('tasks.urls'))
+    path('tasks/', include('tasks.urls')),
+    path('retirement_401k/', include('retirement_401k.urls'))
 ]
 
 if settings.DEBUG:

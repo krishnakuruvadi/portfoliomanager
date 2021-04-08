@@ -788,6 +788,18 @@ def pull_corporate_actions_shares():
     from shares.shares_helper import pull_and_store_corporate_actions
     pull_and_store_corporate_actions()
 
+@db_task()
+def update_401k_month_end_vals():
+    from retirement_401k.helper import reconcile_401k
+    reconcile_401k()
+
+@db_periodic_task(crontab(minute='20', hour='*/6'))
+def check_updates_pending():
+    day = datetime.date.today().day
+    if day in [1,2,3,4,5]:
+        update_401k_month_end_vals()
+
+
 '''
 #  example code below
 
