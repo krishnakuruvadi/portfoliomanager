@@ -16,7 +16,7 @@ from shared.handle_real_time_data import get_conversion_rate, get_historical_sto
 from shared.handle_create import add_common_stock
 from mutualfunds.models import Folio, MutualFundTransaction
 from shared.financial import xirr
-from retirement_401k.helper import get_401k_amount_for_goal
+from retirement_401k.helper import get_401k_amount_for_goal, get_401k_amount_for_user, get_r401k_value_as_on
 
 def get_ppf_amount_for_goal(id):
     ppf_objs = Ppf.objects.filter(goal=id)
@@ -515,7 +515,8 @@ def get_user_contributions(user_id):
         contrib['RSU'] = int(get_rsu_amount_for_user(user_id))
         contrib['Shares'] = int(get_shares_amount_for_user(user_id))
         contrib['MutualFunds'] = int(get_mf_amount_for_user(user_id))
-        contrib['equity'] = contrib['ESPP']+contrib['RSU']+contrib['Shares']+contrib['MutualFunds']
+        contrib['401K'] = int(get_401k_amount_for_user(user_id))
+        contrib['equity'] = contrib['ESPP']+contrib['RSU']+contrib['Shares']+contrib['MutualFunds']+contrib['401K']
         contrib['debt'] = contrib['EPF'] + contrib['FD'] + contrib['PPF'] + contrib['SSY']
         contrib['total'] = contrib['equity'] + contrib['debt']
         
@@ -527,7 +528,8 @@ def get_user_contributions(user_id):
             'SSY':'#f9c5c6', 
             'RSU': '#AA12E8', 
             'Shares': '#e31219', 
-            'MutualFunds': '#bfff00'
+            'MutualFunds': '#bfff00',
+            '401K': '#617688'
         }
         for k,v in item_color_mapping.items():
             if contrib[k] > 0:
@@ -555,6 +557,7 @@ def get_investment_data(start_date):
     rsu_data = list()
     shares_data = list()
     mf_data = list()
+    r401k_data = list()
     total_data = list()
 
     total_epf = 0
@@ -563,6 +566,7 @@ def get_investment_data(start_date):
 
     epf_reset_on_zero = False
     fd_reset_on_zero = False
+    r401k_reset_on_zero = False
     ppf_reset_on_zero = False
     ssy_reset_on_zero = False
     espp_reset_on_zero = False
@@ -639,6 +643,18 @@ def get_investment_data(start_date):
             fd_reset_on_zero = False
             fd_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
         
+        
+        r401k_val = get_r401k_value_as_on(data_end_date)
+        if r401k_val != 0:
+            if not r401k_reset_on_zero:
+                r401k_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
+            r401k_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':r401k_val})
+            total += r401k_val
+            r401k_reset_on_zero = True
+        elif r401k_reset_on_zero:
+            r401k_reset_on_zero = False
+            r401k_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0}) 
+
         espp_entries = Espp.objects.filter(purchase_date__lte=data_end_date)
         espp_val = 0
         for espp_entry in espp_entries:
@@ -779,16 +795,7 @@ def get_investment_data(start_date):
                 historical_mf_prices = get_historical_mf_nav(s, data_end_date+relativedelta(days=-5), data_end_date)
                 for val in historical_mf_prices:
                     found = False
-                    #print(val)
                     for k,v in val.items():
-                        #if stock_obj.exchange == 'NYSE' or stock_obj.exchange == 'NASDAQ':
-                        #    conv_val = get_conversion_rate('USD', 'INR', data_end_date)
-                            #print('conversion value', conv_val)
-                        #    if conv_val:
-                        #        share_val += float(conv_val)*float(v)*int(q)
-                        #        found = True
-                        #        break
-                        #else:
                         mf_val += float(v)*int(q)
                         found = True
                         break
@@ -815,8 +822,8 @@ def get_investment_data(start_date):
 
         data_start_date  = data_start_date+relativedelta(months=+1)
     print('shares data is:',shares_data)
-    print('returning', {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data})
+    print('returning', {'ppf':ppf_data, '401K': r401k_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data})
 
-    return {'ppf':ppf_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data}
+    return {'ppf':ppf_data, '401K': r401k_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data}
         
 
