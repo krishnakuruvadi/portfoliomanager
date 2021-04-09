@@ -102,3 +102,60 @@ def get_401k_amount_for_goal(id):
     for obj in objs:
         total += obj.latest_value
     return total
+
+def get_401k_amount_for_user(user_id):
+    objs = Account401K.objects.filter(user=user_id)
+    total = 0
+    for obj in objs:
+        if obj.latest_value:
+            total += obj.latest_value
+    return total
+
+def get_r401k_value_as_on(dt, currency='INR'):
+    '''
+    dt = input date as on type:datetime.date object
+    users = all users
+    '''
+    if dt > datetime.date.today():
+        dt = datetime.date.today()
+    objs = Account401K.objects.all()
+    total_value = 0
+    for obj in objs:
+        total_value += get_r401k_value_as_on_for_account(obj, dt, currency)
+    return total_value
+
+def get_r401k_value_as_on_for_account(account, dt, currency):
+    latest_nav = 0
+    latest_nav_date = None
+    total_units = 0
+    for trans in Transaction401K.objects.filter(account=account, trans_date__lte=dt):
+        if latest_nav == 0:
+            latest_nav = (trans.employee_contribution+trans.employer_contribution)/trans.units
+            latest_nav_date = trans.trans_date
+        total_units += trans.units
+    if total_units == 0:
+        return 0
+    #check if nav table has latest value
+    checkfrom = datetime.date(day=1,month=dt.month,year=dt.year)
+    use_month = dt.month
+    use_yr = dt.year
+    if dt.month == 12:
+        use_month = 1
+        use_yr += 1
+    else:
+        use_month += 1
+    checkto = datetime.date(day=1,month=use_month,year=use_yr)+relativedelta(days=-1)
+    print(f"checking nav history table for data between {checkfrom} and {checkto}")
+    for nav_h in NAVHistory.objects.filter(account=account, nav_date__lte=checkto, nav_date__gte=latest_nav_date).order_by('-nav_date'):
+        print(f'found newer date {nav_h.nav_date} nav {str(nav_h.nav_value)}')
+        latest_nav = nav_h.nav_value
+        latest_nav_date = nav_h.nav_date
+        break
+    fr = 1
+    if currency != 'USD':
+        fr = get_forex_rate(dt, 'USD', currency)
+    print(f'using units {str(total_units)}, forex rate {str(fr)}, nav {str(latest_nav)} on {latest_nav_date} for total calculation')
+    total_value = float(total_units) * float(latest_nav) * float(fr)
+
+    return round(total_value, 2)
+            

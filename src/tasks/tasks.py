@@ -169,6 +169,7 @@ def update_investment_data():
         all_investment_data.shares_data=investment_data['shares']
         all_investment_data.mf_data=investment_data['mf']
         all_investment_data.total_data=investment_data['total']
+        all_investment_data.r401k_data=investment_data['401K']
         all_investment_data.start_day_across_portfolio=start_date
         all_investment_data.as_on_date=datetime.datetime.now()
         all_investment_data.save()
