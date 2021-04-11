@@ -13,7 +13,12 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
-  <table class="table table-hover" id="goal-table">
+  <table class="table table-borderless">
+    <tr>
+      <td style="text-align:right"><b># of goals:</b> {{total_goals}} &nbsp;&nbsp;&nbsp;<b>Target:</b> {{target}} &nbsp;&nbsp;&nbsp;<b>Achieved:</b> {{achieved}} ({{ach_per}}%)&nbsp;&nbsp;&nbsp;<b>Unallocated:</b> {{unalloc}}
+      </tr>
+    </table>
+    <table class="table table-hover" id="goal-table">
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>

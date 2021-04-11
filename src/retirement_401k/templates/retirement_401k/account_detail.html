@@ -40,8 +40,12 @@
       <td>${{ employer_contribution }}</td>
     </tr>
     <tr>
-      <td>Total</td>
+      <td>Total Contribution</td>
       <td>${{ total }}</td>
+    </tr>
+    <tr>
+      <td>Units</td>
+      <td>{{ units }}</td>
     </tr>
     <tr>
       <td>ROI</td>
@@ -49,7 +53,15 @@
     </tr>
     <tr>
       <td>Latest Value</td>
-      <td>{{ latest_value }}</td>
+      <td>{{ latest_value }} (${{lv_dollar}})</td>
+    </tr>
+    <tr>
+      <td>Latest NAV</td>
+      <td>${{ nav }}</td>
+    </tr>
+    <tr>
+      <td>As on</td>
+      <td>{{ as_on_date }}</td>
     </tr>
   </table>
 {% endblock content %}

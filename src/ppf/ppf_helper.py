@@ -79,3 +79,10 @@ def update_ppf_vals():
         ppf_obj.interest_contribution = interest
         ppf_obj.total = self_contrib + interest
         ppf_obj.save()
+
+def get_no_goal_amount():
+    amt = 0
+    for obj in Ppf.objects.all():
+        if not obj.goal:
+            amt += 0 if not obj.total else obj.total
+    return amt

@@ -114,11 +114,14 @@ def account_detail(request, id):
     acct['total'] = account.total
     acct['notes'] = account.notes
     acct['as_on_date'] = account.nav_date
+    acct['lv_dollar'] = round(account.units*account.nav, 2)
+    acct['units'] = account.units
     acct['latest_value'] = account.latest_value
     if account.goal:
         acct['goal'] = get_goal_name_from_id(account.goal)
     acct['user'] = get_user_name_from_id(account.user)
     acct['roi'] = account.roi
+    acct['nav'] = account.nav
     return render(request, template_name, acct)
 
 def get_transactions(request, id):

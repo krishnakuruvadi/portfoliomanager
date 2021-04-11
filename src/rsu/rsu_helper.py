@@ -73,4 +73,10 @@ def get_rsu_award_latest_vals():
             ret[rsu_award.id]['shares_vested'] = shares_vested
     return ret
 
-
+def get_no_goal_amount():
+    amt = 0
+    for obj in RSUAward.objects.all():
+        if not obj.goal:
+            for rsu_obj in RestrictedStockUnits.objects.filter(award=obj):
+                amt += 0 if not rsu_obj.latest_value else rsu_obj.latest_value
+    return amt

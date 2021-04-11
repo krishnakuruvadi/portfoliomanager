@@ -159,3 +159,10 @@ def get_r401k_value_as_on_for_account(account, dt, currency):
 
     return round(total_value, 2)
             
+
+def get_no_goal_amount():
+    amt = 0
+    for obj in Account401K.objects.all():
+        if not obj.goal:
+            amt += 0 if not obj.latest_value else obj.latest_value
+    return amt

@@ -5,6 +5,7 @@ import csv
 import codecs
 from contextlib import closing
 from shared.handle_real_time_data import get_latest_vals, get_forex_rate
+from .models import Espp
 
 def update_latest_vals(espp_obj):
     start = datetime.date.today()+relativedelta(days=-5)
@@ -30,3 +31,10 @@ def update_latest_vals(espp_obj):
                         espp_obj.gain = float(espp_obj.latest_value) - float(espp_obj.total_purchase_price)
     espp_obj.save()
     print('done with update request')
+
+def get_no_goal_amount():
+    amt = 0
+    for obj in Espp.objects.all():
+        if not obj.goal:
+            amt += 0 if not obj.latest_value else obj.latest_value
+    return amt

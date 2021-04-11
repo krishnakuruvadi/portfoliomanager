@@ -41,3 +41,10 @@ def update_epf_vals():
         epf_obj.total = res['total']
         epf_obj.roi = res['roi']
         epf_obj.save()
+
+def get_no_goal_amount():
+    amt = 0
+    for obj in Epf.objects.all():
+        if not obj.goal:
+            amt += 0 if not obj.total else obj.total
+    return amt

@@ -9,7 +9,7 @@ from django.template import Context
 from django.http import HttpResponseRedirect
 from decimal import Decimal
 from .models import Goal
-from .goal_helper import one_time_pay_final_val, add_goal_entry, get_corpus_to_be_saved, get_depletion_vals
+from .goal_helper import one_time_pay_final_val, add_goal_entry, get_corpus_to_be_saved, get_depletion_vals, get_unallocated_amount
 from dateutil.relativedelta import relativedelta
 from ppf.models import Ppf, PpfEntry
 
@@ -25,12 +25,21 @@ from shared.financial import *
 
 class GoalListView(ListView):
     template_name = 'goals/goal_list.html'
-    queryset = Goal.objects.all() # <blog>/<modelname>_list.html
+    queryset = Goal.objects.all()
     
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         print(data)
         data['user_name_mapping'] = get_all_users()
+        data['total_goals'] = len(self.queryset)
+        data['target'] = 0
+        data['achieved'] = 0
+        for g in self.queryset:
+            data['target'] += g.final_val
+            data['achieved'] += g.achieved_amt
+        data['ach_per'] = round(data['achieved']*100/data['target'],2)
+        data['unalloc'] = get_unallocated_amount()
+        print(data)
         return data
 
 class GoalDetailView(DetailView):

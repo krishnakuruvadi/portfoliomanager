@@ -582,3 +582,10 @@ def pull_and_store_corporate_actions():
             print(f'not supported exchange {share.exchange}')
     process_corporate_actions()
     store_corporate_actions()
+
+def get_no_goal_amount():
+    amt = 0
+    for obj in Share.objects.all():
+        if not obj.goal:
+            amt += 0 if not obj.latest_value else obj.latest_value
+    return amt
