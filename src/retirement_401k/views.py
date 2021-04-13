@@ -7,7 +7,7 @@ from shared.utils import *
 from goal.goal_helper import get_goal_id_name_mapping_for_user
 from django.http import HttpResponseRedirect
 from django.views.generic import DeleteView
-from .helper import reconcile_401k, create_nav_file, remove_nav_file
+from .helper import reconcile_401k, create_nav_file, remove_nav_file, get_yearly_contribution
 # Create your views here.
 
 
@@ -82,6 +82,9 @@ def get_accounts(request):
     accounts = Account401K.objects.all()
     context = dict()
     context['accounts'] = list()
+    total_investment = 0
+    latest_value = 0
+    total_gain = 0
     for account in accounts:
         acct = dict()
         acct['id'] = account.id
@@ -98,8 +101,20 @@ def get_accounts(request):
         acct['user'] = get_user_name_from_id(account.user)
         acct['total'] = account.total
         acct['roi'] = account.roi
+        acct['gain'] = account.gain
         context['accounts'].append(acct)
+        total_investment += float(account.employee_contribution + account.employer_contribution)
+        latest_value += float(account.latest_value)
+        total_gain += float(account.gain)
+    total_investment = latest_value - total_gain
+    context['total_investment'] = total_investment
+    context['latest_value'] = latest_value
+    context['total_gain'] = total_gain
     return render(request, template_name, context)
+
+def links(request):
+    template = 'retirement_401k/links.html'
+    return render(request, template)
 
 def account_detail(request, id):
     template_name = 'retirement_401k/account_detail.html'
@@ -122,6 +137,12 @@ def account_detail(request, id):
     acct['user'] = get_user_name_from_id(account.user)
     acct['roi'] = account.roi
     acct['nav'] = account.nav
+    chart_data = get_yearly_contribution(id)
+    acct['years'] = chart_data['years']
+    acct['er_vals'] = chart_data['er']
+    acct['em_vals'] = chart_data['em']
+    acct['in_vals'] = chart_data['int']
+    acct['total_vals'] = chart_data['total']
     return render(request, template_name, acct)
 
 def get_transactions(request, id):

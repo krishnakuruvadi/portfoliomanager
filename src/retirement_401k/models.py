@@ -18,7 +18,8 @@ class Account401K(models.Model):
     nav = models.DecimalField(max_digits=20, decimal_places=6, null=True, default=0)
     nav_date = models.DateField(null=True, blank=True)
     latest_value = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
-    
+    gain = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+
     def get_absolute_url(self):
         return reverse("retirement_401k:account-detail", kwargs={'id': self.id})
 

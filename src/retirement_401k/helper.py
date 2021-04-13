@@ -39,7 +39,9 @@ def reconcile_401k():
             if nav_date > latest_date:
                 latest_date = nav_date
                 latest_nav = nav_value
-            account.latest_value = float(latest_nav)*float(account.units)*get_forex_rate(latest_date, 'USD', 'INR')
+            fx = get_forex_rate(latest_date, 'USD', 'INR')
+            account.latest_value = float(latest_nav)*float(account.units)*fx
+            account.gain = float(account.latest_value) - float(account.total)*fx
             if len(cash_flows) > 1:
                 cash_flows.append((latest_date, float(latest_nav)*float(account.units)))
                 roi = xirr(cash_flows, 0.1)*100
@@ -166,3 +168,48 @@ def get_no_goal_amount():
         if not obj.goal:
             amt += 0 if not obj.latest_value else obj.latest_value
     return amt
+
+def get_yearly_contribution(id, currency='INR'):
+    data =dict()
+    years = list()
+    er_contrib = list()
+    em_contrib = list()
+    int_contrib = list()
+    total = list()
+    try:
+        account = Account401K.objects.get(id=id)
+        for trans in Transaction401K.objects.filter(account=account).order_by('trans_date'):
+            yr = trans.trans_date.year
+            if yr not in years:
+                years.append(yr)
+                er_contrib.append(0)
+                em_contrib.append(0)
+                int_contrib.append(0)
+                total.append(0)
+            ind = years.index(yr)
+            er_contrib[ind] += float(trans.employer_contribution)
+            em_contrib[ind] += float(trans.employee_contribution)
+        
+        for i, yr in enumerate(years):
+            dt = datetime.date(year=yr, month=12, day=31)
+            if dt > datetime.date.today():
+                dt = datetime.date.today()
+            total[i] = int(get_r401k_value_as_on_for_account(account, dt, currency))
+            fr = get_forex_rate(dt, 'USD', currency)
+            er_contrib[i] *= fr
+            em_contrib[i] *= fr
+            er_contrib[i] = int(er_contrib[i])
+            em_contrib[i] = int(em_contrib[i])
+            if i != 0:
+                int_contrib[i] = total[i] - total[i-1] - em_contrib[i] - er_contrib[i]
+            else:
+                int_contrib[i] = total[i] - em_contrib[i] - er_contrib[i]
+        data['years'] = years
+        data['er'] = er_contrib
+        data['em'] = em_contrib
+        data['int'] = int_contrib
+        data['total'] = total
+
+    except Account401K.DoesNotExist:
+        print(f'no object with id {str(id)}) found')
+    return data

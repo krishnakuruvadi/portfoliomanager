@@ -1,0 +1,36 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">401K</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add 401K Account" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-borderless">
+    <tr>
+        <td><ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link " href="{%url 'retirement_401k:account-list' %}">Accounts</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="links">Links</a>
+        </li>
+        </ul></td>
+    </tr>
+    <tr></tr>
+  </table>
+  <table class="table table-hover" id="accounts-table">
+    <tbody>
+      <tr>
+          <a href="https://www.investopedia.com/terms/1/401kplan.asp" target="_blank" rel="noopener noreferrer">Investopedia: 401(k) plans: The Complete Guide</a> 
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}
+

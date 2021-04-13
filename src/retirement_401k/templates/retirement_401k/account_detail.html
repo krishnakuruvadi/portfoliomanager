@@ -14,55 +14,111 @@
 {% endblock viewname %}
 
 {% block content %}
-  <table class="table table-borderless" style="width:50%">
-    <tr>
-      <td>Company</td>
-      <td>{{ company }}</td>
-    </tr>
-    <tr>
-      <td>Start Date</td>
-      <td>{{ start_date }}</td>
-    </tr>
-    <tr>
-      <td>User</td>
-      <td>{{ user }}</td>
-    </tr>
-    <tr>
-      <td>Goal</td>
-      <td>{{ goal }}</td>
-    </tr>
-    <tr>
-      <td>Employee Contribution</td>
-      <td>${{ employee_contribution }}</td>
-    </tr>
-    <tr>
-      <td>Employer Contribution</td>
-      <td>${{ employer_contribution }}</td>
-    </tr>
-    <tr>
-      <td>Total Contribution</td>
-      <td>${{ total }}</td>
-    </tr>
-    <tr>
-      <td>Units</td>
-      <td>{{ units }}</td>
-    </tr>
-    <tr>
-      <td>ROI</td>
-      <td>{{ roi }}%</td>
-    </tr>
-    <tr>
-      <td>Latest Value</td>
-      <td>{{ latest_value }} (${{lv_dollar}})</td>
-    </tr>
-    <tr>
-      <td>Latest NAV</td>
-      <td>${{ nav }}</td>
-    </tr>
-    <tr>
-      <td>As on</td>
-      <td>{{ as_on_date }}</td>
-    </tr>
-  </table>
+  <div class="row">
+    <div class='col-sm-6'>
+      <table class="table table-borderless">
+        <tr>
+          <td>Company</td>
+          <td>{{ company }}</td>
+        </tr>
+        <tr>
+          <td>Start Date</td>
+          <td>{{ start_date }}</td>
+        </tr>
+        <tr>
+          <td>User</td>
+          <td>{{ user }}</td>
+        </tr>
+        <tr>
+          <td>Goal</td>
+          <td>{{ goal }}</td>
+        </tr>
+        <tr>
+          <td>Employee Contribution</td>
+          <td>${{ employee_contribution }}</td>
+        </tr>
+        <tr>
+          <td>Employer Contribution</td>
+          <td>${{ employer_contribution }}</td>
+        </tr>
+        <tr>
+          <td>Total Contribution</td>
+          <td>${{ total }}</td>
+        </tr>
+        <tr>
+          <td>Units</td>
+          <td>{{ units }}</td>
+        </tr>
+        <tr>
+          <td>ROI</td>
+          <td>{{ roi }}%</td>
+        </tr>
+        <tr>
+          <td>Latest Value</td>
+          <td>{{ latest_value }} (${{lv_dollar}})</td>
+        </tr>
+        <tr>
+          <td>Latest NAV</td>
+          <td>${{ nav }}</td>
+        </tr>
+        <tr>
+          <td>As on</td>
+          <td>{{ as_on_date }}</td>
+        </tr>
+      </table>
+    </div>
+    <div class='col-sm-6'>
+      <canvas id="bar-vertical" width="800" height = "450"></canvas>
+    </div>
+  </div>
 {% endblock content %}
+
+<script>
+  {% block jquery %}
+    {%if years %}
+        setChart({{years|safe}}, {{er_vals|safe}}, {{em_vals|safe}}, {{in_vals|safe}}, {{total_vals|safe}})
+    {% endif %}
+    function setChart(years, er_vals, em_vals, in_vals, total_vals) {
+      console.log(years)
+      console.log(er_vals)
+      console.log(em_vals)
+      console.log(in_vals)
+      console.log(total_vals)
+      new Chart(document.getElementById("bar-vertical"), {
+        type: 'bar',
+        data: {
+          labels: years,
+          datasets: [
+            {
+              label: "Employee Contribution",
+              backgroundColor: "#3e95cd",
+              data: em_vals
+            }, 
+            {
+              label: "Employer Contribution",
+              backgroundColor: "#8e5ea2",
+              data: er_vals
+            },
+            {
+              label: "Interest Contribution",
+              backgroundColor: "#bfff00",
+              data: in_vals
+            },
+            {
+              label: "Total",
+              backgroundColor: "#dc7633",
+              data: total_vals
+            }
+          ]
+        },
+        options: {
+          title: {
+            display: true,
+            text: 'Contribution (approx)'
+          }
+        }
+      });
+    }
+  {% endblock jquery %}
+</script>
 
