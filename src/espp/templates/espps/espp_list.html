@@ -13,6 +13,11 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
+  <table class="table table-borderless">
+    <tr>
+      <td style="text-align:right"><b>Current Investment:</b> {{current_investment}} &nbsp;&nbsp;&nbsp;<b>Current Value:</b> {{latest_value}} &nbsp;&nbsp;&nbsp;<b>Unrealised Gain:</b> {{unrealised_gain}} &nbsp;&nbsp;&nbsp;<b>Realised Gain:</b> {{realised_gain}}</td>
+    </tr>
+  </table>
   <table class="table table-hover" id="espp-table">
     <thead class="thead-dark">
       <tr>
@@ -63,7 +68,8 @@
   {% block jquery %}
   $('#espp-table').DataTable({
         "columnDefs": [
-            { "type": "num", "targets": [0,3,4,5,8,9,10,12] }
+            { "type": "num", "targets": [0,3,4,5,8,9,10,12] },
+            { "type": "date", "targets": [1]}
         ]
       });
 {% endblock jquery %}

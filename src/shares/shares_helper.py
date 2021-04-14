@@ -396,12 +396,12 @@ def reconcile_share(share_obj):
     for trans in transactions:
         print(f"start at {str(quantity)}")
         if last_trans and quantity>0:
-            bonus = Bonus.objects.filter(exchange=share_obj.exchange, symbol=share_obj.symbol, date__lte=trans.trans_date, date__gte=last_trans.trans_date)
+            bonus = Bonus.objects.filter(exchange='NSE' if share_obj.exchange == 'NSE/BSE' else share_obj.exchange, symbol=share_obj.symbol, date__lte=trans.trans_date, date__gte=last_trans.trans_date)
             for b in bonus:
                 quantity = quantity + (quantity*b.ratio_num)/b.ratio_denom
                 if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
                     quantity = int(quantity)
-            split = Split.objects.filter(exchange=share_obj.exchange, symbol=share_obj.symbol, date__lte=trans.trans_date, date__gte=last_trans.trans_date)
+            split = Split.objects.filter(exchange='NSE' if share_obj.exchange == 'NSE/BSE' else share_obj.exchange, symbol=share_obj.symbol, date__lte=trans.trans_date, date__gte=last_trans.trans_date)
             for s in split:
                 quantity = (quantity*s.ratio_denom)/s.ratio_num
                 if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
@@ -422,12 +422,12 @@ def reconcile_share(share_obj):
     if quantity > 0:
         sqty = quantity
         if last_trans:
-            bonus = Bonus.objects.filter(exchange=share_obj.exchange, symbol=share_obj.symbol, date__lte=datetime.date.today(), date__gte=last_trans.trans_date)
+            bonus = Bonus.objects.filter(exchange='NSE' if share_obj.exchange == 'NSE/BSE' else share_obj.exchange, symbol=share_obj.symbol, date__lte=datetime.date.today(), date__gte=last_trans.trans_date)
             for b in bonus:
                 quantity = quantity + (quantity*b.ratio_num)/b.ratio_denom
                 if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
                     quantity = int(quantity)
-            split = Split.objects.filter(exchange=share_obj.exchange, symbol=share_obj.symbol, date__lte=datetime.date.today(), date__gte=last_trans.trans_date)
+            split = Split.objects.filter(exchange='NSE' if share_obj.exchange == 'NSE/BSE' else share_obj.exchange, symbol=share_obj.symbol, date__lte=datetime.date.today(), date__gte=last_trans.trans_date)
             for s in split:
                 quantity = (quantity*s.ratio_denom)/s.ratio_num
                 if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:

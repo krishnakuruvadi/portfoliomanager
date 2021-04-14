@@ -284,12 +284,15 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
 
     total_contribution = 0
     total_years = 0
+    last_yr_contrib = 0
     if len(contrib.keys()):
         for yr in range(curr_yr, min(contrib.keys())-1, -1):
             total_years += 1
             if yr in contrib:
                 for _,amt in contrib[yr].items():
                     total_contribution += amt
+                    if yr == datetime.date.today().year -1:
+                        last_yr_contrib += amt
     #print('total @299', total)
     if total_contribution:        
         avg_contrib = total_contribution/total_years
@@ -301,20 +304,27 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
         cash_flows = sort_set(cash_flows)
         print('cash flows', cash_flows)
         #calc_avg_growth = (latest_value-total_contribution)/(total_contribution*total_years)
-        calc_avg_growth = xirr(cash_flows, 0.1)
+        calc_avg_growth = None
+        try:
+            calc_avg_growth = xirr(cash_flows, 0.1)
+        except Exception as ex:
+            print(f'Exception {ex} when finding XIRR')
 
         if expected_return:
             avg_growth = expected_return/100
         else:
             avg_growth = calc_avg_growth
+        
         goal_obj = Goal.objects.get(id=goal_id)
         goal_end_date = goal_obj.start_date+relativedelta(months=goal_obj.time_period)
         print('*************')
         ret['goal_end_date'] = goal_end_date
-        ret['avg_growth'] = int(calc_avg_growth*100)
+        if calc_avg_growth:
+            ret['avg_growth'] = int(calc_avg_growth*100)
         ret['latest_value'] = latest_value
         ret['total_contribution'] = total_contribution
         ret['avg_contrib'] = int(avg_contrib)
+        ret['last_yr_contrib'] = int(last_yr_contrib)
         print(ret)
         print('*************')
 

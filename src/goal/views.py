@@ -127,6 +127,10 @@ class GoalDetailView(DetailView):
         if ret.get('avg_contrib', 0) > 0:
             growth_reqd = get_required_xirr(total_contribution, ret.get('avg_contrib', 0), data['target_date'], data['object'].final_val)
             data['status_text'] = data['status_text'] + ' Current investment of '+ str(ret.get('avg_contrib', 0)) + ' per year should grow at ' + str(growth_reqd) + '% to reach target.'
+        if ret.get('last_yr_contrib', 0)>0:
+            growth_reqd = get_required_xirr(total_contribution, ret.get('last_yr_contrib', 0), data['target_date'], data['object'].final_val)
+            data['status_text'] = data['status_text'] + ' Last year investment of '+ str(ret.get('last_yr_contrib', 0)) + ' per year should grow at ' + str(growth_reqd) + '% to reach target.'
+ 
         if data['status_text'] == '':
             data['status_text'] = 'Currently investing ' + str(ret.get('avg_contrib', 0)) + ' per year.'
             yrly_investment_reqd = get_required_yrly_investment(0,12, data['target_date'], data['object'].final_val)

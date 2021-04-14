@@ -16,6 +16,7 @@ from shared.handle_get import *
 from shared.handle_create import add_common_stock
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from shared.financial import xirr
 
 class EsppCreateView(CreateView):
     template_name = 'espps/espp_create.html'
@@ -51,6 +52,21 @@ class EsppListView(ListView):
         print(data)
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
         data['user_name_mapping'] = get_all_users()
+        current_investment = 0
+        latest_value = 0
+        unrealised_gain = 0
+        realised_gain = 0
+        for obj in self.queryset:
+            if obj.sell_date:
+                realised_gain += obj.total_sell_price - obj.total_purchase_price
+            else:
+                current_investment += obj.total_purchase_price
+                unrealised_gain += obj.latest_value - obj.total_purchase_price
+                latest_value += obj.latest_value
+        data['current_investment'] = current_investment
+        data['latest_value'] = latest_value
+        data['unrealised_gain'] = unrealised_gain
+        data['realised_gain'] = realised_gain
         return data
 
 class EsppDeleteView(DeleteView):
@@ -76,6 +92,16 @@ class EsppDetailView(DetailView):
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
+        obj = data['object']
+        cash_flows = list()
+        cash_flows.append((obj.purchase_date, -1*float(obj.total_purchase_price)))
+        if obj.sell_date:
+            cash_flows.append((obj.sell_date, float(obj.total_sell_price)))
+        else:
+            cash_flows.append((obj.as_on_date, float(obj.latest_value)))
+        roi = xirr(cash_flows, 0.1)*100
+        roi = round(roi, 2)
+        data['roi'] = roi
         return data
 
 class EsppUpdateView(UpdateView):
