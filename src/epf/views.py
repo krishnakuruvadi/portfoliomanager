@@ -15,6 +15,8 @@ from dateutil.relativedelta import relativedelta
 from shared.handle_get import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from shared.utils import get_date_or_none_from_string
+from .epf_helper import get_summary_for_range
 
 
 # Create your views here.
@@ -81,7 +83,7 @@ class EpfUpdateView(UpdateView):
         print(form.cleaned_data)
         return super().form_valid(form)
 
-def get_fy_details(fy):
+def get_fy_details(epf_obj, fy):
     print('retrieving data for fy', fy)
     month_abbr = ['apr_', 'may_', 'jun_', 'jul_', 'aug_', 'sep_', 'oct_', 'nov_', 'dec_', 'jan_', 'feb_', 'mar_']
     datetime_str = '04/01/' + fy
@@ -90,7 +92,7 @@ def get_fy_details(fy):
     for i in range(len(month_abbr)):
         date = datetime_object+relativedelta(months=i)
         try:
-            contrib = EpfEntry.objects.get(trans_date=date)
+            contrib = EpfEntry.objects.get(epf_id=epf_obj, trans_date=date)
             ret[month_abbr[i] + 'int'] = int(contrib.interest_contribution)
             ret[month_abbr[i] + 'er'] = int(contrib.employer_contribution)
             ret[month_abbr[i] + 'em'] = int(contrib.employee_contribution)
@@ -116,7 +118,8 @@ def show_contributions(request, id, year=None):
     start_date = str(year) + "-04-01"
     end_date = str(year+1) + "-03-31"
     fy = str(year) + '-' + str(year+1)[2:]
-    contribs = EpfEntry.objects.filter(trans_date__range=[start_date, end_date])
+     # inclusive. SQL equivalent: SELECT ... WHERE pub_date BETWEEN '2005-01-01' and '2005-03-31';
+    contribs = EpfEntry.objects.filter(epf_id=epf_obj, trans_date__range=[start_date, end_date])
     fy_trans = list()
     for contrib in contribs:
         entry = dict()
@@ -125,8 +128,12 @@ def show_contributions(request, id, year=None):
         entry['er_contrib'] = contrib.employer_contribution
         entry['interest'] = contrib.interest_contribution
         fy_trans.append(entry)
-     
-    context = {'fy_trans':fy_trans, 'object': {'number':epf_obj.number, 'id':epf_obj.id, 'company':epf_obj.company, 'fy':fy}}
+    summ = get_summary_for_range(epf_obj, get_date_or_none_from_string(start_date), get_date_or_none_from_string(end_date))
+    context = {'fy_trans':fy_trans, 
+                'object': {'number':epf_obj.number, 'id':epf_obj.id, 'company':epf_obj.company, 'fy':fy},
+                'start_amount': summ['start_amt'], 'end_amount': summ['end_amount'], 'employee_contribution': summ['employee_contrib'],
+                'employer_contribution': summ['employer_contrib'], 'interest_contribution':summ['interest_contrib']
+                }
     if epf_start_year < year:
         context['prev_link'] = '../transactions/'+str(year-epf_start_year-1)
     else:
@@ -171,7 +178,7 @@ def add_contribution(request, id):
                 if (interest + employee + employer) > 0:
                     date = datetime_object+relativedelta(months=i)
                     try:
-                        contrib = EpfEntry.objects.get(trans_date=date)
+                        contrib = EpfEntry.objects.get(epf_id=epf_obj, trans_date=date)
                         contrib.employee_contribution = employee
                         contrib.employer_contribution = employer
                         contrib.interest_contribution = interest
@@ -186,7 +193,7 @@ def add_contribution(request, id):
             print("fetch button pressed")
             fy = request.POST.get('fy')
             if fy != 'Select':
-                context = get_fy_details(fy[0:4])
+                context = get_fy_details(epf_obj, fy[0:4])
                 context['fy_list']=fy_list
                 context['sel_fy'] = fy
                 context['object'] = {'id':epf_obj.id, 'number':epf_obj.number, 'company':epf_obj.company}

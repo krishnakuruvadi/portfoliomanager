@@ -15,6 +15,12 @@
 {% endblock viewname %}
 
 {% block content %}
+    <table class="table table-borderless">
+        <tr>
+            <td style="text-align:right"><b>Start:</b> {{start_amount}} &nbsp;&nbsp;&nbsp;<b>End:</b> {{end_amount}} &nbsp;&nbsp;&nbsp;<b>Employee:</b> {{employee_contribution}} &nbsp;&nbsp;&nbsp;<b>Employer:</b> {{employer_contribution}} &nbsp;&nbsp;&nbsp;<b>Interest:</b> {{interest_contribution}}</td>
+        </tr>
+    </table>
+
     <table class="table table-striped">
         <thead>
             <tr>

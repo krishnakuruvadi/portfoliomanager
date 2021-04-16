@@ -40,7 +40,8 @@ urlpatterns = [
     path('alerts/', include('alerts.urls')),
     path('markets/', include('markets.urls')),
     path('tasks/', include('tasks.urls')),
-    path('retirement_401k/', include('retirement_401k.urls'))
+    path('retirement_401k/', include('retirement_401k.urls')),
+    path('tax/', include('tax.urls'))
 ]
 
 if settings.DEBUG:

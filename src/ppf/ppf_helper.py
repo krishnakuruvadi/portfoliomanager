@@ -86,3 +86,39 @@ def get_no_goal_amount():
         if not obj.goal:
             amt += 0 if not obj.total else obj.total
     return amt
+
+def get_summary_for_range(ppf_obj, start_date, end_date):
+    print(f'getting summary for {ppf_obj.number} between {start_date} and {end_date}')
+    start_amount = 0
+
+    if end_date > datetime.date.today():
+        end_date = datetime.date.today()
+
+    if start_date < ppf_obj.start_date:
+        start_date = ppf_obj.start_date
+    else:
+        contribs = PpfEntry.objects.filter(number=ppf_obj, trans_date__range=[ppf_obj.start_date, start_date])
+        for c in contribs:
+            start_amount += round(float(c.amount), 2)
+    
+    c = 0
+    int_c = 0
+    contribs = PpfEntry.objects.filter(number=ppf_obj, trans_date__range=[start_date, end_date])
+    for contrib in contribs:
+        if contrib.interest_component:
+            int_c += float(contrib.amount)
+        else:
+            c += float(contrib.amount)
+    end_amount =  start_amount +  c  + int_c
+    data = dict()
+    data['start_amt'] = start_amount
+    data['end_amount'] = end_amount
+    data['contrib'] = c
+    data['interest_contrib'] = int_c
+    return data
+
+def get_tax_for_user(user_id, start_date, end_date):
+    data = dict()
+    for ppf_obj in Ppf.objects.filter(user=user_id):
+        data[ppf_obj.number] = get_summary_for_range(ppf_obj, start_date, end_date)
+    return data

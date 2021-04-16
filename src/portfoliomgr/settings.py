@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'alerts',
     'pages',
     'markets',
-    'retirement_401k'
+    'retirement_401k',
+    'tax'
 ]
 
 MIDDLEWARE = [
@@ -92,6 +93,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "tasks"),
     os.path.join(BASE_DIR, "retirement_401k"),
     os.path.join(BASE_DIR, "markets"),
+    os.path.join(BASE_DIR, "tax"),
     os.path.join(BASE_DIR, "static"),
 ]
 

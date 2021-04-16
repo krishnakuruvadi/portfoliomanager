@@ -1,0 +1,195 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'tax:tax-home' %}">Tax</a></li>
+    <li><a href="#">Tax Details</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6'>
+
+        <div class="form-group row">
+          <label for="user" class="col-sm-3 col-form-label">User</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_user" name="user" class="form-control"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="Country" class="col-sm-3 col-form-label">Country</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_country" name="country" class="form-control">
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="user" class="col-sm-3 col-form-label">Year</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_year" name="year" class="form-control"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" id="submit" name="submit">Submit</button>
+              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  {% if user_name %}
+  <hr>
+  <h5>{{user_name}} - {{year}} ({{from_date}} to {{to_date}}) - {{country}}</h5>
+  <hr>
+  {% endif %}
+  {% if data.epf %}
+    <h5>EPF</h5>
+    <table class="table table-hover">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Account</th>
+          <th scope="col">Start Amount</th>
+          <th scope="col">Employee Contribution</th>
+          <th scope="col">Employer Contribution</th>
+          <th scope="col">Interest</th>
+          <th scope="col">Final Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for e in data.epf %}
+        <tr>
+          <td>{{forloop.counter}}</td>
+          <td>{{e}}</td>
+          <td>{{data.epf|lookup:e|lookup:'start_amt'}}</td>
+          <td>{{data.epf|lookup:e|lookup:'employee_contrib'}}</td>
+          <td>{{data.epf|lookup:e|lookup:'employer_contrib'}}</td>
+          <td>{{data.epf|lookup:e|lookup:'interest_contrib'}}</td>
+          <td>{{data.epf|lookup:e|lookup:'end_amount'}}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+  {% if data.ppf %}
+  <h5>PPF</h5>
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Account</th>
+        <th scope="col">Start Amount</th>
+        <th scope="col">Contribution</th>
+        <th scope="col">Interest</th>
+        <th scope="col">Final Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for e in data.ppf %}
+      <tr>
+        <td>{{forloop.counter}}</td>
+        <td>{{e}}</td>
+        <td>{{data.ppf|lookup:e|lookup:'start_amt'}}</td>
+        <td>{{data.ppf|lookup:e|lookup:'contrib'}}</td>
+        <td>{{data.ppf|lookup:e|lookup:'interest_contrib'}}</td>
+        <td>{{data.ppf|lookup:e|lookup:'end_amount'}}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+{% endblock content %}
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    set_user_list({{users|safe}}, '{{user|safe}}');
+    set_years_list({{years|safe}}, '{{year|safe}}');
+    
+    var country = '{{country|safe}}';
+    var cntrydropdown = document.getElementById('id_country');
+    var countries = ['', 'India', 'USA'];
+    countries.forEach(function(item, index, array) {
+      console.log(item, index)
+      var opt = document.createElement('option');
+      opt.appendChild( document.createTextNode(item) );
+      opt.value = item;
+      if (country != '') {
+        if (item == country) {
+          opt.selected = true;
+        }
+      }
+      cntrydropdown.appendChild(opt);
+    })
+    setSubmitButtonStatus();
+
+    $("#id_user").change(function () {
+      setSubmitButtonStatus();
+    });
+    $("#id_country").change(function () {
+      setSubmitButtonStatus();
+    });
+    $("#id_year").change(function () {
+      setSubmitButtonStatus();
+    });
+
+    function setSubmitButtonStatus() {
+      var c = document.getElementById("id_country").value;
+      console.log(c)
+      var u = document.getElementById("id_user").value;
+      var y = document.getElementById("id_year").value;
+
+      document.getElementById('submit').disabled=true;
+      if (c != '' && u !='' && y !='') {
+        document.getElementById('submit').disabled=false;
+      }
+    }
+
+    function set_years_list(years, sel_year) {
+      $('#id_year').empty();
+      $('#id_year')
+          .append($('<option>', { value : '' })
+          .text(''));
+      var yeardropdown = document.getElementById('id_year');
+
+      console.log(years);
+      console.log(sel_year)
+      for (x in years) {
+          year = years[x]
+          // create new option element
+          var opt = document.createElement('option');
+          // create text node to add to option element (opt)
+          opt.appendChild( document.createTextNode(year) );
+          // set value property of opt
+          opt.value = year;
+          if (opt.value == sel_year) {
+            opt.selected = true;
+          }
+          // add opt to end of select box (sel)
+          yeardropdown.appendChild(opt);
+      }
+    }
+
+  </script>
+{% endblock %}

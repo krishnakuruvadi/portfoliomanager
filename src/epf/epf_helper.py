@@ -48,3 +48,40 @@ def get_no_goal_amount():
         if not obj.goal:
             amt += 0 if not obj.total else obj.total
     return amt
+
+def get_summary_for_range(epf_obj, start_date, end_date):
+    print(f'getting summary for {epf_obj.number} between {start_date} and {end_date}')
+    start_amount = 0
+
+    if end_date > datetime.date.today():
+        end_date = datetime.date.today()
+
+    if start_date < epf_obj.start_date:
+        start_date = epf_obj.start_date
+    else:
+        contribs = EpfEntry.objects.filter(epf_id=epf_obj, trans_date__range=[epf_obj.start_date, start_date])
+        for c in contribs:
+            start_amount += round(float(c.employee_contribution + c.employer_contribution + c.interest_contribution - c.withdrawl), 2)
+    
+    ee_c = 0
+    er_c = 0
+    int_c = 0
+    contribs = EpfEntry.objects.filter(epf_id=epf_obj, trans_date__range=[start_date, end_date])
+    for contrib in contribs:
+        ee_c += float(contrib.employee_contribution)
+        er_c += float(contrib.employer_contribution)
+        int_c += float(contrib.interest_contribution)
+    end_amount =  start_amount +  ee_c +  er_c + int_c
+    data = dict()
+    data['start_amt'] = start_amount
+    data['end_amount'] = end_amount
+    data['employee_contrib'] = ee_c
+    data['employer_contrib'] = er_c
+    data['interest_contrib'] = int_c
+    return data
+
+def get_tax_for_user(user_id, start_date, end_date):
+    data = dict()
+    for epf_obj in Epf.objects.filter(user=user_id):
+        data[epf_obj.number] = get_summary_for_range(epf_obj, start_date, end_date)
+    return data
