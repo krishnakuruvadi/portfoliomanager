@@ -552,7 +552,7 @@ def update_scroll_data():
                     scroll_item.save()
         else:
             print(f'no data for NSE {item}')
-    n = Nasdaq('')
+    n = Nasdaq('', None)
     data = n.get_all_index()
     if data:
         print(f"data {data}")

@@ -9,6 +9,7 @@ from shared.financial import xirr
 from alerts.alert_helper import create_alert, Severity
 from os.path import isfile
 import csv
+from shared.handle_real_time_data import get_historical_nearest_mf_nav
 
 def mf_add_transactions(broker, user, full_file_path):
     print('inside mf_add_transactions', broker, user, full_file_path)
@@ -253,3 +254,106 @@ def get_no_goal_amount():
         if not obj.goal:
             amt += 0 if not obj.latest_value else obj.latest_value
     return amt
+
+def get_summary_for_range(obj, start_date, end_date):
+    realised_gain = 0
+    st_realised_gain = 0
+    lt_realised_gain = 0
+    income = 0
+    c_trans = list()
+    for trans in MutualFundTransaction.objects.filter(folio=obj, trans_date__lt=start_date).order_by('trans_date', 'trans_type'):
+        if trans.trans_type == 'Buy':
+            c_trans.append({'date':trans.trans_date, 'bought':trans.units, 'sold_before':0, 'sold_during':0, 'nav':trans.price})
+        else:
+            sell_units = trans.units
+            for t in c_trans:   
+                rem_units = t['bought'] - t['sold_before']
+                if rem_units > 0:
+                    units_to_consider = sell_units if sell_units < rem_units else rem_units
+                    sell_units -= units_to_consider
+                    t['sold_before'] += units_to_consider
+                if sell_units == 0:
+                    break
+            if sell_units != 0:
+                print(f'something seriously wrong here for folio {trans.folio.folio}')
+                    
+    units_at_start = 0
+    start_amount = 0
+    for t in c_trans:
+        units_at_start += t['bought'] - t['sold_before']
+    if units_at_start:
+        hmp = get_historical_nearest_mf_nav(obj.fund.code, start_date)
+        if not hmp:
+            print(f'Failed to get nav for date {start_date}')
+            return
+
+        start_amount = hmp*float(units_at_start)
+    
+    investment = 0
+    for trans in MutualFundTransaction.objects.filter(folio=obj, trans_date__range=[start_date, end_date]).order_by('trans_date', 'trans_type'):
+        if trans.trans_type == 'Buy':
+            c_trans.append({'date':trans.trans_date, 'bought':trans.units, 'sold_before':0, 'sold_during':0, 'nav':trans.price})
+            investment += float(trans.trans_price)
+        else:
+            sell_units = trans.units
+            for t in c_trans:   
+                rem_units = t['bought'] - t['sold_before'] - t['sold_during']
+                if rem_units > 0:
+                    units_to_consider = sell_units if sell_units < rem_units else rem_units
+                    sell_units -= units_to_consider
+                    t['sold_during'] += units_to_consider
+                    print(f'sold {units_to_consider}@{trans.price} which was bought at {t["nav"]}')
+                    rg = float(units_to_consider*trans.price - units_to_consider*t['nav'])
+                    realised_gain += rg
+                    # TODO: adjust duration of long term here based on whether it is a equity mf or debt mf
+                    lt_dur = 365
+                    if abs((t['date'] - trans.trans_date).days)>=lt_dur:
+                        lt_realised_gain += rg
+                    else:
+                        st_realised_gain += rg
+
+                if sell_units == 0:
+                    break
+            if sell_units != 0:
+                print(f'calculations went wrong here for folio {trans.folio.folio}')
+            income += float(trans.trans_price)
+    income -= (start_amount+investment)
+
+    final_units = 0  
+    for t in c_trans:
+        if t['bought']-t['sold_before'] - t['sold_during'] > 0:
+            final_units += t['bought'] - t['sold_before'] - t['sold_during']
+    
+    final_amount = 0
+    
+    if final_units:
+        hmp = get_historical_nearest_mf_nav(obj.fund.code, end_date)
+        if not hmp:
+            print(f'Failed to get nav for date {end_date}')
+            return
+
+        final_amount = hmp*float(final_units)
+        income += final_amount
+    income = round(income, 2)
+    final_amount = round(final_amount, 2)
+    start_amount = round(start_amount, 2)
+    investment = round(investment, 2)
+    realised_gain = round(realised_gain, 2)
+    lt_realised_gain = round(lt_realised_gain, 2)
+    st_realised_gain = round(st_realised_gain, 2)
+
+    return {'start':start_amount, 'final':final_amount, 'investment':investment, 'realised_gain':realised_gain, 'longterm_gain':lt_realised_gain, 'shortterm_gain':st_realised_gain, 'income':income}
+
+def get_tax_for_user(user_id, start_date, end_date):
+    data = list()
+    for obj in Folio.objects.filter(user=user_id):
+        summ = get_summary_for_range(obj, start_date, end_date)
+        if summ:
+            if summ['start'] > 0 or summ['final'] > 0 or summ['realised_gain'] > 0 or summ['income'] > 0:
+                summ['folio'] = obj.folio
+                summ['fund'] = obj.fund.code
+                summ['name'] = obj.fund.name
+                data.append(summ)
+            else:
+                print(f'{obj.folio} ignoring folio for date range {start_date} {end_date}')
+    return data

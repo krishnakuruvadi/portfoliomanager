@@ -117,7 +117,105 @@
     {% endfor %}
     </tbody>
   </table>
-{% endif %}
+  {% endif %}
+  {% if data.dmf %}
+  <h5>Debt Mutual Funds</h5>
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Account</th>
+        <th scope="col">Start Amount</th>
+        <th scope="col">Contribution</th>
+        <th scope="col">Growth</th>
+        <th scope="col">Final Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for e in data.dmf %}
+      <tr>
+        <td>{{forloop.counter}}</td>
+        <td>{{e}}</td>
+        <td>{{data.dmf|lookup:e|lookup:'start_amt'}}</td>
+        <td>{{data.dmf|lookup:e|lookup:'contrib'}}</td>
+        <td>{{data.dmf|lookup:e|lookup:'growth'}}</td>
+        <td>{{data.dmf|lookup:e|lookup:'end_amount'}}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  {% if data.emf %}
+  <h5>Equity Mutual Funds</h5>
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Account</th>
+        <th scope="col">Start Amount</th>
+        <th scope="col">Contribution</th>
+        <th scope="col">Growth</th>
+        <th scope="col">Final Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for e in data.emf %}
+      <tr>
+        <td>{{forloop.counter}}</td>
+        <td>{{e}}</td>
+        <td>{{data.emf|lookup:e|lookup:'start_amt'}}</td>
+        <td>{{data.emf|lookup:e|lookup:'contrib'}}</td>
+        <td>{{data.emf|lookup:e|lookup:'growth'}}</td>
+        <td>{{data.emf|lookup:e|lookup:'end_amount'}}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  {% if data.mf %}
+  <h5>Mutual Funds</h5>
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Folio</th>
+        <th scope="col">Name</th>
+        <th scope="col">Start Amount</th>
+        <th scope="col">Contribution</th>
+        {%if country == "USA" %}
+        <th scope="col">Income</th>
+        {% endif %}
+        {%if country == "India" %}
+        <th scope="col">Gain</th>
+        <th scope="col">Short Term Gain</th>
+        <th scope="col">Long Term Gain</th>
+        {% endif %}
+        <th scope="col">Final Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for e in data.mf %}
+      <tr>
+        <td>{{forloop.counter}}</td>
+        <td>{{e|lookup:'folio'}}</td>
+        <td>{{e|lookup:'name'}}</td>
+        <td>{{e|lookup:'start'}}</td>
+        <td>{{e|lookup:'investment'}}</td>
+        {%if country == "USA" %}
+        <td>{{e|lookup:'income'}}</td>
+        {% endif %}
+        {%if country == "India" %}
+        <td>{{e|lookup:'realised_gain'}}</td>
+        <td>{{e|lookup:'shortterm_gain'}}</td>
+        <td>{{e|lookup:'longterm_gain'}}</td>
+        {% endif %}
+        <td>{{e|lookup:'final'}}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  
 {% endblock content %}
 
 {% block javascript %}

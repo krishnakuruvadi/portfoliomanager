@@ -168,7 +168,23 @@
         </div>
       </div>
       <div class="col-sm">
-        One of three columns
+        <a href="{% url 'common:mf-detail' mf_ref_id %}" target="_">Internal MF page</a>
+        <div class="row">
+          <div class="col">
+            ISIN
+          </div>
+          <div class="col">
+            {{isin}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            Alt ISIN
+          </div>
+          <div class="col">
+            {{isin2}}
+          </div>
+        </div>
       </div>
     </div>
   </div>

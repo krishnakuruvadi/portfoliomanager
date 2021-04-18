@@ -11,14 +11,18 @@ from django.utils import timezone
 from shared.utils import get_float_or_zero_from_string
 
 class Nasdaq(Exchange):
-    def __init__(self, stock):
+    def __init__(self, stock, etf):
         self.name = 'Nasdaq'
         self.stock = stock
+        self.etf = etf
 
     def get_alternate_historical_value(self, start, end):
         get_response = None
         #https://api.nasdaq.com/api/quote/CSCO/historical?assetclass=stocks&fromdate=2021-02-18&limit=9999&todate=2021-02-21
-        urlData = 'https://api.nasdaq.com/api/quote/'+self.stock+'/historical?assetclass=stocks&fromdate='
+        if self.etf:
+            urlData = 'https://api.nasdaq.com/api/quote/'+self.stock+'/historical?assetclass=etf&fromdate='
+        else:
+            urlData = 'https://api.nasdaq.com/api/quote/'+self.stock+'/historical?assetclass=stocks&fromdate='
         urlData += start.strftime('%Y-%m-%d')+ '&limit=9999&todate='
         urlData += end.strftime('%Y-%m-%d')
         for i in range(5):
@@ -52,7 +56,10 @@ class Nasdaq(Exchange):
     def get_historical_value(self, start, end):
         get_response = None
         for i in range(5):
-            urlData = "http://www.nasdaq.com/api/v1/historical/" + self.stock + "/stocks/"
+            if self.etf:
+                urlData = "http://www.nasdaq.com/api/v1/historical/" + self.stock + "/etf/"
+            else:
+                urlData = "http://www.nasdaq.com/api/v1/historical/" + self.stock + "/stocks/"
             urlData += start.strftime('%Y-%m-%d')+ '/'
             urlData += end.strftime('%Y-%m-%d')
             print("accessing "+urlData)

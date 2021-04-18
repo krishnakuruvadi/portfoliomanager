@@ -3,6 +3,7 @@ from django.shortcuts import render
 from shared.handle_get import get_start_day_across_portfolio, get_all_users, get_user_name_from_id
 from epf.epf_helper import get_tax_for_user as gtuepf
 from ppf.ppf_helper import get_tax_for_user as gtuppf
+from mutualfunds.mf_helper import get_tax_for_user as gtumf
 
 # Create your views here.
 
@@ -35,6 +36,7 @@ def tax_details(request):
                 to_date = datetime.date.today()
         context['data']['epf'] = gtuepf(user_id, from_date, to_date)
         context['data']['ppf'] = gtuppf(user_id, from_date, to_date)
+        context['data']['mf'] = gtumf(user_id, from_date, to_date)
         context['user'] = user_id
         context['year'] = year
         context['from_date'] = from_date

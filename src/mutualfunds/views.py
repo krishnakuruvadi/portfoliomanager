@@ -309,6 +309,9 @@ class FolioDetailView(DetailView):
         print(data)
         id = data['object'].id
         folio_obj = self.get_object()
+        data['isin'] = folio_obj.fund.isin
+        data['isin2'] = folio_obj.fund.isin2
+        data['mf_ref_id'] = folio_obj.fund.id
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
         data['category'] = folio_obj.fund.category

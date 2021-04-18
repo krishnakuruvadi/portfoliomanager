@@ -141,6 +141,11 @@ def update_share(request, id):
             share.goal = None
         notes = request.POST['notes']
         share.notes = notes
+        if 'etf' in request.POST:
+            print('etf', request.POST['etf'])
+            share.etf = True
+        else:
+            share.etf = False
         share.save()
         
     else:
@@ -151,7 +156,8 @@ def update_share(request, id):
                    'symbol':share.symbol,
                    'user':share.user,
                    'goal':share.goal,
-                   'notes':share.notes}
+                   'notes':share.notes,
+                   'etf':share.etf}
         return render(request, template, context)
     return HttpResponseRedirect("../")
 

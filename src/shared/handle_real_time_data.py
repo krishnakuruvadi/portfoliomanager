@@ -13,13 +13,13 @@ from common.models import Stock
 from django.db import IntegrityError
 
 
-def get_latest_vals(stock, exchange, start, end):
+def get_latest_vals(stock, exchange, start, end, etf=False):
     print("inside get_latest_vals exchange ", exchange, "start date:", start, " end date:", end)
     if exchange == 'NASDAQ':
         #response = Nasdaq(stock).get_historical_value(start, end)
-        response = Nasdaq(stock).get_latest_val()
+        response = Nasdaq(stock, etf).get_latest_val()
         if not response:
-            response = Nasdaq(stock).get_historical_value(start, end)
+            response = Nasdaq(stock, etf).get_historical_value(start, end)
         return response
     if exchange == 'NSE':
         #response = Nse(stock).get_historical_value(start, end)
@@ -186,3 +186,9 @@ def get_historical_mf_nav(amfi_code, start, end, fetch=False):
     #print("returning mf vals ", ret_vals)
     return ret_vals
 
+def get_historical_nearest_mf_nav(amfi_code, rdate):
+    vals = get_historical_mf_nav(amfi_code, rdate+relativedelta(days=-6), rdate, True)
+    if len(vals) > 0:
+        for _,v in vals[0].items():
+            return float(v)
+    return None

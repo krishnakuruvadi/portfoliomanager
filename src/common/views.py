@@ -322,7 +322,7 @@ def preferences(request):
     for i_tz in common_timezones:
         tzs.append(i_tz)
     avail_indexes = list()
-    n = Nasdaq('')
+    n = Nasdaq('', None)
     index_data = n.get_all_index()
     for _,v in index_data.items():
         avail_indexes.append(v['name'])
