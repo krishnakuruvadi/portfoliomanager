@@ -192,6 +192,7 @@ def update_investment_data():
 
 @db_periodic_task(crontab(minute='0', hour='1'))
 def clean_db():
+    from markets.models import News
     set_task_state('clean_db', TaskState.Running)
     folios = Folio.objects.all()
     tracking_funds = set()
@@ -211,6 +212,9 @@ def clean_db():
                 if hmfp.date.day not in (25, 26, 27, 28, 29, 30, 31, 1, 2) and abs(datetime.date.today() - hmfp.date).days > 7:
                     print('Deleting recent outdated entry', hmfp.id, hmfp.code, hmfp.date)
                     hmfp.delete()
+    clear_date = datetime.date.today()+relativedelta(months=-1)
+    for n in News.objects.filter(date__lt=clear_date):
+        n.delete()
     set_task_state('clean_db', TaskState.Successful)
 
 @task()

@@ -58,9 +58,13 @@ def reconcile_401k():
             account.nav_date = None
         account.save()
 
-def upload_nav(id):
+def get_nav_file_locn(id):
     location = os.path.join(settings.MEDIA_ROOT, '401k')
     nav_file = os.path.join(location, str(id)+'.csv')
+    return nav_file
+
+def upload_nav(id):
+    nav_file = get_nav_file_locn(id)
     if os.path.exists(nav_file):
         with open(nav_file, mode='r') as csv_file:
             print("opened file as csv:", nav_file)

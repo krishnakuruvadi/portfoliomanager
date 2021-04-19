@@ -1,6 +1,7 @@
 from .models import Epf, EpfEntry
 import datetime
 from shared.financial import xirr
+from dateutil.relativedelta import relativedelta
 
 def get_epf_details(number):
     try:
@@ -57,9 +58,11 @@ def get_summary_for_range(epf_obj, start_date, end_date):
         end_date = datetime.date.today()
 
     if start_date < epf_obj.start_date:
-        start_date = epf_obj.start_date
+        start_date = datetime.date(year=epf_obj.start_date.year, month=epf_obj.start_date.month, day=1)
     else:
-        contribs = EpfEntry.objects.filter(epf_id=epf_obj, trans_date__range=[epf_obj.start_date, start_date])
+        st = datetime.date(year=epf_obj.start_date.year, month=epf_obj.start_date.month, day=1)
+        en = start_date + relativedelta(days=-1)
+        contribs = EpfEntry.objects.filter(epf_id=epf_obj, trans_date__range=[st, en])
         for c in contribs:
             start_amount += round(float(c.employee_contribution + c.employer_contribution + c.interest_contribution - c.withdrawl), 2)
     

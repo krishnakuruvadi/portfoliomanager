@@ -71,10 +71,38 @@
       <canvas id="bar-vertical" width="800" height = "450"></canvas>
     </div>
   </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-2"><h5>NAV History</h5></div>
+    <div class="col"><small>(Add new NAV at {{nav_file_locn}})</small></div>
+  </div>
+  <br>
+  <table class="table table-hover table-condensed" id="nav-history-table">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Date</th>
+        <th scope="col">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in nav_history %}
+      <tr>
+        <td>{{instance.nav_date}}</td>
+        <td>{{instance.nav_value}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock content %}
 
 <script>
   {% block jquery %}
+    $('#nav-history-table').DataTable({
+        "columnDefs": [
+            { "type": "date", "targets": [0]}
+        ],
+        "order": [[ 0, "desc" ]]
+    } );
     {%if years %}
         setChart({{years|safe}}, {{er_vals|safe}}, {{em_vals|safe}}, {{in_vals|safe}}, {{total_vals|safe}})
     {% endif %}

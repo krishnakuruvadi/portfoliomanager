@@ -2,12 +2,12 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from decimal import Decimal
 from shared.handle_get import *
-from .models import Account401K, Transaction401K
+from .models import Account401K, Transaction401K, NAVHistory
 from shared.utils import *
 from goal.goal_helper import get_goal_id_name_mapping_for_user
 from django.http import HttpResponseRedirect
 from django.views.generic import DeleteView
-from .helper import reconcile_401k, create_nav_file, remove_nav_file, get_yearly_contribution
+from .helper import reconcile_401k, create_nav_file, remove_nav_file, get_yearly_contribution, get_nav_file_locn
 # Create your views here.
 
 
@@ -143,6 +143,8 @@ def account_detail(request, id):
     acct['em_vals'] = chart_data['em']
     acct['in_vals'] = chart_data['int']
     acct['total_vals'] = chart_data['total']
+    acct['nav_history'] = NAVHistory.objects.filter(account=account)
+    acct['nav_file_locn'] = get_nav_file_locn(id)
     return render(request, template_name, acct)
 
 def get_transactions(request, id):
