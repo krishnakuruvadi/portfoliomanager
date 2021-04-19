@@ -44,6 +44,29 @@ def is_nse_eq_file_exists():
         return True
     return False
 
+def check_nse_api(nse):
+    url_oc = "https://www.nseindia.com/option-chain"
+    #url = f"https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
+    headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, '
+                            'like Gecko) '
+                            'Chrome/80.0.3987.149 Safari/537.36',
+            'accept-language': 'en,gu;q=0.9,hi;q=0.8', 'accept-encoding': 'gzip, deflate, br'}
+    session = requests.Session()
+    request = session.get(url_oc, headers=headers, timeout=5)
+    cookies = dict(request.cookies)
+
+    nse_meta_url = 'https://www.nseindia.com/api/equity-meta-info?symbol='+nse
+    r = session.get(nse_meta_url, headers=headers, timeout=5, cookies=cookies)
+    status = r.status_code
+    if status != 200:
+        print(f"An error has occured. [Status code {status} ] for {nse_meta_url}")
+    else:
+        print(r.json())
+        result = r.json()
+        if 'isin' in result:
+            return result['isin']
+    return None
+
 def get_stock_code_nse(nse, isin):
     result = dict()
     if not is_nse_eq_file_exists():
@@ -75,8 +98,13 @@ def get_stock_code_nse(nse, isin):
                             result['nse'] = v
             if found:
                 break
-    if not found:
-        return None
+    if not found and nse and nse != '':
+        isin = check_nse_api(nse)
+        if isin:
+            result['nse'] = nse
+            result['isin'] = isin
+        else:
+            return None
 
     return result
 

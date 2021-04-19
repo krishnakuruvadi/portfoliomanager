@@ -1,0 +1,103 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+<ul class="breadcrumb">
+    <li><a href="{% url 'shares:shares-list' %}">Shares </a></li>
+    <li><a href="#">{{object.symbol }}</a></li>
+</ul>
+ 
+{% endblock viewname %}
+
+{% block content %}
+  <div class="row">
+    <div class='col-sm-4'>
+      <table class="table table-hover">
+        <tr>
+          <th scope="col">#</th>
+          <th>{{ object.id }}</th>
+        </tr>
+        <tr>
+          <th scope="col">exchange</th>
+          <td>{{ object.exchange }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Symbol</th>
+          <td>{{ object.symbol }}</td>
+        </tr>
+        <tr>
+          <th scope="col">User</th>
+          <td>{{ object.user }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Realised Gain</th>
+          <td>{{ object.realised_gain }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Quantity</th>
+          <td>{{ object.quantity }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Buy Value</th>
+          <td>{{ object.buy_value }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Latest Value</th>
+          <td>{{ object.latest_value }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Gain</th>
+          <td>{{ object.gain }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Notes</th>
+          <td>{{ object.notes }}</td>
+        </tr>
+      </table>
+    </div>
+    <div class='col-sm-4'>
+        {% if split %}
+          <h5>Split</h5>
+          <table class="table table-hover">
+            {% for s in split %}
+              <tr>
+                <td>{{s.date}}</td>
+                <td>{{s.ratio}}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        {% endif %}
+
+        {% if bonus %}
+          <h5>Bonus</h5>
+          <table class="table table-hover">
+            {% for b in bonus %}
+              <tr>
+                <td>{{b.date}}</td>
+                <td>{{b.ratio}}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        {% endif %}
+
+        {% if dividend %}
+        <h5>Dividend</h5>
+        <table class="table table-hover">
+          {% for d in dividend %}
+            <tr>
+                <td>{{d.date}}</td>
+                <td>{{d.amount}}</td>
+            </tr>
+          {% endfor %}
+        </table>
+        {% endif %}
+
+    </div>
+    <div class='col-sm-4'>
+
+    </div>
+  </div>
+  {% endblock content %}

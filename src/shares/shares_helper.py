@@ -194,14 +194,19 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
                         isin = get_isin_from_bhav_copy(symbol, date)
                         if isin:
                             nse_bse_data = get_nse_bse(None, None, isin)
-                if nse_bse_data and 'isin' in nse_bse_data:
-                    print(f'checking if {symbol} with isin exists {nse_bse_data["isin"]}')
-                    isin_objs = Share.objects.filter(exchange='NSE/BSE',
-                                                    symbol=nse_bse_data['isin'])
-                    if len(isin_objs) == 1:
-                        share_obj = isin_objs[0]
+                if nse_bse_data and 'nse' in nse_bse_data:
+                    print(f'checking if {symbol} with nse {nse_bse_data["nse"]} exists')
+                    nse_objs = Share.objects.filter(exchange='NSE/BSE',
+                                                    symbol=nse_bse_data['nse'])
+                    if len(nse_objs) == 1:
+                        share_obj = nse_objs[0]
                     else:
-                        print(f'share with isin {nse_bse_data["isin"]} doesnt exist')
+                        nse_objs = Share.objects.filter(exchange='NSE',
+                                                    symbol=nse_bse_data['nse'])
+                        if len(nse_objs) == 1:
+                            share_obj = nse_objs[0]
+                        else:
+                            print(f'share with nse {nse_bse_data["nse"]} doesnt exist')
 
             if not share_obj:
                 share_obj = Share.objects.create(exchange=exchange,
@@ -475,6 +480,18 @@ def check_discrepancies():
                 severity=Severity.warning
             )
     '''
+def move_trans(from_share_obj, to_share_obj, delete_from_share_obj=False):
+    print(f'moving transactions from {from_share_obj.exchange}:{from_share_obj.symbol} to {to_share_obj.exchange}:{to_share_obj.symbol}')
+    for trans in Transactions.objects.filter(share=from_share_obj):
+        trans.share = to_share_obj
+        try:
+            trans.save()
+        except IntegrityError:
+            trans.delete()
+    if delete_from_share_obj:
+        print(f'deleting {from_share_obj.exchange}:{from_share_obj.symbol}')
+        from_share_obj.delete()
+
 
 def update_shares_latest_val():
     start = datetime.date.today()+relativedelta(days=-5)
@@ -485,13 +502,47 @@ def update_shares_latest_val():
             latest_date = None
             latest_val = None
             if (share_obj.as_on_date and share_obj.as_on_date < datetime.date.today()) or not share_obj.as_on_date:
-                vals = get_latest_vals(share_obj.symbol, share_obj.exchange, start, end)
+                vals = get_latest_vals(share_obj.symbol, share_obj.exchange, start, end, share_obj.etf)
                 if vals:
                     for k, v in vals.items():
                         if k and v:
                             if not latest_date or k > latest_date:
                                 latest_date = k
                                 latest_val = v
+                else:
+                    if share_obj.exchange == 'BSE':
+                        isin = None
+                        for trans in Transactions.objects.filter(share=share_obj):
+                            isin = get_isin_from_bhav_copy(share_obj.symbol, trans.trans_date)
+                            if isin:
+                                break
+                        if isin:
+                            nse_bse_data = get_nse_bse(None, None, isin)
+                            if nse_bse_data and 'nse' in nse_bse_data:
+                                print(f'checking if share with symbol {nse_bse_data["nse"]} exists')
+                                isin_objs = Share.objects.filter(exchange='NSE/BSE',
+                                                        symbol=nse_bse_data['nse'])
+                                if len(isin_objs) == 1:
+                                    move_trans(share_obj, isin_objs[0], True)
+                                    continue
+
+                                else:
+                                    nse_objs = Share.objects.filter(exchange='NSE', symbol=nse_bse_data['nse'])
+                                    if len(nse_objs) == 1:
+                                        move_trans(share_obj, nse_objs[0], True)
+                                        nse_objs[0].exchange = 'NSE/BSE'
+                                        nse_objs[0].save()
+                                        continue
+
+                            if 'bse' in nse_bse_data:
+                                try:
+                                    bse_obj = Share.objects.get(exchange='BSE', symbol=nse_bse_data['bse'])
+                                    move_trans(share_obj, bse_obj, True)
+                                except Share.DoesNotExist:
+                                    share_obj.symbol = nse_bse_data['bse']
+                                    share_obj.save()
+                                continue
+                    
                 if latest_date and latest_val:
                     share_obj.as_on_date = latest_date
                     if share_obj.exchange == 'NASDAQ':
@@ -501,6 +552,12 @@ def update_shares_latest_val():
                     share_obj.latest_value = float(latest_val) * float(share_obj.conversion_rate) * float(share_obj.quantity)
                     share_obj.latest_price = float(latest_val)
                     share_obj.save()
+                else:
+                    create_alert(
+                        summary=share_obj.exchange + ':' + share_obj.symbol + ' - Failed to get latest value',
+                        content=share_obj.exchange + ':' + share_obj.symbol + ' - Failed to get latest value',
+                        severity=Severity.warning
+                    )
                 if share_obj.latest_value: 
                     share_obj.gain=float(share_obj.latest_value)-float(share_obj.buy_value)
                     share_obj.save()

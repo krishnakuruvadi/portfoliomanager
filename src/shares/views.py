@@ -15,6 +15,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from .models import Share, Transactions
+from common.models import Dividend, Bonus, Split
 from .shares_helper import *
 from shared.utils import *
 from shared.handle_get import *
@@ -118,6 +119,25 @@ class ShareDetailView(DetailView):
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
+        obj = self.get_object()
+        exchange = obj.exchange
+        if exchange == 'NSE/BSE':
+            exchange = 'NSE'
+        divs = list()
+        for dividend in Dividend.objects.filter(exchange=exchange, symbol=obj.symbol):
+            divs.append({'date':dividend.date, 'amount':dividend.amount})
+        if len(divs) > 0:
+            data['dividend'] = divs
+        splits = list()
+        for split in Split.objects.filter(exchange=exchange, symbol=obj.symbol):
+            splits.append({'date':split.date, 'ratio':str(split.ratio_num)+':'+str(split.ratio_denom)})
+        if len(splits) > 0:
+            data['split'] = splits
+        bonuses = list()
+        for bonus in Bonus.objects.filter(exchange=exchange, symbol=obj.symbol):
+            bonuses.append({'date':bonus.date, 'ratio':str(bonus.ratio_num)+':'+str(bonus.ratio_denom)})
+        if len(bonuses) > 0:
+            data['bonus'] = bonuses
         return data
 
 class TransactionDetailView(DetailView):
