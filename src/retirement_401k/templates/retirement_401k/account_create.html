@@ -72,7 +72,7 @@
     <div class="form-group row">
       <div class="col-sm-6">
         <div class="md-form mt-0">
-          <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+          <button type="submit" class="btn btn-primary" name="submit" id="submit">Submit</button>
           <a href="../" class="btn btn-danger" role="button">Cancel</a>
         </div>
       </div>
@@ -89,9 +89,33 @@
   <script src="{% static 'common.js' %}"></script>
   <script>
     set_user_list({{users|safe}}, '{{user|safe}}');
+    setSubmitButtonStatus();
+
+    $("#id_user").change(function () {
+        setSubmitButtonStatus();
+    });
+    $("#start_date").change(function () {
+        setSubmitButtonStatus();
+    });
+    $("#company").change(function () {
+        setSubmitButtonStatus();
+    });
 
     function get_goals_and_set_goal(response) {
       set_goals(response, '{{goal|safe}}');
+    }
+    function setSubmitButtonStatus() {
+      var usr = document.getElementById('id_user').value;
+      var dt = document.getElementById('start_date').value;
+      var company = document.getElementById('company').value;
+      console.log(usr);
+      console.log(dt);
+      console.log(company);
+      if ((usr != "") && (dt != "") && (company != "")) {
+        document.getElementById('submit').disabled=false;
+      } else {
+        document.getElementById('submit').disabled=true;
+      }
     }
   </script>
 {% endblock javascript %}

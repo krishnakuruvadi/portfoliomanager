@@ -107,9 +107,9 @@ def get_accounts(request):
         latest_value += float(account.latest_value)
         total_gain += float(account.gain)
     total_investment = latest_value - total_gain
-    context['total_investment'] = total_investment
-    context['latest_value'] = latest_value
-    context['total_gain'] = total_gain
+    context['total_investment'] = round(total_investment, 2)
+    context['latest_value'] = round(latest_value, 2)
+    context['total_gain'] = round(total_gain, 2)
     return render(request, template_name, context)
 
 def links(request):
