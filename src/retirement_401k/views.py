@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from decimal import Decimal
 from shared.handle_get import *
+from shared.yahoo_finance_2 import YahooFinance2
 from .models import Account401K, Transaction401K, NAVHistory
 from shared.utils import *
 from goal.goal_helper import get_goal_id_name_mapping_for_user
@@ -145,6 +146,38 @@ def account_detail(request, id):
     acct['total_vals'] = chart_data['total']
     acct['nav_history'] = NAVHistory.objects.filter(account=account)
     acct['nav_file_locn'] = get_nav_file_locn(id)
+    #{{fund_vals|safe}}, {{voo_vals|safe}}, {{chart_labels|safe}}
+    fund_vals = list()
+    spy_vals = list()
+    chart_labels = list()
+    for nav in NAVHistory.objects.filter(account=account).order_by('nav_date'):
+        chart_labels.append(nav.nav_date.strftime('%Y-%m-%d'))
+        fund_vals.append(float(nav.nav_value))
+        val = None
+        if nav.comparision_nav_value and nav.comparision_nav_value != 0:
+            val = float(nav.comparision_nav_value)
+        else:
+            response = YahooFinance2('SPY').get_historical_value(nav.nav_date, nav.nav_date+relativedelta(days=5))
+        
+            val_date = None
+            for k,v in response.items():
+                if not val:
+                    val = v
+                    val_date = k
+                else:
+                    if val_date > k:
+                        val_date = k
+                        val = v
+            if val:
+                nav.comparision_nav_value = round(val, 2)
+                nav.save()
+            else:
+                val = 0
+        spy_vals.append(val)
+    acct['fund_vals'] = fund_vals
+    acct['chart_labels'] = chart_labels
+    
+    acct['spy_vals'] = spy_vals
     return render(request, template_name, acct)
 
 def get_transactions(request, id):

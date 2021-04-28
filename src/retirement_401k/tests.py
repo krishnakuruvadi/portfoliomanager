@@ -25,6 +25,9 @@ class Retirement401KTest(StaticLiveServerTestCase):
                 return v.strip()
         return None
     
+    def get_no_of_accounts(self):
+        self.browser.get(self.live_server_url + reverse('retirement_401k:account-list'))
+
     def test_no_account(self):
         self.browser.get(self.live_server_url + reverse('retirement_401k:account-list'))
         ti = self.browser.find_element_by_xpath("//b[text()='Total Investment:']/..")
@@ -32,21 +35,48 @@ class Retirement401KTest(StaticLiveServerTestCase):
         self.assertEqual(float(self.get_summary_val(ti.text, 'Current Value')), 0)
         self.assertEqual(float(self.get_summary_val(ti.text, 'Gain')), 0)
 
-        time.sleep(10)
+        time.sleep(3)
     
     #https://stackoverflow.com/questions/2581005/django-testcase-testing-order
     def test_add_account(self):
         user = add_default_user()
         self.browser.get(self.live_server_url + reverse('retirement_401k:account-list'))
         self.browser.find_element_by_xpath("//i[@title='Add 401K Account']").click()
-        time.sleep(5)
+        time.sleep(2)
         self.browser.find_element_by_id('company').send_keys('Personal')
-        self.browser.find_element_by_id('start_date').send_keys('10/01/2010')
+        self.browser.find_element_by_id('start_date').send_keys('10/04/2010')
         self.browser.find_element_by_xpath("//select[@id='id_user']/option[text()='" + user.name + "']").click()
 
-        time.sleep(5)
+        time.sleep(2)
         self.browser.find_element_by_id('submit').click()
+        time.sleep(2)
+        self.browser.get(self.live_server_url + reverse('retirement_401k:account-list'))
+        accounts_table = self.browser.find_element_by_id('accounts-table')
+        body = accounts_table.find_elements_by_tag_name('tbody')
+
+        rows = body[0].find_elements_by_tag_name('tr')
+        self.assertEqual(len(rows), 1)
+        columns = rows[0].find_elements_by_tag_name('td')
+        anc = columns[0].find_elements_by_tag_name('a')
+        self.assertEquals(anc[0].text, 'Personal')
+        self.assertEquals(columns[1].text, 'Oct. 4, 2010')
+        time.sleep(2)
+        self.assertEquals(columns[2].text, 'None')
+        self.assertEquals(columns[3].text, user.name)
+        self.assertEquals(columns[4].text, '')
+        self.assertEquals(columns[5].text, '0.00')
+        self.assertEquals(columns[6].text, '0.00')
+        self.assertEquals(columns[7].text, '0.00')
+        self.assertEquals(columns[8].text, 'None')
+        self.assertEquals(columns[9].text, '0.00')
+
+        trans = columns[10].find_element_by_xpath("./a[contains(@href,'transactions')]")
+        trans.click()
         time.sleep(5)
+        self.assertTrue('No data available in table' in self.browser.page_source)
+        time.sleep(5)
+        
+        
 
 '''
 source venv/bin/activate

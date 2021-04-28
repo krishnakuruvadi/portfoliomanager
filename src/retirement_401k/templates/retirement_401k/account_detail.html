@@ -73,26 +73,40 @@
   </div>
   <hr>
   <div class="row">
-    <div class="col-sm-2"><h5>NAV History</h5></div>
-    <div class="col"><small>(Add new NAV at {{nav_file_locn}})</small></div>
+    <div class="col-sm-8">
+      <div class="row">
+        <div class="col-sm-8"><h5>NAV History</h5><small>(Add new NAV at {{nav_file_locn}})</small></div>
+      </div>
+      <div class="row">
+        <div class="col-sm-8">
+          <br>
+          <table class="table table-hover table-condensed" id="nav-history-table">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for instance in nav_history %}
+              <tr>
+                <td>{{instance.nav_date}}</td>
+                <td>{{instance.nav_value}}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="row">
+        <div class="col">
+          <canvas id="fund-compare" width="800" height = "600"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
-  <br>
-  <table class="table table-hover table-condensed" id="nav-history-table">
-    <thead class="thead-dark">
-      <tr>
-        <th scope="col">Date</th>
-        <th scope="col">Value</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for instance in nav_history %}
-      <tr>
-        <td>{{instance.nav_date}}</td>
-        <td>{{instance.nav_value}}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
 {% endblock content %}
 
 <script>
@@ -103,9 +117,13 @@
         ],
         "order": [[ 0, "desc" ]]
     } );
+    {%if fund_vals %}
+    set_nav_comparision_chart({{fund_vals|safe}}, {{spy_vals|safe}}, {{chart_labels|safe}})
+    {% endif %}
     {%if years %}
         setChart({{years|safe}}, {{er_vals|safe}}, {{em_vals|safe}}, {{in_vals|safe}}, {{total_vals|safe}})
     {% endif %}
+
     function setChart(years, er_vals, em_vals, in_vals, total_vals) {
       console.log(years)
       console.log(er_vals)
@@ -128,7 +146,7 @@
               data: er_vals
             },
             {
-              label: "Interest Contribution",
+              label: "Growth",
               backgroundColor: "#bfff00",
               data: in_vals
             },
@@ -143,6 +161,48 @@
           title: {
             display: true,
             text: 'Contribution (approx)'
+          }
+        }
+      });
+    }
+    function set_nav_comparision_chart(fund_vals, spy_vals, chart_labels) {
+      var canvas = document.getElementById('fund-compare');
+      new Chart(canvas, {
+        type: 'line',
+        data: {
+          //labels: ['1', '2', '3', '4', '5'],
+          labels: chart_labels,
+          datasets: [{
+            label: 'Fund',
+            yAxisID: 'Fund',
+            //data: [100, 96, 84, 76, 69],
+            data: fund_vals,
+            borderColor: "#3e95cd",
+            fill: false
+          }, {
+            label: 'SPY',
+            yAxisID: 'SPY',
+            //data: [1, 1, 1, 1, 0],
+            data: spy_vals,
+            borderColor: "#bfff00",
+            fill: false
+          }]
+        },
+        options: {
+          title: {
+            display: true,
+            text: 'Fund vs SPY'
+          },
+          scales: {
+            yAxes: [{
+              id: 'Fund',
+              type: 'linear',
+              position: 'left',
+            }, {
+              id: 'SPY',
+              type: 'linear',
+              position: 'right'
+            }]
           }
         }
       });

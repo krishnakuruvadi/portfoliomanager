@@ -36,6 +36,39 @@
     </tr>
     <tr></tr>
     <tr>
+      <td>
+        <form method="POST">
+          {% csrf_token %}
+            <div class="row">
+
+              <div class="col-sm-1">
+                <label for="user" class="col-sm-3 col-form-label">User</label>
+              </div>
+
+              <div class="col-sm-2">
+                <div class="md-form mt-0">
+                  <select id="id_user" name="user" class="form-control"></select>
+                </div>
+              </div>
+
+              <div class="col-sm-3">
+                <label for="zero_val" class="col-form-label">Show zero balance Folios?</label>
+              </div>
+              
+              <div class="col-sm-1">
+                <input type="checkbox" name="show_zero_val" id="show_zero_val" value="{{show_zero_val}}">
+              </div>
+              
+
+              <div class="col-sm-1">
+                <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              </div>
+
+            </div>
+        </form>
+      </td>
+    </tr>
+    <tr>
       <td style="text-align:right"><b>Total Investment:</b> {{total_investment}} &nbsp;&nbsp;&nbsp;<b>Current Value:</b> {{latest_value}} &nbsp;&nbsp;&nbsp;<b>Gain:</b> {{total_gain}} &nbsp;&nbsp;&nbsp;<b>Current XIRR:</b> {{curr_ret}}% &nbsp;&nbsp;&nbsp;<b>All time XIRR:</b> {{all_ret}}% &nbsp;&nbsp;&nbsp;<b>Last Updated:</b> {{as_on_date}}</td>
     </tr>
   </table>
@@ -121,7 +154,19 @@
 </script>
 
 {% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
   <script>
+    set_user_list({{users|safe}}, '{{user|safe}}');
+    e = document.getElementById('show_zero_val');
+    var show = "{{show_zero_val|safe}}"
+    console.log(e.checked);
+    console.log(show);
+    if (show == "True") {
+      e.checked = true;
+    } else {
+      e.checked = false;
+    }
     $(document).on('click', '.confirm-delete', function(){
       return confirm('Are you sure you want to delete all folios?');
     })

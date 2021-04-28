@@ -132,4 +132,4 @@ def get_unallocated_amount():
     amt += r4a()
     amt += sa()
 
-    return amt
+    return round(amt, 2)

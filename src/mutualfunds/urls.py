@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (
-    FolioListView,
+    get_folios,
     FolioDetailView,
     FolioDeleteView,
     FolioTransactionsListView,
@@ -25,7 +25,7 @@ from .views import (
 app_name = 'mutualfund'
 
 urlpatterns = [
-    path('', FolioListView.as_view(), name='folio-list'),
+    path('', get_folios, name='folio-list'),
     path('add/', add_folio, name='folio-add'),
     path('refresh/', mf_refresh, name='refresh'),
     path('transactions', TransactionsListView.as_view(), name='transactions-list'),

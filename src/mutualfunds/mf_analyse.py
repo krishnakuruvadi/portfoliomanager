@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, ElementNotInteractableException
+from selenium.common.exceptions import TimeoutException, ElementNotInteractableException, StaleElementReferenceException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import os
 import pathlib
@@ -82,8 +82,193 @@ def get_token_and_ms_code(driver):
                     print(f'ms_code {ms_code}')
         if token != '' and ms_code != '':
             break
-
+    print(f'get_token_and_ms_code: returning {token} and {ms_code}')
     return token, ms_code
+
+def set_ms_code_for_fund(id, ms_code):
+    try:
+        fund = MutualFund.objects.get(id=id)
+        fund.ms_id = ms_code
+        fund.save()
+        print(f'set ms_id to {ms_code} for mutualfund with id {id}')
+    except MutualFund.DoesNotExist:
+        print(f'mutualfund object with id {id} doesnt exist')
+
+def form_space_separated_string(str_list, start, till, replace_and=False):
+    ret = None
+    for i in range(start, till+1):
+        if not ret:
+            ret = str_list[i]
+        else:
+            if str_list[i].strip():
+                if str_list[i] == '&' and replace_and:
+                    ret += ' &amp;'
+                else:    
+                    ret = ret + ' ' + str_list[i]
+    print(f'  form_space_separated_string: ret{ret}')
+    return ret
+
+def get_ms_code(mf_name, isin, isin2, ms_name, ignore_names=None, retry=0):
+    url = decode(b'\x03\x11\r\x07\x1cHKD\x12\x0e\x00A\x1f\x0b\x19\x0b\x10\x19\x08\x01\x10\n\x17W\x1e\x01')
+    capabilities = DesiredCapabilities.CHROME
+    capabilities["goog:loggingPrefs"] = {"performance": "ALL"}
+    driver = webdriver.Chrome(executable_path=get_path_to_chrome_driver(),desired_capabilities=capabilities)
+    driver.get(url)
+    timeout = 30
+    ms_code = None
+    if not ignore_names:
+        ignore_names = list()
+    try:
+        try:
+            continue_elem = driver.find_element_by_xpath('/html/body/form/div[3]/div[2]/div[2]/div[1]/a')
+            if continue_elem:
+                print(continue_elem)
+                continue_elem.click()
+        except Exception:
+            pass
+        search_element_id = decode(b'\x08\x11\x15G_-\x11\x08-\x1c\x16\x0b\x17\x164\x11\x01\x03>\x07\x0b\x1f\x00&\x03\x17\x06%\x1e\x11\x164\x00\x1f\x14\x07\x00\r\x12')
+        WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID, search_element_id)))
+        search_element = driver.find_element_by_id(search_element_id)
+        mf_name_parts = mf_name.split(' ')
+        i = 0
+        while i< len(mf_name_parts):
+            part = mf_name_parts[i]
+            if not part.strip():
+                i += 1
+                continue
+            if i == len(mf_name_parts)-1:
+                print('sending ', part)
+                search_element.send_keys(part)
+            else:
+                print(f'{i} sending {part} + <space>')
+                search_element.send_keys(part + ' ')
+            time.sleep(3)
+
+            els = driver.find_elements_by_class_name('quote-list')
+            if len(els) == 0:
+                print(f'No results found for {form_space_separated_string(mf_name_parts, 0, i)}')
+                return None     
+            else:
+                for el in els:
+                    if el.tag_name == 'ul':
+                        #print(el.id)
+                        if 'more' in el.get_attribute('innerHTML'):
+                            print('too many (more) results')
+                            send_next_key = True
+                            i += 1
+                            break
+                        li_elems = el.find_elements_by_xpath('.//li')
+                        send_next_key = False
+                        if len(li_elems)> 10:
+                            print('too many results')
+                            
+                            #print(f"{li.get_attribute('innerHTML')}")
+                            till_now = form_space_separated_string(mf_name_parts, 0, i, True)
+                            qn_elems = el.find_elements_by_css_selector('div.quote-name')
+                            if qn_elems:
+                                if till_now.lower() in qn_elems[0].get_attribute('innerHTML').lower():
+                                    i += 1
+                                    send_next_key = True
+                                    break
+                                else:
+                                    print(f"176:didnt find {till_now} in {qn_elems[0].get_attribute('innerHTML')}")
+                            else:
+                                print(f'FIX ME: No quote name elements')
+                                return None
+                            if part == '-':
+                                till_now = form_space_separated_string(mf_name_parts, 0, i-1)
+                                remaining = form_space_separated_string(mf_name_parts, i+1, len(mf_name_parts)-1)
+                                new_string = till_now + ' ' + remaining
+                                print(f'trying {new_string} instead')
+                                driver.close()
+                                return get_ms_code(new_string, isin, isin2, ms_name, ignore_names)
+                            elif part == '&':
+                                new_search = form_space_separated_string(mf_name_parts, 0, i-1) + ' </strong>and '
+                                if new_search.lower() in qn_elems[0].get_attribute('innerHTML').lower():
+                                    new_search = form_space_separated_string(mf_name_parts, 0, i-1) + ' and ' + form_space_separated_string(mf_name_parts, i+1, len(mf_name_parts)-1)
+                                    print(f'trying {new_search} instead')
+                                    driver.close()
+                                    return get_ms_code(new_search, isin, isin2, ms_name, ignore_names)
+                            elif part.lower() == 'and':
+                                print('193')
+                                new_search = form_space_separated_string(mf_name_parts, 0, i-1) + ' </strong>&'
+                                if new_search.lower() in qn_elems[0].get_attribute('innerHTML').lower():
+                                    new_search = form_space_separated_string(mf_name_parts, 0, i-1) + ' & ' + form_space_separated_string(mf_name_parts, i+1, len(mf_name_parts)-1)
+                                    print(f'trying {new_search} instead')
+                                    driver.close()
+                                    return get_ms_code(new_search, isin, isin2, ms_name, ignore_names)
+                                else:
+                                    print(f'{new_search} not found in {qn_elems[0].get_attribute("innerHTML")}')
+                            else:
+                                print(f'part {part}')
+                        print('200')
+                        if len(li_elems) and not send_next_key:
+                            qn_elems = el.find_elements_by_css_selector('div.quote-name')
+                            if qn_elems:
+                                map_elems = dict()
+                                high_score = 0
+                                high_element = -1
+                                high_name = ''
+                                for num, div in enumerate(qn_elems):
+                                    print("innerHtml", div.get_attribute('innerHTML'))
+                                    temp = div.get_attribute('innerHTML').replace('<strong>', '')
+                                    temp = temp.replace('</strong>', '')
+                                    temp = temp.replace('&amp;', '&')
+                                    if temp not in ignore_names:
+                                        map_elems[num] = match_score(mf_name, temp)
+                                        if high_score<map_elems[num]:
+                                            high_score = map_elems[num]
+                                            high_element = num
+                                            high_name = temp
+                                
+                                if high_element != -1:
+                                    best_match_elem = qn_elems[high_element]
+                                    print('high_element:', high_element, ' high_name:', high_name, ' high_element:', high_element)
+                                    print('clicking')
+                                    best_match_elem.click()
+                                    print('done clicking')
+                                    time.sleep(10)
+                                    print('done sleeping')
+                                    j = 0
+                                    while not ms_code and j < 3:
+                                        try:
+                                            print(f'j {j}')
+                                        
+                                            isin_elems = driver.find_elements_by_class_name('sal-mip-quote__symbol')
+                                            for isin_elem in isin_elems:
+                                                if isin_elem.text == isin or (isin2 and isin_elem.text == isin2):
+                                                    if isin2:
+                                                        print(f'matching fund found for {isin} or {isin2}')
+                                                    else:
+                                                        print(f'matching fund found for {isin}')
+                                                    _, ms_code = get_token_and_ms_code(driver)
+                                                else:
+                                                    print(f'{isin_elem.text} didnt match {isin} or {isin2}')
+                                        except Exception as ex:
+                                            print(f'Exception {ex} searching for isin, attempt({j})')
+                                        j += 1
+                                        time.sleep(2)
+                                    if not ms_code:
+                                        ignore_names.append(high_name)
+                                        driver.close()
+                                        return get_ms_code(mf_name, isin, isin2, ms_name, ignore_names)
+                        if not len(li_elems):
+                            print('no matching funds found')
+                            return None
+                        else:
+                            print(f'len(li_elems) {len(li_elems)}')
+
+        driver.close()
+    except StaleElementReferenceException:
+        print(f'StaleElementReferenceException')
+        driver.close()
+        if not ms_code:
+            retry += 1
+            return get_ms_code(mf_name, isin, isin2, ms_name, ignore_names, retry)
+    except Exception as ex:
+        print('Exception during processing', ex)
+        driver.close()
+    return ms_code
 
 def pull_ms(code, ignore_names, replaceAnd=False, token=None):
     fund = None
@@ -152,7 +337,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                         continue
                     li_elems = el.find_elements_by_xpath('.//li')
                     if len(li_elems)> 10:
-                        print('too many results')
+                        print(f'too many results {len(li_elems)}')
                         continue 
                     if len(li_elems):
                         qn_elems = el.find_elements_by_css_selector('div.quote-name')
@@ -184,18 +369,16 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                                 for isin_elem in isin_elems:
                                     if isin_elem.text == fund.isin or (fund.isin2 and isin_elem.text == fund.isin2):
                                         if fund.isin2:
-                                            print('matching fund found for {fund.isin} or {fund.isin2}')
+                                            print(f'matching fund found for {fund.isin} or {fund.isin2}')
                                         else:
-                                            print('matching fund found for {fund.isin}')
+                                            print(f'matching fund found for {fund.isin}')
                                         data = dict()
                                         token, ms_code = get_token_and_ms_code(driver)
                                         if token != '' and ms_code != '':
-                                            data = use_api_to_get_vals(token, ms_code)
-                                            print('Updated ms_code to {ms_code} for {fund.Name}')
-                                            fund.ms_id = ms_code
-                                            fund.save()
+                                            set_ms_code_for_fund(fund.id, ms_code)
+                                            data = use_api_to_get_vals(token, ms_code)                                            
                                         else:
-                                            print('not updated ms_code for {fund.Name}')
+                                            print(f'not updated ms_code for {fund.name}')
 
                                         is_elems = driver.find_elements_by_class_name('investment-style')
                                         for is_elem in is_elems:
@@ -254,19 +437,28 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
         driver.close()
         return None, token
 
+def get_lower_case_splits(st):
+    ret = list()
+    for part in st.split(' '):
+        ret.append(part.lower())
+    return ret
 
 def match_score(base, comp):
-    base_parts = base.split(' ')
-    comp_parts = comp.split(' ')
+    base_parts = get_lower_case_splits(base)
+    comp_parts = get_lower_case_splits(comp)
     score = 0
     for part in base_parts:
+        if part == '-' or part == ' ':
+            continue
         if part in comp_parts:
             score = score+1
+            #print(f'found {part}, score: {score}')
         else:
             if part == 'and' or part == '&':
                 if 'and' in comp_parts or '&' in comp_parts:
                     score = score + 1
-    print('score:', score, ' ', base, ' ', comp)
+                    #print(f'found {part}, score: {score}')
+    #print('score:', score, ' ', base, ' ', comp)
     return score
 
 def grab_details(driver, data):
@@ -354,7 +546,7 @@ def get_json_response(url):
     try:
         response = requests.get(url)
         response.raise_for_status()
-        # access JSOn content
+        # access JSON content
         jsonResponse = response.json()
         print("Entire JSON response")
         print(jsonResponse)

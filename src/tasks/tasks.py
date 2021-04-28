@@ -20,7 +20,7 @@ from mutualfunds.models import Folio, MutualFundTransaction
 from mutualfunds.mf_helper import mf_add_transactions
 import os
 import json
-from mutualfunds.mf_analyse import pull_ms, pull_category_returns, pull_blend
+from mutualfunds.mf_analyse import pull_ms, pull_category_returns, pull_blend, get_ms_code
 from django.db import IntegrityError
 from goal.goal_helper import update_all_goals_contributions
 from .models import Task, TaskState
@@ -298,10 +298,20 @@ def update_shares_latest_vals():
 @db_periodic_task(crontab(minute='35', hour='2'))
 def analyse_mf():
     set_task_state('analyse_mf', TaskState.Running)
+    folios = Folio.objects.all()
+    for folio in folios:
+        fund = folio.fund
+        if not fund.ms_id or fund.ms_id == '':
+            ret = get_ms_code(fund.name, fund.isin, fund.isin2, fund.ms_name)
+            if ret:
+                f = MutualFund.objects.get(id=fund.id)
+                f.ms_id = ret
+                f.save()
+                print(f'set ms_id for {f.id} {f.name} as {ret}')
+
     ret = pull_category_returns()
     update_category_returns(ret)
     token = None
-    folios = Folio.objects.all()
     finished_funds = set()
     for folio in folios:
         code = folio.fund.code
@@ -433,6 +443,7 @@ def analyse_mf():
 
 @db_periodic_task(crontab(day='1', minute='35', hour='3'))
 def mf_update_blend():
+    set_task_state('mf_update_blend', TaskState.Running)
     ms_codes = list()
     folios = Folio.objects.all()
     for folio in folios:
@@ -778,10 +789,12 @@ def update_latest_vals_epf_ssy_ppf():
     from epf.epf_helper import update_epf_vals
     from ppf.ppf_helper import update_ppf_vals
     from ssy.ssy_helper import update_ssy_vals
+    set_task_state('update_latest_vals_epf_ssy_ppf', TaskState.Running)
 
     update_epf_vals()
     update_ssy_vals()
     update_ppf_vals()
+    set_task_state('update_latest_vals_epf_ssy_ppf', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='30', hour='*/6'))
 def poll_market_news():

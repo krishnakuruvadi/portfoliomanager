@@ -24,46 +24,59 @@ from .kuvera import Kuvera
 from .pull_coin import pull_coin
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .mf_helper import insert_trans_entry, calculate_xirr_all_users
+from .mf_helper import insert_trans_entry, calculate_xirr_all_users, calculate_xirr
 from tasks.tasks import add_mf_transactions
 from .pull_kuvera import pull_kuvera
 from goal.goal_helper import get_goal_id_name_mapping_for_user
 
 # Create your views here.
 
-class FolioListView(ListView):
-    template_name = 'mutualfunds/folio_list.html'
-    queryset = Folio.objects.all()
-    
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        print(data)
-        data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
-        data['user_name_mapping'] = get_all_users()
-        total_investment = 0
-        latest_value = 0
-        as_on_date= None
-        total_gain = 0
+def get_folios(request):
+    template = 'mutualfunds/folio_list.html'
+    context = dict()
+    context['users'] = get_all_users()
+    show_zero_val_folio = True
+    user = None
+    if request.method == 'POST':
+        print(request.POST)
+        user = request.POST['user']
+        show_zero_val_folio = 'show_zero_val' in request.POST
+    context['object_list'] = list()
+    context['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
+    context['user_name_mapping'] = get_all_users()
+    context['show_zero_val'] = show_zero_val_folio
+    total_investment = 0
+    latest_value = 0
+    as_on_date= None
+    total_gain = 0
+    folio_objs = None
+    if not user or user=='':
         folio_objs = Folio.objects.all()
-        for folio_obj in folio_objs:
-            if not folio_obj.latest_value:
-                continue
-            if not as_on_date:
+    else:
+        folio_objs = Folio.objects.filter(user=user)
+        context['user'] = user
+    for folio_obj in folio_objs:
+        if not folio_obj.latest_value:
+            if show_zero_val_folio:
+                context['object_list'].append(folio_obj)
+            continue
+        context['object_list'].append(folio_obj)
+        if not as_on_date:
+            as_on_date = folio_obj.as_on_date
+        else:
+            if as_on_date < folio_obj.as_on_date:
                 as_on_date = folio_obj.as_on_date
-            else:
-                if as_on_date < folio_obj.as_on_date:
-                    as_on_date = folio_obj.as_on_date
-            latest_value += folio_obj.latest_value
-            total_investment += folio_obj.buy_value
-            total_gain += folio_obj.gain
-        data['as_on_date'] = as_on_date
-        data['total_gain'] = round(total_gain, 2)
-        data['total_investment'] = round(total_investment, 2)
-        data['latest_value'] = round(latest_value, 2)
-        cur_ret, all_ret = calculate_xirr_all_users()
-        data['curr_ret'] = cur_ret
-        data['all_ret'] = all_ret
-        return data
+        latest_value += folio_obj.latest_value
+        total_investment += folio_obj.buy_value
+        total_gain += folio_obj.gain
+    context['as_on_date'] = as_on_date
+    context['total_gain'] = round(total_gain, 2)
+    context['total_investment'] = round(total_investment, 2)
+    context['latest_value'] = round(latest_value, 2)
+    cur_ret, all_ret = calculate_xirr(folio_objs)
+    context['curr_ret'] = cur_ret
+    context['all_ret'] = all_ret
+    return render(request, template, context)
 
 class FolioTransactionsListView(ListView):
     template_name = 'mutualfunds/transactions_list.html'
