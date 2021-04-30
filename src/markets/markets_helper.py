@@ -1,5 +1,5 @@
 from shares.shares_helper import get_invested_shares
-from .mc import MoneyControl
+from .mc_news import MoneyControlNews
 import datetime
 from .models import News
 from django.db import IntegrityError
@@ -10,10 +10,10 @@ def get_news():
         print(f"getting news for {ish['exchange']} {ish['symbol']}")
         count = 0
         if ish['exchange'] in ['NSE', 'BSE', 'NSE/BSE']:
-            if ish['exchange'] == 'NSE/BSE':
-                mc = MoneyControl('ISIN', ish['symbol'])
+            if ish['exchange'] == 'NSE/BSE' or ish['exchange'] == 'NSE':
+                mc = MoneyControlNews('NSE/BSE', ish['symbol'])
             else:
-                mc = MoneyControl(ish['exchange'], ish['symbol'])
+                mc = MoneyControlNews(ish['exchange'], ish['symbol'])
             try:
                 results = mc.fetch_ticker_news()
                 if results:

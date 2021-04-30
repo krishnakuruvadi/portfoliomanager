@@ -9,6 +9,8 @@ from alerts.alert_helper import create_alert, Severity
 from common.nse_bse import get_nse_bse
 from shared.handle_get import get_user_name_from_id
 from nsetools import Nse
+from common.nse import NSE
+from common.nse_historical import NSEHistorical
 from bs4 import BeautifulSoup as bs
 import requests
 from django.conf import settings
@@ -383,14 +385,14 @@ def merge_bse_nse():
         print('nothing to merge')
 
 
-def reconcile_shares():
+def reconcile_shares(log_calc=False):
     merge_bse_nse()
     share_objs = Share.objects.all()
     for share_obj in share_objs:
-        reconcile_share(share_obj)
+        reconcile_share(share_obj, log_calc)
     check_discrepancies()
 
-def reconcile_share(share_obj):
+def reconcile_share(share_obj, log_calc=False):
     from common.models import Bonus, Split
     quantity = 0
     buy_value = 0
@@ -398,20 +400,28 @@ def reconcile_share(share_obj):
     realised_gain = 0
     transactions = Transactions.objects.filter(share=share_obj).order_by('trans_date')
     last_trans = None
+    if log_calc:
+        print('***********************************************************************************')
+        print(f'    {share_obj.exchange} {share_obj.symbol}')
+        print('***********************************************************************************')
     for trans in transactions:
-        print(f"start at {str(quantity)}")
+        #print(f"start at {str(quantity)}")
         if last_trans and quantity>0:
             bonus = Bonus.objects.filter(exchange='NSE' if share_obj.exchange == 'NSE/BSE' else share_obj.exchange, symbol=share_obj.symbol, date__lte=trans.trans_date, date__gte=last_trans.trans_date)
             for b in bonus:
                 quantity = quantity + (quantity*b.ratio_num)/b.ratio_denom
                 if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
                     quantity = int(quantity)
+                if log_calc:
+                    print(f'{b.date}: {b.subject}, {quantity}')
             split = Split.objects.filter(exchange='NSE' if share_obj.exchange == 'NSE/BSE' else share_obj.exchange, symbol=share_obj.symbol, date__lte=trans.trans_date, date__gte=last_trans.trans_date)
             for s in split:
-                quantity = (quantity*s.ratio_denom)/s.ratio_num
+                quantity = (quantity*s.ratio_num)/s.ratio_denom
                 if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
                     quantity = int(quantity)
-            print(f"After bonus and split at {str(quantity)}")
+                if log_calc:
+                    print(f'{s.date}: {s.subject}, {quantity}')
+            #print(f"After bonus and split at {str(quantity)}")
         if trans.trans_type == 'Buy':
             quantity += trans.quantity
             buy_value += trans.trans_price
@@ -421,7 +431,9 @@ def reconcile_share(share_obj):
             else:
                 realised_gain += trans.trans_price
             quantity -= trans.quantity
-        print(f"After transaction {trans.trans_type} on {trans.trans_date} at {str(quantity)}")
+        if log_calc:
+                    print(f'{trans.trans_date}: {trans.trans_type} {trans.quantity}, {quantity}')
+        #print(f"After transaction {trans.trans_type} on {trans.trans_date} at {str(quantity)}")
         last_trans = trans
     
     if quantity > 0:
@@ -432,11 +444,15 @@ def reconcile_share(share_obj):
                 quantity = quantity + (quantity*b.ratio_num)/b.ratio_denom
                 if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
                     quantity = int(quantity)
+                if log_calc:
+                    print(f'{b.date}: {b.subject}, {quantity}')
             split = Split.objects.filter(exchange='NSE' if share_obj.exchange == 'NSE/BSE' else share_obj.exchange, symbol=share_obj.symbol, date__lte=datetime.date.today(), date__gte=last_trans.trans_date)
             for s in split:
-                quantity = (quantity*s.ratio_denom)/s.ratio_num
+                quantity = (quantity*s.ratio_num)/s.ratio_denom
                 if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
                     quantity = int(quantity)
+                if log_calc:
+                    print(f'{s.date}: {s.subject}, {quantity}')
         if quantity > 0:
             buy_price = buy_value/quantity
         else:
@@ -451,7 +467,11 @@ def reconcile_share(share_obj):
         quantity = 0
     else:
         buy_price = 0
-    print(f'ended up with {str(quantity)}')
+    if log_calc:
+        print('***********************************************************************************')
+        print(f'    {quantity}')
+        print('***********************************************************************************')
+    #print(f'ended up with {str(quantity)}')
     share_obj.quantity = quantity
     share_obj.buy_value = buy_value
     share_obj.buy_price = buy_price
@@ -542,7 +562,27 @@ def update_shares_latest_val():
                                     share_obj.symbol = nse_bse_data['bse']
                                     share_obj.save()
                                 continue
-                    
+                    elif share_obj.exchange == 'NSE':
+                        if not check_nse_valid(share_obj.symbol):
+                            trans = Transactions.objects.filter(share=share_obj).order_by('-trans_date')
+                            if len(trans) > 0:
+                                nh = NSEHistorical(share_obj.symbol, trans[0].trans_date)
+                                isin = nh.get_isin_from_bhav_copy()
+                                if isin:
+                                    n = NSE('')
+                                    symbol = n.get_symbol(isin)
+                                    if symbol:
+                                        nse_objs = Share.objects.filter(exchange='NSE', symbol=symbol)
+                                        if len(nse_objs) == 1:
+                                            move_trans(share_obj, nse_objs[0], True)
+                                        else:
+                                            nse_objs = Share.objects.filter(exchange='NSE/BSE', symbol=symbol)
+                                            if len(nse_objs) == 1:
+                                                move_trans(share_obj, nse_objs[0], True)
+                                            else:
+                                                share_obj.symbol = symbol
+                                                share_obj.save()
+
                 if latest_date and latest_val:
                     share_obj.as_on_date = latest_date
                     if share_obj.exchange == 'NASDAQ':

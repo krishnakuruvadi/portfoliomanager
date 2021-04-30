@@ -21,13 +21,11 @@ class MoneyControl(object):
         self.a_page_links = []    # Stores the list of links all the announcement pages.
         self.link = ""      # Link to the front page of the company we are looking for on moneycontrol
         self.present_a_page = 0
+        self.soup = None
+        self.ticker_url = None
 
-        #self.fetch_ticker()
-        #self.__fetch_a_next_page_link()
 
-
-    def fetch_ticker_news(self):
-        ret = list()
+    def fetch_tiker_page(self):
         try:
             self.link = SEARCH_URL+ self.ticker
             r = requests.get(self.link)
@@ -47,7 +45,7 @@ class MoneyControl(object):
                         for span in spans:
                             #print(span)
                             #print(f'text: {span.text}')
-                            if self.exchange == 'NSE':
+                            if self.exchange == 'NSE' or self.exchange=='NSE/BSE':
                                 if 'NSE' in span.text and span.text.strip().endswith(self.ticker):
                                     anchors = columns[0].findChildren(['a'])
                                     ticker_url = anchors[0]['href']
@@ -58,60 +56,24 @@ class MoneyControl(object):
                     print(f'fetching {ticker_url}')
                     r = requests.get(ticker_url)
                     if r.status_code==200:
+                        print(f'found page')
+                        self.ticker_url = r.url
                         self.soup = bs4.BeautifulSoup(r.content, 'html.parser')
-                        '''
-                        news_section = self.soup.find("div", {"id": "news"})
-                        anchors = news_section.findChildren(['a'])
-                        for anchor in anchors:
-                           #print(f"link: {anchor['href']} text: {anchor.text}")
-                           if anchor.text and anchor.text != '':
-                               #print(anchor.parent)
-                               spans = anchor.parent.findChildren(['span'])
-                               for span in spans:
-                                   print(f"{span.text}: {anchor['href']} text: {anchor.text}")
-                                   n = dict()
-                                   n['date'] = span.text
-                                   n['link'] = anchor['href']
-                                   n['text'] = anchor.text
-                                   ret.append(n)
-                        return ret
-                        '''
                     elif r.status_code==404:
                         print("Page not found")
                         return
                     else:
                         print("A different status code received : "+str(r.status_code))
                         return
-
                 else:
                     print(SEARCH_URL)
                     print('in stock page already')
                     print(r.url)
-
-                news_section = self.soup.find("div", {"id": "news"})
-                anchors = news_section.findChildren(['a'])
-                for anchor in anchors:
-                    #print(f"link: {anchor['href']} text: {anchor.text}")
-                    if anchor.text and anchor.text != '':
-                        #print(anchor.parent)
-                        spans = anchor.parent.findChildren(['span'])
-                        for span in spans:
-                            print(f"{span.text}: {anchor['href']} text: {anchor.text}")
-                            n = dict()
-                            #'Nov 03 2020
-                            n['date'] = get_date_or_none_from_string(span.text[0:11], format='%b %d %Y')
-                            n['link'] = anchor['href']
-                            n['text'] = anchor.text
-                            ret.append(n)
-                return ret
-                #print(self.soup)
-                #self.more_anno_link = PREFIX_URL + str(self.soup.find("div", attrs={"class":"PT5 gL_11", "align":"right"}).find("a")["href"] ) # class name extracted after looking at the document
-                #self.more_news_link = PREFIX_URL + str(self.soup.find("div", attrs={"class":"PT5 gL_11 FR"}).find("a")["href"])
+                    self.ticker_url = r.url
             elif r.status_code==404:
                 print("Page not found")
             else:
                 print("A different status code received : "+str(r.status_code))
-
         except requests.ConnectionError as ce:
             print("There is a network problem (DNS Failure, refused connectionn etc.). Error : "+str(ce))
             raise Exception
@@ -128,6 +90,72 @@ class MoneyControl(object):
             print("Any type of request related error : "+str(oe))
             raise Exception
 
+    def fetch_splits(self):
+        splits = list()
+        if not self.soup:
+            self.fetch_tiker_page()
+        if not self.soup:
+            print(f'failed to get ticker page')
+            return
+        url_splits = self.ticker_url.split('/')
+        url_part_1 = url_splits[len(url_splits)-2]
+        url_part_2 = url_splits[len(url_splits)-1]
+        #https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/yesbank/YB
+        splits_url = f'https://www.moneycontrol.com/company-facts/{url_part_1}/splits/{url_part_2}#{url_part_2}'
+        r = requests.get(splits_url)
+        if r.status_code==200:
+            print(f'found page')
+            self.soup = bs4.BeautifulSoup(r.content, 'html.parser')
+            table = self.soup.find("table", {"class":"mctable1"})
+            tbody = table.find("tbody")
+            rows = tbody.findChildren("tr")
+            ret_dict = dict()
+            for row in rows:
+                print(f'row {row}')
+                cols = row.findChildren("td")
+                if cols and len(cols) >=3:
+                    ret_dict[cols[0]] = {'old_fv': int(cols[1].text), 'new_fv':int(cols[2].text), 'effective_date':get_date_or_none_from_string(cols[3].text, '%d-%m-%Y')}
+            for _,v in ret_dict.items():
+                splits.append({'old_fv': v['old_fv'], 'new_fv':v['new_fv'], 'effective_date':v['effective_date']})
+            return splits
+        elif r.status_code==404:
+                print(f"Page not found url: {r.url}")
+        else:
+            print(f"A different status code received : {str(r.status_code)} for url: {r.url}")
+    
+    def fetch_bonuses(self):
+        bonuses = list()
+        if not self.soup:
+            self.fetch_tiker_page()
+        if not self.soup:
+            print(f'failed to get ticker page')
+            return
+        url_splits = self.ticker_url.split('/')
+        url_part_1 = url_splits[len(url_splits)-2]
+        url_part_2 = url_splits[len(url_splits)-1]
+        #https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/yesbank/YB
+        splits_url = f'https://www.moneycontrol.com/company-facts/{url_part_1}/bonus/{url_part_2}#{url_part_2}'
+        r = requests.get(splits_url)
+        if r.status_code==200:
+            print(f'found page')
+            self.soup = bs4.BeautifulSoup(r.content, 'html.parser')
+            table = self.soup.find("table", {"class":"mctable1 MT20"})
+            tbody = table.find("tbody")
+            rows = tbody.findChildren("tr")
+            ret_dict = dict()
+            for row in rows:
+                print(f'row {row}')
+                cols = row.findChildren("td")
+                if cols and len(cols) >=3:
+                    ret_dict[cols[0]] = {'ratio': cols[1].text, 'effective_date':get_date_or_none_from_string(cols[3].text, '%d-%m-%Y')}
+            for _,v in ret_dict.items():
+                bonuses.append({'ratio': v['ratio'], 'effective_date':v['effective_date']})
+            return bonuses
+        elif r.status_code==404:
+                print(f"Page not found url: {r.url}")
+        else:
+            print(f"A different status code received : {str(r.status_code)} for url: {r.url}")
+    
     '''
     def __fetch_a_next_page_link(self):
 

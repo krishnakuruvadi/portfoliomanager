@@ -6,6 +6,7 @@ from io import StringIO
 import datetime
 import csv
 import codecs
+import time
 
 class YahooFinance2(Exchange):
     timeout = 2
@@ -16,8 +17,12 @@ class YahooFinance2(Exchange):
 
     def __init__(self, symbol):
         self.symbol = symbol
+        self.session = None
+        self.crumb = None
+        self.get_session()
+
+    def get_session(self):
         self.session = requests.Session()
-        #self.dt = timedelta(days=days_back)
 
     def get_crumb(self):
         response = self.session.get(self.crumb_link.format(self.symbol), timeout=self.timeout)
@@ -34,9 +39,11 @@ class YahooFinance2(Exchange):
 
     def get_historical_value(self, start, end):
         print('getting historical values from ', start, ' to ', end, ' for symbol ', self.symbol)
-        for i in range(self.retries):
+        for _ in range(self.retries):
             try:
-                if not hasattr(self, 'crumb') or len(self.session.cookies) == 0:
+                if not self.session or len(self.session.cookies) == 0:
+                    self.get_session()
+                if not self.crumb:
                     self.get_crumb()
                 dt_to =  self.get_datetime_from_date(end,False)
                 dt_from = self.get_datetime_from_date(start)
