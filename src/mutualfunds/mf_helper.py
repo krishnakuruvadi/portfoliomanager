@@ -130,13 +130,16 @@ def calculate_xirr(folios):
         if trans.folio.folio in folios_list:
             all_folio_cash_flows.append((trans.trans_date, float(trans.trans_price) if trans.trans_type=='Sell' else float(-1*trans.trans_price)))
 
-        if trans.folio.units and trans.folio.units > 0:
+        if trans.folio.folio in folios_list and trans.folio.units and trans.folio.units > 0:
             current_folio_cash_flows.append((trans.trans_date, float(trans.trans_price) if trans.trans_type=='Sell' else float(-1*trans.trans_price)))
     
+    latest_value = 0
     for folio in folios:
         if folio.latest_value and folio.latest_value > 0:
-            all_folio_cash_flows.append((datetime.date.today(), float(folio.latest_value)))
-            current_folio_cash_flows.append((datetime.date.today(), float(folio.latest_value)))
+            latest_value += float(folio.latest_value)
+    if latest_value > 0:
+        all_folio_cash_flows.append((datetime.date.today(), latest_value))
+        current_folio_cash_flows.append((datetime.date.today(), latest_value))
 
     curr_folio_returns = 0
     all_folio_returns = 0

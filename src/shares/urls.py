@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (
-    SharesListView,
+    get_shares_list,
     ShareDetailView,
     ShareDeleteView,
     ShareTransactionsListView,
@@ -21,7 +21,7 @@ from .views import (
 app_name = 'shares'
 
 urlpatterns = [
-    path('', SharesListView.as_view(), name='shares-list'),
+    path('', get_shares_list, name='shares-list'),
     path('add/', add_transaction, name='transaction-add'),
     path('refresh/', refresh, name='refresh'),
     path('transactions', TransactionsListView.as_view(), name='transactions-list'),

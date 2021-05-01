@@ -18,6 +18,49 @@
 {% block content %}
   <table class="table table-borderless">
     <tr>
+      <td>
+        <form method="POST">
+          {% csrf_token %}
+            <div class="row">
+
+              <div class="col-sm-1">
+                <label for="user" class="col-sm-3 col-form-label">User</label>
+              </div>
+
+              <div class="col-sm-2">
+                <div class="md-form mt-0">
+                  <select id="id_user" name="user" class="form-control"></select>
+                </div>
+              </div>
+
+              <div class="col-sm-1">
+                <label for="exchange" class="col-sm-3 col-form-label">Exchange</label>
+              </div>
+
+              <div class="col-sm-2">
+                <div class="md-form mt-0">
+                  <select id="id_exchange" name="exchange" class="form-control"></select>
+                </div>
+              </div>
+
+              <div class="col-sm-3">
+                <label for="zero_val" class="col-form-label">Show zero value shares?</label>
+              </div>
+              
+              <div class="col-sm-1">
+                <input type="checkbox" name="show_zero_val" id="show_zero_val" value="{{show_zero_val}}">
+              </div>
+              
+
+              <div class="col-sm-1">
+                <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              </div>
+
+            </div>
+        </form>
+      </td>
+    </tr>
+    <tr>
       <td style="text-align:right"><b>Total Investment:</b> {{total_investment}} &nbsp;&nbsp;&nbsp;<b>Current Value:</b> {{latest_value}} &nbsp;&nbsp;&nbsp;<b>Unrealised Gain:</b> {{total_gain}} &nbsp;&nbsp;&nbsp;<b>Realised Gain:</b> {{realised_gain}} &nbsp;&nbsp;&nbsp;<b>Last Updated:</b> {{as_on_date}}</td>
     </tr>
   </table>
@@ -74,9 +117,46 @@
 </script>
 
 {% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
   <script>
+    set_user_list({{users|safe}}, '{{user|safe}}');
+    e = document.getElementById('show_zero_val');
+    var show = "{{show_zero_val|safe}}"
+    console.log(e.checked);
+    console.log(show);
+    if (show == "True") {
+      e.checked = true;
+    } else {
+      e.checked = false;
+    }
     $(document).on('click', '.confirm-delete', function(){
       return confirm('Are you sure you want to delete all shares?');
     })
+    set_exchange_list({{exchanges|safe}}, '{{exchange|safe}}')
+    function set_exchange_list(exchanges, sel_exchange) {
+      $('#id_exchange').empty();
+      $('#id_exchange')
+          .append($('<option>', { value : '' })
+          .text(''));
+      var exchdropdown = document.getElementById('id_exchange');
+
+      console.log(exchanges);
+      console.log(sel_exchange)
+      for (x in exchanges) {
+          exchange = exchanges[x]
+          // create new option element
+          var opt = document.createElement('option');
+          // create text node to add to option element (opt)
+          opt.appendChild( document.createTextNode(exchange) );
+          // set value property of opt
+          opt.value = exchange;
+          if (opt.value == sel_exchange) {
+            opt.selected = true;
+          }
+          // add opt to end of select box (sel)
+          exchdropdown.appendChild(opt);
+      }
+    }
 </script>
 {% endblock javascript %}

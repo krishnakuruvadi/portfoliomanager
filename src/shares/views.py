@@ -26,6 +26,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from tasks.tasks import pull_share_trans_from_broker, pull_share_trans_from_rh
 from django.conf import settings
+from django.db.models import Q
 import time
 # Create your views here.
 
@@ -33,40 +34,73 @@ class TransactionsListView(ListView):
     template_name = 'shares/transactions_list.html'
     queryset = Transactions.objects.all()
 
-class SharesListView(ListView):
-    template_name = 'shares/shares_list.html'
-    queryset = Share.objects.all()
-    
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        print(data)
-        data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
-        data['user_name_mapping'] = get_all_users()
-        total_investment = 0
-        latest_value = 0
-        as_on_date= None
-        total_gain = 0
-        realised_gain = 0
-        share_objs = Share.objects.all()
-        for share_obj in share_objs:
-            if share_obj.realised_gain:
-                realised_gain = realised_gain + float(share_obj.realised_gain)
-            if not share_obj.latest_value:
-                continue
-            if not as_on_date:
-                as_on_date = share_obj.as_on_date
+def get_shares_list(request):
+    template = 'shares/shares_list.html'
+    context = dict()
+    context['users'] = get_all_users()
+    context['exchanges'] = ['NSE/BSE', 'NASDAQ', 'NYSE']
+    show_zero_val_shares = True
+    user = None
+    exchange = None
+    if request.method == 'POST':
+        print(request.POST)
+        user = request.POST['user']
+        exchange = request.POST['exchange']
+        show_zero_val_shares = 'show_zero_val' in request.POST
+    context['object_list'] = list()
+    context['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
+    context['user_name_mapping'] = get_all_users()
+    context['show_zero_val'] = show_zero_val_shares
+    total_investment = 0
+    latest_value = 0
+    as_on_date= None
+    total_gain = 0
+    realised_gain = 0
+    share_objs = None
+    if not user or user=='':
+        if not exchange or exchange=='': 
+            share_objs = Share.objects.all()
+        else:
+            if exchange == 'NSE/BSE':
+                share_objs = Share.objects.filter(Q(exchange='NSE') | Q(exchange='BSE') | Q(exchange='NSE/BSE'))
             else:
-                if as_on_date < share_obj.as_on_date:
-                    as_on_date = share_obj.as_on_date
-            latest_value += share_obj.latest_value
-            total_investment += share_obj.buy_value
-            total_gain += share_obj.gain
-        data['as_on_date'] = as_on_date
-        data['total_gain'] = total_gain
-        data['total_investment'] = total_investment
-        data['latest_value'] = latest_value
-        data['realised_gain'] = round(realised_gain, 2)
-        return data
+                share_objs = Share.objects.filter(exchange=exchange)
+            context['exchange'] = exchange
+    else:
+        if not exchange or exchange=='': 
+            share_objs = Share.objects.filter(user=user)
+        else:
+            if exchange == 'NSE/BSE':
+                share_objs = Share.objects.filter(Q(exchange='NSE') | Q(exchange='BSE') | Q(exchange='NSE/BSE'))
+            else:
+                share_objs = Share.objects.filter(user=user, exchange=exchange)
+            context['exchange'] = exchange
+        context['user'] = user
+    for share_obj in share_objs:
+        if share_obj.realised_gain:
+            realised_gain = realised_gain + float(share_obj.realised_gain)
+        if not share_obj.latest_value:
+            if show_zero_val_shares:
+                context['object_list'].append(share_obj)
+            continue
+        context['object_list'].append(share_obj)
+        if not as_on_date:
+            as_on_date = share_obj.as_on_date
+        else:
+            if as_on_date < share_obj.as_on_date:
+                as_on_date = share_obj.as_on_date
+        latest_value += share_obj.latest_value
+        total_investment += share_obj.buy_value
+        total_gain += share_obj.gain
+    context['as_on_date'] = as_on_date
+    context['total_gain'] = round(total_gain, 2)
+    context['total_investment'] = round(total_investment, 2)
+    context['latest_value'] = round(latest_value, 2)
+    #cur_ret, all_ret = calculate_xirr(folio_objs)
+    #context['curr_ret'] = cur_ret
+    #context['all_ret'] = all_ret
+    context['realised_gain'] = round(realised_gain, 2)
+    return render(request, template, context)
 
 class ShareTransactionsListView(ListView):
     template_name = 'shares/transactions_list.html'
