@@ -37,7 +37,10 @@ class GoalListView(ListView):
         for g in self.queryset:
             data['target'] += g.final_val
             data['achieved'] += g.achieved_amt
-        data['ach_per'] = round(data['achieved']*100/data['target'],2)
+        if data['target'] > 0:
+            data['ach_per'] = round(data['achieved']*100/data['target'],2)
+        else:
+            data['ach_per'] = 0
         data['unalloc'] = get_unallocated_amount()
         print(data)
         return data

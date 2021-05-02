@@ -27,7 +27,7 @@
     <tbody>
       {% for instance in alerts %}
       <tr>
-        <td><a href="{{ instance.get_absolute_url }}">{{ instance.id }}</a></td>
+        <td><a href="{% url 'alerts:alert-detail' instance.id %}">{{ instance.id }}</a></td>
         <td style="text-align:center">
           {% if instance.severity == 0 %}
             <i class="far fa-times-circle" title="critical" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
