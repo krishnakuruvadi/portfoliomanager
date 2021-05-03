@@ -98,9 +98,9 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "debt_per": int(all_debt*100/(all_debt+all_equity+1)),
             "equity_per": int(all_equity*100/(all_debt+all_equity+1)),
         }
+    context['investment_data'] = dict()
     try:
         investment_data = InvestmentData.objects.get(user='all')
-        context['investment_data'] = dict()
         context['investment_data']['ppf'] = json.loads(investment_data.ppf_data.replace("\'", "\""))
         context['investment_data']['epf'] = json.loads(investment_data.epf_data.replace("\'", "\""))
         context['investment_data']['ssy'] = json.loads(investment_data.ssy_data.replace("\'", "\""))
