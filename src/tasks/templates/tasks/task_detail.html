@@ -5,7 +5,13 @@
 
 {%block canvas %}{% endblock canvas %}
 
-{% block viewname %} {{object.number }} : {{object.company}} {% endblock viewname %}
+{% block viewname %}
+<ul class="breadcrumb">
+  <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+  <li><a href="{% url 'tasks:task-list' %}">Tasks</a></li>
+  <li><a href="#">{{object.task_name}}</a></li>
+</ul>
+{% endblock viewname %}
 
 {% block content %} 
   <table>

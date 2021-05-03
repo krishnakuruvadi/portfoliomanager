@@ -28,6 +28,7 @@ from .mf_helper import insert_trans_entry, calculate_xirr_all_users, calculate_x
 from tasks.tasks import add_mf_transactions
 from .pull_kuvera import pull_kuvera
 from goal.goal_helper import get_goal_id_name_mapping_for_user
+from decimal import Decimal
 
 # Create your views here.
 
@@ -395,7 +396,12 @@ class FolioDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse('mutualfund:folio-list')
-
+    
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['folio_id'] = self.kwargs['id']
+        print(data)
+        return data
 
 class TransactionsListView(ListView):
     template_name = 'mutualfunds/transactions_list.html'

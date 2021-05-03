@@ -533,41 +533,43 @@ def update_scroll_data():
 
     nse = NSE(None)
     print('getting index list for nse')
-    for item in nse.get_index_list():
-        print(f'getting data of index {item} from nse')
-        data = nse.get_index_quote(item)
-        if data:
-            print(f"data {data}")
-            scroll_item = None
-            try:
-                scroll_item = ScrollData.objects.get(scrip=item)
-                if get_diff(float(scroll_item.val), data['lastPrice']) > 0.1:
-                    print(f"NSE scroll_item.val {scroll_item.val} data['lastPrice'] {data['lastPrice']}")
-                    scroll_item.last_updated = timezone.now()
-                    scroll_item.val = data['lastPrice']
-                    scroll_item.change = data['change']
-                    if not scroll_item.change:
-                        scroll_item.change = 0
-                    scroll_item.percent = data['pChange']
-                    if not scroll_item.percent:
-                        scroll_item.percent = 0
-                    scroll_item.save()
-            except ScrollData.DoesNotExist:
-                scroll_item = ScrollData.objects.create(scrip=item,
-                                                        last_updated = timezone.now(),
-                                                        val = data['lastPrice'],
-                                                        change = data['change'],
-                                                        percent = data['pChange'])
-            if len(sel_indexes) == 0 or item in sel_indexes:
-                if scroll_item.display != True:
-                    scroll_item.display = True
-                    scroll_item.save()
+    il = nse.get_index_list()
+    if il:
+        for item in il:
+            print(f'getting data of index {item} from nse')
+            data = nse.get_index_quote(item)
+            if data:
+                print(f"data {data}")
+                scroll_item = None
+                try:
+                    scroll_item = ScrollData.objects.get(scrip=item)
+                    if get_diff(float(scroll_item.val), data['lastPrice']) > 0.1:
+                        print(f"NSE scroll_item.val {scroll_item.val} data['lastPrice'] {data['lastPrice']}")
+                        scroll_item.last_updated = timezone.now()
+                        scroll_item.val = data['lastPrice']
+                        scroll_item.change = data['change']
+                        if not scroll_item.change:
+                            scroll_item.change = 0
+                        scroll_item.percent = data['pChange']
+                        if not scroll_item.percent:
+                            scroll_item.percent = 0
+                        scroll_item.save()
+                except ScrollData.DoesNotExist:
+                    scroll_item = ScrollData.objects.create(scrip=item,
+                                                            last_updated = timezone.now(),
+                                                            val = data['lastPrice'],
+                                                            change = data['change'],
+                                                            percent = data['pChange'])
+                if len(sel_indexes) == 0 or item in sel_indexes:
+                    if scroll_item.display != True:
+                        scroll_item.display = True
+                        scroll_item.save()
+                else:
+                    if scroll_item.display != False:
+                        scroll_item.display = False
+                        scroll_item.save()
             else:
-                if scroll_item.display != False:
-                    scroll_item.display = False
-                    scroll_item.save()
-        else:
-            print(f'no data for NSE {item}')
+                print(f'no data for NSE {item}')
     n = Nasdaq('', None)
     data = n.get_all_index()
     if data:

@@ -1,6 +1,12 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} Delete Folio {% endblock %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'mutualfund:folio-list' %}">Mutual Funds</a></li>
+    <li><a href="{% url 'mutualfund:folio-detail' folio_id %}">{{folio.folio}}</a></li>
+    <li><a href="#">Delete Folio</a></li>
+  </ul>
+{% endblock %}
 
 
 {% block canvas %}{% endblock canvas %}

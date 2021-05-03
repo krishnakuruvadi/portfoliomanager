@@ -1,6 +1,11 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} Delete User {% endblock %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'users:user-list' %}">Users</a></li>
+    <li><a href="#">Delete User</a></li>
+  </ul>
+{% endblock %}
 
 
 {% block canvas %}{% endblock canvas %}
