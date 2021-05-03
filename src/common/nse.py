@@ -4,12 +4,18 @@ import requests
 from django.conf import settings
 import zipfile
 import csv
+import json
+from nsetools.utils import byte_adaptor
+import time
+
 
 class NSE:
     nse_equity_url = 'http://www1.nseindia.com/content/equities/EQUITY_L.csv'
 
     def __init__(self, symbol):
         self.symbol = symbol
+        self.index_url="http://www1.nseindia.com/homepage/Indices1.json"
+
 
     def nse_headers(self):
         """
@@ -102,4 +108,42 @@ class NSE:
                     for k,v in row.items():
                         if k.strip() == 'SYMBOL':
                             return v
+        return None
+
+    def get_index_list(self):
+        for _ in range(5):
+            try:
+                headers = self.nse_headers()
+                r = requests.get(self.index_url, headers=headers, timeout=10)
+                resp = r.content
+                #print(f'resp {resp}')
+                j = json.loads(resp)
+                #print(f'j {j}')
+                resp_list = j['data']
+                index_list = [str(item['name']) for item in resp_list]
+                return index_list
+            except Exception as ex:
+                print(f'exception getting index list {ex}')
+                time.sleep(3)
+        return None
+
+    def get_index_quote(self, code):
+        for _ in range(5):
+            try:
+                headers = self.nse_headers()
+                r = requests.get(self.index_url, headers=headers, timeout=10)
+                resp = r.content
+                #print(f'resp {resp}')
+                j = json.loads(resp)
+                #print(f'j {j}')
+                resp_list = j['data']
+                for item in resp_list:
+                    if item['name'] == code:
+                        item['lastPrice'] = float(item['lastPrice'].replace(',',''))
+                        item['change'] = float(item['change'].replace(',',''))
+                        item['pChange'] = float(item['pChange'].replace(',',''))
+                        return item
+            except Exception as ex:
+                print(f'exception getting index list {ex}')
+                time.sleep(3)
         return None

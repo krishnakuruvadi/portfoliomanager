@@ -8,9 +8,12 @@
 {% endblock %} 
 
 {% block applicableactions %} 
-    <a style="padding-left:25px;" href="{% url 'mutualfund:transaction-upload' %}"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
-    <a style="padding-left:25px;padding-right:25px;" href="{% url 'mutualfund:folio-add' %}"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+  <a style="padding-left:25px;" href="{% url 'mutualfund:transaction-upload' %}"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
+  {% if folio_id %}
+    <a style="padding-left:25px;padding-right:25px;" href="{% url 'mutualfund:folio-add-transaction' folio_id %}"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+  {% endif %}
 {% endblock applicableactions %}
+
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}

@@ -1,6 +1,11 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} Delete Goal {% endblock %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'goals:goal-list' %}">Goals</a></li>
+    <li><a href="#">Delete Goal</a></li>
+  </ul>
+{% endblock %}
 
 
 {% block canvas %}{% endblock canvas %}

@@ -39,6 +39,7 @@ from markets.models import PEMonthy, PBMonthy
 from django.db import IntegrityError
 from common.helper import get_mf_passwords
 from .tasks_helper import *
+from common.nse import NSE
 
 
 def set_task_state(name, state):
@@ -530,7 +531,7 @@ def update_scroll_data():
         for index in pref_obj.indexes_to_scroll.split('|'):
             sel_indexes.append(index)
 
-    nse = Nse()
+    nse = NSE(None)
     print('getting index list for nse')
     for item in nse.get_index_list():
         print(f'getting data of index {item} from nse')

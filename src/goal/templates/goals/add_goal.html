@@ -5,18 +5,17 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block viewname %}
-  {% if name %}
-    Update Goal
-  {% else %}
-    Add Goal
-  {% endif %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'goals:goal-list' %}">Goals</a></li>
+    <li><a href="#">  {% if name %}
+      Update Goal
+    {% else %}
+      Add Goal
+    {% endif %}</a></li>
+  </ul>
 {% endblock viewname %}
 
 {% block content %}
-  <ul class="breadcrumb">
-    <li><a href="{% url 'goals:goal-list' %}">Goals</a></li>
-    <li><a href="#">Add Goal</a></li>
-  </ul>
   <form method="POST">
     {% csrf_token %}
     <div class="row">

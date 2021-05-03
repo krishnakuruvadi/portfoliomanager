@@ -84,6 +84,12 @@ class FolioTransactionsListView(ListView):
     def get_queryset(self):
         #folio = get_object_or_404(Folio, id=self.kwargs['id'])
         return MutualFundTransaction.objects.order_by('-trans_date').filter(folio__id=self.kwargs['id'])
+    
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['folio_id'] = self.kwargs['id']
+        print(data)
+        return data
 
 def sip_list(request):
     template = 'mutualfunds/sip_list.html'
@@ -271,7 +277,7 @@ def add_transaction(request, id):
         notes = request.POST['notes']
         insert_trans_entry(folio.folio, folio.fund.code, folio.user, trans_type, units, price, trans_date, notes, broker, conversion_rate, trans_price)
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add Transaction', 'folio':folio.folio, 'user':user, 'fund_name':folio.fund.name}
+    context = {'users':users, 'operation': 'Add Transaction', 'folio':folio.folio, 'user':user, 'fund_name':folio.fund.name, 'folio_id':id}
     return render(request, template, context)
 
 def update_transaction(request, id):

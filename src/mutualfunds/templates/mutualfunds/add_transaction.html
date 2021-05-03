@@ -4,13 +4,16 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %} {{operation}} {% endblock viewname %}
-
-{% block content %}
+{% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'mutualfund:folio-list' %}">Mutual Funds</a></li>
-    <li><a href="#">Add Transaction</a></li>
+    <li><a href="{% url 'mutualfund:folio-detail' folio_id %}">{{folio}}</a></li>
+    <li><a href="#">{{operation}}</a></li>
   </ul>
+{% endblock viewname %}
+
+{% block content %}
+
   <form method="POST">
     {% csrf_token %}
     <div class="row">

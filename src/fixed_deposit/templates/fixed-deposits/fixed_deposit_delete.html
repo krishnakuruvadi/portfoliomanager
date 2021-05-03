@@ -1,6 +1,11 @@
 {% extends 'base.html' %} 
 
-{% block viewname %} Delete Fixed Deposit {% endblock %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'fixed-deposits:fixed-deposit-list' %}">Fixed Deposits</a></li>
+    <li><a href="#">Delete Fixed Deposit</a></li>
+  </ul>
+{% endblock %}
 
 
 {% block canvas %}{% endblock canvas %}
