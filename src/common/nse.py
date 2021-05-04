@@ -111,7 +111,7 @@ class NSE:
         return None
 
     def get_index_list(self):
-        for _ in range(5):
+        for _ in range(3):
             try:
                 headers = self.nse_headers()
                 r = requests.get(self.index_url, headers=headers, timeout=10)
@@ -128,7 +128,7 @@ class NSE:
         return None
 
     def get_index_quote(self, code):
-        for _ in range(5):
+        for _ in range(3):
             try:
                 headers = self.nse_headers()
                 r = requests.get(self.index_url, headers=headers, timeout=10)

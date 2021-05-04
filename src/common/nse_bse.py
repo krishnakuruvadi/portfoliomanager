@@ -174,7 +174,7 @@ def pull_bse():
         dload.click()
         print('download element clicked')
         dload_file_name = None
-        for i  in range(5):
+        for _ in range(5):
             time.sleep(5)
             new_file_list = get_new_files_added(settings.MEDIA_ROOT, existing_files)        
             if len(new_file_list) == 1:

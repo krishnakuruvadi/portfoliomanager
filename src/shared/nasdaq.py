@@ -26,7 +26,7 @@ class Nasdaq(Exchange):
             urlData = 'https://api.nasdaq.com/api/quote/'+self.stock+'/historical?assetclass=stocks&fromdate='
         urlData += start.strftime('%Y-%m-%d')+ '&limit=9999&todate='
         urlData += end.strftime('%Y-%m-%d')
-        for _ in range(5):
+        for _ in range(3):
             try:
                 print("accessing "+urlData)
                 headers = {
@@ -60,7 +60,7 @@ class Nasdaq(Exchange):
 
     def get_historical_value(self, start, end):
         get_response = None
-        for _ in range(5):
+        for _ in range(3):
             try:
                 if self.etf:
                     urlData = "http://www.nasdaq.com/api/v1/historical/" + self.stock + "/etf/"
@@ -110,7 +110,7 @@ class Nasdaq(Exchange):
     
     def get_index_val(self):
         get_response = None
-        for _ in range(5):
+        for _ in range(3):
             try:
                 urlData = "https://api.nasdaq.com/api/quote/"+self.stock+"/info?assetclass=index" 
                 print("accessing "+urlData)
@@ -151,7 +151,7 @@ class Nasdaq(Exchange):
 
     def get_all_index(self):
         get_response = None
-        for _ in range(5):
+        for _ in range(3):
             try:
                 urlData = "https://api.nasdaq.com/api/quote/watchlist?symbol=comp%7cindex&symbol=ndx%7cindex&symbol=indu%7cindex&symbol=rui%7cindex&symbol=omxs30%7cindex&symbol=omxn40%7cindex&symbol=omxb10%7cindex&symbol=cac40%7cindex&symbol=nik%25sl%25o%7cindex" 
                 print("accessing "+urlData)
@@ -218,7 +218,7 @@ class Nasdaq(Exchange):
     
     def get_latest_val(self):
         get_response = None
-        for _ in range(5):
+        for _ in range(3):
             try:
                 urlData = "https://api.nasdaq.com/api/quote/" + self.stock + "/info?assetclass=stocks"
                 print("accessing "+urlData)

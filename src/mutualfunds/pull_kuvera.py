@@ -73,7 +73,7 @@ def pull_kuvera(user, email, passwd, pull_user_name):
         time.sleep(5)
         dload = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//img[contains(@src,'download.svg')]")))
         dload.click()
-        for i in range(10):
+        for _ in range(10):
             if os.path.exists(dload_file):
                 break
             time.sleep(1)
@@ -81,7 +81,7 @@ def pull_kuvera(user, email, passwd, pull_user_name):
         
         sips = pull_sip(driver)
         mf_add_or_update_sip_kuvera(sips)
-        for i in range(5):
+        for _ in range(5):
             try:
                 user_cont = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//div[contains(@class,'username-container')]")))
                 user_cont.click()
@@ -111,7 +111,7 @@ def pull_sip(driver):
         sip_url = 'https://kuvera.in/systematic/sip'
         driver.get(sip_url)
         time.sleep(5)
-        for i in range(5):
+        for _ in range(5):
             try:
                 sip_elem = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//div[contains(@class,'b-dynamic-tab-header__item__title') and text()[contains(.,'SIP')]]")))
                 sip_elem.click()

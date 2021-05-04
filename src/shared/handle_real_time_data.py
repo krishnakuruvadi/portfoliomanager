@@ -35,7 +35,7 @@ def get_latest_vals(stock, exchange, start, end, etf=False):
 def get_mf_vals(amfi_code, start, end):
     mf = Mftool()
     response = dict()
-    for i in range(5):
+    for _ in range(3):
         try:
             vals = mf.get_scheme_historical_nav_year(amfi_code,start.year)
             if vals:
@@ -56,8 +56,8 @@ def get_mf_vals(amfi_code, start, end):
 
 def get_historical_year_mf_vals(amfi_code, year):
     mf = Mftool()
-    today = end_date = datetime.date.today()
-    for i in range(5):
+    today = datetime.date.today()
+    for _ in range(3):
         try:
             vals = mf.get_scheme_historical_nav_year(amfi_code,year)
             if vals:

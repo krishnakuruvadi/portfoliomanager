@@ -522,7 +522,7 @@ def add_share_transactions(broker, user, full_file_path):
     shares_add_transactions(broker, user, full_file_path)
     os.remove(full_file_path)
 
-@db_periodic_task(crontab(minute='*/10'))
+@db_periodic_task(crontab(minute='*/20'))
 def update_scroll_data():
     pref_obj = Preferences.get_solo()
     sel_indexes = list()
