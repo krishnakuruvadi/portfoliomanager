@@ -20,6 +20,8 @@ def get_latest_vals(stock, exchange, start, end, etf=False):
         response = Nasdaq(stock, etf).get_latest_val()
         if not response:
             response = Nasdaq(stock, etf).get_historical_value(start, end)
+            if not response:
+                response = YahooFinance2(stock).get_historical_value(start, end)
         return response
     if exchange == 'NSE' or exchange == 'NSE/BSE':
         #response = Nse(stock).get_historical_value(start, end)

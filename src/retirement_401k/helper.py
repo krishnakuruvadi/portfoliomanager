@@ -36,7 +36,7 @@ def reconcile_401k():
 
         if latest_date:
             nav_date, nav_value = get_latest_month_end_nav(account.id)
-            if nav_date > latest_date:
+            if nav_date and nav_date > latest_date:
                 latest_date = nav_date
                 latest_nav = nav_value
             fx = get_forex_rate(latest_date, 'USD', 'INR')
@@ -102,7 +102,7 @@ def get_latest_month_end_nav(id):
     history = NAVHistory.objects.filter(account=account).order_by('-nav_date')
     if len(history) > 0:
         return history[0].nav_date, history[0].nav_value
-    return 0
+    return None, None
 
 def get_401k_amount_for_goal(id):
     objs = Account401K.objects.filter(goal=id)
