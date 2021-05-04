@@ -30,7 +30,6 @@ from shares.shares_helper import shares_add_transactions, update_shares_latest_v
 from shared.financial import xirr
 from shared.nasdaq import Nasdaq
 from django.utils import timezone
-from nsetools import Nse
 from common.models import ScrollData, Preferences
 import requests
 from bs4 import BeautifulSoup
@@ -616,7 +615,7 @@ def get_pe():
     if pref_obj.indexes_to_scroll:
             for index in pref_obj.indexes_to_scroll.split('|'):
                 sel_indexes.append(index)
-    nse = Nse()
+    nse = NSE(None)
     avail_indices = ["NIFTY 50","NIFTY NEXT 50","NIFTY100 LIQUID 15","NIFTY MIDCAP LIQUID 15","NIFTY 100","NIFTY 200","NIFTY 500","NIFTY500 MULTICAP 50:25:25","NIFTY MIDCAP 150","NIFTY MIDCAP 50","NIFTY FULL MIDCAP 100",
 					"NIFTY MIDCAP 100","NIFTY SMALLCAP 250","NIFTY SMALLCAP 50","NIFTY FULL SMALLCAP 100", "NIFTY SMALLCAP 100", "NIFTY LargeMidcap 250", "NIFTY MIDSMALLCAP 400",
                     "NIFTY AUTO","NIFTY BANK","NIFTY CONSUMER DURABLES","NIFTY FINANCIAL SERVICES","NIFTY FINANCIAL SERVICES 25/50","NIFTY FMCG","Nifty Healthcare Index","NIFTY IT","NIFTY MEDIA","NIFTY METAL",
@@ -626,7 +625,10 @@ def get_pe():
                     "NIFTY MIDCAP LIQUID 15",	"NIFTY500 VALUE 50", "NIFTY MIDCAP150 QUALITY 50", "NIFTY ALPHA LOW-VOLATILITY 30", "NIFTY QUALITY LOW-VOLATILITY 30", "NIFTY ALPHA QUALITY LOW-VOLATILITY 30",	
                     "NIFTY ALPHA QUALITY VALUE LOW-VOLATILITY 30", "NIFTY50 Equal Weight", "NIFTY100 Equal Weight", "NIFTY100 LOW VOLATILITY 30", "NIFTY200 MOMENTUM 30", "NIFTY ALPHA 50",
 		            "NIFTY DIVIDEND OPPORTUNITIES 50", "NIFTY HIGH BETA 50","NIFTY LOW VOLATILITY 50","NIFTY100 QUALITY 30","NIFTY50 VALUE 20",	"NIFTY GROWTH SECTORS 15"]
-    for item in nse.get_index_list():
+    il = nse.get_index_list()
+    if not il:
+        return
+    for item in il:
         if item in sel_indexes and item in avail_indices:
             fp = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             pe_file = os.path.join(fp, 'media', 'pe-ratio', item+'.json')
@@ -670,6 +672,8 @@ def get_pe():
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'
                 }
                 page = requests.get(url, headers=headers, timeout=10)
+                if not page or page.status_code != 200:
+                    break
                 print('finished get')
                 soup = BeautifulSoup(page.text, 'html.parser')
                 print('finished souping')

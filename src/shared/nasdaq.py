@@ -42,12 +42,12 @@ class Nasdaq(Exchange):
                 }
                 get_response = requests.get(urlData, headers=headers, timeout=10)
                 print(get_response)
-                if get_response.status_code == 200:
+                if get_response and get_response.status_code == 200:
                     break
             except Exception as ex:
                 print(f'exception when accessing {urlData}: {ex}')
                 time.sleep(3)
-        if get_response.status_code != 200:
+        if not get_response or get_response.status_code != 200:
             return None
         json_data = get_response.json()
         data = dict()
@@ -82,12 +82,12 @@ class Nasdaq(Exchange):
                 }
                 get_response = requests.get(urlData, headers=headers, timeout=10)
                 print(get_response)
-                if get_response.status_code == 200:
+                if get_response and get_response.status_code == 200:
                     break
             except Exception as ex:
                 print(f'exception when accessing {urlData}: {ex}')
                 time.sleep(3)
-        if get_response.status_code != 200:
+        if not get_response or get_response.status_code != 200:
             ret = self.get_alternate_historical_value(start, end)
             return ret
         text = get_response.iter_lines()
@@ -121,12 +121,12 @@ class Nasdaq(Exchange):
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'}
                 get_response = requests.get(urlData, headers=headers, timeout=10)
                 print(get_response)
-                if get_response.status_code == 200:
+                if get_response and get_response.status_code == 200:
                     break
             except Exception as ex:
                 print(f'exception when accessing {urlData}: {ex}')
                 time.sleep(3)
-        if get_response.status_code != 200:
+        if not get_response or get_response.status_code != 200:
             return None
         #print(get_response.content)
         json_data = get_response.json()
@@ -162,12 +162,12 @@ class Nasdaq(Exchange):
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'}
                 get_response = requests.get(urlData, headers=headers, timeout=10)
                 #print(get_response)
-                if get_response.status_code == 200:
+                if get_response and get_response.status_code == 200:
                     break
             except Exception as ex:
                 print(f'exception when accessing {urlData}: {ex}')
                 time.sleep(3)
-        if get_response.status_code != 200:
+        if not get_response or get_response.status_code != 200:
             return None
         #print(get_response.content)
         json_data = get_response.json()
@@ -244,12 +244,12 @@ class Nasdaq(Exchange):
                 }
                 get_response = requests.get(urlData, headers=headers, timeout=10)
                 #print(get_response)
-                if get_response.status_code == 200:
+                if get_response and get_response.status_code == 200:
                     break
             except Exception as ex:
                 print(f'exception when accessing {urlData}: {ex}')
                 time.sleep(3)
-        if get_response.status_code != 200:
+        if not get_response or get_response.status_code != 200:
             print(get_response)
             return None
         json_data = get_response.json()
