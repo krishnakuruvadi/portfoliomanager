@@ -80,7 +80,7 @@ class Nasdaq(Exchange):
                     'Connection': "close",
                     'cache-control': "no-cache"
                 }
-                get_response = requests.request('GET', urlData, headers=headers)
+                get_response = requests.get(urlData, headers=headers, timeout=10)
                 print(get_response)
                 if get_response.status_code == 200:
                     break
@@ -119,7 +119,7 @@ class Nasdaq(Exchange):
                     'Origin': 'https://www.nasdaq.com/',
                     'Sec-Fetch-Mode': 'cors',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'}
-                get_response = requests.request('GET', urlData, headers=headers)
+                get_response = requests.get(urlData, headers=headers, timeout=10)
                 print(get_response)
                 if get_response.status_code == 200:
                     break
@@ -160,7 +160,7 @@ class Nasdaq(Exchange):
                     'Origin': 'https://www.nasdaq.com/',
                     'Sec-Fetch-Mode': 'cors',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'}
-                get_response = requests.request('GET', urlData, headers=headers)
+                get_response = requests.get(urlData, headers=headers, timeout=10)
                 #print(get_response)
                 if get_response.status_code == 200:
                     break
@@ -242,7 +242,7 @@ class Nasdaq(Exchange):
                     'Sec-Fetch-Mode': 'cors',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'
                 }
-                get_response = requests.request('GET', urlData, headers=headers)
+                get_response = requests.get(urlData, headers=headers, timeout=10)
                 #print(get_response)
                 if get_response.status_code == 200:
                     break
