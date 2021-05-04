@@ -9,6 +9,7 @@ from common.helper import get_preferences
 from dateutil import tz
 from django.utils import timezone
 from shared.utils import get_float_or_zero_from_string
+import time
 
 class Nasdaq(Exchange):
     def __init__(self, stock, etf):
@@ -25,23 +26,27 @@ class Nasdaq(Exchange):
             urlData = 'https://api.nasdaq.com/api/quote/'+self.stock+'/historical?assetclass=stocks&fromdate='
         urlData += start.strftime('%Y-%m-%d')+ '&limit=9999&todate='
         urlData += end.strftime('%Y-%m-%d')
-        for i in range(5):
-            print("accessing "+urlData)
-            headers = {
-                'Content-Type': "application/x-www-form-urlencoded",
-                'User-Agent': "PostmanRuntime/7.13.0",
-                'Accept': "*/*",
-                'Cache-Control': "no-cache",
-                'Host': "www.nasdaq.com",
-                'accept-encoding': "gzip, deflate",
-                'content-length': "166",
-                'Connection': "close",
-                'cache-control': "no-cache"
-            }
-            get_response = requests.request('GET', urlData, headers=headers)
-            print(get_response)
-            if get_response.status_code == 200:
-                break
+        for _ in range(5):
+            try:
+                print("accessing "+urlData)
+                headers = {
+                    'Content-Type': "application/x-www-form-urlencoded",
+                    'User-Agent': "PostmanRuntime/7.13.0",
+                    'Accept': "*/*",
+                    'Cache-Control': "no-cache",
+                    'Host': "www.nasdaq.com",
+                    'accept-encoding': "gzip, deflate",
+                    'content-length': "166",
+                    'Connection': "close",
+                    'cache-control': "no-cache"
+                }
+                get_response = requests.get(urlData, headers=headers, timeout=10)
+                print(get_response)
+                if get_response.status_code == 200:
+                    break
+            except Exception as ex:
+                print(f'exception when accessing {urlData}: {ex}')
+                time.sleep(3)
         if get_response.status_code != 200:
             return None
         json_data = get_response.json()
@@ -55,29 +60,33 @@ class Nasdaq(Exchange):
 
     def get_historical_value(self, start, end):
         get_response = None
-        for i in range(5):
-            if self.etf:
-                urlData = "http://www.nasdaq.com/api/v1/historical/" + self.stock + "/etf/"
-            else:
-                urlData = "http://www.nasdaq.com/api/v1/historical/" + self.stock + "/stocks/"
-            urlData += start.strftime('%Y-%m-%d')+ '/'
-            urlData += end.strftime('%Y-%m-%d')
-            print("accessing "+urlData)
-            headers = {
-                'Content-Type': "application/x-www-form-urlencoded",
-                'User-Agent': "PostmanRuntime/7.13.0",
-                'Accept': "*/*",
-                'Cache-Control': "no-cache",
-                'Host': "www.nasdaq.com",
-                'accept-encoding': "gzip, deflate",
-                'content-length': "166",
-                'Connection': "close",
-                'cache-control': "no-cache"
-            }
-            get_response = requests.request('GET', urlData, headers=headers)
-            print(get_response)
-            if get_response.status_code == 200:
-                break
+        for _ in range(5):
+            try:
+                if self.etf:
+                    urlData = "http://www.nasdaq.com/api/v1/historical/" + self.stock + "/etf/"
+                else:
+                    urlData = "http://www.nasdaq.com/api/v1/historical/" + self.stock + "/stocks/"
+                urlData += start.strftime('%Y-%m-%d')+ '/'
+                urlData += end.strftime('%Y-%m-%d')
+                print("accessing "+urlData)
+                headers = {
+                    'Content-Type': "application/x-www-form-urlencoded",
+                    'User-Agent': "PostmanRuntime/7.13.0",
+                    'Accept': "*/*",
+                    'Cache-Control': "no-cache",
+                    'Host': "www.nasdaq.com",
+                    'accept-encoding': "gzip, deflate",
+                    'content-length': "166",
+                    'Connection': "close",
+                    'cache-control': "no-cache"
+                }
+                get_response = requests.request('GET', urlData, headers=headers)
+                print(get_response)
+                if get_response.status_code == 200:
+                    break
+            except Exception as ex:
+                print(f'exception when accessing {urlData}: {ex}')
+                time.sleep(3)
         if get_response.status_code != 200:
             ret = self.get_alternate_historical_value(start, end)
             return ret
@@ -101,18 +110,22 @@ class Nasdaq(Exchange):
     
     def get_index_val(self):
         get_response = None
-        for i in range(5):
-            urlData = "https://api.nasdaq.com/api/quote/"+self.stock+"/info?assetclass=index" 
-            print("accessing "+urlData)
-            headers =  {'Accept': 'application/json, text/plain, */*',
-                 'DNT': "1",
-                 'Origin': 'https://www.nasdaq.com/',
-                 'Sec-Fetch-Mode': 'cors',
-                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'}
-            get_response = requests.request('GET', urlData, headers=headers)
-            print(get_response)
-            if get_response.status_code == 200:
-                break
+        for _ in range(5):
+            try:
+                urlData = "https://api.nasdaq.com/api/quote/"+self.stock+"/info?assetclass=index" 
+                print("accessing "+urlData)
+                headers =  {'Accept': 'application/json, text/plain, */*',
+                    'DNT': "1",
+                    'Origin': 'https://www.nasdaq.com/',
+                    'Sec-Fetch-Mode': 'cors',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'}
+                get_response = requests.request('GET', urlData, headers=headers)
+                print(get_response)
+                if get_response.status_code == 200:
+                    break
+            except Exception as ex:
+                print(f'exception when accessing {urlData}: {ex}')
+                time.sleep(3)
         if get_response.status_code != 200:
             return None
         #print(get_response.content)
@@ -138,18 +151,22 @@ class Nasdaq(Exchange):
 
     def get_all_index(self):
         get_response = None
-        for i in range(5):
-            urlData = "https://api.nasdaq.com/api/quote/watchlist?symbol=comp%7cindex&symbol=ndx%7cindex&symbol=indu%7cindex&symbol=rui%7cindex&symbol=omxs30%7cindex&symbol=omxn40%7cindex&symbol=omxb10%7cindex&symbol=cac40%7cindex&symbol=nik%25sl%25o%7cindex" 
-            print("accessing "+urlData)
-            headers =  {'Accept': 'application/json, text/plain, */*',
-                 'DNT': "1",
-                 'Origin': 'https://www.nasdaq.com/',
-                 'Sec-Fetch-Mode': 'cors',
-                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'}
-            get_response = requests.request('GET', urlData, headers=headers)
-            #print(get_response)
-            if get_response.status_code == 200:
-                break
+        for _ in range(5):
+            try:
+                urlData = "https://api.nasdaq.com/api/quote/watchlist?symbol=comp%7cindex&symbol=ndx%7cindex&symbol=indu%7cindex&symbol=rui%7cindex&symbol=omxs30%7cindex&symbol=omxn40%7cindex&symbol=omxb10%7cindex&symbol=cac40%7cindex&symbol=nik%25sl%25o%7cindex" 
+                print("accessing "+urlData)
+                headers =  {'Accept': 'application/json, text/plain, */*',
+                    'DNT': "1",
+                    'Origin': 'https://www.nasdaq.com/',
+                    'Sec-Fetch-Mode': 'cors',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'}
+                get_response = requests.request('GET', urlData, headers=headers)
+                #print(get_response)
+                if get_response.status_code == 200:
+                    break
+            except Exception as ex:
+                print(f'exception when accessing {urlData}: {ex}')
+                time.sleep(3)
         if get_response.status_code != 200:
             return None
         #print(get_response.content)
@@ -201,33 +218,37 @@ class Nasdaq(Exchange):
     
     def get_latest_val(self):
         get_response = None
-        for i in range(5):
-            urlData = "https://api.nasdaq.com/api/quote/" + self.stock + "/info?assetclass=stocks"
-            print("accessing "+urlData)
-            '''
-            headers = {
-                'Content-Type': "application/x-www-form-urlencoded",
-                'User-Agent': "PostmanRuntime/7.13.0",
-                'Accept': "*/*",
-                'Cache-Control': "no-cache",
-                'Host': "www.nasdaq.com",
-                'accept-encoding': "gzip, deflate",
-                'content-length': "166",
-                'Connection': "close",
-                'cache-control': "no-cache"
-            }
-            '''
-            headers =  {
-                'Accept': 'application/json, text/plain, */*',
-                'DNT': "1",
-                'Origin': 'https://www.nasdaq.com/',
-                'Sec-Fetch-Mode': 'cors',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'
-            }
-            get_response = requests.request('GET', urlData, headers=headers)
-            #print(get_response)
-            if get_response.status_code == 200:
-                break
+        for _ in range(5):
+            try:
+                urlData = "https://api.nasdaq.com/api/quote/" + self.stock + "/info?assetclass=stocks"
+                print("accessing "+urlData)
+                '''
+                headers = {
+                    'Content-Type': "application/x-www-form-urlencoded",
+                    'User-Agent': "PostmanRuntime/7.13.0",
+                    'Accept': "*/*",
+                    'Cache-Control': "no-cache",
+                    'Host': "www.nasdaq.com",
+                    'accept-encoding': "gzip, deflate",
+                    'content-length': "166",
+                    'Connection': "close",
+                    'cache-control': "no-cache"
+                }
+                '''
+                headers =  {
+                    'Accept': 'application/json, text/plain, */*',
+                    'DNT': "1",
+                    'Origin': 'https://www.nasdaq.com/',
+                    'Sec-Fetch-Mode': 'cors',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0)'
+                }
+                get_response = requests.request('GET', urlData, headers=headers)
+                #print(get_response)
+                if get_response.status_code == 200:
+                    break
+            except Exception as ex:
+                print(f'exception when accessing {urlData}: {ex}')
+                time.sleep(3)
         if get_response.status_code != 200:
             print(get_response)
             return None

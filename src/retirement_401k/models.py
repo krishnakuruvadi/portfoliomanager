@@ -45,4 +45,4 @@ class NAVHistory(models.Model):
         unique_together = ('account', 'nav_date')
     
     def __str__(self):
-        return self.account.company+ ' ' + self.nav_date + ' ' + str(self.nav_value)
+        return self.account.company+ ' ' + self.nav_date.strftime('%d-%b-%Y') + ' ' + str(self.nav_value)

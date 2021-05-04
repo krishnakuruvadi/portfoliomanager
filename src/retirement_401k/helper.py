@@ -100,7 +100,9 @@ def get_latest_month_end_nav(id):
     upload_nav(id)
     account = Account401K.objects.get(id=id)
     history = NAVHistory.objects.filter(account=account).order_by('-nav_date')
-    return history[0].nav_date, history[0].nav_value
+    if len(history) > 0:
+        return history[0].nav_date, history[0].nav_value
+    return 0
 
 def get_401k_amount_for_goal(id):
     objs = Account401K.objects.filter(goal=id)
