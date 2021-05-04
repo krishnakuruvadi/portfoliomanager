@@ -26,7 +26,7 @@ from pytz import timezone
 from common.helper import get_preferences
 from pytz import common_timezones
 from shared.nasdaq import Nasdaq
-from nsetools import Nse
+from common.nse import NSE
 from shared.utils import *
 from .bsestar import update_bsestar_schemes
 from shared.handle_get import *
@@ -327,9 +327,11 @@ def preferences(request):
     for _,v in index_data.items():
         avail_indexes.append(v['name'])
     
-    nse = Nse()
-    for item in nse.get_index_list():
-        avail_indexes.append(item)
+    nse = NSE(None)
+    il = nse.get_index_list()
+    if il:
+        for item in il:
+            avail_indexes.append(item)
     
     sel_indexes = list()
     if pref_obj.indexes_to_scroll:

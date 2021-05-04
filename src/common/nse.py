@@ -7,7 +7,16 @@ import csv
 import json
 from nsetools.utils import byte_adaptor
 import time
-
+import re
+import six
+if six.PY2:
+    from urllib2 import build_opener, HTTPCookieProcessor, Request
+    from urllib import urlencode
+    from cookielib import CookieJar
+else:
+    from urllib.request import build_opener, HTTPCookieProcessor, Request
+    from urllib.parse import urlencode
+    from http.cookiejar import CookieJar
 
 class NSE:
     nse_equity_url = 'http://www1.nseindia.com/content/equities/EQUITY_L.csv'
@@ -15,8 +24,9 @@ class NSE:
     def __init__(self, symbol):
         self.symbol = symbol
         self.index_url="http://www1.nseindia.com/homepage/Indices1.json"
-
-
+        self.get_quote_url = 'https://www1.nseindia.com/live_market/dynaContent/live_watch/get_quote/GetQuote.jsp?'
+        self.opener = self.nse_opener()
+    
     def nse_headers(self):
         """
         Headers required for requesting http://nseindia.com
@@ -147,3 +157,81 @@ class NSE:
                 print(f'exception getting index list {ex}')
                 time.sleep(3)
         return None
+    
+    def build_url_for_quote(self, code):
+        """
+        builds a url which can be requested for a given stock code
+        :param code: string containing stock code.
+        :return: a url object
+        """
+        if code is not None and type(code) is str:
+            encoded_args = urlencode([('symbol', code), ('illiquid', '0'), ('smeFlag', '0'), ('itpFlag', '0')])
+            return self.get_quote_url + encoded_args
+        else:
+            raise Exception('code must be string')
+
+    def nse_opener(self):
+        """
+        builds opener for urllib2
+        :return: opener object
+        """
+        cj = CookieJar()
+        return build_opener(HTTPCookieProcessor(cj))
+
+    def get_quote(self, code):
+        code = code.upper()
+        url = self.build_url_for_quote(code)
+        for _ in range(3):
+            try:
+                headers = self.nse_headers()
+                req = Request(url, None, headers)
+                #r = requests.get(url, headers=headers, timeout=10)
+                res = self.opener.open(req, timeout=10)
+                res = byte_adaptor(res)
+                res = res.read()
+                #resp = r.content
+                #print(resp)
+                match = re.search(\
+                        r'<div\s+id="responseDiv"\s+style="display:none">(.*?)</div>',
+                        res, re.S
+                    )
+                try:
+                    buffer = match.group(1).strip()
+                    #print(f'buffer:{buffer}')
+                    response = self.clean_server_response(json.loads(buffer)['data'][0])
+                    #print(f'response {response}')
+                    return response
+                except SyntaxError as err:
+                    raise Exception('ill formatted response')
+            except Exception as ex:
+                print(f'exception getting index list {ex}')
+                time.sleep(3)
+        return None
+
+    def clean_server_response(self, resp_dict):
+        """cleans the server reponse by replacing:
+            '-'     -> None
+            '1,000' -> 1000
+        :param resp_dict:
+        :return: dict with all above substitution
+        """
+
+        # change all the keys from unicode to string
+        d = {}
+        for key, value in resp_dict.items():
+            d[str(key)] = value
+        resp_dict = d
+        for key, value in resp_dict.items():
+            if type(value) is str or isinstance(value, six.string_types):
+                if re.match('-', value):
+                    try:
+                        if float(value) or int(value):
+                            dataType = True
+                    except ValueError:
+                        resp_dict[key] = None
+                elif re.search(r'^[0-9,.]+$', value):
+                    # replace , to '', and type cast to int
+                    resp_dict[key] = float(re.sub(',', '', value))
+                else:
+                    resp_dict[key] = str(value)
+        return resp_dict

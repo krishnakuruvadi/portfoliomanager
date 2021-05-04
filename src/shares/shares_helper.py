@@ -8,7 +8,6 @@ from dateutil.relativedelta import relativedelta
 from alerts.alert_helper import create_alert, Severity
 from common.nse_bse import get_nse_bse
 from shared.handle_get import get_user_name_from_id
-from nsetools import Nse
 from common.nse import NSE
 from common.nse_historical import NSEHistorical
 from bs4 import BeautifulSoup as bs
@@ -31,11 +30,11 @@ def shares_add_transactions(broker, user, full_file_path):
         print(f'unsupported broker {broker}')
 
 def check_nse_valid(symbol):
-    nse = Nse()
+    nse = NSE(None)
     data = nse.get_quote(symbol)
     print(data)
     if not data:
-        return False
+        return False, None
     return True, data['isinCode']
 
 def clean_string(text):
@@ -563,7 +562,8 @@ def update_shares_latest_val():
                                     share_obj.save()
                                 continue
                     elif share_obj.exchange == 'NSE':
-                        if not check_nse_valid(share_obj.symbol):
+                        valid, _ = check_nse_valid(share_obj.symbol)
+                        if not valid:
                             trans = Transactions.objects.filter(share=share_obj).order_by('-trans_date')
                             if len(trans) > 0:
                                 nh = NSEHistorical(share_obj.symbol, trans[0].trans_date)
