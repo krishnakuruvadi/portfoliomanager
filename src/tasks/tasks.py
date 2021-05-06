@@ -569,6 +569,48 @@ def update_scroll_data():
                         scroll_item.save()
             else:
                 print(f'no data for NSE {item}')
+    else:
+        print('getting using yahoo')
+        indexes = {'NIFTY 50':'^NSEI', 'NIFTY BANK':'^NSEBANK', 'INDIA VIX':'^INDIAVIX', 'NIFTY 100':'^CNX100',
+                    'NIFTY 500':'^CRSLDX', 'NIFTY MIDCAP 100':'NIFTY_MIDCAP_100.NS', 'NIFTY PHARMA':'^CNXPHARMA',
+                    'NIFTY IT':'^CNXIT', 'NIFTY SMLCAP 100':'^CNXSC', 'NIFTY 200':'^CNX200', 'NIFTY AUTO':'^CNXAUTO'}
+        for name,index in indexes.items():
+            from shared.yahoo_finance_2 import YahooFinance2
+            y = YahooFinance2(index)
+            v = y.get_live_price(name)
+            try:
+                scroll_item = None
+                try:
+                    scroll_item = ScrollData.objects.get(scrip=v['name'])
+                    if get_diff(float(scroll_item.val), float(v['lastPrice'])) > 0.1:
+                        print(f"Yahoo scroll_item.val {scroll_item.val} v['lastPrice'] {v['lastPrice']}")
+                        if 'last_updated' in v and v['last_updated']:
+                            scroll_item.last_updated = v['last_updated']
+                        else:
+                            scroll_item.last_updated = timezone.now()
+                        scroll_item.val = v['lastPrice']
+                        scroll_item.change = v['change']
+                        scroll_item.percent = v['pChange']
+                        scroll_item.save()
+                    else:
+                        print('no change from last update.  not updating')
+                except ScrollData.DoesNotExist:
+                    scroll_item = ScrollData.objects.create(scrip=v['name'],
+                                                            last_updated = v['last_updated'],
+                                                            val = v['lastPrice'],
+                                                            change = v['change'],
+                                                            percent = v['pChange'])
+                if len(sel_indexes) == 0 or v['name'] in sel_indexes:
+                    if scroll_item.display != True:
+                        scroll_item.display = True
+                        scroll_item.save()
+                else:
+                    if scroll_item.display != False:
+                        scroll_item.display = False
+                        scroll_item.save()
+            except Exception as ex:
+                print(f'Exception {ex} adding index with content {v}')
+
     n = Nasdaq('', None)
     data = n.get_all_index()
     if data:
@@ -607,6 +649,44 @@ def update_scroll_data():
                         scroll_item.save()
             except Exception as ex:
                 print(f'Exception {ex} adding index with content {v}')
+    else:
+        print('getting from yahoo')
+        from shared.yahoo_finance_2 import YahooFinance2
+        y = YahooFinance2('^IXIC')
+        v = y.get_live_price('NASDAQ Composite')
+        try:
+            scroll_item = None
+            try:
+                scroll_item = ScrollData.objects.get(scrip=v['name'])
+                if get_diff(float(scroll_item.val), float(v['lastPrice'])) > 0.1:
+                    print(f"Yahoo scroll_item.val {scroll_item.val} v['lastPrice'] {v['lastPrice']}")
+                    if 'last_updated' in v and v['last_updated']:
+                        scroll_item.last_updated = v['last_updated']
+                    else:
+                        scroll_item.last_updated = timezone.now()
+                    scroll_item.val = v['lastPrice']
+                    scroll_item.change = v['change']
+                    scroll_item.percent = v['pChange']
+                    scroll_item.save()
+                else:
+                    print('no change from last update.  not updating')
+            except ScrollData.DoesNotExist:
+                scroll_item = ScrollData.objects.create(scrip=v['name'],
+                                                        last_updated = v['last_updated'],
+                                                        val = v['lastPrice'],
+                                                        change = v['change'],
+                                                        percent = v['pChange'])
+            if len(sel_indexes) == 0 or v['name'] in sel_indexes:
+                if scroll_item.display != True:
+                    scroll_item.display = True
+                    scroll_item.save()
+            else:
+                if scroll_item.display != False:
+                    scroll_item.display = False
+                    scroll_item.save()
+        except Exception as ex:
+            print(f'Exception {ex} adding index with content {v}')
+
 
 @db_periodic_task(crontab(minute='10', hour='1-5', day='1-5'))
 def get_pe():

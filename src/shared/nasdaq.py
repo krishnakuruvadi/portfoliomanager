@@ -4,7 +4,7 @@ import csv
 import datetime
 import codecs
 from dateutil.parser import parse
-from pytz import timezone
+import pytz
 from common.helper import get_preferences
 from dateutil import tz
 from django.utils import timezone
@@ -142,7 +142,7 @@ class Nasdaq(Exchange):
             date_str = date_str.replace('DATA AS OF', '')
             date_str = date_str.replace(' ET', '')
             date_obj = parse(date_str)
-            from_zone = timezone('America/Cancun')
+            from_zone = pytz.timezone('America/Cancun')
             date_obj = date_obj.replace(tzinfo=from_zone)
             to_zone = tz.tzutc()
             data['last_updated'] = date_obj.astimezone(to_zone).strftime("%Y-%m-%d %H:%M:%S")

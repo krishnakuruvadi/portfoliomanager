@@ -7,12 +7,15 @@ import datetime
 import csv
 import codecs
 import time
+#import pytz
+#from dateutil import tz
 
 class YahooFinance2(Exchange):
     timeout = 2
     crumb_link = 'https://finance.yahoo.com/quote/{0}/history?p={0}'
     crumble_regex = r'CrumbStore":{"crumb":"(.*?)"}'
     quote_link = 'https://query1.finance.yahoo.com/v7/finance/download/{quote}?period1={dfrom}&period2={dto}&interval=1d&events=history&crumb={crumb}'
+    live_link = 'https://query1.finance.yahoo.com/v8/finance/chart/{quote}?region=US&lang=en-US&includePrePost=false&interval=2m&useYfid=true&range=1d&corsDomain=finance.yahoo.com&.tsrc=finance'
     retries = 5
 
     def __init__(self, symbol):
@@ -70,6 +73,43 @@ class YahooFinance2(Exchange):
                 print('done with request')
                 print(response)
                 return response
+            except Exception as e:
+                print(e)
+        return None
+
+    def get_live_price(self, name):
+        print('getting live values for symbol ', self.symbol)
+        for _ in range(self.retries):
+            try:
+                if not self.session or len(self.session.cookies) == 0:
+                    self.get_session()
+                if not self.crumb:
+                    self.get_crumb()
+                url= self.live_link.format(quote=self.symbol)
+                response = self.session.get(url)
+                response.raise_for_status()
+                text = StringIO(response.text)#response.text
+                #print("in YahooFinance2 response.text:", response.text)
+                data = response.json()
+                ret = dict()
+                ret['name'] = name
+                meta_data = data["chart"]["result"][0]['meta']
+                ret['lastPrice'] = meta_data['regularMarketPrice']
+                ret['change'] = round(meta_data['regularMarketPrice'] - meta_data['chartPreviousClose'], 2)
+                ret['pChange'] = round(ret['change']*100/meta_data['chartPreviousClose'], 2)
+                date_obj = datetime.datetime.fromtimestamp(meta_data['regularMarketTime'])
+                
+                '''
+                from_zone = pytz.timezone(meta_data['exchangeTimezoneName'])
+                date_obj = date_obj.replace(tzinfo=from_zone)
+                to_zone = tz.tzutc()
+                ret['last_updated'] = date_obj.astimezone(to_zone).strftime("%Y-%m-%d %H:%M:%S")
+                #ret['last_updated']:2021-05-07 00:03:29, date_obj:2021-05-06 19:07:29-04:56
+                #print(f"ret['last_updated']:{ret['last_updated']}, date_obj:{date_obj}")
+                '''
+                ret['last_updated'] = date_obj
+                return ret
+
             except Exception as e:
                 print(e)
         return None
