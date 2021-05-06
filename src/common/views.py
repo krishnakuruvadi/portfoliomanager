@@ -324,14 +324,23 @@ def preferences(request):
     avail_indexes = list()
     n = Nasdaq('', None)
     index_data = n.get_all_index()
-    for _,v in index_data.items():
-        avail_indexes.append(v['name'])
+    if not index_data:
+        avail_indexes.append('NASDAQ Composite')
+    else:
+        for _,v in index_data.items():
+            avail_indexes.append(v['name'])
     
     nse = NSE(None)
     il = nse.get_index_list()
     if il:
         for item in il:
             avail_indexes.append(item)
+    else:
+        index_data = {'NIFTY 50':'^NSEI', 'NIFTY BANK':'^NSEBANK', 'INDIA VIX':'^INDIAVIX', 'NIFTY 100':'^CNX100',
+                    'NIFTY 500':'^CRSLDX', 'NIFTY MIDCAP 100':'NIFTY_MIDCAP_100.NS', 'NIFTY PHARMA':'^CNXPHARMA',
+                    'NIFTY IT':'^CNXIT', 'NIFTY SMLCAP 100':'^CNXSC', 'NIFTY 200':'^CNX200', 'NIFTY AUTO':'^CNXAUTO'}
+        for k,_ in index_data.items():
+            avail_indexes.append(k)
     
     sel_indexes = list()
     if pref_obj.indexes_to_scroll:
