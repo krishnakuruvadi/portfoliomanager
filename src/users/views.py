@@ -12,6 +12,7 @@ from django.template import Context
 from shared.handle_delete import delete_user
 from shared.handle_chart_data import get_user_contributions
 from .models import User
+from shared.utils import get_date_or_none_from_string
 
 # Create your views here.
 class UserListView(ListView):
@@ -44,7 +45,7 @@ def add_user(request):
     template = 'users/add_user.html'
     if request.method == 'POST':
         name = request.POST['name']
-        dob = request.POST['dob']
+        dob = get_date_or_none_from_string(request.POST['dob'])
         email = request.POST['email']
         notes = request.POST['notes']
         User.objects.create(name=name, dob=dob, notes=notes, email=email)

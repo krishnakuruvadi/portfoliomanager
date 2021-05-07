@@ -17,23 +17,43 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from shared.utils import get_date_or_none_from_string
 from .epf_helper import get_summary_for_range
-
+from decimal import Decimal
+from django.db import IntegrityError
+from django.http import HttpResponseRedirect
+from goal.goal_helper import get_goal_id_name_mapping_for_user
 
 # Create your views here.
-class EpfCreateView(CreateView):
+
+def create_epf(request):
     template_name = 'epfs/epf_create.html'
-    form_class = EpfModelForm
-    queryset = Epf.objects.all() # <blog>/<modelname>_list.html
-    #success_url = '/'
-
-    '''
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
-    '''
-
-    def get_success_url(self):
-        return reverse('epfs:epf-list')
+    if request.method == 'POST':
+        print(request.POST)
+        number = request.POST['number']
+        end_date = get_date_or_none_from_string(request.POST['end_date'])
+        start_date = get_date_or_none_from_string(request.POST['start_date'])
+        company = request.POST['company']
+        notes = request.POST['notes']
+        user = request.POST['user']
+        goal = request.POST['goal']
+        if goal != '':
+            goal_id = Decimal(goal)
+        else:
+            goal_id = None
+        try:
+            Epf.objects.create(
+                number=number,
+                end_date=end_date,
+                start_date=start_date,
+                company=company,
+                user=user,
+                goal=goal_id,
+                notes=notes
+            )
+        except IntegrityError:
+            print('EPF already exists')
+    users = get_all_users()
+    context = {'users':users, 'operation': 'Create EPF'}
+    return render(request, template_name, context)
 
 class EpfListView(ListView):
     template_name = 'epfs/epf_list.html'
@@ -71,17 +91,44 @@ class EpfDetailView(DetailView):
         data['user_str'] = get_user_name_from_id(data['object'].user)
         return data
 
-class EpfUpdateView(UpdateView):
+def update_epf(request, id):
     template_name = 'epfs/epf_create.html'
-    form_class = EpfModelForm
+    
+    try:
+        epf_obj = Epf.objects.get(id=id)
+        if request.method == 'POST':
+            print(request.POST)
+            number = request.POST['number']
+            end_date = get_date_or_none_from_string(request.POST['end_date'])
+            start_date = get_date_or_none_from_string(request.POST['start_date'])
+            company = request.POST['company']
+            notes = request.POST['notes']
+            user = request.POST['user']
+            goal = request.POST['goal']
+            if goal != '':
+                goal_id = Decimal(goal)
+            else:
+                goal_id = None
+            epf_obj.number=number
+            epf_obj.end_date=end_date
+            epf_obj.start_date=start_date
+            epf_obj.company=company
+            epf_obj.user=user
+            epf_obj.goal=goal_id
+            epf_obj.notes=notes
+            epf_obj.save()
+            return HttpResponseRedirect("../")
+        else:
+            users = get_all_users()
+            goals = get_goal_id_name_mapping_for_user(epf_obj.user)
+            context = {'goals':goals, 'users':users, 'user':epf_obj.user, 'number':epf_obj.number, 'start_date':epf_obj.start_date.strftime("%Y-%m-%d"),
+                    'notes':epf_obj.notes, 'goal':epf_obj.goal, 'end_date':epf_obj.end_date.strftime("%Y-%m-%d"),
+                    'operation': 'Edit EPF', 'company':epf_obj.company}
 
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Epf, id=id_)
-
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
+    except Epf.DoesNotExist:
+        return HttpResponseRedirect("../")
+    
+    return render(request, template_name, context)
 
 def get_fy_details(epf_obj, fy):
     print('retrieving data for fy', fy)

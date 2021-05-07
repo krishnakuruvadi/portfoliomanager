@@ -8,7 +8,7 @@
   <ul class="breadcrumb">
     <li><a href="{% url 'epfs:epf-list' %}">EPFs</a></li>
     <li><a href="#">
-      {% if object %}
+      {% if number %}
         Update EPF
       {% else %}
         Create EPF
@@ -19,17 +19,127 @@
 
 {% block content %}
 
-  <form action="." method="POST">
-    {% csrf_token %} {{ form.as_p }}
-    <input type="submit" value="Submit" class="btn btn-primary"/>&nbsp;<a href="../" class="btn btn-danger" role="button">Cancel</a>
-  </form>
+<form action="." method="POST">
+  {% csrf_token %}
+  <div class="row">
+    <div class='col-sm-6'>
+
+      <div class="form-group row">
+        <label for="number" class="col-sm-3 col-form-label">Number <span style="color:red;">*</span></label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            <input type="text" id="number" name="number" value="{{number}}" required="true">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="company" class="col-sm-3 col-form-label">Company <span style="color:red;">*</span></label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            <input type="text" id="company" name="company" value="{{company}}" required="true">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="start_date" class="col-sm-3 col-form-label">Start Date <span style="color:red;">*</span></label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            <input type="date" id="start_date" name="start_date" value="{{start_date}}" required="true">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="end_date" class="col-sm-3 col-form-label">End Date</label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            <input type="date" id="end_date" name="end_date" value="{{end_date}}">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            <select id="id_user" name="user" class="form-control" required="true"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="goal" class="col-sm-3 col-form-label">Goal</label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            <select id="id_goal" name="goal" class="form-control"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+        <div class="col-sm-3">
+          <textarea name="notes" rows="5" cols="18">{{notes}}</textarea>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="col-sm-6">
+          <div class="md-form mt-0">
+            <button type="submit" class="btn btn-primary" id="id_submit" name="submit">Submit</button>
+            <a href="../" class="btn btn-danger" role="button">Cancel</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</form>
 
 {% endblock content %}
+
+{% block ajaxcalls %}
+          {
+            url      : '/goal/get-goals/{{user|safe}}',
+            data     : null,
+            callback : get_goals_and_set_goal
+          },
+{% endblock ajaxcalls %}
 
 {% block javascript %}
   {% load static %}
   <script src="{% static 'common.js' %}"></script>
   <script>
+    set_user_list({{users|safe}}, '{{user|safe}}');
 
+    function get_goals_and_set_goal(response) {
+      set_goals(response, '{{goal|safe}}');
+    }
+
+    var el_company = document.getElementById('company');
+    var el_start = document.getElementById('start_date');
+    var el_number = document.getElementById('number');
+    var el_user = document.getElementById('id_user');
+    var el_submit = document.getElementById('id_submit');
+
+    el_company.onchange = set_submit_button_status;
+    el_start.onchange = set_submit_button_status;
+    el_number.onchange = set_submit_button_status;
+    el_user.onchange = set_submit_button_status;
+    set_submit_button_status();
+
+    function set_submit_button_status() {
+      v_company = el_company.value;
+      v_start = el_start.value;
+      v_number = el_number.value;
+      v_user = el_user.value;
+      if ((v_company!='') && (v_start!='') && (v_number!='') && (v_user!='')) {
+        el_submit.disabled = false;
+      } else {
+        el_submit.disabled = true;
+      }
+    }
   </script>
 {% endblock javascript %}

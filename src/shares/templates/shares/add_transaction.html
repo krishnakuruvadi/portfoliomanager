@@ -18,44 +18,44 @@
     <div class="row">
       <div class='col-sm-6'>
         <div class="form-group row">
-          <label for="exchange" class="col-sm-3 col-form-label">Exchange</label>
+          <label for="exchange" class="col-sm-3 col-form-label">Exchange <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <select id="exchange" name="exchange" class="form-control">
+              <select id="exchange" name="exchange" class="form-control" required="true">
               </select>
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="symbol" class="col-sm-3 col-form-label">Symbol</label>
+          <label for="symbol" class="col-sm-3 col-form-label">Symbol <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="text" id="symbol" name="symbol" value="{{symbol}}">
+              <input type="text" id="symbol" name="symbol" value="{{symbol}}" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="user" class="col-sm-3 col-form-label">User</label>
+          <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <select id="id_user" name="user" class="form-control"></select>
+              <select id="id_user" name="user" class="form-control" required="true"></select>
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date</label>
+          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}">
+              <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="conversion_rate" class="col-sm-3 col-form-label">Conversion Rate</label>
+          <label for="conversion_rate" class="col-sm-3 col-form-label">Conversion Rate <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
               <input type="number" id="conversion_rate" name="conversion_rate" value="{{conversion_rate}}" step="0.001">
@@ -67,10 +67,10 @@
         </div>
 
         <div class="form-group row">
-          <label for="trans_type" class="col-sm-3 col-form-label">Transaction Type</label>
+          <label for="trans_type" class="col-sm-3 col-form-label">Transaction Type <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <select id="trans_type" name="trans_type" class="form-control">
+              <select id="trans_type" name="trans_type" class="form-control" required="true">
                 <option value="Buy">Buy</option>
                 <option value="Buy">Sell</option>
               </select>
@@ -79,37 +79,37 @@
         </div>
 
         <div class="form-group row">
-          <label for="price" class="col-sm-3 col-form-label">Price</label>
+          <label for="price" class="col-sm-3 col-form-label">Price <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="price" name="price" value="{{price}}" step="0.000001">
+              <input type="number" id="price" name="price" value="{{price}}" step="0.000001" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="quantity" class="col-sm-3 col-form-label">Quantity</label>
+          <label for="quantity" class="col-sm-3 col-form-label">Quantity <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="quantity" name="quantity" value="{{quantity}}" step="0.000001">
+              <input type="number" id="quantity" name="quantity" value="{{quantity}}" step="0.000001" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="trans_price" class="col-sm-3 col-form-label">Transaction Price</label>
+          <label for="trans_price" class="col-sm-3 col-form-label">Transaction Price <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="trans_price" name="trans_price" value="{{trans_price}}" step="0.000001"> 
+              <input type="number" id="trans_price" name="trans_price" value="{{trans_price}}" step="0.000001" required="true"> 
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="broker" class="col-sm-3 col-form-label">Broker</label>
+          <label for="broker" class="col-sm-3 col-form-label">Broker <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="text" id="broker" name="broker" value="{{broker}}">
+              <input type="text" id="broker" name="broker" value="{{broker}}" required="true">
             </div>
           </div>
         </div>

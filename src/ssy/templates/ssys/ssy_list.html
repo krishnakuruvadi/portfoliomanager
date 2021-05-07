@@ -33,7 +33,7 @@
         <th scope="row">{{ forloop.counter }}</th>
 
         <td>
-          <a href="{{ instance.get_absolute_url }}">{{ instance.number }}</a>
+          <a href="{% url 'ssys:ssy-detail' instance.number %}">{{ instance.number }}</a>
         </td>
         <td>{{ instance.start_date }}</td>
         <td>{{ user_name_mapping|lookup:instance.user }}</td>

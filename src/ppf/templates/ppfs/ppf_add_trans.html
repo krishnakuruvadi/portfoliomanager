@@ -7,6 +7,7 @@
 {% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'ppfs:ppf-list' %}">PPFs</a></li>
+    <li><a href="{% url 'ppfs:ppf-detail' number %}">{{number}}</a></li>
     <li><a href="#">Add PPF transaction</a></li>
   </ul>
 {% endblock viewname %}
@@ -18,7 +19,7 @@
       <div class='col-sm-6'>
 
         <div class="form-group row">
-          <label for="fund_name" class="col-sm-3 col-form-label">Number</label>
+          <label for="fund_name" class="col-sm-3 col-form-label">Number <span style="color:red;">*</span></label>
           <div class="col-sm-6">
             <div class="md-form mt-0">
               <label>{{number}}</label>
@@ -27,19 +28,19 @@
         </div>
 
         <div class="form-group row">
-          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date</label>
+          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}">
+              <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="entry_type" class="col-sm-3 col-form-label">Entry Type</label>
+          <label for="entry_type" class="col-sm-3 col-form-label">Entry Type <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <select id="entry_type" name="entry_type" class="form-control">
+              <select id="entry_type" name="entry_type" class="form-control" required="true">
                 <option value="Buy">Buy</option>
                 <option value="Buy">Sell</option>
               </select>
@@ -48,16 +49,16 @@
         </div>
 
         <div class="form-group row">
-          <label for="amount" class="col-sm-3 col-form-label">Amount</label>
+          <label for="amount" class="col-sm-3 col-form-label">Amount <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="amount" name="amount" value="{{amount}}" step="0.0001">
+              <input type="number" id="amount" name="amount" value="{{amount}}" step="0.0001" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="int_comp" class="col-sm-3 col-form-label">Interest component?</label>
+          <label for="int_comp" class="col-sm-3 col-form-label">Interest component? <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
               <input type="checkbox" name="interest_component" id="interest_component" value="{{interest_component}}">
