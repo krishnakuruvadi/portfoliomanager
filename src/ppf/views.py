@@ -17,7 +17,7 @@ from dateutil.relativedelta import relativedelta
 import datetime
 from .forms import PpfModelForm, PpfEntryModelForm
 from .models import Ppf, PpfEntry
-from .ppf_helper import ppf_add_transactions, get_ppf_details
+from .ppf_helper import ppf_add_transactions, get_ppf_details, insert_ppf_trans_entry
 from decimal import Decimal
 from shared.handle_get import *
 from rest_framework.views import APIView
@@ -142,30 +142,33 @@ class PpfEntryListView(ListView):
         self.number = get_object_or_404(Ppf, number=self.kwargs['id'])
         return PpfEntry.objects.filter(number=self.number).order_by('-trans_date')
 
-class PpfAddEntryView(CreateView):
+def add_trans(request, id):
     template_name = 'ppfs/ppf_add_trans.html'
-    form_class = PpfEntryModelForm
-    queryset = Ppf.objects.all() # <blog>/<modelname>_list.html
-    #success_url = '/'
+    context = dict()
+    context['number'] = id
+    if request.method == 'POST':
+        try:
+            ppf_obj = Ppf.objects.get(number=id)
+            date = request.POST['trans_date']
+            trans_type = request.POST['entry_type']
+            if trans_type == 'Buy':
+                trans_type = 'CR'
+            else:
+                trans_type = 'DR'
+            amount = request.POST['amount']
+            notes = request.POST['notes']
+            reference = request.POST['reference']
+            if 'interest_component' in request.POST:
+                interest_component = True
+            else:
+                interest_component = False
+            insert_ppf_trans_entry(id, date, trans_type, amount, notes, reference, interest_component)
+            
+        except Ppf.DoesNotExist:
+            print(f'PPF with number {id} doesnt exist')
+        
+    return render(request, template_name, context)
 
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('ppfs:ppf-list')
-    
-    def get_initial(self):
-        """
-        Returns the initial data to use for forms on this view.
-        """
-        initial = super().get_initial()
-
-        initial['number'] = self.kwargs['id']
-        print(initial)
-        print(self.kwargs['id'])
-
-        return initial
 
 def upload_ppf_trans(request, id):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
