@@ -277,6 +277,8 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
             if i not in total:
                 total[i] = dict()
             for j in range(i-1, min(contrib.keys())-1, -1):
+                if j not in total:
+                    total[j] = dict()
                 print('j:', j)
                 total[i]['PPF'] = total[i].get('PPF', 0) + total[j].get('PPF', 0)
                 total[i]['EPF'] = total[i].get('EPF', 0) + total[j].get('EPF', 0)

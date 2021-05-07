@@ -17,72 +17,81 @@
     {% csrf_token %} 
     <div class="row">
         <div class='col-sm-6'>
+
             <div class="form-group row">
-                <label for="name" class="col-sm-3 col-form-label">Name</label>
+                <label for="name" class="col-sm-3 col-form-label">Name <span style="color:red;">*</span></label>
                 <div class="col-sm-3">
                     <div class="md-form mt-0">
-                        <input type="text" id="name" name="name" value="{{name}}">
+                        <input type="text" id="name" name="name" value="{{name}}" required="true">
                     </div>
                 </div>
             </div>
+
             <div class="form-group row">
-                <label for="startdate" class="col-sm-3 col-form-label">Start Date</label>
+                <label for="startdate" class="col-sm-3 col-form-label">Start Date <span style="color:red;">*</span></label>
                 <div class="col-sm-3">
                     <div class="md-form mt-0">
-                        <input type="date" id="startdate" name="startdate" value="{{startdate}}">
+                        <input type="date" id="startdate" name="startdate" value="{{startdate}}" required="true">
                     </div>
                 </div>
             </div>
+
             <div class="form-group row">
-                <label for="user" class="col-sm-3 col-form-label">User</label>
+                <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
                 <div class="col-sm-3">
                     <div class="md-form mt-0">
-                        <select id="id_user" name="user" class="form-control"></select>
+                        <select id="id_user" name="user" class="form-control" required="true"></select>
                     </div>
                 </div>
             </div>
+
             <div class="form-group row">
-                <label for="curr_val" class="col-sm-3 col-form-label">Current Expense (Per Year)</label>
+                <label for="curr_val" class="col-sm-3 col-form-label">Current Expense (Per Year) <span style="color:red;">*</span></label>
                 <div class="col-sm-3">
                     <div class="md-form mt-0">
-                        <input type="number" id="curr_val" name="curr_val" value="{{curr_val}}">
+                        <input type="number" id="curr_val" name="curr_val" value="{{curr_val}}" required="true">
                     </div>
                 </div>
             </div>
+
             <div class="form-group row">
-                <label for="inflation" class="col-sm-3 col-form-label">Inflation</label>
+                <label for="inflation" class="col-sm-3 col-form-label">Inflation <span style="color:red;">*</span></label>
                 <div class="col-sm-3">
                     <div class="md-form mt-0">
-                        <input type="number" id="inflation" name="inflation" placeholder="1.0" step="0.01" min="0" max="10" value="{{inflation}}">
+                        <input type="number" id="inflation" name="inflation" placeholder="1.0" step="0.01" min="0" max="10" value="{{inflation}}" required="true">
                     </div>
                 </div>
             </div>
+
             <div class="form-group row">
-                <label for="time_period" class="col-sm-3 col-form-label">Accumulation period (years)</label>
+                <label for="time_period" class="col-sm-3 col-form-label">Accumulation period (years) <span style="color:red;">*</span></label>
                 <div class="col-sm-3">
                     <div class="md-form mt-0">
-                        <input type="number" id="time_period" name="time_period" value="{{time_period}}">
+                        <input type="number" id="time_period" name="time_period" value="{{time_period}}" required="true">
                     </div>
                 </div>
             </div>
+
             <div class="form-group row">
-                <label for="expense_period" class="col-sm-3 col-form-label">Expense period (years)</label>
+                <label for="expense_period" class="col-sm-3 col-form-label">Expense period (years) <span style="color:red;">*</span></label>
                 <div class="col-sm-3">
                     <div class="md-form mt-0">
-                        <input type="number" id="expense_period" name="expense_period" value="{{expense_period}}">
+                        <input type="number" id="expense_period" name="expense_period" value="{{expense_period}}" required="true">
                     </div>
                 </div>
             </div>
+
             <div class="form-group row">
-                <label for="roi_corpus" class="col-sm-3 col-form-label">ROI on corpus</label>
+                <label for="roi_corpus" class="col-sm-3 col-form-label">ROI on corpus <span style="color:red;">*</span></label>
                 <div class="col-sm-3">
                     <div class="md-form mt-0">
-                        <input type="number" id="roi_corpus" name="roi_corpus" placeholder="1.0" step="0.01" min="0" max="10" value="{{roi_corpus}}">
+                        <input type="number" id="roi_corpus" name="roi_corpus" placeholder="1.0" step="0.01" min="0" max="10" value="{{roi_corpus}}" required="true">
                     </div>
                 </div>
             </div>
+
             <div class="form-group row">
-                <label for="final_val" class="col-sm-3 col-form-label">Corpus</label>
+                <label for="final_val" class="col-sm-3 col-form-label">Corpus <span style="color:red;">*</span></label>
                 <div class="col-sm-6">
                     <div class="md-form mt-0">
                         <input type="number" id="final_val" name="final_val" value="{{final_val}}"> 
@@ -90,6 +99,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="form-group row">
                 <label for="notes" class="col-sm-3 col-form-label">Notes</label>
                 <div class="col-sm-3">
@@ -98,8 +108,12 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary" name="submit">Submit</button>
-            <a href="../" class="btn btn-danger" role="button">Cancel</a>
+
+            <div class="form-group row">
+                <button type="submit" class="btn btn-primary" name="submit">Submit</button>&nbsp;
+                <a href="../" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+
         </div>
         <div class='col-sm-6'>
             <canvas id="bar-chart-grouped" width="800" height="450"></canvas>

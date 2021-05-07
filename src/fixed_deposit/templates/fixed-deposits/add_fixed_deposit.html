@@ -17,37 +17,37 @@
     <div class="row">
       <div class='col-sm-6'>
         <div class="form-group row">
-          <label for="number" class="col-sm-3 col-form-label">Number</label>
+          <label for="number" class="col-sm-3 col-form-label">Number <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="text" id="number" name="number" value="{{number}}">
+              <input type="text" id="number" name="number" value="{{number}}" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="bank_name" class="col-sm-3 col-form-label">Bank Name</label>
+          <label for="bank_name" class="col-sm-3 col-form-label">Bank Name <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="text" id="bank_name" name="bank_name" value="{{bank_name}}">
+              <input type="text" id="bank_name" name="bank_name" value="{{bank_name}}" required="true">
             </div>
           </div>
         </div>
         
         <div class="form-group row">
-          <label for="start_date" class="col-sm-3 col-form-label">Start Date</label>
+          <label for="start_date" class="col-sm-3 col-form-label">Start Date <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="date" id="start_date" name="start_date" value="{{start_date}}">
+              <input type="date" id="start_date" name="start_date" value="{{start_date}}" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="user" class="col-sm-3 col-form-label">User</label>
+          <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <select id="id_user" name="user" class="form-control"></select>
+              <select id="id_user" name="user" class="form-control" required="true"></select>
             </div>
           </div>
         </div>
@@ -62,34 +62,34 @@
         </div>
 
         <div class="form-group row">
-          <label for="principal" class="col-sm-3 col-form-label">Principal</label>
+          <label for="principal" class="col-sm-3 col-form-label">Principal <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="principal" name="principal" value="{{principal}}">
+              <input type="number" id="principal" name="principal" value="{{principal}}" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="roi" class="col-sm-3 col-form-label">Rate of Interest</label>
+          <label for="roi" class="col-sm-3 col-form-label">Rate of Interest <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="roi" name="roi" value="{{roi}}" placeholder="1.0" step="0.01" min="0" max="20">
+              <input type="number" id="roi" name="roi" value="{{roi}}" placeholder="1.0" step="0.01" min="0" max="20" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="time_period_days" class="col-sm-3 col-form-label">Time period (days)</label>
+          <label for="time_period_days" class="col-sm-3 col-form-label">Time period (days) <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="time_period_days" name="time_period_days" value="{{time_period_days}}">
+              <input type="number" id="time_period_days" name="time_period_days" value="{{time_period_days}}" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="final_val" class="col-sm-3 col-form-label">Maturity Value</label>
+          <label for="final_val" class="col-sm-3 col-form-label">Maturity Value <span style="color:red;">*</span></label>
           <div class="col-sm-6">
             <div class="md-form mt-0">
               <input type="number" id="final_val" name="final_val" value="{{final_val}}"> 
@@ -99,7 +99,7 @@
         </div>
 
         <div class="form-group row">
-          <label for="mat_date" class="col-sm-3 col-form-label">Maturity Date</label>
+          <label for="mat_date" class="col-sm-3 col-form-label">Maturity Date <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
               <input type="date" id="mat_date" name="mat_date" value="{{mat_date}}">
@@ -134,7 +134,10 @@
   <script src="{% static 'common.js' %}"></script>
   <script>
     set_user_list({{users|safe}}, '{{user|safe}}');
-
+    {% if goals %}
+      var resp = {"goal_list":{{goals|safe}}};
+      get_goals_and_set_goal(resp)
+    {% endif %}
     function get_goals_and_set_goal(response) {
       set_goals(response, '{{goal|safe}}');
     }

@@ -92,9 +92,10 @@ def add_fixed_deposit(request):
             mat_date, val = get_maturity_value(int(principal), start_date, float(roi), int(time_period_days))
             print("calculated value", val)
             users = get_all_users()
+            goals = get_goal_id_name_mapping_for_user(user)
             context = {'users':users,'user':user, 'number':number, 'start_date':start_date, 'bank_name': bank_name, 'roi': roi,
                 'time_period_days': time_period_days, 'principal': principal, 'final_val':val, 'notes': notes,
-                'goal':goal, 'mat_date':mat_date, 'operation': 'Add Fixed Deposit'}
+                'goal':goal, 'mat_date':mat_date, 'operation': 'Add Fixed Deposit', 'goals':goals}
             return render(request, template, context=context)
     users = get_all_users()
     context = {'users':users, 'operation': 'Add Fixed Deposit'}

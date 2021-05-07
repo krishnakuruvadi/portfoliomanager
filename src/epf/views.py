@@ -122,7 +122,7 @@ def update_epf(request, id):
             users = get_all_users()
             goals = get_goal_id_name_mapping_for_user(epf_obj.user)
             context = {'goals':goals, 'users':users, 'user':epf_obj.user, 'number':epf_obj.number, 'start_date':epf_obj.start_date.strftime("%Y-%m-%d"),
-                    'notes':epf_obj.notes, 'goal':epf_obj.goal, 'end_date':epf_obj.end_date.strftime("%Y-%m-%d"),
+                    'notes':epf_obj.notes, 'goal':epf_obj.goal, 'end_date':epf_obj.end_date.strftime("%Y-%m-%d") if epf_obj.end_date else None,
                     'operation': 'Edit EPF', 'company':epf_obj.company}
 
     except Epf.DoesNotExist:
