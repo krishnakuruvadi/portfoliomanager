@@ -1,6 +1,6 @@
 # Portfolio Manager
 ## Live Server
-Example live server hosted at https://india-portfolio-manager.herokuapp.com/. 
+Example live server hosted at https://india-portfolio-manager.herokuapp.com/. Not optimized for mobile. Best viewed on Chrome browser.
 ```diff
 ! Please be kind enough and not do any delete operations
 ```
