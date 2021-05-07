@@ -46,8 +46,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         remaining = target - achieved
         if remaining < 0:
             remaining = 0
-        remaining_per = int(remaining*100/target)
-        achieve_per = int(achieved*100/target)
+        remaining_per = round(remaining*100/target, 2)
+        achieve_per = round(achieved*100/target, 2)
         
         context['users'][str(i)]['data'] = {
             "id": id,
@@ -60,8 +60,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "remaining": remaining,
             "remaining_per": remaining_per,
             "achieve_per": achieve_per,
-            "debt_per": int(debt*100/(debt+equity+1)),
-            "equity_per": int(equity*100/(debt+equity+1)),
+            "debt_per": round(debt*100/(debt+equity+1), 2),
+            "equity_per": round(equity*100/(debt+equity+1), 2),
         }
 
         for d in range(len(contrib['distrib_labels'])):
@@ -75,8 +75,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         i = i + 1
     if all_target > 0:
         all_remaining = all_target - all_achieved
-        all_remaining_per = int(all_remaining*100/all_target)
-        all_achieve_per = int(all_achieved*100/all_target)
+        all_remaining_per = round(all_remaining*100/all_target, 2)
+        all_achieve_per = round(all_achieved*100/all_target, 2)
     else:
         all_remaining = all_target = all_achieved = 0
         all_remaining_per = all_achieve_per = 0
@@ -95,8 +95,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "remaining": all_remaining,
             "remaining_per": all_remaining_per,
             "achieve_per": all_achieve_per,
-            "debt_per": int(all_debt*100/(all_debt+all_equity+1)),
-            "equity_per": int(all_equity*100/(all_debt+all_equity+1)),
+            "debt_per": round(all_debt*100/(all_debt+all_equity+1), 2),
+            "equity_per": round(all_equity*100/(all_debt+all_equity+1), 2),
         }
     context['investment_data'] = dict()
     try:

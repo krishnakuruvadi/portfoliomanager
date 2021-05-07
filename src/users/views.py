@@ -85,8 +85,8 @@ class ChartData(APIView):
             remaining = target - achieved
             if remaining < 0:
                 remaining = 0
-            remaining_per = int(remaining*100/target)
-            achieve_per = int(achieved*100/target)
+            remaining_per = round(remaining*100/target, 2)
+            achieve_per = round(achieved*100/target, 2)
             data = {
                 "id": id,
                 "debt": debt,
