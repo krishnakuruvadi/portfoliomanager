@@ -20,6 +20,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"
     />
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-colvis-1.6.5/b-html5-1.6.5/b-print-1.6.5/fh-3.1.7/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/font-awesome-animation@0.2.1/dist/font-awesome-animation.min.css">
     {% load static %}
     <link rel="icon" href="{% static 'favicon.ico' %}" />
 {% block style %}
@@ -38,7 +39,22 @@
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <img src="{% static 'PortfolioManager.png' %}" height="100" width="260" alt="PortfolioManager">
+                <img src="{% static 'PortfolioManager.png' %}" height="100" width="260" alt="PortfolioManager" id="id_pm_img" data-toggle="modal" data-target="#myModal">
+                <!-- The Modal -->
+                <div id="myModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <i class="far fa-hand-paper faa-wrench animated" style="font-size: 1.4em;"></i>&nbsp;<h5>Hello !!!</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      </div>
+                      <div class="modal-body">
+                        <br>
+                        <div>This software is in its pre-alpha version.  Please support by contributing/reporting bugs. </div><br>
+                        <a href="https://github.com/krishnakuruvadi/portfoliomanager" target="_blank"><i class="fab fa-github" style="font-size: 1.2em;"></i>&nbsp;&nbsp;Link to the code</a>                        
+                      </div>
+                    </div>
+                </div>
               </li>
               <div class="dropdown-divider"></div>
               <li class="nav-item">
