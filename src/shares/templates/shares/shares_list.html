@@ -23,36 +23,36 @@
           {% csrf_token %}
             <div class="row">
 
-              <div class="col-sm-1">
+              <div class="col-sm-12 col-md-6 col-lg-1">
                 <label for="user" class="col-sm-3 col-form-label">User</label>
               </div>
 
-              <div class="col-sm-2">
+              <div class="col-sm-12 col-md-6 col-lg-2">
                 <div class="md-form mt-0">
                   <select id="id_user" name="user" class="form-control"></select>
                 </div>
               </div>
 
-              <div class="col-sm-1">
+              <div class="col-sm-12 col-md-6 col-lg-1">
                 <label for="exchange" class="col-sm-3 col-form-label">Exchange</label>
               </div>
 
-              <div class="col-sm-2">
+              <div class="col-sm-12 col-md-6 col-lg-1">
                 <div class="md-form mt-0">
                   <select id="id_exchange" name="exchange" class="form-control"></select>
                 </div>
               </div>
 
-              <div class="col-sm-3">
+              <div class="col-sm-12 col-md-6 col-lg-2">
                 <label for="zero_val" class="col-form-label">Show zero value shares?</label>
               </div>
               
-              <div class="col-sm-1">
+              <div class="col-sm-12 col-md-6 col-lg-1">
                 <input type="checkbox" name="show_zero_val" id="show_zero_val" value="{{show_zero_val}}">
               </div>
               
 
-              <div class="col-sm-1">
+              <div class="col-sm-12 col-md-6 col-lg-1">
                 <button type="submit" class="btn btn-primary" name="submit">Submit</button>
               </div>
 

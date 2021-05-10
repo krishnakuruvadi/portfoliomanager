@@ -57,22 +57,22 @@
       Welcome to PortfolioManager.  Start by creating <a href="/user">Users</a> and <a href="/goal">Goals</a>
     </div>
   </div>
-  <div id="tempChart">
-    <canvas id="myTempChart" width="200" height="200" margin="auto" position="absolute"></canvas>
+  <div id="tempChart" class='col-sm-12 col-md-6 col-lg-6'>
+    <canvas id="myTempChart" margin="auto" position="absolute"></canvas>
   </div>
   <div id="usercharts">
     {% if users %}
       All
       <hr>
       <div class="row">
-          <div class='col-sm-3'>
-              <canvas id="all_classificationChart" width="300" height="200"></canvas>
+          <div class='col-sm-12 col-md-6 col-lg-4'>
+              <canvas id="all_classificationChart"></canvas>
           </div>
-          <div class='col-sm-4'>
-              <canvas id="all_distributionChart" width="300" height="150"></canvas>
+          <div class='col-sm-12 col-md-6 col-lg-4'>
+              <canvas id="all_distributionChart"></canvas>
           </div>
-          <div class='col-sm-3'>
-              <canvas id="all_statusChart" width="300" height="200"></canvas>
+          <div class='col-sm-12 col-md-6 col-lg-4'>
+              <canvas id="all_statusChart"></canvas>
           </div>
       </div>
       <br><br>
@@ -81,14 +81,14 @@
         {{value.name}}
         <hr>
         <div class="row">
-            <div class='col-sm-3'>
-                <canvas id="{{key}}_classificationChart" width="300" height="200"></canvas>
+            <div class='col-sm-12 col-md-6 col-lg-4'>
+                <canvas id="{{key}}_classificationChart"></canvas>
             </div>
-            <div class='col-sm-4'>
-                <canvas id="{{key}}_distributionChart" width="300" height="150"></canvas>
+            <div class='col-sm-12 col-md-6 col-lg-4'>
+                <canvas id="{{key}}_distributionChart"></canvas>
             </div>
-            <div class='col-sm-3'>
-                <canvas id="{{key}}_statusChart" width="300" height="200"></canvas>
+            <div class='col-sm-12 col-md-6 col-lg-4'>
+                <canvas id="{{key}}_statusChart"></canvas>
             </div>
         </div>
         <br><br>
