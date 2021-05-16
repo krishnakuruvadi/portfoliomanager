@@ -77,6 +77,11 @@ body
     list-style: none;
 }
 
+.navigation ul li.active
+{
+    background: #9b7db8;
+}
+
 .navigation ul li a
 {
     position: relative;

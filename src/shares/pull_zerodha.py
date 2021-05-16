@@ -55,21 +55,26 @@ def pull_zerodha(userid, passwd, pin):
     driver.get(url)
     time.sleep(5)
     print(driver.current_url)
-    user_id_elem = driver.find_element_by_id('userid')
-    user_id_elem.send_keys(userid)
-    passwd_elem = driver.find_element_by_id('password')
-    passwd_elem.send_keys(passwd)
-    submit_button = driver.find_element_by_xpath('//button[text()="Login "]')
-    submit_button.click()
-    time.sleep(3)
-    pin_element = driver.find_element_by_id('pin')
-    pin_element.send_keys(pin)
-    submit_button = driver.find_element_by_xpath('//button[text()="Continue "]')
-    submit_button.click()
-    time.sleep(5)
-    if driver.current_url != url:
-        driver.get(url)
+    try:
+        user_id_elem = driver.find_element_by_id('userid')
+        user_id_elem.send_keys(userid)
+        passwd_elem = driver.find_element_by_id('password')
+        passwd_elem.send_keys(passwd)
+        submit_button = driver.find_element_by_xpath('//button[text()="Login "]')
+        submit_button.click()
+        time.sleep(3)
+        pin_element = driver.find_element_by_id('pin')
+        pin_element.send_keys(pin)
+        submit_button = driver.find_element_by_xpath('//button[text()="Continue "]')
+        submit_button.click()
         time.sleep(5)
+        if driver.current_url != url:
+            driver.get(url)
+            time.sleep(5)
+    except Exception as ex:
+        print(f'Exception {ex} while logging in')
+        driver.close()
+        return None
 
     try:
         time.sleep(5) 
@@ -150,6 +155,7 @@ def pull_zerodha(userid, passwd, pin):
     except TimeoutException as t:
         print('timeout waiting', t)
         driver.close()
+        return None
     except Exception as ex:
         print('Exception during processing', ex)
         driver.close()

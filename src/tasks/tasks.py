@@ -491,7 +491,7 @@ def pull_share_trans_from_broker(user, broker, user_id, passwd, pass_2fa):
         files = pull_zerodha(user_id, passwd, pass_2fa)
         for dload_file in files:
             add_share_transactions(broker, user, dload_file)
-        check_discrepancies()
+        update_shares_latest_vals()
     else:
         print('Unsupported broker')
 

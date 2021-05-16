@@ -385,6 +385,7 @@ class FolioDetailView(DetailView):
             data['cat_Inception_top'] = cat_returns.return_inception_top
         except MFCategoryReturns.DoesNotExist:
             print(f'not able to find returns for category {folio_obj.fund.category}')
+        data['curr_module_id'] = 'id_mf_module'
         return data
 
 class FolioDeleteView(DeleteView):

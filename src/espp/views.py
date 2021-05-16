@@ -67,6 +67,7 @@ class EsppListView(ListView):
         data['latest_value'] = latest_value
         data['unrealised_gain'] = unrealised_gain
         data['realised_gain'] = realised_gain
+        data['curr_module_id'] = 'id_espp_module'
         return data
 
 class EsppDeleteView(DeleteView):
@@ -102,6 +103,7 @@ class EsppDetailView(DetailView):
         roi = xirr(cash_flows, 0.1)*100
         roi = round(roi, 2)
         data['roi'] = roi
+        data['curr_module_id'] = 'id_espp_module'
         return data
 
 class EsppUpdateView(UpdateView):

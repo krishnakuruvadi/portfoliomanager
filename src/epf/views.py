@@ -52,7 +52,7 @@ def create_epf(request):
         except IntegrityError:
             print('EPF already exists')
     users = get_all_users()
-    context = {'users':users, 'operation': 'Create EPF'}
+    context = {'users':users, 'operation': 'Create EPF', 'curr_module_id': 'id_epf_module'}
     return render(request, template_name, context)
 
 class EpfListView(ListView):
@@ -64,6 +64,7 @@ class EpfListView(ListView):
         print(data)
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
         data['user_name_mapping'] = get_all_users()
+        data[ 'curr_module_id'] = 'id_epf_module'
         return data
 
 class EpfDeleteView(DeleteView):
@@ -89,6 +90,7 @@ class EpfDetailView(DetailView):
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
+        data[ 'curr_module_id'] = 'id_epf_module'
         return data
 
 def update_epf(request, id):
@@ -123,7 +125,7 @@ def update_epf(request, id):
             goals = get_goal_id_name_mapping_for_user(epf_obj.user)
             context = {'goals':goals, 'users':users, 'user':epf_obj.user, 'number':epf_obj.number, 'start_date':epf_obj.start_date.strftime("%Y-%m-%d"),
                     'notes':epf_obj.notes, 'goal':epf_obj.goal, 'end_date':epf_obj.end_date.strftime("%Y-%m-%d") if epf_obj.end_date else None,
-                    'operation': 'Edit EPF', 'company':epf_obj.company}
+                    'operation': 'Edit EPF', 'company':epf_obj.company, 'curr_module_id': 'id_epf_module'}
 
     except Epf.DoesNotExist:
         return HttpResponseRedirect("../")
@@ -179,7 +181,7 @@ def show_contributions(request, id, year=None):
     context = {'fy_trans':fy_trans, 
                 'object': {'number':epf_obj.number, 'id':epf_obj.id, 'company':epf_obj.company, 'fy':fy},
                 'start_amount': summ['start_amt'], 'end_amount': summ['end_amount'], 'employee_contribution': summ['employee_contrib'],
-                'employer_contribution': summ['employer_contrib'], 'interest_contribution':summ['interest_contrib']
+                'employer_contribution': summ['employer_contrib'], 'interest_contribution':summ['interest_contrib'], 'curr_module_id':'id_epf_module'
                 }
     if epf_start_year < year:
         context['prev_link'] = '../transactions/'+str(year-epf_start_year-1)
@@ -247,7 +249,7 @@ def add_contribution(request, id):
                 print(context)
                 return render(request, template, context)
     
-    context = {'fy_list':fy_list, 'object': {'id':epf_obj.id, 'number':epf_obj.number, 'company':epf_obj.company, 'sel_fy':'select'}}
+    context = {'fy_list':fy_list, 'curr_module_id':'id_epf_module', 'object': {'id':epf_obj.id, 'number':epf_obj.number, 'company':epf_obj.company, 'sel_fy':'select'}}
     return render(request, template, context)
 
 def get_contrib_values(epf_id):

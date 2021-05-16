@@ -1,5 +1,4 @@
 from .models import Share, Transactions
-from .zerodha import Zerodha
 from django.db import IntegrityError
 from shared.handle_real_time_data import get_latest_vals, get_forex_rate
 from shared.utils import get_date_or_none_from_string, get_float_or_zero_from_string
@@ -20,6 +19,7 @@ import json
 
 
 def shares_add_transactions(broker, user, full_file_path):
+    from .zerodha import Zerodha
     if broker == 'ZERODHA':
         zerodha_helper = Zerodha(full_file_path)
         for trans in zerodha_helper.get_transactions():

@@ -8,7 +8,7 @@ import datetime
 
 def markets_home(request):
     template = 'markets/markets_home.html'
-    context = {}
+    context = {'curr_module_id':'id_markets_module'}
 
     print(context)
     return render(request, template, context)
@@ -17,6 +17,7 @@ def news_view(request):
     template = 'markets/news.html'
     
     context = dict()
+    context['curr_module_id'] = 'id_markets_module'
     context['news'] = list()
     for news in News.objects.all().order_by('-date'):
         n = dict()
@@ -80,5 +81,6 @@ def pe_view(request):
         context['pe_vals'] = pe_vals
     if len(pb_vals.keys()) > 0:
         context['pb_vals'] = pb_vals
+    context['curr_module_id'] = 'id_markets_module'
     print(context)
     return render(request, template, context)

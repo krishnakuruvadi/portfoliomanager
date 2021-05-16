@@ -49,7 +49,8 @@ def add_user(request):
         email = request.POST['email']
         notes = request.POST['notes']
         User.objects.create(name=name, dob=dob, notes=notes, email=email)
-    return render(request, template)
+    context = {'curr_module_id': 'id_user_module'}
+    return render(request, template, context=context)
 
 def update_user(request, id):
     template = 'users/add_user.html'
@@ -62,7 +63,7 @@ def update_user(request, id):
             user_obj.notes = request.POST['notes']
             user_obj.save()
         else:
-            context = {'name': user_obj.name, 'email':user_obj.email, 'dob':user_obj.dob.strftime("%Y-%m-%d"), 'notes':user_obj.notes}
+            context = {'curr_module_id': 'id_user_module', 'name': user_obj.name, 'email':user_obj.email, 'dob':user_obj.dob.strftime("%Y-%m-%d"), 'notes':user_obj.notes}
             return render(request, template, context=context)
         return HttpResponseRedirect("../")
     except User.DoesNotExist:

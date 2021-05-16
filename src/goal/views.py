@@ -42,6 +42,7 @@ class GoalListView(ListView):
         else:
             data['ach_per'] = 0
         data['unalloc'] = get_unallocated_amount()
+        data['curr_module_id'] = 'id_goal_module'
         print(data)
         return data
 
@@ -142,6 +143,7 @@ class GoalDetailView(DetailView):
             yrly_investment_reqd = get_required_yrly_investment(0,8, data['target_date'], data['object'].final_val)
             data['status_text'] = data['status_text'] + ' If '+str(yrly_investment_reqd) + ' per year is invested at '+ str(8)
             data['status_text'] = data['status_text'] + '% you will reach target.'
+        data['curr_module_id'] = 'id_goal_module'
         print("GoalProgressData - returning:", data)
         print(data)
         return data
@@ -195,7 +197,8 @@ def add_goal(request):
             print("calculated value", val)
             users = get_all_users()
             context = {'users':users, 'user':user, 'startdate':start_date, 'name': name, 'notes': notes,
-                'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val}
+                'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val,
+                'curr_module_id':'id_goal_module'}
             return render(request, template, context=context)
     users = get_all_users()
     context = {'users':users}
@@ -243,7 +246,7 @@ def add_retirement_goal(request):
             context = {'users':users, 'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
                         'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':corpus,
                         'expense_period': expense_period, 'roi_corpus':post_returns, 'labels':json.dumps(dates), 
-                        'corpus_vals': corpus_vals, 'expense_vals': expense_vals, 'operation':operation}
+                        'corpus_vals': corpus_vals, 'expense_vals': expense_vals, 'operation':operation, 'curr_module_id':'id_goal_module'}
             return render(request, template, context=context)
     users = get_all_users()
     context = {'users':users, "labels":None, "data":None, 'operation':operation}
@@ -291,7 +294,7 @@ def update_goal(request, id):
                     context = {'users':users, 'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
                                 'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':corpus,
                                 'expense_period': expense_period, 'roi_corpus':post_returns, 'labels':json.dumps(dates), 
-                                'corpus_vals': corpus_vals, 'expense_vals': expense_vals, 'operation':operation}
+                                'corpus_vals': corpus_vals, 'expense_vals': expense_vals, 'operation':operation, 'curr_module_id':'id_goal_module'}
                     return render(request, template, context=context)
                 return HttpResponseRedirect("../")
             else:
@@ -302,7 +305,7 @@ def update_goal(request, id):
                             'inflation':goal_obj.inflation, 'final_val':goal_obj.final_val,
                             'expense_period': int(goal_obj.expense_period/12), 'roi_corpus':goal_obj.post_returns,
                             'notes':goal_obj.notes, 'recurring_pay_goal': goal_obj.recurring_pay_goal, 'labels':json.dumps(dates),
-                            'corpus_vals': corpus_vals, 'expense_vals': expense_vals, 'operation':operation}
+                            'corpus_vals': corpus_vals, 'expense_vals': expense_vals, 'operation':operation, 'curr_module_id':'id_goal_module'}
                 return render(request, template, context=context) 
         else:
             template = 'goals/add_goal.html'
@@ -336,7 +339,8 @@ def update_goal(request, id):
                     print("calculated value", val)
                     users = get_all_users()
                     context = {'users':users, 'user':user, 'startdate':start_date, 'name': name, 'notes':notes,
-                        'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val, 'operation':operation}
+                        'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val, 'operation':operation,
+                        'curr_module_id':'id_goal_module'}
                     return render(request, template, context=context)
                 return HttpResponseRedirect("../")
             else:
@@ -345,7 +349,8 @@ def update_goal(request, id):
                             'time_period': goal_obj.time_period, 'curr_val': goal_obj.curr_val,
                             'inflation':goal_obj.inflation, 'final_val':goal_obj.final_val,
                             'expense_period': goal_obj.expense_period, 'roi_corpus':goal_obj.post_returns,
-                            'notes':goal_obj.notes, 'recurring_pay_goal': goal_obj.recurring_pay_goal, 'operation':operation}
+                            'notes':goal_obj.notes, 'recurring_pay_goal': goal_obj.recurring_pay_goal, 'operation':operation,
+                            'curr_module_id':'id_goal_module'}
                 return render(request, template, context=context) 
     except Goal.DoesNotExist:
         pass
