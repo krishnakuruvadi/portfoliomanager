@@ -1,0 +1,119 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'espps:espp-list' %}">ESPP</a></li>
+    <li><a href="{% url 'espps:espp-detail' espp_id %}">{{espp_id}}</a></li>
+    <li><a href="#">Sell</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6 col-md-4 col-lg-4'>
+
+        <div class="form-group row">
+          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="price" class="col-sm-3 col-form-label">Price</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="price" name="price" value="{{price}}" step="0.0001">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="units" class="col-sm-3 col-form-label">Units</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="units" name="units" value="{{units}}" step="0.0001">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="conversion_rate" class="col-sm-3 col-form-label">Conversion Rate</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="conversion_rate" name="conversion_rate" value="{{conversion_rate}}" step="0.01">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="trans_price" class="col-sm-3 col-form-label">Transaction Price</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="trans_price" name="trans_price" value="{{trans_price}}" step="0.01"> 
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </form>
+  {% endblock content %}
+
+  {% block javascript %}
+    <script>
+      $("#price").change(function () {
+        setTransPrice();
+      });
+      $("#units").change(function () {
+        setTransPrice();
+      });
+      $("#conversion_rate").change(function () {
+        setTransPrice();
+      });
+      function setTransPrice(){
+        var priceElem = document.getElementById("price");
+        var price = priceElem.value
+        var quantityElem = document.getElementById("units");
+        var quantity = quantityElem.value
+        var conversionRateElem = document.getElementById("conversion_rate");
+        var conversionRate = conversionRateElem.value
+        console.log(price)
+        console.log(quantity)
+        console.log(conversionRate)
+        if (quantity!= '' && price!='' && conversionRate!='') {
+          totalPrice = quantity*price*conversionRate
+          console.log(totalPrice)
+          totalPriceElem = document.getElementById("trans_price")
+          totalPriceElem.value = totalPrice
+        }  
+      }
+    </script>
+  {% endblock %}

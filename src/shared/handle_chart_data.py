@@ -2,7 +2,7 @@ from ppf.models import Ppf, PpfEntry
 from ssy.models import Ssy, SsyEntry
 from fixed_deposit.models import FixedDeposit
 from fixed_deposit.fixed_deposit_helper import get_maturity_value
-from espp.models import Espp
+from espp.models import Espp, EsppSellTransactions
 from rsu.models import RSUAward, RestrictedStockUnits
 from epf.models import Epf, EpfEntry
 from goal.models import Goal
@@ -63,7 +63,7 @@ def get_espp_amount_for_goal(id):
     espp_objs = Espp.objects.filter(goal=id)
     total_espp = 0
     for espp_obj in espp_objs:
-        if not espp_obj.total_sell_price:
+        if espp_obj.latest_value:
             total_espp += espp_obj.latest_value
     return total_espp
 
@@ -458,9 +458,8 @@ def get_espp_amount_for_user(user_id):
     espp_objs = Espp.objects.filter(user=user_id)
     total_espp = 0
     for espp_obj in espp_objs:
-        if not espp_obj.total_sell_price:
-            if espp_obj.latest_value:
-                total_espp += espp_obj.latest_value
+        if espp_obj.latest_value:
+            total_espp += espp_obj.latest_value
     return total_espp
 
 def get_rsu_amount_for_user(user_id):
@@ -671,7 +670,11 @@ def get_investment_data(start_date):
         espp_val = 0
         for espp_entry in espp_entries:
             #print("espp entry")
-            if espp_entry.sell_date is None or espp_entry.sell_date < data_end_date:
+            avail_units = espp_entry.shares_purchased
+            for sell_trans in EsppSellTransactions.objects.filter(espp=espp_entry, trans_date__lte=data_end_date):
+                avail_units -= sell_trans.units
+
+            if avail_units > 0:
                 try:
                     stock = Stock.objects.get(symbol=espp_entry.symbol, exchange=espp_entry.exchange)
                     historical_stock_prices = get_historical_stock_price(stock, data_end_date+relativedelta(days=-5), data_end_date)
@@ -683,11 +686,11 @@ def get_investment_data(start_date):
                                 conv_val = get_conversion_rate('USD', 'INR', data_end_date)
                                 #print('conversion value', conv_val)
                                 if conv_val:
-                                    espp_val += float(conv_val)*float(v)*int(espp_entry.shares_purchased)
+                                    espp_val += float(conv_val)*float(v)*float(avail_units)
                                     found = True
                                     break
                             else:
-                                espp_val += float(v)*int(espp_entry.shares_purchased)
+                                espp_val += float(v)*float(avail_units)
                                 found = True
                                 break
                         if found:

@@ -8,8 +8,10 @@ from django.views.generic import (
     ListView,
     DeleteView
 )
+
+from shared.utils import get_date_or_none_from_string, get_float_or_none_from_string
 from .forms import EsppModelForm
-from .models import Espp
+from .models import Espp, EsppSellTransactions
 from .espp_helper import update_latest_vals
 from django.http import HttpResponseRedirect
 from shared.handle_get import *
@@ -17,6 +19,7 @@ from shared.handle_create import add_common_stock
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from shared.financial import xirr
+from django.db import IntegrityError
 
 class EsppCreateView(CreateView):
     template_name = 'espps/espp_create.html'
@@ -36,8 +39,7 @@ class EsppCreateView(CreateView):
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
-        if self.object.sell_price and self.object.sell_conversion_rate:
-            self.object.total_sell_price = self.object.sell_price*self.object.shares_purchased*self.object.sell_conversion_rate
+        self.object.shares_avail_for_sale = self.object.shares_purchased
         self.object.save()
         form.save_m2m()
         add_common_stock(self.object.exchange, self.object.symbol, self.object.purchase_date)
@@ -56,18 +58,21 @@ class EsppListView(ListView):
         latest_value = 0
         unrealised_gain = 0
         realised_gain = 0
+        total_investment = 0
         for obj in self.queryset:
-            if obj.sell_date:
-                realised_gain += obj.total_sell_price - obj.total_purchase_price
-            else:
-                current_investment += obj.total_purchase_price
-                unrealised_gain += obj.latest_value - obj.total_purchase_price
+            total_investment += obj.total_purchase_price
+            if obj.latest_value:
                 latest_value += obj.latest_value
-        data['current_investment'] = current_investment
+                current_investment += float(obj.shares_avail_for_sale*obj.purchase_price*obj.purchase_conversion_rate)
+            unrealised_gain += obj.unrealised_gain
+            realised_gain += obj.realised_gain
+        data['total_investment'] = total_investment
+        data['current_investment'] = round(current_investment, 2)
         data['latest_value'] = latest_value
         data['unrealised_gain'] = unrealised_gain
         data['realised_gain'] = realised_gain
         data['curr_module_id'] = 'id_espp_module'
+        print(data)
         return data
 
 class EsppDeleteView(DeleteView):
@@ -96,14 +101,26 @@ class EsppDetailView(DetailView):
         obj = data['object']
         cash_flows = list()
         cash_flows.append((obj.purchase_date, -1*float(obj.total_purchase_price)))
-        if obj.sell_date:
-            cash_flows.append((obj.sell_date, float(obj.total_sell_price)))
-        else:
+        for st in EsppSellTransactions.objects.filter(espp=data['object']):
+            cash_flows.append((st.trans_date, float(st.trans_price)))
+        if float(obj.latest_value) > 0:
             cash_flows.append((obj.as_on_date, float(obj.latest_value)))
         roi = xirr(cash_flows, 0.1)*100
         roi = round(roi, 2)
         data['roi'] = roi
         data['curr_module_id'] = 'id_espp_module'
+        data['transactions'] = list()
+        for st in EsppSellTransactions.objects.filter(espp=data['object']):
+            data['transactions'].append({
+                'id':st.id,
+                'trans_date':st.trans_date,
+                'price':st.price,
+                'units':st.units,
+                'conversion_rate':st.conversion_rate,
+                'trans_price':st.trans_price,
+                'realised_gain':st.realised_gain,
+                'notes':st.notes
+            })
         return data
 
 class EsppUpdateView(UpdateView):
@@ -121,8 +138,6 @@ class EsppUpdateView(UpdateView):
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
-        if self.object.sell_price:
-            self.object.total_sell_price = self.object.sell_price*self.object.shares_purchased*self.object.sell_conversion_rate
         self.object.save()
         form.save_m2m()
         return HttpResponseRedirect(self.get_success_url())
@@ -133,6 +148,69 @@ def refresh_espp_trans(request):
         print("looping through espp " + str(espp_obj.id))
         update_latest_vals(espp_obj)
     return HttpResponseRedirect(template)
+
+def get_sell_trans(request, id):
+    template = "espps/sell_transactions.html"
+    context = dict()
+    context['espp_id'] = id
+    context['transactions'] = list()
+    try:
+        espp_obj = Espp.objects.get(id=id)
+        context['purchase_date'] = espp_obj.purchase_date
+        context['symbol'] = espp_obj.symbol
+        total_realised_gain = 0
+        for st in EsppSellTransactions.objects.filter(espp=espp_obj):
+            context['transactions'].append({
+                'id':st.id,
+                'trans_date':st.trans_date,
+                'price':st.price,
+                'units':st.units,
+                'conversion_rate':st.conversion_rate,
+                'trans_price':st.trans_price,
+                'realised_gain':st.realised_gain,
+                'notes':st.notes
+            })
+            total_realised_gain += float(st.realised_gain)
+        context['total_realised_gain'] = total_realised_gain
+    except Espp.DoesNotExist:
+        print(f"ESPP with id {id} does not exist")
+    return render(request, template, context)
+
+def delete_sell_trans(request, id):
+    try:
+        espp_sel_trans = EsppSellTransactions.objects.get(id=id)
+        espp_id = espp_sel_trans.espp.id
+        espp_sel_trans.delete()
+        return HttpResponseRedirect(reverse('espps:espp-sell-trans-list',kwargs={'id':espp_id}))
+    except EsppSellTransactions.DoesNotExist:
+        print(f'EsppSellTransactions with id {id} does not exist')
+        pass
+    return HttpResponseRedirect(reverse('espps:espp-list'))
+
+def add_sell_trans(request, id):
+    template = "espps/add_sell_transaction.html"
+    context = dict()
+    context['espp_id'] = id
+    try:
+        espp_obj = Espp.objects.get(id=id)
+        if request.method == 'POST':
+            trans_date = get_date_or_none_from_string(request.POST['trans_date'])
+            price = get_float_or_none_from_string(request.POST['price'])
+            units = get_float_or_none_from_string(request.POST['units'])
+            conversion_rate = get_float_or_none_from_string(request.POST['conversion_rate'])
+            trans_price = get_float_or_none_from_string(request.POST['trans_price'])
+            realised_gain = trans_price - (float(espp_obj.purchase_price) * float(espp_obj.purchase_conversion_rate) * float(units))
+            notes = request.POST['notes']
+            try:
+                EsppSellTransactions.objects.create(espp=espp_obj, trans_date=trans_date, price=price, units=units, conversion_rate=conversion_rate,
+                    trans_price=trans_price, realised_gain=realised_gain, notes=notes)
+                update_latest_vals(espp_obj)
+            except IntegrityError:
+                print('transaction already exists')            
+    except Espp.DoesNotExist:
+        print(f"ESPP with id {id} does not exist")
+        return HttpResponseRedirect(reverse('espps:espp-list'))
+    return render(request, template, context)
 
 class CurrentEspps(APIView):
     authentication_classes = []

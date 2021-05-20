@@ -15,7 +15,7 @@
 {% block content %}
   <table class="table table-borderless">
     <tr>
-      <td style="text-align:right"><b>Current Investment:</b> {{current_investment}} &nbsp;&nbsp;&nbsp;<b>Current Value:</b> {{latest_value}} &nbsp;&nbsp;&nbsp;<b>Unrealised Gain:</b> {{unrealised_gain}} &nbsp;&nbsp;&nbsp;<b>Realised Gain:</b> {{realised_gain}}</td>
+      <td style="text-align:right"><b>Total Investment:</b> {{total_investment}} &nbsp;&nbsp;&nbsp;<b>Current Investment:</b> {{current_investment}} &nbsp;&nbsp;&nbsp;<b>Current Value:</b> {{latest_value}} &nbsp;&nbsp;&nbsp;<b>Unrealised Gain:</b> {{unrealised_gain}} &nbsp;&nbsp;&nbsp;<b>Realised Gain:</b> {{realised_gain}}</td>
     </tr>
   </table>
   <table class="table table-hover" id="espp-table">
@@ -52,11 +52,11 @@
         <td>{{ instance.latest_price }}</td>
         <td>{{ instance.latest_value }}</td>
         <td>{{ instance.as_on_date }}</td>
-        <td>{{ instance.gain }}</td>
+        <td>{{ instance.unrealised_gain }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}sell"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+          <a href="{{ instance.get_absolute_url }}delete" title="Delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update" title="Update"><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}sell" title="Add Sell Transaction"><i class="far fa-file-alt" aria-hidden="true"></i></a>
         </td>
       </tr>
       {% endfor %}

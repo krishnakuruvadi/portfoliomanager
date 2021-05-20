@@ -18,16 +18,12 @@ class EsppModelForm(forms.ModelForm):
             'purchase_price',
             'purchase_conversion_rate',
             'shares_purchased',
-            'sell_date',
-            'sell_price',
-            'sell_conversion_rate',
             'user',
             'goal'
         ]
         # Always put date in %Y-%m-%d for chrome to show things properly 
         widgets = {
             'purchase_date': forms.DateInput(format=('%Y-%m-%d'), attrs={'placeholder':'Select a date', 'type':'date'}),
-            'sell_date': forms.DateInput(format=('%Y-%m-%d'), attrs={'placeholder':'Select a date', 'type':'date'}),
         }
     user = ChoiceField(required=True)
     goal = ChoiceField(required=False, validators=[])

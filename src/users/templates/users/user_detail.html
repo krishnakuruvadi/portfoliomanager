@@ -35,13 +35,13 @@
   </table>
 <br><br><br>
 <div class="row">
-  <div class='col-sm-12 col-md-6 col-lg-4'>
+  <div style="width:100%;height:25vh;" class='col-sm-12 col-md-6 col-lg-4'>
     <canvas id="classificationChart"></canvas>
   </div>
-  <div class='col-sm-12 col-md-6 col-lg-4'>
+  <div style="width:100%;height:28vh;" class='col-sm-12 col-md-6 col-lg-4'>
     <canvas id="distributionChart"></canvas>
   </div>
-  <div class='col-sm-12 col-md-6 col-lg-4'>
+  <div style="width:100%;height:26vh;" class='col-sm-12 col-md-6 col-lg-4'>
     <canvas id="statusChart"></canvas>
   </div>
 </div>
@@ -94,7 +94,8 @@
           labels: debt_equity_labels
         },
         options: {
-          responsive: true
+          responsive: true,
+          maintainAspectRatio:false
         }
       };
       var ctx2 = document.getElementById('distributionChart').getContext('2d');
@@ -109,7 +110,8 @@
           labels: distribution_labels
         },
         options: {
-          responsive: true
+          responsive: true,
+          maintainAspectRatio:false
         }
       };
       var ctx3 = document.getElementById('statusChart').getContext('2d');
@@ -126,7 +128,8 @@
           labels: status_labels
         },
         options: {
-          responsive: true
+          responsive: true,
+          maintainAspectRatio:false
         }
       };
       var classificationChart = new Chart(ctx,config);

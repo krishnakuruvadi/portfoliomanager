@@ -21,6 +21,7 @@
         <th scope="col">Bank Name</th>
         <th scope="col">Maturity Value</th>
         <th scope="col">Maturity Date</th>
+        <th scope="col">ROI</th>
         <th scope="col">Goal</th>
         <th scope="col">User</th>
         <th scope="col"></th>
@@ -37,6 +38,7 @@
         <td>{{ instance.bank_name }}</td>
         <td>{{ instance.final_val }}</td>
         <td>{{ instance.mat_date }}</td>
+        <td>{{ instance.roi }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>

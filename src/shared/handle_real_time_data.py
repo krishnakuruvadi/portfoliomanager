@@ -11,6 +11,7 @@ from .yahoo_finance_2 import YahooFinance2
 from mftool import Mftool
 from common.models import Stock
 from django.db import IntegrityError
+import time
 
 
 def get_latest_vals(stock, exchange, start, end, etf=False):
@@ -82,14 +83,21 @@ def get_historical_year_mf_vals(amfi_code, year):
             pass
 
 def get_forex_rate(date, from_cur, to_cur):
-    # https://api.ratesapi.io/api/2020-01-31?base=USD&symbols=INR
-    url = "https://api.ratesapi.io/api/" + date.strftime('%Y-%m-%d') + "?base=" + from_cur + "&symbols=" + to_cur
-    response = requests.get(url) 
-    # print response 
-    print(response) 
-    # print json content 
-    print(response.json())
-    return response.json().get('rates').get(to_cur)
+    for _ in range(5):
+        try:
+            # https://api.ratesapi.io/api/2020-01-31?base=USD&symbols=INR
+            #url = "https://api.ratesapi.io/api/" + date.strftime('%Y-%m-%d') + "?base=" + from_cur + "&symbols=" + to_cur
+            url = 'https://api.exchangerate.host/' + date.strftime('%Y-%m-%d') + "?base=" + from_cur + "&symbols=" + to_cur
+            response = requests.get(url) 
+            # print response 
+            print(response) 
+            # print json content 
+            print(response.json())
+            return response.json().get('rates').get(to_cur)
+        except Exception as ex:
+            print(f'exception while getting forex rate for: date {date}, from_cur {from_cur}, to_cur {to_cur}')
+            time.sleep(5)
+    return None
 
 def get_conversion_rate(from_cur, to_cur, date):
     try:
@@ -97,10 +105,13 @@ def get_conversion_rate(from_cur, to_cur, date):
         return forex_rate.rate
     except HistoricalForexRates.DoesNotExist:
         val = get_forex_rate(date, from_cur, to_cur)
-        new_entry = HistoricalForexRates(from_cur=from_cur, to_cur=to_cur, date=date, rate=val)
-        new_entry.save()
-        print(val)
-        return val
+        if val:
+            new_entry = HistoricalForexRates(from_cur=from_cur, to_cur=to_cur, date=date, rate=val)
+            new_entry.save()
+            print(val)
+            return val
+        else:
+            return None
 
 def get_historical_stock_price_based_on_symbol(symbol, exchange, start, end):
     try:

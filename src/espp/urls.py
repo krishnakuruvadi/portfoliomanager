@@ -7,7 +7,10 @@ from .views import (
     EsppDetailView,
     EsppUpdateView,
     refresh_espp_trans,
-    CurrentEspps
+    CurrentEspps,
+    get_sell_trans,
+    add_sell_trans,
+    delete_sell_trans
 )
 
 app_name = 'espps'
@@ -18,7 +21,9 @@ urlpatterns = [
     path('<id>/', EsppDetailView.as_view(), name='espp-detail'),
     path('<id>/update/', EsppUpdateView.as_view(), name='espp-update'),
     path('<id>/delete/', EsppDeleteView.as_view(), name='espp-delete'),
-    #path('<id>/transactions/', show_contributions, name='espp-entry-list'),
+    path('<id>/sell/', get_sell_trans, name='espp-sell-trans-list'),
+    path('<id>/sell/add', add_sell_trans, name='espp-add-sell-trans'),
+    path('<id>/sell/delete', delete_sell_trans, name='espp-delete-sell-trans'),
     #path('<id>/transactions/<year>', show_contributions, name='espp-entry-list'),
     #path('<id>/upload-transactions/', upload_espp_trans, name='espp-upload-trans'),
     #path('<id>/add-contribution/', add_contribution, name='espp-add-contribution'),
