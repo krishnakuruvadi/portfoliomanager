@@ -20,31 +20,329 @@ from shared.handle_delete import delete_goal
 from shared.handle_get import *
 from shared.handle_chart_data import get_goal_contributions, get_goal_yearly_contrib
 from shared.financial import *
+import colorsys
+from shared.utils import get_int_or_none_from_string
 
 # Create your views here.
 
-class GoalListView(ListView):
-    template_name = 'goals/goal_list.html'
+def goal_list(request):
+    template = 'goals/goal_list.html'
     queryset = Goal.objects.all()
+    data = dict()
+    data['user_name_mapping'] = get_all_users()
+    data['total_goals'] = len(queryset)
+    data['target'] = 0
+    data['achieved'] = 0
+    data['object_list'] = list()
+    for g in queryset:
+        data['target'] += g.final_val
+        data['achieved'] += g.achieved_amt
+        data['object_list'].append(
+            {
+                'name': g.name,
+                'start_date':g.start_date,
+                'end_date':g.start_date+relativedelta(months=g.time_period),
+                'time_period':g.time_period,
+                'final_val':g.final_val,
+                'user':g.user,
+                'notes':g.notes,
+                'id':g.id
+            }
+        )
+    if data['target'] > 0:
+        data['ach_per'] = round(data['achieved']*100/data['target'],2)
+    else:
+        data['ach_per'] = 0
+    data['unalloc'] = get_unallocated_amount()
+    data['curr_module_id'] = 'id_goal_module'
+    print(data)
+    return render(request, template, context=data)
+
+def goals_insight(request):
+    template = "goals/goals_insight.html"
+    context = dict()
+    goal_objs = Goal.objects.all()
+    target_val = 0
+    remaining_val = 0
+    yrly_invest_12 = dict()
+    yrly_invest_8 = dict()
+    target_dates_and_amts= list()
+    today = datetime.date.today()
+    exp_growth = 8
+    if request.method == 'POST':
+        exp_growth = get_int_or_none_from_string(request.POST.get('exp_ret'))
+        if not exp_growth or exp_growth <= 0:
+            exp_growth = 8
     
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        print(data)
-        data['user_name_mapping'] = get_all_users()
-        data['total_goals'] = len(self.queryset)
-        data['target'] = 0
-        data['achieved'] = 0
-        for g in self.queryset:
-            data['target'] += g.final_val
-            data['achieved'] += g.achieved_amt
-        if data['target'] > 0:
-            data['ach_per'] = round(data['achieved']*100/data['target'],2)
+    for goal_obj in goal_objs:
+        target = float(goal_obj.final_val)
+        if target < 1:
+            target = 1
+        target_val += target
+        remaining = target - float(goal_obj.achieved_amt)
+        if remaining < 0:
+            remaining = 0
+        remaining_val += remaining
+        target_date = goal_obj.start_date+relativedelta(months=goal_obj.time_period)
+        months_to_goal = relativedelta(target_date, today)
+        mtg = months_to_goal.months + months_to_goal.years*12
+        projected = get_fd_final_val(float(goal_obj.achieved_amt), 'fd_compound_yearly', mtg, 8)
+
+        target_dates_and_amts.append({'date':target_date, 'target':remaining-projected, 'id':goal_obj.id})
+        '''
+        yrly_investment_reqd_12 = int(get_required_yrly_investment(float(goal_obj.achieved_amt), 12, target_date, target))
+        yrly_investment_reqd_8 = int(get_required_yrly_investment(float(goal_obj.achieved_amt), 8, target_date, target))
+
+        for yr in range(today.year, target_date.year):
+            if not yr in yrly_invest_12:
+                yrly_invest_12[yr] = 0
+            if not yr in yrly_invest_8:
+                yrly_invest_8[yr] = 0
+            yrly_invest_12[yr] += yrly_investment_reqd_12
+            yrly_invest_8[yr] += yrly_investment_reqd_8
+        '''
+    context['remaining_per'] = round(remaining_val*100/target_val, 2)
+    context['achieve_per'] = round(100 - context['remaining_per'], 2)
+    context['target'] = target_val
+    context['remaining'] = remaining_val
+    context['achieved'] = target_val - remaining_val
+    #context['yrly_invest_12'] = yrly_invest_12
+    #context['yrly_invest_8'] = yrly_invest_8
+    context['exp_ret'] = exp_growth
+
+    for i in range(0,len(target_dates_and_amts)):
+        if i != len(target_dates_and_amts)-1:
+            for j in range(i, len(target_dates_and_amts)):
+                if target_dates_and_amts[i]['date'] > target_dates_and_amts[j]['date']:
+                    temp = target_dates_and_amts[j]
+                    target_dates_and_amts[j] = target_dates_and_amts[i]
+                    target_dates_and_amts[i] = temp
+    print(f'sorted {target_dates_and_amts}')
+    goal_yrly_inv, goal_monthly_inv, yrly_total = alternate_investment_strategy(target_dates_and_amts, exp_growth)
+
+    last_date = target_dates_and_amts[len(target_dates_and_amts)-1]['date']
+    j = 0 
+    cash_flows = list()
+    cash_flows.append((today, -1*context['achieved']))
+    for yr, amt in yrly_total.items():
+        if yr == today.year:
+            for m in range(today.month, 13):
+                cash_flows.append((datetime.date(year=yr, month=m, day=1), -1*int(amt/(13-today.month))))
+                for k in range (j, len(target_dates_and_amts)):
+                    if target_dates_and_amts[k]['date'].year == yr and target_dates_and_amts[k]['date'].month == m:
+                        g = Goal.objects.get(id=target_dates_and_amts[k]['id'])
+                        cash_flows.append((target_dates_and_amts[k]['date'], float(g.final_val)))
+                        j += 1
+        elif yr == last_date.year:
+            for m in range(1, last_date.month+1):
+                cash_flows.append((datetime.date(year=yr, month=m, day=1), -1*int(amt/last_date.month)))
+                for k in range (j, len(target_dates_and_amts)):
+                    if target_dates_and_amts[k]['date'].year == yr and target_dates_and_amts[k]['date'].month == m:
+                        g = Goal.objects.get(id=target_dates_and_amts[k]['id'])
+                        cash_flows.append((target_dates_and_amts[k]['date'], float(g.final_val)))
+                        j += 1
         else:
-            data['ach_per'] = 0
-        data['unalloc'] = get_unallocated_amount()
-        data['curr_module_id'] = 'id_goal_module'
-        print(data)
-        return data
+            for m in range(1, 13):
+                cash_flows.append((datetime.date(year=yr, month=m, day=1), -1*int(amt/12)))
+                for k in range (j, len(target_dates_and_amts)):
+                    if target_dates_and_amts[k]['date'].year == yr and target_dates_and_amts[k]['date'].month == m:
+                        g = Goal.objects.get(id=target_dates_and_amts[k]['id'])
+                        cash_flows.append((target_dates_and_amts[k]['date'], float(g.final_val)))
+                        j += 1
+
+    colors = get_N_HexCol(len(goal_objs)+2)
+    print(f'****** Getting fv for total ***********')
+    print(f'cash_flows: {cash_flows}')
+    fv, fvs = get_fv_from_cashflows(cash_flows=cash_flows, roi=exp_growth)
+    print(f'****** Done fv for total ***********')
+
+    table_goal_yrly_inv = '<tr><th>Investment Required</th>'
+    for goal_obj in goal_objs:
+        table_goal_yrly_inv += '<th>' + get_user_short_name_or_name_from_id(goal_obj.user) + '/' + goal_obj.name + '</th>'
+    table_goal_yrly_inv += '<th>Total</th></tr>' 
+    for yr in range(today.year, last_date.year+1):
+        yr_total = 0
+        table_goal_yrly_inv += '<tr><th>' + str(yr) + '</th>'
+        for goal_obj in goal_objs:
+            if yr in goal_yrly_inv[goal_obj.id]:
+                table_goal_yrly_inv += '<td>' + str(goal_yrly_inv[goal_obj.id][yr]) + '</td>'
+                yr_total += goal_yrly_inv[goal_obj.id][yr]
+            else:
+                table_goal_yrly_inv += '<td></td>'
+        table_goal_yrly_inv += '<td>' + str(round(yr_total,2)) + '</td>'
+        table_goal_yrly_inv += '</tr>'
+    context['table_goal_yrly_inv'] = table_goal_yrly_inv
+
+
+    #print(f'fv: {fv}')
+    #print(f'fvs: {fvs}')
+    context['chart_data'] = list()
+    context['chart_data'].append({'label':'Total', 'data':fvs, 'borderColor':colors[0], 'fill':'false'})
+    i = 1
+    for g in goal_objs:
+        print(f'************ Getting chart fv data for {g.name}**************')
+        cash_flows = list()
+        if float(g.achieved_amt) > 0:
+            print(f'achieved amount for goal {g.name}: {g.achieved_amt}')
+            cash_flows.append((today, -1*float(g.achieved_amt)))
+        else:
+            print(f'no achieved amount for goal {g.name}')
+        cash_flows.extend(goal_monthly_inv[g.id])
+        cash_flows.append((g.start_date+relativedelta(months=g.time_period), float(g.final_val)))
+        #if g.id == 2:
+        #    print(f'cash_flows {cash_flows}')
+        fv, fvs = get_fv_from_cashflows(cash_flows=cash_flows, roi=exp_growth, debug=g.id==2)
+        #if g.id == 2:
+        #    print(f'goal2 fvs {fvs}')
+        context['chart_data'].append({'label':g.name, 'data':fvs, 'borderColor':colors[i], 'fill':'false'})
+        i += 1
+    print(context)
+    return render(request, template, context)
+
+def get_N_HexCol(N=5):
+    HSV_tuples = [(x * 1.0 / N, 0.5, 0.5) for x in range(N)]
+    hex_out = []
+    for rgb in HSV_tuples:
+        rgb = map(lambda x: int(x * 255), colorsys.hsv_to_rgb(*rgb))
+        hex_out.append('#%02x%02x%02x' % tuple(rgb))
+    return hex_out
+
+def goal_monthly_data(start_date, end_date, monthly_amt):
+    ret = list()
+    while start_date <= end_date:
+        ret.append((start_date, -1*float(monthly_amt)))
+        start_date = start_date+relativedelta(months=1)
+    return ret
+
+def alternate_investment_strategy(target_dates_and_amts, roi):
+    print('*************************************************************************************')
+    print(target_dates_and_amts)
+    total_target = 0
+    today = datetime.date.today()
+    #print(f'before sorting: {sorted_dates}')
+
+    last_date = target_dates_and_amts[len(target_dates_and_amts)-1]['date']
+    print(f'by {last_date} we should have reached {total_target}')
+    goal_yrly_inv = dict()
+    goal_monthly_inv = dict()
+    max_yrs_investment = 0
+    for i in range(len(target_dates_and_amts)):
+        curr_goal = target_dates_and_amts[i]
+        last_goal = target_dates_and_amts[i-1]
+        goal_yrly_inv[curr_goal['id']] = dict()
+        goal_monthly_inv[curr_goal['id']] = dict()
+        print(f'Goal {curr_goal}')
+        yrly_investment_reqd = 0
+        start_yr = 0
+        end_yr = 0
+
+        months_to_goal = relativedelta(curr_goal['date'], today)
+        months_to_goal = months_to_goal.months + 12*months_to_goal.years if months_to_goal.years > 0 else 0
+
+        if months_to_goal < 12:
+            yrly_investment_reqd = int(get_required_yrly_investment(0, roi, curr_goal['date'], curr_goal['target']))
+            monthly = round(yrly_investment_reqd/12, 2)
+            curr_yr_months = 12 - today.month
+            goal_yrly_inv[curr_goal['id']][today.year] = round(goal_yrly_inv[curr_goal['id']].get(today.year, 0) + curr_yr_months * monthly, 2)
+            if curr_goal['date'].year != today.year:
+                goal_yrly_inv[curr_goal['id']][curr_goal['date'].year] = round(goal_yrly_inv[curr_goal['id']].get(curr_goal['date'].year, 0) + (curr_goal['date'].month+1)*monthly, 2)
+            goal_monthly_inv[curr_goal['id']] = goal_monthly_data(today, curr_goal['date'], monthly)
+        elif i == 0:
+            yrly_investment_reqd = int(get_required_yrly_investment(0,roi, curr_goal['date'], curr_goal['target']))
+            monthly = round(yrly_investment_reqd/12, 2)
+            for yr in range(today.year, curr_goal['date'].year+1):
+                months = 12
+                if yr == today.year:
+                    months = 12 - today.month
+                elif yr == curr_goal['date'].year:
+                    months = curr_goal['date'].month+1
+                goal_yrly_inv[curr_goal['id']][yr] = round(goal_yrly_inv[curr_goal['id']].get(yr, 0) + months*monthly, 2)
+            goal_monthly_inv[curr_goal['id']] = goal_monthly_data(today, curr_goal['date'], monthly)
+        else:
+            diff = relativedelta(curr_goal['date'], last_goal['date'])
+            print(f"diff between {last_goal['date']} and {curr_goal['date']} is {diff}")
+            if diff.years > 0:
+                print('have more than a year for next goal')
+                m = diff.months + 1 + diff.years*12
+                yrly_investment_reqd = int(get_required_yrly_investment(0,roi, today+relativedelta(months=m), curr_goal['target']))
+                if yrly_investment_reqd > max_yrs_investment:
+                    print(f' {yrly_investment_reqd} > highest yearly investment of  {max_yrs_investment}')
+                    temp1 = rd_calc_final_val(max_yrs_investment/12, m, roi, None)
+                    temp2 = curr_goal['target'] - temp1
+                    print(f'temp1 {temp1} temp2 {temp2}')
+                    add_each_year = get_required_yrly_investment(0,roi, last_goal["date"], temp2)
+                    print(f'Add {max_yrs_investment} to each year from {last_goal["date"].year} to {curr_goal["date"].year+1}.')
+                    print(f'Add additional {add_each_year} to each year from {today.year} to {curr_goal["date"].year+1} to reach goal')
+                    monthly1 = round(add_each_year/12, 2)
+                    for j in range(today.year, curr_goal["date"].year+1):
+                        months = 12
+                        if j == today.year:
+                            months = 12 - today.month
+                        elif j == curr_goal['date'].year:
+                            months = curr_goal['date'].month+1
+                        goal_yrly_inv[curr_goal['id']][j] = round(goal_yrly_inv[curr_goal['id']].get(j, 0) + months*monthly1, 2)
+                    
+                    goal_monthly_inv[curr_goal['id']] = goal_monthly_data(today, last_goal["date"], monthly1)
+
+                    monthly2 = round(max_yrs_investment/12, 2)
+                    for j in range(last_goal['date'].year, curr_goal["date"].year+1):
+                        months = 12
+                        if j == today.year:
+                            months = 12 - today.month
+                        elif j == curr_goal['date'].year:
+                            months = curr_goal['date'].month+1
+                        goal_yrly_inv[curr_goal['id']][j] = round(goal_yrly_inv[curr_goal['id']].get(j, 0) + months*monthly2, 2)
+                    goal_monthly_inv[curr_goal['id']].extend(goal_monthly_data(last_goal["date"], curr_goal["date"], monthly1+monthly2))
+                else:
+                    print(f'{yrly_investment_reqd} < highest yearly investment of {max_yrs_investment}')
+                    start_yr = last_goal["date"].year
+                    end_yr = curr_goal["date"].year
+                    monthly = round(yrly_investment_reqd/12, 2)
+                    for j in range(start_yr, end_yr+1):
+                        months = 12
+                        if j == today.year:
+                            months = 12 - today.month
+                        elif j == curr_goal['date'].year:
+                            months = curr_goal['date'].month+1
+                        goal_yrly_inv[curr_goal['id']][j] = round(goal_yrly_inv[curr_goal['id']].get(j, 0) + months*monthly, 2)
+                    goal_monthly_inv[curr_goal['id']] = goal_monthly_data(last_goal["date"], curr_goal['date'], monthly)
+            else:
+                print('have less than a year for next goal')
+                yrly_investment_reqd = int(get_required_yrly_investment(0,roi, curr_goal["date"], curr_goal["target"]))
+                monthly = round(yrly_investment_reqd/12, 2)
+                for yr in range(today.year, curr_goal['date'].year+1):
+                    months = 12
+                    if yr == today.year:
+                        months = 12 - today.month
+                    elif yr == curr_goal['date'].year:
+                        months = curr_goal['date'].month+1
+                    goal_yrly_inv[curr_goal['id']][yr] = round(goal_yrly_inv[curr_goal['id']].get(yr, 0) + months*monthly, 2)
+                goal_monthly_inv[curr_goal['id']] = goal_monthly_data(today, curr_goal['date'], monthly)
+
+        yrly_total = dict()
+        for _,v in goal_yrly_inv.items():
+            for yr,amt in v.items():
+                yrly_total[yr] = yrly_total.get(yr, 0) + amt
+        max_yr = None
+        for yr,v in yrly_total.items():
+            if v > max_yrs_investment:
+                max_yrs_investment = v
+                max_yr = yr
+        print(f"Goal {curr_goal['id']} {goal_yrly_inv[curr_goal['id']]}")
+        print(f'after {i} goals max_yrs_investment: {max_yrs_investment} for year {max_yr}')
+
+    for k,v in goal_yrly_inv.items():
+        print(f'Goal {k}, {v}')
+    yrly_total = dict()
+    for _,v in goal_yrly_inv.items():
+        for yr,amt in v.items():
+            yrly_total[yr] = yrly_total.get(yr, 0) + amt
+    total = 0
+    for yr,v in yrly_total.items():
+        print(f'{yr}: {v}')
+        total += v
+    print(f'total: {total}')
+    return goal_yrly_inv, goal_monthly_inv, yrly_total
 
 class GoalDetailView(DetailView):
     template_name = 'goals/goal_detail.html'

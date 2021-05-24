@@ -1,0 +1,163 @@
+{% extends 'base.html' %} 
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="#">Goals</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %}
+    <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add Goal" style="font-size: 1.2em;"></i></a>
+    <a href="create-retirement" style="padding-left:15px;"><i class="fas fa-seedling" aria-hidden="true" title="Add Retirement Goal" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-borderless">
+    <tr>
+      <td><ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link" href="../">Goals List</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Insights</a>
+        </li>
+      </ul></td>
+    </tr>
+  </table>
+  <br>
+  <table class="table table-borderless table-condensed" style="width:30%">
+    <tr>
+      <th>Target</th>
+      <td>{{target}}</td>
+      </tr>
+    <tr>
+      <th>Achieved</th>
+      <td>{{achieved}}</td>
+      <td>{{achieve_per}} %</td>
+    </tr>
+    <tr>
+      <th>Remaining</th>
+      <td>{{remaining}}</td>
+      <td>{{remaining_per}} %</td>
+    </tr>
+  </table>
+  <br>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-9 col-md-6 col-lg-5'>
+        <div class="form-group row">
+          <label for="fd_prin" class="col-sm-3 col-form-label">Expected Return</label>
+          <div class="col-sm-7">
+              <div class="md-form mt-0">
+                  <input type="number" id="id_exp_ret" name="exp_ret" value="{{exp_ret}}" step="1"> 
+                  <button type="submit" class="btn btn-primary" id="calculate" name="calculate">Calculate</button>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <!--table class="table table-borderless"  style="width:30%">
+    <th colspan=5 style="text-align:center;">Amount to invest @12% expected growth</th>
+  {% for key, value in yrly_invest_12.items %}
+    {% if forloop.counter0|divisibleby:"5" %}
+      {% if forloop.counter0 != 0 %}
+        </tr>
+      {% endif %}
+      <tr>
+    {% endif %}
+      <td>
+        <table class="table table-bordered">
+          <tr style="background-color:green"><td>{{key}}</td></tr>
+          <tr><td>{{value}}</td></tr>
+        </table>
+      </td>
+  {% endfor %}
+  {% if yrly_invest_12|length > 0 %}
+    {% if yrly_invest_12|length|divisibleby:"5" %}
+    {% else %}
+      </tr>
+    {% endif %}
+  {% endif %}
+  </table>
+  <br-->
+  <!--table class="table table-borderless" style="width:30%">
+    <th colspan=5 style="text-align:center;">Amount to invest @8% expected growth</th>
+
+  {% for key, value in yrly_invest_8.items %}
+    {% if forloop.counter0|divisibleby:"5" %}
+      {% if forloop.counter0 != 0 %}
+        </tr>
+      {% endif %}
+      <tr>
+    {% endif %}
+      <td>
+        <table class="table table-bordered">
+          <tr style="background-color:green"><td>{{key}}</td></tr>
+          <tr><td>{{value}}</td></tr>
+        </table>
+      </td>
+  {% endfor %}
+  {% if yrly_invest_8|length > 0 %}
+    {% if yrly_invest_8|length|divisibleby:"5" %}
+    {% else %}
+      </tr>
+    {% endif %}
+  {% endif %}
+  </table-->
+  <table class="table table-bordered" id="table_goal_yrly_inv"></table><br>
+
+  <div style="width:100%;height:80vh;">
+    <canvas id="fv_chart"></canvas>
+  </div>
+{% endblock %}
+
+<script>
+  {% block jquery %}
+  var chartdata = {{chart_data|safe}};
+  setProgressChart(chartdata);
+  document.getElementById('table_goal_yrly_inv').innerHTML = '{{table_goal_yrly_inv|safe}}';
+  $('#table_goal_yrly_inv').DataTable({});
+
+
+  function setProgressChart(chartdata) {
+      var ctx = document.getElementById("fv_chart");
+      var config = {
+        type:    'line',
+        data:    {
+          datasets: chartdata
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title:      {
+            display: true,
+            text:    "Future Value Progression"
+          },
+          scales:     {
+            xAxes: [{
+              type:       "time",
+              time:       {
+                format: 'YYYY-MM-DD',
+                tooltipFormat: 'll'
+              },
+              scaleLabel: {
+                display:     true,
+                labelString: 'Date'
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display:     true,
+                labelString: 'Amount'
+              }
+            }]
+          }
+        }
+      };
+      var myChart = new Chart(ctx,config);
+    }
+  {% endblock jquery %}
+</script>

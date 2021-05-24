@@ -15,6 +15,16 @@
 {% block content %}
   <table class="table table-borderless">
     <tr>
+      <td><ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Goals List</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="insights">Insights</a>
+        </li>
+      </ul></td>
+    </tr>
+    <tr>
       <td style="text-align:right"><b># of goals:</b> {{total_goals}} &nbsp;&nbsp;&nbsp;<b>Target:</b> {{target}} &nbsp;&nbsp;&nbsp;<b>Achieved:</b> {{achieved}} ({{ach_per}}%)&nbsp;&nbsp;&nbsp;<b>Unallocated:</b> {{unalloc}}
       </tr>
     </table>
@@ -25,7 +35,8 @@
         <th scope="col">Name</th>
         <th scope="col">Start Date</th>
         <th scope="col">Time Period</th>
-        <th scope="col">Final Value</th>
+        <th scope="col">End Date</th>
+        <th scope="col">Target Value</th>
         <th scope="col">User</th>
         <th scope="col">Notes</th>
         <th scope="col"></th>
@@ -37,16 +48,17 @@
         <td>{{ forloop.counter }}</td>
 
         <td>
-          <a href="{{ instance.get_absolute_url }}">{{ instance.name }}</a>
+          <a href="{% url 'goals:goal-detail' instance.id %}">{{ instance.name }}</a>
         </td>
         <td>{{ instance.start_date }}</td>
         <td>{{ instance.time_period }}</td>
+        <td>{{ instance.end_date }}</td>
         <td>{{ instance.final_val }}</td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ instance.notes }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{% url 'goals:goal-delete' instance.id %}"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
+          <a href="{% url 'goals:goal-update' instance.id %}" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
         </td>
       </tr>
       {% endfor %}
@@ -56,6 +68,11 @@
 
 <script>
   {% block jquery %}
-  $('#goal-table').DataTable();
+  $('#goal-table').DataTable({
+    "columnDefs": [
+      { "type": "date", "targets": [2, 4] }
+    ],
+    "order": [[ 4, "asc" ]]
+  });
   {% endblock jquery %}
 </script>

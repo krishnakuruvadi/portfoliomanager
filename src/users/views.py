@@ -45,10 +45,11 @@ def add_user(request):
     template = 'users/add_user.html'
     if request.method == 'POST':
         name = request.POST['name']
+        short_name = request.POST['short_name']
         dob = get_date_or_none_from_string(request.POST['dob'])
         email = request.POST['email']
         notes = request.POST['notes']
-        User.objects.create(name=name, dob=dob, notes=notes, email=email)
+        User.objects.create(name=name, dob=dob, notes=notes, email=email, short_name=short_name)
     context = {'curr_module_id': 'id_user_module'}
     return render(request, template, context=context)
 
@@ -58,12 +59,16 @@ def update_user(request, id):
         user_obj = User.objects.get(id=id)
         if request.method == 'POST':
             user_obj.name = request.POST['name']
+            user_obj.short_name = request.POST['short_name']
             user_obj.email = request.POST['email']
             user_obj.dob = request.POST['dob']
             user_obj.notes = request.POST['notes']
             user_obj.save()
         else:
-            context = {'curr_module_id': 'id_user_module', 'name': user_obj.name, 'email':user_obj.email, 'dob':user_obj.dob.strftime("%Y-%m-%d"), 'notes':user_obj.notes}
+            short_name = user_obj.short_name
+            if not short_name:
+                short_name = ''
+            context = {'curr_module_id': 'id_user_module', 'name': user_obj.name, 'short_name': short_name, 'email':user_obj.email, 'dob':user_obj.dob.strftime("%Y-%m-%d"), 'notes':user_obj.notes}
             return render(request, template, context=context)
         return HttpResponseRedirect("../")
     except User.DoesNotExist:

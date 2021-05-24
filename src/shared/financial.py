@@ -96,6 +96,15 @@ def get_required_xirr(initial_amt, yrly_investment, target_date, target_amt):
     cash_flows.append((target_date, target_amt))
     return round(xirr(cash_flows)*100, 2)
 
+'''
+input:
+  initial_amt: start at this amount
+  xirr: rate at which amount will grow
+  target_date: date by which we need to reach target
+  target_amt: target amount to reach
+returns:
+  yearly investment required to reach target
+'''
 def get_required_yrly_investment(initial_amt, xirr, target_date, target_amt):
     target_amt = float(target_amt)
     rd = relativedelta(target_date, datetime.date.today())
@@ -126,6 +135,15 @@ def get_required_yrly_investment(initial_amt, xirr, target_date, target_amt):
             i = i+1
     return round(yrly_investment*12, 2)
 
+'''
+input:
+  rd_prin: per month contrib
+  rd_compound: 'rd_compound_qtr' or 'rd_compound_half' or 'rd_compound_yearly'. Default is 'rd_compound_yearly'
+  rd_time: time period left in months
+  rd_roi: rate of interest
+returns:
+  final amount of the initial investment
+'''
 def rd_calc_final_val(rd_prin, rd_time, rd_roi, rd_compound):
     n = 1
     every = 12
@@ -161,7 +179,13 @@ input:
 returns:
   final amount of the initial investment
 '''
-def get_fd_final_val(fd_prin, fd_compound, fd_time, fd_roi):
+def get_fd_final_val(fd_prin, fd_compound, fd_time, fd_roi, print_logs=False):
+    if fd_prin == 0:
+        return 0
+    if fd_time == 0:
+        return fd_prin
+    if fd_time < 0 :
+        raise ValueError('fd_time cannot be less than 0')
     n = 1
     if fd_compound == 'fd_compound_qtr':
         n = 4
@@ -170,7 +194,52 @@ def get_fd_final_val(fd_prin, fd_compound, fd_time, fd_roi):
     fd_time = float(fd_time)
     fd_roi = float(fd_roi)
     val = fd_prin * (((1 + (fd_roi/(100.0 * n))) ** (n*(fd_time/12))))
+    if print_logs:
+        print(f'{fd_prin} compounded {fd_compound} @ {fd_roi}% for {fd_time} months = {val}')
     return val
+
+def get_fv_from_cashflows(cash_flows, roi, debug=False):
+    total = 0
+    #last_date = cash_flows[len(cash_flows)-1][0]
+    next_sell_dt = None
+    fvs = list()
+    if debug:
+        print(f'cash_flows[0] is {cash_flows[0]}')
+    for i in range(len(cash_flows)):            
+        if not next_sell_dt:
+            for j in range (i, len(cash_flows)):
+                if cash_flows[j][1] > 0:
+                    next_sell_dt = cash_flows[j][0]
+                    break
+            if total > 0:
+                d = relativedelta(next_sell_dt, cash_flows[i][0])
+                months = d.months + d.years*12
+                if debug:
+                    print(f'Before: cash_flows[i][0] {cash_flows[i][0]} total {total} next_sell_dt {next_sell_dt}')
+                total = get_fd_final_val(total, 'fd_compound_yearly', months, roi, True)
+                if debug:
+                    print(f'After: cash_flows[i][0] {cash_flows[i][0]} total {total} next_sell_dt {next_sell_dt}')
+            else:
+                if debug:
+                    print(f'Else: cash_flows[i][0] {cash_flows[i][0]} total {total} next_sell_dt {next_sell_dt}')
+
+        if cash_flows[i][1] > 0:
+            if debug:
+                print(f'Removing {cash_flows[i][1]} from {total} on {cash_flows[i][0]} = {total-cash_flows[i][1]}')
+            total -= cash_flows[i][1]
+            next_sell_dt = None
+        else:
+            if cash_flows[i][1] == 0:
+                continue
+            d = relativedelta(next_sell_dt, cash_flows[i][0])
+            months = d.months + d.years*12
+            total += get_fd_final_val(-1*cash_flows[i][1], 'fd_compound_yearly', months, roi, False)
+            if debug:
+                print(f'total {total} cf {cash_flows[i][1]} months {months} roi {roi}')
+        fvs.append({'x':cash_flows[i][0].strftime('%Y-%m-%d'), 'y':int(total)})
+    if debug:
+        print(f'total for goal {total}')
+    return total, fvs
 
 '''
 initial_amt = 0

@@ -206,27 +206,30 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
     for espp_obj in Espp.objects.filter(goal=goal_id):
         add_or_create(espp_obj.purchase_date.year, 'ESPP', contrib, deduct, total, espp_obj.total_purchase_price, 0, 0)
         end_year = datetime.datetime.now().year
-        if espp_obj.sell_date:
-            end_year = espp_obj.sell_date.year
-            add_or_create(espp_obj.sell_date.year, 'ESPP', contrib, deduct, total, 0, -1*espp_obj.total_sell_price, 0)
-            cash_flows.append((espp_obj.sell_date, float(espp_obj.total_sell_price)))
-        else:
-            cash_flows.append((espp_obj.purchase_date, -1*float(espp_obj.total_purchase_price)))
+        for st in EsppSellTransactions.objects.filter(espp=espp_obj):
+            add_or_create(st.trans_date.year, 'ESPP', contrib, deduct, total, 0, -1*st.trans_price, 0)
+            cash_flows.append((st.trans_date, float(st.trans_price)))
+        cash_flows.append((espp_obj.purchase_date, -1*float(espp_obj.total_purchase_price)))
         for i in range (espp_obj.purchase_date.year, end_year+1):
             year_end_value = 0
             end_date = datetime.datetime.now()
             if i != datetime.datetime.now().year:
                 end_date = datetime.datetime.strptime(str(i)+'-12-31', '%Y-%m-%d').date()
-            year_end_value_vals = get_historical_stock_price_based_on_symbol(espp_obj.symbol, espp_obj.exchange, end_date+relativedelta(days=-5), end_date)
-            if year_end_value_vals:
-                conv_rate = 1
-                if espp_obj.exchange == 'NASDAQ' or espp_obj.exchange == 'NYSE':
-                    conv_val = get_conversion_rate('USD', 'INR', end_date)
-                    if conv_val:
-                        conv_rate = conv_val
-                for k,v in year_end_value_vals.items():
-                    year_end_value = float(v)*float(conv_rate)*float(espp_obj.shares_purchased)
-                    break
+            units = espp_obj.shares_purchased
+            for st in EsppSellTransactions.objects.filter(espp=espp_obj, trans_date__lte=end_date):
+                units -= st.units
+            
+            if units > 0:
+                year_end_value_vals = get_historical_stock_price_based_on_symbol(espp_obj.symbol, espp_obj.exchange, end_date+relativedelta(days=-5), end_date)
+                if year_end_value_vals:
+                    conv_rate = 1
+                    if espp_obj.exchange == 'NASDAQ' or espp_obj.exchange == 'NYSE':
+                        conv_val = get_conversion_rate('USD', 'INR', end_date)
+                        if conv_val:
+                            conv_rate = conv_val
+                    for k,v in year_end_value_vals.items():
+                        year_end_value = float(v)*float(conv_rate)*float(units)
+                        break
             print(f'espp year_end_value {i} {year_end_value}')
 
             add_or_create(i, 'ESPP', contrib, deduct, total, 0, 0, year_end_value)

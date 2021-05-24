@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (
-    GoalListView,
+    goal_list,
     GoalDetailView,
     GoalDeleteView,
     add_goal,
@@ -10,15 +10,17 @@ from .views import (
     GoalNames,
     ChartData,
     CurrentGoals,
-    GoalProgressData
+    GoalProgressData,
+    goals_insight
 )
 
 app_name = 'goals'
 
 urlpatterns = [
-    path('', GoalListView.as_view(), name='goal-list'),
+    path('', goal_list, name='goal-list'),
     path('create/', add_goal, name='goal-add'),
     path('create-retirement/', add_retirement_goal, name='goal-add-retirement'),
+    path('insights/', goals_insight, name='goals-insight'),
     path('<id>/', GoalDetailView.as_view(), name='goal-detail'),
     path('<id>/delete/', GoalDeleteView.as_view(), name='goal-delete'),
     path('<id>/update', update_goal, name='goal-update'),

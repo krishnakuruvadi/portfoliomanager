@@ -17,6 +17,7 @@
       <tr>
         <th scope="col">#</th>
         <th scope="col">Name</th>
+        <th scope="col">Short Name</th>
         <th scope="col">Email</th>
         <th scope="col">DOB</th>
         <th scope="col">Notes</th>
@@ -31,6 +32,7 @@
         <td>
           <a href="{{ instance.get_absolute_url }}">{{ instance.name }}</a>
         </td>
+        <td>{{ instance.short_name }}</td>
         <td>{{ instance.email }}</td>
         <td>{{ instance.dob }}</td>
         <td>{{ instance.notes }}</td>

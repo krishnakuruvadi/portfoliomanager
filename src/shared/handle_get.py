@@ -72,6 +72,15 @@ def get_user_name_from_id(id):
     except Exception as e:
         return None
 
+def get_user_short_name_or_name_from_id(id):
+    try:
+        user_obj = User.objects.get(id=id)
+        if user_obj.short_name and user_obj.short_name != '':
+            return user_obj.short_name
+        return user_obj.name
+    except Exception as e:
+        return None
+
 def get_day_range_of_month(year, month):
     last_day_of_month = calendar.monthrange(2019,8)[1]
     first_day = datetime.datetime(year, month, 1)
