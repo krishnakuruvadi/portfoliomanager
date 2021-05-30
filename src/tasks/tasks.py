@@ -39,6 +39,7 @@ from django.db import IntegrityError
 from common.helper import get_mf_passwords
 from .tasks_helper import *
 from common.nse import NSE
+from rsu.rsu_helper import update_rsu_latest_vals
 
 
 def set_task_state(name, state):
@@ -138,6 +139,13 @@ def update_espp():
         print("looping through espp " + str(espp_obj.id))
         update_latest_vals(espp_obj)
     set_task_state('update_espp', TaskState.Successful)
+
+@db_periodic_task(crontab(minute='20', hour='*/2'))
+def update_rsu():
+    print('Updating RSU')
+    set_task_state('update_rsu', TaskState.Running)
+    update_rsu_latest_vals()
+    set_task_state('update_rsu', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='0', hour='10'))
 def update_mf_schemes():

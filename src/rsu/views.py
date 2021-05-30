@@ -9,7 +9,7 @@ from django.views.generic import (
     DeleteView
 )
 from .forms import RsuModelForm
-from .models import RSUAward, RestrictedStockUnits
+from .models import RSUAward, RestrictedStockUnits, RSUSellTransactions
 from .rsu_helper import update_latest_vals, get_rsu_award_latest_vals
 from django.http import HttpResponseRedirect
 from shared.handle_get import *
@@ -88,17 +88,6 @@ class RsuDeleteView(DeleteView):
     def get_success_url(self):
         return reverse('rsus:rsu-list')
 
-class RsuVestDeleteView(DeleteView):
-    template_name = 'rsus/rsu_delete_vest.html'
-    
-    def get_object(self):
-        id_ = self.kwargs.get("vestid")
-        print('deleting RestrictedStockUnits with id', id_)
-        return get_object_or_404(RestrictedStockUnits, id=id_)
-
-    def get_success_url(self):
-        return reverse('rsus:rsu-vest-list')
-
 class RsuDetailView(DetailView):
     template_name = 'rsus/rsu_detail.html'
     #queryset = Ppf.objects.all()
@@ -116,7 +105,6 @@ class RsuDetailView(DetailView):
 
 class RsuVestDetailView(DetailView):
     template_name = 'rsus/rsu_vest_detail.html'
-    #queryset = Ppf.objects.all()
 
     def get_object(self):
         id_ = self.kwargs.get("id")
@@ -124,6 +112,7 @@ class RsuVestDetailView(DetailView):
     
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
+        data['sell_trans'] = RSUSellTransactions.objects.filter(rsu_vest=data['object'])
         print(data)
         return data
 
@@ -161,24 +150,98 @@ def show_vest_list(request,id):
         entry['shares_vested'] = rsu_obj.shares_vested
         entry['shares_for_sale'] = rsu_obj.shares_for_sale
         entry['total_aquisition_price'] = rsu_obj.total_aquisition_price
-        entry['sell_date'] = rsu_obj.sell_date
-        entry['sell_price'] = rsu_obj.sell_price
-        entry['sell_conversion_rate'] = rsu_obj.sell_conversion_rate
-        entry['total_sell_price'] = rsu_obj.total_sell_price
         entry['latest_conversion_rate'] = rsu_obj.latest_conversion_rate
         entry['latest_price'] = rsu_obj.latest_price
         entry['latest_value'] = rsu_obj.latest_value
         entry['as_on_date'] = rsu_obj.as_on_date
+        entry['realised_gain'] = rsu_obj.realised_gain
+        entry['unrealised_gain'] = rsu_obj.unrealised_gain
         entry['notes'] = rsu_obj.notes
+        entry['unsold_shares'] = rsu_obj.unsold_shares
         vest_list.append(entry)
      
     context = {'vest_list':vest_list, 'award_id':rsu_award.award_id, 'symbol':rsu_award.symbol, 'award_date':rsu_award.award_date}
     
     return render(request, template, context)
 
+def show_vest_sell_trans(request, id, vestid):
+    template = 'rsus/rsu_vest_sell_trans.html'
+    print(f'id {id} vest_id {vestid}')
+    try:
+        rsu_vest = RestrictedStockUnits.objects.get(id=vestid)
+        vest_sell_list = list()
+        for st in RSUSellTransactions.objects.filter(rsu_vest=rsu_vest):
+            vs = {
+                'id':st.id,
+                'sell_date':st.trans_date,
+                'units':st.units,
+                'sell_price':st.price,
+                'sell_conversion_rate':st.conversion_rate,
+                'total_sell_price':st.trans_price,
+                'realised_gain':st.realised_gain,
+                'notes':st.notes
+            }
+            vest_sell_list.append(vs)
+        context = {'vest_sell_list':vest_sell_list, 'vest_date':rsu_vest.vest_date, 'award_date':rsu_vest.award.award_date, 'symbol':rsu_vest.award.symbol, 'award_id':rsu_vest.award.award_id}
+        return render(request, template, context)
+    except Exception as ex:
+        print(f'exception getting sell transactions  {ex}')
+        return HttpResponseRedirect(reverse('rsus:rsu-list'))
+
+def delete_vest_sell_trans(request, id, vestid, selltransid):
+    try:
+        trans = RSUSellTransactions.objects.get(id=selltransid)
+        trans.delete()
+    except RSUSellTransactions.DoesNotExist:
+        print(f'{selltransid} RSUSellTransaction does not exist')
+    return HttpResponseRedirect(reverse('rsus:rsu-sell-vest',kwargs={'id':id,'vestid':vestid}))
+
+def delete_vest(request, id, vestid):
+    try:
+        vest = RestrictedStockUnits.objects.get(id=vestid)
+        vest.delete()
+    except RestrictedStockUnits.DoesNotExist:
+        print(f'{vestid} RestrictedStockUnits does not exist')
+    return HttpResponseRedirect(reverse('rsus:rsu-vest-list',kwargs={'id':id}))
+
+def add_vest_sell_trans(request, id, vestid):
+    template = 'rsus/rsu_add_sell_trans.html'
+    print(f'id {id} vest_id {vestid}')
+    try:
+        award_obj = get_object_or_404(RSUAward, id=id)
+        rsu_vest = RestrictedStockUnits.objects.get(id=vestid)
+
+        if request.method == 'POST':
+            sell_date = get_date_or_none_from_string(request.POST.get('sell_date'))
+            units = get_float_or_none_from_string(request.POST.get('units'))
+            sell_price = get_float_or_none_from_string(request.POST.get('sell_price'))
+            sell_conv_rate = get_float_or_none_from_string(request.POST.get('sell_conversion_rate'))
+            total_sell_price = get_float_or_none_from_string(request.POST.get('total_sell_price'))
+            notes = request.POST.get('notes')
+            st = RSUSellTransactions.objects.create(
+                rsu_vest=rsu_vest,
+                trans_date=sell_date,
+                price=sell_price,
+                units=units,
+                conversion_rate=sell_conv_rate,
+                trans_price=total_sell_price,
+                notes=notes
+            )
+            st.realised_gain = float(st.trans_price) - float(rsu_vest.aquisition_price)*float(st.units)*float(rsu_vest.conversion_rate)
+            st.save()
+            return HttpResponseRedirect(reverse('rsus:rsu-sell-vest',kwargs={'id':id,'vestid':vestid}))
+        else:
+            context = {'award_date':award_obj.award_date, 'symbol':award_obj.symbol, 'award_id':award_obj.award_id,
+             'vest_date':rsu_vest.vest_date, 'unsold_shares':rsu_vest.unsold_shares, 'aquisition_price':rsu_vest.aquisition_price, 'exchange':award_obj.exchange}
+            return render(request, template, context)
+    except Exception as ex:
+        print(f'exception adding sell transaction {ex}')
+        return HttpResponseRedirect(reverse('rsus:rsu-list'))
+
+
 def add_vest(request,id):
     template = 'rsus/rsu_add_vest.html'
-    rsu_obj = get_object_or_404(RSUAward, id=id)
+    award_obj = get_object_or_404(RSUAward, id=id)
     
     if request.method == 'POST':
         print(request.POST)
@@ -189,26 +252,20 @@ def add_vest(request,id):
             shares_vested = get_int_or_none_from_string(request.POST.get('shares_vested'))
             shares_for_sale = get_int_or_none_from_string(request.POST.get('shares_for_sale'))
             total_aquisition_price = get_float_or_none_from_string(request.POST.get('total_aquisition_price'))
-            sell_date = get_datetime_or_none_from_string(request.POST.get('sell_date'))
-            sell_price = get_float_or_none_from_string(request.POST.get('sell_price'))
-            sell_conversion_rate = get_float_or_none_from_string(request.POST.get('sell_conversion_rate'))
-            total_sell_price = get_float_or_none_from_string(request.POST.get('total_sell_price'))
             notes = request.POST.get('notes')
-            rsu = RestrictedStockUnits.objects.create(award=rsu_obj,
+            rsu = RestrictedStockUnits.objects.create(award=award_obj,
                                                       vest_date=vest_date,
                                                       fmv=fmv,
                                                       aquisition_price=aquisition_price,
                                                       shares_vested=shares_vested,
                                                       shares_for_sale=shares_for_sale,
+                                                      unsold_shares=shares_for_sale,
                                                       total_aquisition_price=total_aquisition_price,
-                                                      sell_date=sell_date,
-                                                      sell_price=sell_price,
-                                                      sell_conversion_rate=sell_conversion_rate,
                                                       notes=notes)
             rsu.save()
             return redirect('rsus:rsu-vest-list', id=id)
 
-    context = {'award_id':rsu_obj.award_id, 'symbol':rsu_obj.symbol, 'award_date':rsu_obj.award_date}
+    context = {'award_id':award_obj.award_id, 'exchange':award_obj.exchange, 'symbol':award_obj.symbol, 'award_date':award_obj.award_date}
     
     return render(request, template, context)
 
@@ -225,30 +282,26 @@ def update_vest(request,id,vestid):
             rsu_obj.aquisition_price = get_float_or_none_from_string(request.POST.get('aquisition_price'))
             rsu_obj.shares_vested = get_int_or_none_from_string(request.POST.get('shares_vested'))
             rsu_obj.shares_for_sale = get_int_or_none_from_string(request.POST.get('shares_for_sale'))
+            rsu_obj.conversion_rate = get_float_or_none_from_string(request.POST.get('conversion_rate'))
             rsu_obj.total_aquisition_price = get_float_or_none_from_string(request.POST.get('total_aquisition_price'))
-            rsu_obj.sell_date = get_datetime_or_none_from_string(request.POST.get('sell_date'))
-            rsu_obj.sell_price = get_float_or_none_from_string(request.POST.get('sell_price'))
-            rsu_obj.sell_conversion_rate = get_float_or_none_from_string(request.POST.get('sell_conversion_rate'))
-            rsu_obj.total_sell_price = get_float_or_none_from_string(request.POST.get('total_sell_price'))
             rsu_obj.notes = request.POST.get('notes')
+            rsu_obj.unsold_shares = rsu_obj.shares_for_sale
             rsu_obj.save()
             return redirect('rsus:rsu-vest-list', id=id)
     else:
-        context = {'award_id':award_obj.award_id, 'symbol':award_obj.symbol, 'award_date':award_obj.award_date}
+        context = {'award_id':award_obj.award_id, 'exchange':award_obj.exchange, 'symbol':award_obj.symbol, 'award_date':award_obj.award_date}
         context['vest_date'] = convert_date_to_string(rsu_obj.vest_date)
         context['fmv'] = rsu_obj.fmv
         context['aquisition_price'] = rsu_obj.aquisition_price
         context['shares_vested'] = rsu_obj.shares_vested
         context['shares_for_sale'] = rsu_obj.shares_for_sale
         context['total_aquisition_price'] = rsu_obj.total_aquisition_price
-        if rsu_obj.sell_date:
-            context['sell_date'] = convert_date_to_string(rsu_obj.sell_date)
-            context['sell_price'] = rsu_obj.sell_price
-            context['sell_conversion_rate'] = rsu_obj.sell_conversion_rate
+        context['conversion_rate'] = rsu_obj.conversion_rate
         context['notes'] = rsu_obj.notes
+        print(context)
         return render(request, template, context)
 
-    context = {'award_id':award_obj.award_id, 'symbol':award_obj.symbol, 'award_date':award_obj.award_date}
+    context = {'award_id':award_obj.award_id, 'exchange':award_obj.exchange, 'symbol':award_obj.symbol, 'award_date':award_obj.award_date}
     
     return render(request, template, context)
 

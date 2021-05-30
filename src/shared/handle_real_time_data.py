@@ -88,7 +88,7 @@ def get_forex_rate(date, from_cur, to_cur):
             # https://api.ratesapi.io/api/2020-01-31?base=USD&symbols=INR
             #url = "https://api.ratesapi.io/api/" + date.strftime('%Y-%m-%d') + "?base=" + from_cur + "&symbols=" + to_cur
             url = 'https://api.exchangerate.host/' + date.strftime('%Y-%m-%d') + "?base=" + from_cur + "&symbols=" + to_cur
-            response = requests.get(url) 
+            response = requests.get(url, timeout=15) 
             # print response 
             print(response) 
             # print json content 

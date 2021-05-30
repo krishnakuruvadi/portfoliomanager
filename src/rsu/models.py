@@ -32,18 +32,31 @@ class RestrictedStockUnits(models.Model):
     fmv = models.DecimalField(_('FMV'), max_digits=20, decimal_places=2, null=False)
     aquisition_price = models.DecimalField(_('Aquisition Price'), max_digits=20, decimal_places=2, null=False)
     shares_vested = models.DecimalField(_('Vested'), max_digits=20, decimal_places=0, null=False)
-    shares_for_sale = models.DecimalField(_('Available For Sell'), max_digits=20, decimal_places=0, null=False)
+    shares_for_sale = models.DecimalField(_('Available For Sell At Vest'), max_digits=20, decimal_places=0, null=False)
+    conversion_rate =  models.DecimalField(_('Conversion Price'), max_digits=20, decimal_places=2, default=1)
     total_aquisition_price = models.DecimalField(_('Total Aquisition Price'), max_digits=20, decimal_places=2, null=False)
-    sell_date = models.DateField(_('Sell Date'), blank=True, null=True)
-    sell_price = models.DecimalField(_('Sell Price'), max_digits=20, decimal_places=2, null=True, blank=True)
-    sell_conversion_rate = models.DecimalField(_('Sell Conversion Rate'), max_digits=20, decimal_places=2, null=True, blank=True)
-    total_sell_price = models.DecimalField(_('Total Sell Price'), max_digits=20, decimal_places=2, null=True, blank=True)
     notes = models.CharField(max_length=80, null=True, blank=True)
-
-    latest_conversion_rate =  models.DecimalField(_('Latest Conversion Price'), max_digits=20, decimal_places=2, null=True, blank=True)
+    unsold_shares = models.DecimalField(_('Unsold Quantity'), max_digits=20, decimal_places=0, default=0)
+    latest_conversion_rate =  models.DecimalField(_('Latest Conversion Price'), max_digits=20, decimal_places=2, default=1)
     latest_price = models.DecimalField(_('Latest Price'), max_digits=20, decimal_places=2, null=True, blank=True)
     latest_value = models.DecimalField(_('Latest Value'), max_digits=20, decimal_places=2, null=True, blank=True)
     as_on_date = models.DateField(_('As On Date'), blank=True, null=True)
-    
+    realised_gain = models.DecimalField(_('Realised Gain'), max_digits=20, decimal_places=2, default=0)
+    unrealised_gain = models.DecimalField(_('Unrealised Gain'), max_digits=20, decimal_places=2, default=0)
+    tax_at_vest = models.DecimalField(_('Tax at Vest'), max_digits=20, decimal_places=2, default=0)
+
+
     def get_absolute_url(self):
         return reverse("rsus:rsu-vest-detail", kwargs={'id': self.id})
+
+class RSUSellTransactions(models.Model):
+    class Meta:
+        unique_together = (('rsu_vest', 'trans_date'))
+    rsu_vest = models.ForeignKey('RestrictedStockUnits', on_delete=models.CASCADE)
+    trans_date = models.DateField(_('Transaction Date'), null=False, blank=False)
+    price = models.DecimalField(_('Price'), max_digits=20, decimal_places=4, null=False, blank=False)
+    units = models.DecimalField(max_digits=20, decimal_places=4, null=False, blank=False)
+    conversion_rate = models.DecimalField(_('Conversion Rate'), max_digits=20, decimal_places=2, default=1)
+    trans_price = models.DecimalField(_('Total Price'), max_digits=20, decimal_places=4, default=0)
+    realised_gain = models.DecimalField(_('Realised Gain'), max_digits=20, decimal_places=2, default=0)
+    notes = models.CharField(max_length=80, null=True, blank=True)

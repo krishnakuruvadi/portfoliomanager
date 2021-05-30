@@ -52,14 +52,14 @@ class NSEHistorical:
 
     def pull_nse(self, nse_url):
         headers = self.nse_headers()
-        r = requests.get(nse_url, headers=headers)
+        r = requests.get(nse_url, headers=headers, timeout=15)
         full_file_path = self.nse_bhav_copy_file_path()
         with open(full_file_path, 'wb') as f:
             f.write(r.content)
 
     def download_url(self, url, save_path, chunk_size=128):
         print(f'getting url {url}')
-        r = requests.get(url, headers=self.nse_headers(), stream=True)
+        r = requests.get(url, headers=self.nse_headers(), stream=True, timeout=15)
         if r.status_code == 200:
             with open(save_path, 'wb') as fd:
                 for chunk in r.iter_content(chunk_size=chunk_size):

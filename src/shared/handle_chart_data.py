@@ -470,9 +470,8 @@ def get_rsu_amount_for_user(user_id):
     total_rsu = 0
     for award_obj in award_objs:
         for rsu_obj in RestrictedStockUnits.objects.filter(award=award_obj):
-            if not rsu_obj.total_sell_price:
-                if rsu_obj.latest_value:
-                    total_rsu += rsu_obj.latest_value
+            if rsu_obj.latest_value:
+                total_rsu += rsu_obj.latest_value
     return total_rsu
 
 def get_shares_amount_for_user(user_id):

@@ -33,7 +33,7 @@ def nse_eq_file_path():
 
 def pull_nse():
     headers = nse_headers()
-    r = requests.get(nse_url, headers=headers)
+    r = requests.get(nse_url, headers=headers, timeout=15)
     full_file_path = nse_eq_file_path()
     with open(full_file_path, 'wb') as f:
         f.write(r.content)

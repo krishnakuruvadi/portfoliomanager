@@ -48,7 +48,7 @@ def get_bse_headers():
 
 def download_url(url, save_path, chunk_size=128):
     print(f'getting url {url}')
-    r = requests.get(url, headers=get_bse_headers(), stream=True)
+    r = requests.get(url, headers=get_bse_headers(), stream=True, timeout=15)
     if r.status_code == 200:
         with open(save_path, 'wb') as fd:
             for chunk in r.iter_content(chunk_size=chunk_size):
@@ -94,7 +94,7 @@ def check_bse_valid(symbol, bse_code):
     else:
         return False, None, None
 
-    res = requests.get(url, headers=headers)
+    res = requests.get(url, headers=headers, timeout=15)
     c = res.content
     soup = bs(c, "lxml")
     for span in soup('span'):

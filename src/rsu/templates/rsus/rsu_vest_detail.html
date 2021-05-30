@@ -4,24 +4,43 @@
 
 {% block canvas %}{% endblock canvas %}
 
-{% block viewname %}
-    RSU Vest 
-{% endblock viewname %}
+{% block viewname %} 
+<ul class="breadcrumb">
+  <li><a href="{% url 'rsus:rsu-list' %}">RSU</a></li>
+  <li><a href="#">{{object.award.symbol}}/{{object.award.award_id}}</a></li>
+  <li><a href="#">{{object.vest_date}}</a></li>
+</ul> 
+{% endblock %} 
 
 {% block content %}
-<table class="table">
-    <thead class="thead-dark">
-        <tr>
-            <th scope="col">Vest Date</th>
-            <th scope="col">FMV</th>
-            <th scope="col">Aquisition Price</th>
-        </tr>
-    </thead>
-    <tr>
-        <td>{{object.vest_date}} </td>
-        <td>{{object.fmv}}</td>
-        <td>{{object.aquisition_price}}</td>
-    </tr>
+<table class="table" style="width:50%">
+    <tr><th scope="col">Vest Date</th><td>{{object.vest_date}} </td></tr>
+    <tr><th scope="col">FMV</th><td>{{object.fmv}}</td></tr>
+    <tr><th scope="col">Aquisition Price</th><td>{{object.aquisition_price}}</td></tr>
+    <tr><th scope="col">Shares Vested</th><td>{{object.shares_vested}}</td></tr>
+    <tr><th scope="col">Available For Sell At Vest</th><td>{{object.shares_for_sale}}</td></tr>
+    <tr><th scope="col">Conversion Price at Vest</th><td>{{object.conversion_rate}}</td></tr>
+    <tr><th scope="col">Total Aquisition Price</th><td>{{object.total_aquisition_price}}</td></tr>
+    <tr><th scope="col">Unsold Quantity</th><td>{{object.unsold_shares}}</td></tr>
+    <tr><th scope="col">Latest Conversion Price</th><td>{{object.latest_conversion_rate}}</td></tr>
+    <tr><th scope="col">Latest Price</th><td>{{object.latest_price}}</td></tr>
+    <tr><th scope="col">Latest Value</th><td>{{object.latest_value}}</td></tr>
+    <tr><th scope="col">As on Date</th><td>{{object.as_on_date}}</td></tr>
+    <tr><th scope="col">Realised Gain</th><td>{{object.realised_gain}}</td></tr>
+    <tr><th scope="col">Unrealised Gain</th><td>{{object.unrealised_gain}}</td></tr>
+    <tr><th scope="col">Tax at Vest</th><td>{{object.tax_at_vest}}</td></tr>
+</table>
+<br>
+<table class="table" style="width:50%">
+    {% for instance in sell_trans %}
+    <th>Transaction Date</th><td>{{instance.trans_date}}</td>
+    <th>Price</th><td>{{instance.price}}</td>
+    <th>Units</th><td>{{instance.units}}</td>
+    <th>Conversion Rate</th><td>{{instance.conversion_rate}}</td>
+    <th>Transaction Price</th><td>{{instance.trans_price}}</td>
+    <th>Realised Gain</th><td>{{instance.realised_gain}}</td>
+    <th>Notes</th><td>{{instance.notes}}</td>
+    {% endfor %}
 </table>
 {% endblock content %}
 

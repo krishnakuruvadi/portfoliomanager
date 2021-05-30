@@ -45,7 +45,7 @@ class NSE:
 
     def pull_nse(self):
         headers = self.nse_headers()
-        r = requests.get(self.nse_equity_url, headers=headers)
+        r = requests.get(self.nse_equity_url, headers=headers, timeout=15)
         full_file_path = self.nse_eq_file_path()
         with open(full_file_path, 'wb') as f:
             f.write(r.content)

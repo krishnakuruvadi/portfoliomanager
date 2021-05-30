@@ -42,7 +42,7 @@ class EsppSellTransactions(models.Model):
     class Meta:
         unique_together = (('espp', 'trans_date'))
     espp = models.ForeignKey('Espp', on_delete=models.CASCADE)
-    trans_date = models.DateField(_('Transaction Date'), )
+    trans_date = models.DateField(_('Transaction Date'), null=False, blank=False)
     price = models.DecimalField(_('Price'), max_digits=20, decimal_places=4, null=False, blank=False)
     units = models.DecimalField(max_digits=20, decimal_places=4, null=False, blank=False)
     conversion_rate = models.DecimalField(_('Conversion Rate'), max_digits=20, decimal_places=2, default=1)

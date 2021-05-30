@@ -51,6 +51,9 @@ def get_tasks(request):
         },
         'update_latest_vals_epf_ssy_ppf': {
             'description': 'Update latest values in PPF, EPF, SSY'
+        },
+        'update_rsu': {
+            'description':'Update RSU investment with latest value'
         }
     }
     for task in available_tasks.keys():

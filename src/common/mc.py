@@ -28,7 +28,7 @@ class MoneyControl(object):
     def fetch_tiker_page(self):
         try:
             self.link = SEARCH_URL+ self.ticker
-            r = requests.get(self.link)
+            r = requests.get(self.link, timeout=15)
             if r.status_code==200:
                 print("Fetched page for ticker : "+self.ticker)
                 # Creating a bs4 object to store the contents of the requested page
@@ -54,7 +54,7 @@ class MoneyControl(object):
                         print(f'Unable to find url for {self.exchange} : {self.ticker}')
                         return
                     print(f'fetching {ticker_url}')
-                    r = requests.get(ticker_url)
+                    r = requests.get(ticker_url, timeout=15)
                     if r.status_code==200:
                         print(f'found page')
                         self.ticker_url = r.url
@@ -102,7 +102,7 @@ class MoneyControl(object):
         url_part_2 = url_splits[len(url_splits)-1]
         #https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/yesbank/YB
         splits_url = f'https://www.moneycontrol.com/company-facts/{url_part_1}/splits/{url_part_2}#{url_part_2}'
-        r = requests.get(splits_url)
+        r = requests.get(splits_url, timeout=15)
         if r.status_code==200:
             print(f'found page')
             self.soup = bs4.BeautifulSoup(r.content, 'html.parser')
@@ -135,7 +135,7 @@ class MoneyControl(object):
         url_part_2 = url_splits[len(url_splits)-1]
         #https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/yesbank/YB
         splits_url = f'https://www.moneycontrol.com/company-facts/{url_part_1}/bonus/{url_part_2}#{url_part_2}'
-        r = requests.get(splits_url)
+        r = requests.get(splits_url, timeout=15)
         if r.status_code==200:
             print(f'found page')
             self.soup = bs4.BeautifulSoup(r.content, 'html.parser')
@@ -160,7 +160,7 @@ class MoneyControl(object):
     def __fetch_a_next_page_link(self):
 
         # Fetches the template URL for fetching different announcement pages
-        r = requests.get(self.more_anno_link)
+        r = requests.get(self.more_anno_link, timeout=15)
         announcement_soup = bs4.BeautifulSoup(r.content, 'html.parser')
         # Checking whether the link for the next page is available or not
         if len(announcement_soup.find("div", attrs={"class":"gray2_11"}).find_all("a")) > 0:
@@ -175,7 +175,7 @@ class MoneyControl(object):
             # Clear all the previous data in "a" instance variable
             self.a = []
 
-            r = requests.get(self.template_next_a_page + str(page_no))
+            r = requests.get(self.template_next_a_page + str(page_no), timeout=15)
 
             self.present_a_page = page_no
 
@@ -187,7 +187,7 @@ class MoneyControl(object):
             for x in raw_links:
                 link = PREFIX_URL + x['href']
                 list_of_links.append(link)
-                a = requests.get(PREFIX_URL + x['href'])
+                a = requests.get(PREFIX_URL + x['href'], timeout=15)
                 anno_page = bs4.BeautifulSoup(a.content, "html.parser")
 
                 pdf_link = ""
@@ -222,7 +222,7 @@ class MoneyControl(object):
 
     def has_a(self, link):
         result = False
-        r = requests.get(link)
+        r = requests.get(link, timeout=15)
         soup = bs4.BeautifulSoup(r.content, "html.parser")
         a = soup.find_all("p", attrs={"class":"gL_10"})     # Finding the list of the all the dates available on the page
         if len(a)>0:

@@ -1,0 +1,86 @@
+{% extends 'base.html' %} 
+{% block viewname %} 
+<ul class="breadcrumb">
+  <li><a href="{% url 'rsus:rsu-list' %}">RSU</a></li>
+  <li><a href="../">{{symbol}}/{{award_id}}</a></li>
+  <li><a href="#">{{vest_date}}</a></li>
+</ul> 
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a style="padding-right:20px;" href="sell"><i class="fa fa-plus" aria-hidden="true" title="Add RSU Sell" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+<table class="table">
+  <thead class="thead-dark">
+      <tr>
+          <th scope="col">Award</th>
+          <th scope="col">Company</th>
+          <th scope="col">Award Date</th>
+          <th scope="col">Vest Date</th>
+      </tr>
+  </thead>
+  <tr>
+      <td>{{award_id}} </td>
+      <td>{{symbol}}</td>
+      <td>{{award_date}}</td>
+      <td>{{vest_date}}</th>
+  </tr>
+</table>
+<p></p>
+<p></p>
+  <table class="table table-hover" id="vest-sell-table">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Sell Date</th>
+        <th scope="col">Units</th>
+        <th scope="col">Sell Price</th>
+        <th scope="col">Sell Conversion Rate</th>
+        <th scope="col">Total Sell Price</th>
+        <th scope="col">Realised Gain</th>
+        <th scope="col">Notes</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in vest_sell_list %}
+      <tr>
+        <th scope="row">{{ instance.id }}</th>
+        <td>{{ instance.sell_date }}</td>
+        <td>{{ instance.units }}</td>
+        <td>{{ instance.sell_price }}</td>
+        <td>{{ instance.sell_conversion_rate }}</td>
+        <td>{{ instance.total_sell_price }}</td>
+        <td>{{ instance.realised_gain }}</td>
+        <td>{{ instance.notes }}</td>
+        <td>
+          <a href="delete/{{ instance.id }}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+<script>
+  {% block jquery %}
+  $('#vest-sell-table').DataTable({
+        "columnDefs": [
+            { "type": "num", "targets": [0,2,3,4,5,6] },
+            { "type": "date", "targets": [1] }
+        ],
+        "order": [[ 1, "desc" ]]
+      });
+{% endblock jquery %}
+</script>
+
+{% block javascript %}
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete this sell transaction?');
+    })
+  </script>
+{% endblock javascript %}

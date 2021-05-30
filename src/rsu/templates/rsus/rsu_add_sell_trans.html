@@ -7,8 +7,9 @@
 {% block viewname %}
 <ul class="breadcrumb">
   <li><a href="{% url 'rsus:rsu-list' %}">RSU</a></li>
-  <li><a href="#">{{award_id}}</a></li>
-  <li><a href="#">Add RSU Vest</a></li>
+  <li><a href="#">{{symbol}}/{{award_id}}</a></li>
+  <li><a href="#">{{vest_date}}</a></li>
+  <li><a href="#">Sell RSU</a></li>
 </ul> 
 {% endblock viewname %}
 
@@ -19,12 +20,18 @@
             <th scope="col">Award</th>
             <th scope="col">Company</th>
             <th scope="col">Award Date</th>
+            <th scope="col">Vest Date</th>
+            <th scope="col">Unsold Shares</th>
+            <th scope="col">Aquisition Price</th>
         </tr>
     </thead>
     <tr>
         <td>{{award_id}} </td>
         <td>{{symbol}}</td>
         <td>{{award_date}}</td>
+        <td>{{vest_date}}</th>
+        <td>{{unsold_shares}}</th>
+        <td>{{aquisition_price}}</td>
     </tr>
 </table>
 <p></p>
@@ -32,63 +39,40 @@
 <form method="POST">
     {% csrf_token %}
     <div class="row">
-      <div class='col-sm-7'>
+      <div class='col-sm-6'>
 
         <div class="form-group row">
-          <label for="vest_date" class="col-sm-3 col-form-label">Vest Date</label>
-          <div class="col-sm-3">
-              <div class="md-form mt-0">
-                  <input type="date" id="vest_date" name="vest_date" value="{{vest_date}}">
-              </div>
-          </div>
-          <div class="col-sm-3"></div>
+            <label for="sell_date" class="col-sm-3 col-form-label">Sell Date <span style="color:red;">*</span></label>
+            <div class="col-sm-3">
+                <div class="md-form mt-0">
+                    <input type="date" id="sell_date" name="sell_date" value="{{sell_date}}" required="true">
+                </div>
+            </div>
         </div>
 
         <div class="form-group row">
-          <label for="fmv" class="col-sm-3 col-form-label">FMV</label>
+          <label for="shares_for_sale" class="col-sm-3 col-form-label">Units <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" step="0.01" id="fmv" name="fmv" value="{{fmv}}">
+              <input type="number" id="units" name="units" value="{{units}}" required="true">
             </div>
           </div>
-          <div class="col-sm-3"></div>
+        </div>
+
+        <div class="form-group row">
+          <label for="sell_price" class="col-sm-3 col-form-label">Sell Price <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" step="0.01" id="sell_price" name="sell_price" value="{{sell_price}}" required="true">
+            </div>
+          </div>
         </div>
         
         <div class="form-group row">
-          <label for="aquisition_price" class="col-sm-3 col-form-label">Aquisition Price</label>
+          <label for="sell_conversion_rate" class="col-sm-3 col-form-label">Sell Conversion Rate <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" step="0.01" id="aquisition_price" name="aquisition_price" value="{{aquisition_price}}">
-            </div>
-          </div>
-          <div class="col-sm-3"></div>
-        </div>
-
-        <div class="form-group row">
-          <label for="shares_vested" class="col-sm-3 col-form-label">Shares Vested</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="shares_vested" name="shares_vested" value="{{shares_vested}}">
-            </div>
-          </div>
-          <div class="col-sm-3"></div>
-        </div>
-
-        <div class="form-group row">
-          <label for="shares_for_sale" class="col-sm-3 col-form-label">Shares For Sale</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="shares_for_sale" name="shares_for_sale" value="{{shares_for_sale}}">
-            </div>
-          </div>
-          <div class="col-sm-3"></div>
-        </div>
-
-        <div class="form-group row">
-          <label for="conversion_rate" class="col-sm-3 col-form-label">Conversion Rate</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" step="0.01" id="conversion_rate" name="conversion_rate" value="{{conversion_rate}}">
+              <input type="number" step="0.01" id="sell_conversion_rate" name="sell_conversion_rate" value="{{sell_conversion_rate}}" required="true">
             </div>
           </div>
           <div class="col-sm-1">
@@ -97,13 +81,12 @@
         </div>
 
         <div class="form-group row">
-          <label for="total_aquisition_price" class="col-sm-3 col-form-label">Total Aquisition Price</label>
+          <label for="total_sell_price" class="col-sm-3 col-form-label">Total Sell Price <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" step="0.01" id="total_aquisition_price" name="total_aquisition_price" value="{{total_aquisition_price}}">
+              <input type="number" step="0.01" id="total_sell_price" name="total_sell_price" value="{{total_sell_price}}" required="true">
             </div>
           </div>
-          <div class="col-sm-3"></div>
         </div>
 
         <div class="form-group row">
@@ -113,7 +96,6 @@
               <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
             </div>
           </div>
-          <div class="col-sm-3"></div>
         </div>
 
         <div class="form-group row">
@@ -123,7 +105,6 @@
               <a href="../" class="btn btn-danger" role="button">Cancel</a>
             </div>
           </div>
-          <div class="col-sm-3"></div>
         </div>
 
       </div>
@@ -135,31 +116,28 @@
   {% load static %}
   <script src="{% static 'common.js' %}"></script>
   <script>
-    $("#aquisition_price").change(function () {
+    $("#sell_conversion_rate").change(function () {
       setTotalAquisitionPrice();
     });
-    $("#shares_vested").change(function () {
+    $("#sell_price").change(function () {
       setTotalAquisitionPrice();
     });
-    $("#conversion_rate").change(function () {
+    $("#units").change(function () {
       setTotalAquisitionPrice();
     });
     function setTotalAquisitionPrice(){
-      var aquisitionPrice = document.getElementById("aquisition_price").value;
-      var sharesVested = document.getElementById("shares_vested").value;
-      var convRate = document.getElementById("conversion_rate").value;
-      console.log(aquisitionPrice)
-      console.log(sharesVested)
-      if (sharesVested!= '' && aquisitionPrice!='' && convRate!='') {
-        totalAquisitionPrice = sharesVested*aquisitionPrice*convRate
-        console.log(totalAquisitionPrice)
-        totalAquisitionPriceElem = document.getElementById("total_aquisition_price")
-        totalAquisitionPriceElem.value = totalAquisitionPrice
+      var units = document.getElementById("units").value;
+      var sell_conversion_rate = document.getElementById("sell_conversion_rate").value;
+      var sell_price = document.getElementById("sell_price").value;
+      if (units!= '' && sell_conversion_rate!='' && sell_price!='') {
+        totalSellPrice = units*sell_price*sell_conversion_rate;
+        console.log(totalSellPrice)
+        document.getElementById("total_sell_price").value = totalSellPrice;
       }
     }
 
     function update_forex_rate_fetch_btn_status() {
-      var dt_elem = document.getElementById("vest_date");
+      var dt_elem = document.getElementById("sell_date");
       //console.log('conv_elem value', dt_elem.value)
       if (dt_elem.value) {
         var conv_btn = document.getElementById("id_forex_fetch");
@@ -167,14 +145,14 @@
       } else {
         var conv_btn = document.getElementById("id_forex_fetch");
         conv_btn.disabled = true;
-        conv_elem = document.getElementById("conversion_rate");
+        conv_elem = document.getElementById("sell_conversion_rate");
         conv_elem.value = '';
       }
     }
 
     function get_forex_rate_and_populate() {
       //console.log('fetch button clicked');
-      dt = document.getElementById("vest_date").value;
+      dt = document.getElementById("sell_date").value;
       var parts = dt.split('-');
       var year = parts[0];
       var month = parts[1];
@@ -185,10 +163,10 @@
       if (exch == 'NASDAQ' || exch == 'NYSE') {
         var val = get_forex_rate(year, month, day, 'USD', 'INR');
         console.log('received forex rate as ', val)
-        conv_elem = document.getElementById("conversion_rate");
+        conv_elem = document.getElementById("sell_conversion_rate");
         conv_elem.value = val;
       } else {
-        conv_elem = document.getElementById("conversion_rate");
+        conv_elem = document.getElementById("sell_conversion_rate");
         conv_elem.value = 1;
       }
     }
@@ -203,7 +181,7 @@
     return false;
   };
   update_forex_rate_fetch_btn_status();
-  $("#vest_date").change(function () {
+  $("#sell_date").change(function () {
     //console.log( $(this).val() );
     update_forex_rate_fetch_btn_status();
   });
