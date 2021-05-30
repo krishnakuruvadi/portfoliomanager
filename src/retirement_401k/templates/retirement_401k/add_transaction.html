@@ -18,37 +18,37 @@
     <div class="row">
       <div class='col-sm-6'>
         <div class="form-group row">
-          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date</label>
+          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}">
+              <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="ee_contrib" class="col-sm-3 col-form-label">Employee Contribution</label>
+          <label for="ee_contrib" class="col-sm-3 col-form-label">Employee Contribution <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="quantity" name="employee_contribution" value="{{employee_contribution}}" step="0.000001">
+              <input type="number" id="quantity" name="employee_contribution" value="{{employee_contribution}}" step="0.000001" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="er_contrib" class="col-sm-3 col-form-label">Employer Contribution</label>
+          <label for="er_contrib" class="col-sm-3 col-form-label">Employer Contribution <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="quantity" name="employer_contribution" value="{{employer_contribution}}" step="0.000001">
+              <input type="number" id="quantity" name="employer_contribution" value="{{employer_contribution}}" step="0.000001" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="quantity" class="col-sm-3 col-form-label">Quantity</label>
+          <label for="quantity" class="col-sm-3 col-form-label">Quantity <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="units" name="units" value="{{units}}" step="0.000001">
+              <input type="number" id="units" name="units" value="{{units}}" step="0.000001" required="true">
             </div>
           </div>
         </div>

@@ -142,6 +142,13 @@ class PpfEntryListView(ListView):
         self.number = get_object_or_404(Ppf, number=self.kwargs['id'])
         return PpfEntry.objects.filter(number=self.number).order_by('-trans_date')
 
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get the context
+        context = super(PpfEntryListView, self).get_context_data(**kwargs)
+        # Create any data and add it to the context
+        context['ppf_num'] = self.kwargs['id']
+        return context
+
 def add_trans(request, id):
     template_name = 'ppfs/ppf_add_trans.html'
     context = dict()

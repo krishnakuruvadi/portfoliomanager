@@ -141,6 +141,13 @@ class SsyEntryListView(ListView):
     def get_queryset(self):
         self.number = get_object_or_404(Ssy, number=self.kwargs['id'])
         return SsyEntry.objects.filter(number=self.number).order_by('-trans_date')
+    
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get the context
+        context = super(SsyEntryListView, self).get_context_data(**kwargs)
+        # Create any data and add it to the context
+        context['ssy_num'] = self.kwargs['id']
+        return context
 
 def add_trans(request, id):
     template_name = 'ssys/ssy_add_trans.html'

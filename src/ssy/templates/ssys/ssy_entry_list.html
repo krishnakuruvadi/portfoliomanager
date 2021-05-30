@@ -8,6 +8,7 @@
 {% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'ssys:ssy-list' %}">SSY</a></li>
+    <li><a href="{% url 'ssys:ssy-detail' ssy_num %}">{{ssy_num}}</a></li>
     <li><a href="#">Transactions</a></li>
   </ul>
 {% endblock %} 
@@ -52,4 +53,4 @@
             "order": [[ 1, "desc" ]]
         });
     {% endblock jquery %}
-  </script>
+</script>
