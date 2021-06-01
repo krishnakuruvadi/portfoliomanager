@@ -509,7 +509,10 @@ def move_trans(from_share_obj, to_share_obj, delete_from_share_obj=False):
             trans.delete()
     if delete_from_share_obj:
         print(f'deleting {from_share_obj.exchange}:{from_share_obj.symbol}')
-        from_share_obj.delete()
+        try:
+            from_share_obj.delete()
+        except Exception as ex:
+            print(f'failed to delete object {ex}')
 
 
 def update_shares_latest_val():
@@ -529,6 +532,7 @@ def update_shares_latest_val():
                                 latest_date = k
                                 latest_val = v
                 else:
+                    print(f'Couldnt get latest value for {share_obj.symbol} {share_obj.exchange}')
                     if share_obj.exchange == 'BSE':
                         isin = None
                         for trans in Transactions.objects.filter(share=share_obj):
@@ -561,28 +565,40 @@ def update_shares_latest_val():
                                     share_obj.symbol = nse_bse_data['bse']
                                     share_obj.save()
                                 continue
+                        else:
+                            print(f'couldnt find isin for {share_obj.symbol} {share_obj.exchange} using transaction date bhav copy')
                     elif share_obj.exchange == 'NSE':
                         valid, _ = check_nse_valid(share_obj.symbol)
                         if not valid:
                             trans = Transactions.objects.filter(share=share_obj).order_by('-trans_date')
                             if len(trans) > 0:
-                                nh = NSEHistorical(share_obj.symbol, trans[0].trans_date)
-                                isin = nh.get_isin_from_bhav_copy()
-                                if isin:
-                                    n = NSE('')
-                                    symbol = n.get_symbol(isin)
-                                    if symbol:
-                                        nse_objs = Share.objects.filter(exchange='NSE', symbol=symbol)
-                                        if len(nse_objs) == 1:
-                                            move_trans(share_obj, nse_objs[0], True)
-                                        else:
-                                            nse_objs = Share.objects.filter(exchange='NSE/BSE', symbol=symbol)
+                                bhavcopy_symbol = share_obj.symbol
+                                while True:
+                                    nh = NSEHistorical(bhavcopy_symbol, trans[0].trans_date, True)
+                                    isin = nh.get_isin_from_bhav_copy()
+                                    if isin:
+                                        n = NSE('')
+                                        symbol = n.get_symbol(isin)
+                                        if symbol:
+                                            nse_objs = Share.objects.filter(exchange='NSE', symbol=symbol)
                                             if len(nse_objs) == 1:
                                                 move_trans(share_obj, nse_objs[0], True)
                                             else:
-                                                share_obj.symbol = symbol
-                                                share_obj.save()
-
+                                                nse_objs = Share.objects.filter(exchange='NSE/BSE', symbol=symbol)
+                                                if len(nse_objs) == 1:
+                                                    move_trans(share_obj, nse_objs[0], True)
+                                                else:
+                                                    share_obj.symbol = symbol
+                                                    share_obj.save()
+                                                    break
+                                        else:
+                                            print(f'Failed to get symbol from isin {isin}')
+                                    else:
+                                        print(f'couldnt find isin for {share_obj.symbol} {share_obj.exchange} using transaction date bhav copy')
+                                        if '-' in bhavcopy_symbol:
+                                            bhavcopy_symbol = bhavcopy_symbol[0:bhavcopy_symbol.rfind('-')]
+                                        else:
+                                            break
                 if latest_date and latest_val:
                     share_obj.as_on_date = latest_date
                     if share_obj.exchange == 'NASDAQ':

@@ -7,9 +7,10 @@ import csv
 
 class NSEHistorical:
 
-    def __init__(self, symbol, historical_date):
+    def __init__(self, symbol, historical_date, debug=False):
         self.historical_date = historical_date
         self.symbol = symbol
+        self.debug = debug
 
     def get_bhav_copy_csv_file_name(self):
         month = convert_date_to_string(self.historical_date, format='%b')
@@ -65,6 +66,7 @@ class NSEHistorical:
                 for chunk in r.iter_content(chunk_size=chunk_size):
                     fd.write(chunk)
             return True
+        print(f'failed to download bhav copy from: {url}')
         return False
 
     def get_isin_from_bhav_copy(self):
@@ -73,17 +75,27 @@ class NSEHistorical:
         
         bc_file = os.path.join(bc_path, self.get_bhav_copy_csv_file_name())
         if not os.path.exists(bc_zip_file):
+            if self.debug:
+                print(f'getting bhav copy for date {self.historical_date}')
             if self.download_url(self.get_bhav_nse_equity_url(), bc_zip_file):
                 with zipfile.ZipFile(os.path.join(bc_path,bc_zip_file), 'r') as zip_ref:
                     zip_ref.extractall(bc_path)
             else:
                 print(f'failed to download bhav copy of {self.symbol} for date {self.historical_date}')
         else:
+            if self.debug:
+                print(f'bhav copy exists locally for date {self.historical_date}')
             if not os.path.exists(bc_file):
                 if os.path.exists(bc_zip_file):
                     with zipfile.ZipFile(os.path.join(bc_path,bc_zip_file), 'r') as zip_ref:
                         zip_ref.extractall(bc_path)
+                else:
+                    print(f'ERROR: bhav copy zip file not found locally for date {self.historical_date}')
+            else:
+                print(f'bhav copy exists locally and is extracted for date {self.historical_date}')
         if os.path.exists(bc_file):
+            if self.debug:
+                print(f"checking for isin for row['SYMBOL'] in bhav copy file {bc_file}")
             with open(bc_file, 'r') as csv_file:
                 csv_reader = csv.DictReader(csv_file)
                 for row in csv_reader:
