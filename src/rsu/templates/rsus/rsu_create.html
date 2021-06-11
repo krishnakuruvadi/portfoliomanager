@@ -21,22 +21,83 @@
 
   <form action="." method="POST" class="form-horizontal">
     {% csrf_token %}
-    {% for field in form %}
-      <div class="form-group row">
-        {{ field.errors }}
-        <label class="control-label col-sm-2 col-form-label" for="id_{{ field.name }}">{{ field.label }}</label>
-        <div class="col-sm-3">
-          <div class="md-form mt-0">
-            {{ field }}
+    <div class="row">
+      <div class='col-sm-6'>
+        <div class="form-group row">
+          <label class="control-label col-sm-2 col-form-label" for="id_award_date">Award Date</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="date" name="award_date" value={{award_date}} placeholder="Select a date" required="" id="id_award_date">
+            </div>
           </div>
         </div>
-        {% if field.help_text %}
-          <p class="help">{{ field.help_text|safe }}</p>
-        {% endif %}
+      
+        <div class="form-group row">   
+          <label class="control-label col-sm-2 col-form-label" for="id_exchange">Exchange</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="exchange" required="" id="id_exchange">
+                <option value="">---------</option>
+                <option value="NASDAQ">NASDAQ</option>
+                <option value="NYSE">NYSE</option>
+                <option value="BSE">BSE</option>
+                <option value="NSE">NSE</option>
+              </select>
+            </div>
+          </div> 
+        </div>
+      
+        <div class="form-group row">
+          <label class="control-label col-sm-2 col-form-label" for="id_symbol">Symbol</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" name="symbol" value="{{symbol}}" maxlength="20" required="" id="id_symbol">
+            </div>
+          </div>
+        </div>
+      
+        <div class="form-group row">
+          <label class="control-label col-sm-2 col-form-label" for="id_award_id">Award id</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" name="award_id" value="{{award_id}}" maxlength="20" required="" id="id_award_id">
+            </div>
+          </div>
+        </div>
+      
+        <div class="form-group row">
+          <label class="control-label col-sm-2 col-form-label" for="id_user">User</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="user" required="" id="id_user">
+              </select>
+            </div>
+          </div>
+        </div>
+      
+        <div class="form-group row">
+          <label class="control-label col-sm-2 col-form-label" for="id_goal">Goal</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="goal" id="id_goal">
+                <option value=""></option>
+              </select>
+            </div>
+          </div>
+        </div>
+      
+        <div class="form-group row">
+          <label class="control-label col-sm-2 col-form-label" for="id_shares_awarded">Awarded</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" name="shares_awarded" value="{{shares_awarded}}" step="1" required="" id="id_shares_awarded">
+            </div>
+          </div>
+        </div>
+      
+        <input type="submit" value="Submit" class="btn btn-primary">&nbsp;<a href="../" class="btn btn-danger" role="button">Cancel</a>
       </div>
-    {% endfor %}
-    <input type="submit" value="Submit" class="btn btn-primary"/>&nbsp;<a href="../" class="btn btn-danger" role="button">Cancel</a>
-
+    </div>
   </form>
 
 {% endblock content %}
@@ -44,4 +105,11 @@
 {% block javascript %}
   {% load static %}
   <script src="{% static 'common.js' %}"></script>
+  <script>
+    set_user_list({{users|safe}}, '{{user|safe}}');
+
+    function get_goals_and_set_goal(response) {
+      set_goals(response, '{{goal|safe}}');
+    }
+  </script>
 {% endblock javascript %}

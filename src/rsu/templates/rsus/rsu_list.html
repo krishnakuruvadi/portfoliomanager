@@ -42,26 +42,26 @@
         <td>{{ instance.award_date }}</td>
         <td><a href="{{ instance.award_id }}"></a>{{ instance.award_id }}</a></td>
         <td>{{ instance.shares_awarded }}</td>
-        {% if award_latest_vals %}
-        <td>{{ award_latest_vals|lookup:instance.id|lookup:'shares_vested' }}</td>
-        {% else %}
+        {% if award_latest_vals|lookup:instance.id == None %}
         <td></td>
+        {% else %}
+        <td>{{ award_latest_vals|lookup:instance.id|lookup:'shares_vested' }}</td>        
         {% endif %}
         
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
-        {% if award_latest_vals %}
+        {% if award_latest_vals|lookup:instance.id == None %}
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        {% else %}
         <td>{{ award_latest_vals|lookup:instance.id|lookup:'latest_conversion_rate' }}</td>
         <td>{{ award_latest_vals|lookup:instance.id|lookup:'latest_price' }}</td>
         <td>{{ award_latest_vals|lookup:instance.id|lookup:'shares_for_sale' }}</td>
         <td>{{ award_latest_vals|lookup:instance.id|lookup:'latest_value' }}</td>
         <td>{{ award_latest_vals|lookup:instance.id|lookup:'as_on_date' }}</td>
-        {% else %}
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
         {% endif %}
         <td>
           <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>

@@ -19,29 +19,33 @@ from shared.utils import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-class RsuCreateView(CreateView):
-    template_name = 'rsus/rsu_create.html'
-    form_class = RsuModelForm
-    queryset = RSUAward.objects.all() # <blog>/<modelname>_list.html
-    #success_url = '/'
 
-    '''
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
-    '''
+def create_rsu(request):
+    template = "rsus/rsu_create.html"
+    if request.method == 'POST':
+        print(request.POST)
+        #'award_date': ['2019-06-05'], 'exchange': ['NASDAQ'], 'symbol': ['CSCO'], 'award_id': ['1434877'], 'user': ['1'], 'goal': ['2'], 'shares_awarded': ['279']
+        
+        award_date = get_date_or_none_from_string(request.POST.get('award_date'))
+        award_id = request.POST.get('award_id')
+        exchange = request.POST.get('exchange')
+        symbol = request.POST.get('symbol')
+        user = request.POST.get('user')
+        goal = get_int_or_none_from_string(request.POST.get('goal'))
+        shares_awarded = get_int_or_none_from_string(request.POST.get('shares_awarded'))
+        RSUAward.objects.create(
+            award_date=award_date,
+            award_id=award_id,
+            user=user,
+            exchange=exchange,
+            symbol=symbol,
+            goal=goal,
+            shares_awarded=shares_awarded
+        )
+    users = get_all_users()
+    context = {'users':users, 'operation': 'Add RSU Award'}
+    return render(request, template, context)
 
-    def get_success_url(self):
-        return reverse('rsus:rsu-list')
-    
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        #self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
-        self.object.save()
-        form.save_m2m()
-        # TODO: Fix me
-        #add_common_stock(self.object.exchange, self.object.symbol, self.object.purchase_date)
-        return HttpResponseRedirect(self.get_success_url())
 
 class RsuUpdateView(UpdateView):
     template_name = 'rsus/rsu_create.html'

@@ -12,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from django.core.files.storage import FileSystemStorage
 from .models import MutualFund
+from alerts.alert_helper import create_alert, Severity
 
 
 class BSEStar:
@@ -77,9 +78,24 @@ def download_bsestar_schemes():
     if bse_star_file:
         bse_star_obj = BSEStar()
         bse_schemes = bse_star_obj.get_all_schemes(bse_star_file)
-        update_bsestar_schemes(bse_schemes)
-        fs = FileSystemStorage()
-        fs.delete(bse_star_file)
+        if len(bse_schemes) > 0:
+            update_bsestar_schemes(bse_schemes)
+            fs = FileSystemStorage()
+            fs.delete(bse_star_file)
+        else:
+            create_alert(
+                summary='Failure to update BSE StAR schemes',
+                content='schemes parsed is 0',
+                severity=Severity.error
+            )
+    else:
+        print('no bse star file. not updating schemes')
+        description = 'no bse star file. not updating schemes'
+        create_alert(
+            summary='Failure to update BSE StAR schemes',
+            content= description,
+            severity=Severity.error
+        )
 
     '''
     headers ={'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',

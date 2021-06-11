@@ -56,10 +56,11 @@ def get_rsu_award_latest_vals():
         for rsu_obj in RestrictedStockUnits.objects.filter(award=rsu_award):
             as_on_date = rsu_obj.as_on_date
             latest_conversion_rate = rsu_obj.latest_conversion_rate
-            if not latest_price:
-                latest_price = rsu_obj.latest_price
-            else:
-                latest_price += rsu_obj.latest_price
+            if rsu_obj.latest_price:
+                if not latest_price:
+                    latest_price = rsu_obj.latest_price
+                else:
+                    latest_price += rsu_obj.latest_price
             if not shares_for_sale:
                 shares_for_sale = rsu_obj.shares_for_sale
             else:
@@ -68,10 +69,11 @@ def get_rsu_award_latest_vals():
                 shares_vested = rsu_obj.shares_vested
             else:
                 shares_vested += rsu_obj.shares_vested
-            if not latest_value:
-                latest_value = rsu_obj.latest_value
-            else:
-                latest_value += rsu_obj.latest_value
+            if rsu_obj.latest_value:
+                if not latest_value:
+                    latest_value = rsu_obj.latest_value
+                else:
+                    latest_value += rsu_obj.latest_value
         if as_on_date:
             ret[rsu_award.id] = {'as_on_date':as_on_date, 'latest_conversion_rate':latest_conversion_rate, 'latest_price':latest_price}
             ret[rsu_award.id]['shares_for_sale'] = shares_for_sale
