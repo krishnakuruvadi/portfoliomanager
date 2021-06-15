@@ -6,6 +6,8 @@ from .models import Folio
 import enum
 from alerts.alert_helper import create_alert, Severity
 from shared.handle_real_time_data import get_mf_vals
+from common.helper import get_or_add_mf_obj
+import requests
 
 class FundType(enum.Enum):
     growth = 1
@@ -18,7 +20,6 @@ class Kuvera:
         self.broker = 'KUVERA'
     
     def get_transactions(self):
-        transactions = dict()
         if isfile(self.filename):
             ignored_folios = set()
             with open(self.filename, mode='r', encoding='utf-8-sig') as csv_file:
@@ -74,6 +75,18 @@ class Kuvera:
             fund = MutualFund.objects.get(kuvera_name__contains=fund_name)
             return fund.code
         except MutualFund.DoesNotExist:
+            code = self.get_code_from_kuv_gist(fund_name)
+            if code:
+                mf_obj = get_or_add_mf_obj(code)
+                if mf_obj:
+                    mf_obj.kuvera_name = fund_name
+                    mf_obj.save()
+                    return code
+                else:
+                    print(f'couldnt find mf object for {code}')
+            else:
+                print('couldnt get mf code from gist')
+            
             for mf_obj in MutualFund.objects.all():
                 if mf_obj.bse_star_name and self._matches_bsestar(fund_name, mf_obj.bse_star_name):
                     mf_obj.kuvera_name = fund_name
@@ -81,7 +94,23 @@ class Kuvera:
                     return mf_obj.code
         print('couldnt find match with bse star name for fund:', fund_name)
         return None
-    
+
+    def get_code_from_kuv_gist(self, kuv_name):
+        url = b'\x03\x11\r\x07\x1cHKD\x02\x10\x04\x1b\\\x03\x02\x11\x11\x02\r\\\x07\x04\x08V\x1c\x1d\x1b\x17\x03\x0b\x18\x1c\x1a\x00\x11\x1d\x04\x1d\x1e@\x17SYRHG[A\x01Y\\\x1bC\x0bKTSVIN[\x14\x06X\x04\x1c\x11\nK\x01]VV\x05\x0e\x05K\t\x00A\x14ZG\x00\\T\x1aB_KPZ\x06MB\rBQYRH\x14\\\x10QS\\I\x13WJ\x00\tWO\x12Z]\x0f\x1e\x13\x1c\x05\x0e\\\x07\x18\x13'
+        url = k_decode(url)
+            
+        r = requests.get(url, timeout=15)
+        if r.status_code==200:
+            decoded_content = r.content.decode('utf-8')
+            csv_reader = csv.DictReader(decoded_content.splitlines(), delimiter=',')
+            for row in csv_reader:
+                #print(row)
+                if row['kuvera_name'] == kuv_name:
+                    return row['code']
+        else:
+            print(f'failed to get mf from gist for kuvera {r.status_code}')
+            return None
+
     # compare DSP Equal Nifty 50 Growth Direct Plan with DSP EQUAL NIFTY 50 FUND - DIR - GROWTH
     def _matches_bsestar(self, fund_name, bse_star_name):
         k_fund_name_lower = fund_name.lower().replace(' plan','')
@@ -168,12 +197,10 @@ class Kuvera:
                 b_fund_type = FundType.div_payout
             else:
                 b_fund_type = None
-            
             if 'dir' in bse_star_parts[1].lower():
                 b_direct = True
             else:
                 b_direct = False
-
             if b_direct == k_direct:
                 if b_fund_type and b_fund_type == k_fund_type:
                     if bse_star_name.split(' ')[0].lower() == fund_name.split(' ')[0].lower():
@@ -190,4 +217,5 @@ class Kuvera:
                                     mf_obj.kuvera_name = fund_name
                                     mf_obj.save()
                                     return mf_obj.code
+        print(f'no match found. returning none')
         return None

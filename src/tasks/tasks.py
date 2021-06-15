@@ -10,14 +10,14 @@ import datetime
 import time
 from django.db.models import Q
 from mftool import Mftool
-from common.helper import update_mf_scheme_codes, update_category_returns
+from common.helper import update_mf_scheme_codes, update_category_returns, update_mf_details
 from shared.utils import get_float_or_zero_from_string, get_float_or_none_from_string, get_int_or_none_from_string, get_date_or_none_from_string, convert_date_to_string, get_diff
 from common.bsestar import download_bsestar_schemes
 from shared.handle_get import *
 from shared.handle_chart_data import get_investment_data
 from pages.models import InvestmentData
 from mutualfunds.models import Folio, MutualFundTransaction
-from mutualfunds.mf_helper import mf_add_transactions
+from mutualfunds.mf_helper import mf_add_transactions, clean_mutual_fund_table
 import os
 import json
 from mutualfunds.mf_analyse import pull_ms, pull_category_returns, pull_blend, get_ms_code
@@ -151,7 +151,9 @@ def update_rsu():
 def update_mf_schemes():
     print('Updating Mutual Fund Schemes')
     set_task_state('update_mf_schemes', TaskState.Running)
-    update_mf_scheme_codes()
+    #update_mf_scheme_codes()
+    clean_mutual_fund_table()
+    update_mf_details()
     set_task_state('update_mf_schemes', TaskState.Successful)
 
 @db_periodic_task(crontab(minute='55', hour='*/12'))

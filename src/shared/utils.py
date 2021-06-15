@@ -92,3 +92,13 @@ def get_preferred_tz(utc_date_time):
     if not preferred_tz:
         preferred_tz = 'Asia/Kolkata'
     return utc_date_time.astimezone(timezone(preferred_tz)).strftime("%Y-%m-%d %H:%M:%S")
+
+def k_obfuscate(byt):
+    # Use same function in both directions.  Input and output are bytes
+    # objects.
+    mask = b'keyword'
+    lmask = len(mask)
+    return bytes(c ^ mask[i % lmask] for i, c in enumerate(byt))
+
+def k_decode(data):
+    return k_obfuscate(data).decode()

@@ -1,17 +1,58 @@
 from mftool import Mftool
+import csv
 import datetime
 from common.models import MutualFund, MFCategoryReturns, Preferences, Passwords
-from shared.utils import get_float_or_none_from_string
-import pathlib
+from shared.utils import get_float_or_none_from_string, k_decode
+import requests
 import base64
 import os
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-import shutil
 import json
 from django.conf import settings
 
+
+def get_or_add_mf_obj(amfi_code):
+    try:
+        mf_obj = MutualFund.objects.get(code=amfi_code)
+        return mf_obj
+    except MutualFund.DoesNotExist:
+        mf = Mftool()
+        mf_schemes = get_scheme_codes(mf, False)
+
+        for code, details in mf_schemes.items():
+            if amfi_code == code:
+                isin2 = None
+                if details['isin2'] and details['isin2'] != '' and details['isin2'] != '-':
+                    isin2 = details['isin2']
+                mf_obj = MutualFund.objects.create(code=code,
+                                                name=details['name'],
+                                                isin=details['isin1'],
+                                                isin2=isin2,
+                                                fund_house=details['fund_house'],
+                                                collection_start_date=datetime.date.today())
+                return mf_obj
+    return None
+
+def update_mf_details():
+    url = b'\x03\x11\r\x07\x1cHKD\x02\x10\x04\x1b\\\x03\x02\x11\x11\x02\r\\\x07\x04\x08V\x1c\x1d\x1b\x17\x03\x0b\x18\x1c\x1a\x00\x11\x1d\x04\x1d\x1e@\x17SYRHG[A\x01Y\\\x1bC\x0bKTSVIN[\x14\x06X\x04\x1c\x11\nK\x01]VV\x05\x0e\x05K\t\x00A\x14ZG\x00\\T\x1aB_KPZ\x06MB\rBQYRH\x14\\\x10QS\\I\x13WJ\x00\tWO\x12Z]\t\x18K\x1a\x04\x19'
+    url = k_decode(url)        
+    r = requests.get(url, timeout=15)
+    if r.status_code==200:
+        decoded_content = r.content.decode('utf-8')
+        csv_reader = csv.DictReader(decoded_content.splitlines(), delimiter=',')
+        for mf_obj in MutualFund.objects.all():
+            for row in csv_reader:
+                #print(row)
+                if row['code'] == mf_obj.code:
+                    if row['ms_name'] != '':
+                        mf_obj.ms_name = row['ms_name']
+                        mf_obj.ms_id = row['ms_id']
+                        mf_obj.category = row['ms_category']
+                        mf_obj.investment_style = row['ms_investment_style']
+                        mf_obj.save()
+                    break
 
 def update_mf_scheme_codes():
     print("inside update_mf_scheme_codes")
@@ -32,6 +73,7 @@ def update_mf_scheme_codes():
                                                name=details['name'],
                                                isin=details['isin1'],
                                                isin2=isin2,
+                                               fund_house=details['fund_house'],
                                                collection_start_date=datetime.date.today())
             print('added mutual fund with code', code)
             added = added + 1
@@ -48,20 +90,6 @@ def update_mf_scheme_codes():
         if details_changed:
             changed = changed + 1
             mf_obj.save()
-        '''
-        try:
-            HistoricalMFPrice.objects.create(code=mf_obj,
-                                             date=datetime.datetime.strptime(details['date'],'%d-%b-%Y').date(),
-                                             nav=float(details['nav']))
-        except Exception as ex:
-            print(ex)
-        '''
-    '''
-    mf_objs = MutualFund.objects.all()
-    for mf in mf_objs:
-        collection_start_date = datetime.date.today()+relativedelta(days=-5)       
-        _ = get_historical_mf_nav(mf.code, collection_start_date, datetime.date.today())
-    '''
     if added or changed:
         print('Addition to schemes:', added,'. Changed scheme details:', changed)
     else:
@@ -77,6 +105,7 @@ def get_scheme_codes(mf, as_json=False):
     url = mf._get_quote_url
     response = mf._session.get(url)
     data = response.text.split("\n")
+    fund_house = ""
     for scheme_data in data:
         if ";INF" in scheme_data:
             scheme = scheme_data.rstrip().split(";")
@@ -85,7 +114,10 @@ def get_scheme_codes(mf, as_json=False):
                                       'isin2':scheme[2],
                                       'name':scheme[3],
                                       'nav':scheme[4],
-                                      'date':scheme[5]}
+                                      'date':scheme[5],
+                                      'fund_house':fund_house}
+        elif scheme_data.strip() != "":
+            fund_house = scheme_data.strip()
 
     return mf.render_response(scheme_info, as_json)
 

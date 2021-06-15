@@ -48,6 +48,7 @@ def mf_add_transactions(broker, user, full_file_path):
 
 
 def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes, broker, conversion_rate=1, trans_price=None):
+    print(f'{folio}, {fund}, {user}, {trans_type}, {units}, {price}, {date}')
     folio_obj = None
     try:
         folio_objs = Folio.objects.filter(folio=folio)
@@ -360,3 +361,12 @@ def get_tax_for_user(user_id, start_date, end_date):
             else:
                 print(f'{obj.folio} ignoring folio for date range {start_date} {end_date}')
     return data
+
+def clean_mutual_fund_table():
+    tbc = MutualFund.objects.filter(folio__isnull=True)
+    total = MutualFund.objects.all()
+    #print('following mutual funds will be cleaned')
+    #for mf in tbc:
+    #    print(f'{mf}')
+    print(f'{len(tbc)}/{len(total)}  will be cleaned')
+    tbc.delete()
