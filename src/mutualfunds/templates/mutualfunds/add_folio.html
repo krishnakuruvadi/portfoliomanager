@@ -17,11 +17,21 @@
     {% csrf_token %}
     <div class="row">
       <div class='col-sm-6'>
+
         <div class="form-group row">
           <label for="folio" class="col-sm-3 col-form-label">Folio <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
               <input type="text" id="id_folio" name="folio" value="{{folio}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="folio" class="col-sm-3 col-form-label">Fund House <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_fund_house" name="fund_house" class="form-control" required="true"></select>
             </div>
           </div>
         </div>
@@ -39,7 +49,7 @@
             </div>
           </div>
         </div>
-
+        <div id="log"></div>
         <div class="form-group row">
           <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
           <div class="col-sm-3">
@@ -96,6 +106,42 @@
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script>
     set_user_list({{users|safe}}, '{{user|safe}}');
+    set_fund_house({{fund_houses|safe}});
+    set_fund_select_status();
+
+    $("#id_fund_house").change(function () {
+      set_fund_select_status();
+    });
+
+    function set_fund_house(fund_houses) {
+      $('#id_fund_house').empty();
+      $('#id_fund_house')
+          .append($('<option>', { value : '' })
+          .text(''));
+      var dropdown = document.getElementById('id_fund_house');
+      for (x in fund_houses) {
+          fundhouse = fund_houses[x]
+          // create new option element
+          var opt = document.createElement('option');
+          // create text node to add to option element (opt)
+          opt.appendChild( document.createTextNode(fundhouse) );
+          // set value property of opt
+          opt.value = x;
+          // add opt to end of select box (sel)
+          dropdown.appendChild(opt);
+      }
+    }
+
+    function set_fund_select_status() {
+      v = document.getElementById('id_fund_house').value;
+      document.getElementById('id_fund').value='';
+      if (v != '') {
+        document.getElementById('id_fund').disabled = false;
+      } else {
+        document.getElementById('id_fund').disabled = true;
+      }
+    }
+
     $(function() {
       function log( message ) {
         $( "<div>" ).text( message ).prependTo( "#log" );
@@ -108,7 +154,8 @@
             url: "/common/mf/avail_funds",
             dataType: "json",
             data: {
-              q: request.term
+              q: request.term,
+              fund_house: $("#id_fund_house").val()
             },
             success: function( data ) {
               response( data );

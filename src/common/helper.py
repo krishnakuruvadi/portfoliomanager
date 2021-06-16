@@ -95,6 +95,31 @@ def update_mf_scheme_codes():
     else:
         print('No addition or changes detected in mutual fund schemes')
 
+def get_fund_houses():
+    print("inside get_fund_houses")
+    mf = Mftool()
+    ret = set()
+    '''
+    data = mf.get_all_amc_profiles(False)
+
+    if data:
+        for e in data:
+            ret.add(e['Name of the Mutual Fund'])
+        return ret
+    '''
+    url = mf._get_quote_url
+    response = mf._session.get(url)
+    data = response.text.split("\n")
+    probable_fh = ''
+    for scheme_data in data:
+        if not ";" in scheme_data and scheme_data.strip() != "":
+            probable_fh = scheme_data.strip()
+        elif ";" in scheme_data:
+            if probable_fh != "":
+                ret.add(probable_fh)
+            probable_fh = ''
+    return ret
+
 def get_scheme_codes(mf, as_json=False):
     """
     returns a dictionary with key as scheme code and value as scheme name.

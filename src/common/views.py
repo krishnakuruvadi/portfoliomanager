@@ -241,7 +241,10 @@ def mf_bse_star(request):
 def get_mutual_funds(request):
     print('inside get_mutual_funds')
     filte = request.GET.get('q', '')
+    fund_house = request.GET.get('fund_house', '')
+    print(f' {filte} {fund_house}')
     mfs = list()
+    '''
     try:
         i = 0
         for mfo in MutualFund.objects.filter(name__contains=filte):
@@ -254,6 +257,19 @@ def get_mutual_funds(request):
                 break
     except Exception as ex:
         print('exception in AvailableMutualFunds', ex)
+    '''
+    mf = Mftool()
+    sc = get_scheme_codes(mf)
+    i = 0
+    for code, details in sc.items():
+        if details['fund_house'] == fund_house and filte in details['name'].lower():
+            data = dict()
+            data['value'] = code
+            data['label'] = details['name']
+            mfs.append(data)
+            i  += 1
+            if i > 10:
+                break
     #s = json.dumps(mfs)
     return JsonResponse(mfs, safe=False)
 

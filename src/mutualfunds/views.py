@@ -29,6 +29,7 @@ from tasks.tasks import add_mf_transactions
 from .pull_kuvera import pull_kuvera
 from goal.goal_helper import get_goal_id_name_mapping_for_user
 from decimal import Decimal
+from common.helper import get_fund_houses
 
 # Create your views here.
 
@@ -260,7 +261,11 @@ def add_folio(request):
                                  goal=goal_id,
                                  notes=notes)
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add Folio'}
+    fund_houses = dict()
+    resp = get_fund_houses()
+    for fh in sorted(resp):
+        fund_houses[fh] = fh
+    context = {'users':users, 'operation': 'Add Folio', 'fund_houses':fund_houses}
     return render(request, template, context)
 
 def add_transaction(request, id):
