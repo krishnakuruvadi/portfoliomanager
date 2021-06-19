@@ -910,9 +910,7 @@ def update_401k_month_end_vals():
 
 @db_periodic_task(crontab(minute='20', hour='*/6'))
 def check_updates_pending():
-    day = datetime.date.today().day
-    if day in [1,2,3,4,5]:
-        update_401k_month_end_vals()
+    update_401k_month_end_vals()
 
 
 '''

@@ -27,4 +27,48 @@
     </tr>
     <tr></tr>
   </table>
+
+  <table id='world' class='table table-borderless'>
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Country</th>
+        <th scope="col">Name</th>
+        <th scope="col">Timestamp</th>
+        <th scope="col">1D Price Change</th>
+        <th scope="col">1D % Change</th>
+        <th scope="col">1W Price Change</th>
+        <th scope="col">1W % Change</th>
+        <th scope="col">YTD % Change</th>
+        <th scope="col">52 Week High</th>
+        <th scope="col">52 Week Low</th>
+        <th scope="col">1Y % Change</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in instruments %}
+      <tr>
+        <td>{{ instance.country }}</th>
+        <td>{{ instance.name }}</td>
+        <td>{{ instance.timestamp }}</td>
+        <td>{{ instance.1dPriceChange }}</td>
+        <td>{{ instance.1dPercentChange }}</td>
+        <td>{{ instance.1wPriceChange }}</td>
+        <td>{{ instance.1wPercentChange }}</td>
+        <td>{{ instance.ytdPercentageChange }}</td>
+        <td>{{ instance.oneYearHigh }}</td>
+        <td>{{ instance.oneYearLow }}</td>
+        <td>{{ instance.1yearPercentChange }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock content %}
+
+<script>
+  {% block jquery %}
+  $('#world').DataTable({
+        "order": [[ 10, "desc" ]],
+        "lengthMenu": [[20, 25, 50, -1], [20, 25, 50, "All"]]
+    } );
+  {% endblock jquery %}
+</script>

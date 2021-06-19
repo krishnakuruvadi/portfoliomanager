@@ -100,7 +100,7 @@ def get_accounts(request):
         acct['latest_value'] = account.latest_value
         if account.goal:
             acct['goal'] = get_goal_name_from_id(account.goal)
-        acct['user'] = get_user_name_from_id(account.user)
+        acct['user'] = get_user_short_name_or_name_from_id(account.user)
         acct['total'] = account.total
         acct['roi'] = account.roi
         acct['gain'] = account.gain
