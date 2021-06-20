@@ -2,7 +2,6 @@ import csv
 from os.path import isfile
 from shared.utils import *
 from common.models import MutualFund
-from .models import Folio
 from alerts.alert_helper import create_alert, Severity
 from django.db.models import Q
 
@@ -50,12 +49,14 @@ class Coin:
                             content= description,
                             severity=Severity.error
                         )
+        else:
+            print(f'{self.filename} is not a file or doesnt exist')
 
     def _get_fund(self, isin, folio):
         fund = MutualFund.objects.filter(Q(isin=isin) | Q(isin2=isin))
         if len(fund) == 1:
             return fund[0].code, ''
-        else:
+        elif len(fund) > 1:
             print(f'too many matching values for isin {isin}')
             return None, 'too many matching values for isin '+ isin + ' for folio:'+ folio
         print(f'couldnt find match with isin for fund: {isin}')

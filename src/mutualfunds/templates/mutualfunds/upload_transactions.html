@@ -34,11 +34,21 @@
                   <select class="form-control" id="brokerControlSelect" name="brokerControlSelect">
                     <option>KUVERA</option>
                     <option>COIN ZERODHA</option>
+                    <option>CAS</option>
                   </select>
                 </div>
               </div>
             </div>
           
+            <div class="form-group row" id="div_cas_pass">
+              <label for="cas_pass" id="label-cas-pass" class="col-sm-3 col-form-label">Password</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <input type="text" id="id_cas_pass" name="cas-pass">
+                </div>
+              </div>
+            </div>
+
             <div class="form-group row">
               <label for="file" class="col-sm-3 col-form-label">File</label>
               <div class="col-sm-6">
@@ -201,15 +211,29 @@
     $("#document").change(function () {
       updateFileUploadSegment();
     });
+    $("#id_cas_pass").change(function () {
+      updateFileUploadSegment();
+    });
     function updateFileUploadSegment() {
       var broker = document.getElementById('brokerControlSelect').value;
       var user = document.getElementById('id_user').value;
       var doc = document.getElementById('document').value;
+      var pass = document.getElementById('id_cas_pass').value;
       document.getElementById('submit').disabled=true;
       if ((user!='') && (broker!='') && (doc!='')) {
-        document.getElementById('submit').disabled=false;
+        if (broker == 'CAS') {
+          if (pass!='') {
+            document.getElementById('submit').disabled=false;
+          }
+        } else {
+          document.getElementById('submit').disabled=false;
+        }
       }
-
+      if (broker != 'CAS') {
+        document.getElementById('div_cas_pass').style.display = "none";
+      } else {
+        document.getElementById('div_cas_pass').style.display=null;
+      }
     }
   </script>
 {% endblock %}

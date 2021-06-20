@@ -454,14 +454,13 @@ def upload_transactions(request):
             uploaded_file = request.FILES['document']
             user = request.POST['user']
             broker = request.POST.get('brokerControlSelect')
-            print(uploaded_file)
-            print(broker)
+            passwd = request.POST.get('cas-pass')
             fs = FileSystemStorage()
             file_locn = fs.save(uploaded_file.name, uploaded_file)
-            print(file_locn)
             print(settings.MEDIA_ROOT)
             full_file_path = settings.MEDIA_ROOT + '/' + file_locn
-            add_mf_transactions(broker, user, full_file_path)
+            print(f'Read transactions from file: {uploaded_file} {broker} {passwd} {file_locn} {full_file_path}')
+            add_mf_transactions(broker, user, full_file_path, passwd)
     users = get_all_users()
     context = {'users':users}
     return render(request, template, context)

@@ -228,8 +228,8 @@ def clean_db():
     set_task_state('clean_db', TaskState.Successful)
 
 @task()
-def add_mf_transactions(broker, user, full_file_path):
-    mf_add_transactions(broker, user, full_file_path)
+def add_mf_transactions(broker, user, full_file_path, passwd=None):
+    mf_add_transactions(broker, user, full_file_path, passwd)
 
 @db_periodic_task(crontab(minute='*/30', hour='*/4'))
 def pull_mf_transactions():

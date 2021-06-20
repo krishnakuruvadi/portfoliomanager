@@ -1,5 +1,6 @@
 from .kuvera import Kuvera
 from .coin import Coin
+from .cas import CAS
 from .models import Folio, MutualFundTransaction, Sip
 from common.models import MutualFund
 from shared.utils import *
@@ -11,7 +12,7 @@ from os.path import isfile
 import csv
 from shared.handle_real_time_data import get_historical_nearest_mf_nav
 
-def mf_add_transactions(broker, user, full_file_path):
+def mf_add_transactions(broker, user, full_file_path, passwd=None):
     print('inside mf_add_transactions', broker, user, full_file_path)
     if broker == 'KUVERA':
         kuvera_helper = Kuvera(full_file_path)
@@ -41,6 +42,21 @@ def mf_add_transactions(broker, user, full_file_path):
                                trans["trans_date"],
                                None,
                                broker,
+                               1.0,
+                               trans["trans_value"])
+    if broker == 'CAS':
+        cas_helper = CAS(full_file_path, passwd)
+        for trans in cas_helper.get_transactions():
+            print("trans is", trans)
+            insert_trans_entry(trans["folio"],
+                               trans['fund'],
+                               user,
+                               trans["trans_type"],
+                               trans["units"],
+                               trans["nav"],
+                               trans["trans_date"],
+                               None,
+                               trans["broker"],
                                1.0,
                                trans["trans_value"])
     fs = FileSystemStorage()
