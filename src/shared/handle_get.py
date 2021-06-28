@@ -93,31 +93,54 @@ def get_day_range_of_month(year, month):
 def get_start_day_across_portfolio():
     #TODO: Fill for other investment avenues
     start_day = datetime.date.today()
-    epf_objs = Epf.objects.all()
-    for epf_obj in epf_objs:    
-        start_day = start_day if start_day < epf_obj.start_date else epf_obj.start_date
-    espp_objs = Espp.objects.all()
-    for espp_obj in espp_objs:
-        start_day = start_day if start_day < espp_obj.purchase_date else espp_obj.purchase_date
-    fd_objs = FixedDeposit.objects.all()
-    for fd_obj in fd_objs:
-        start_day = start_day if start_day < fd_obj.start_date else fd_obj.start_date
-        
-    ppf_objs = Ppf.objects.all()
-    for ppf_obj in ppf_objs:
-        start_day = start_day if start_day < ppf_obj.start_date else ppf_obj.start_date
-    
-    ssy_objs = Ssy.objects.all()
-    for ssy_obj in ssy_objs:
-        start_day = start_day if start_day < ssy_obj.start_date else ssy_obj.start_date
-    
-    mf_trans = MutualFundTransaction.objects.all()
-    for trans in mf_trans:
-        start_day = start_day if start_day < trans.trans_date else trans.trans_date
-    
-    share_trans = Transactions.objects.all()
-    for trans in share_trans:
-        start_day = start_day if start_day < trans.trans_date else trans.trans_date
+    try:
+        epf_objs = Epf.objects.all()
+        for epf_obj in epf_objs:    
+            start_day = start_day if start_day < epf_obj.start_date else epf_obj.start_date
+    except Exception as ex:
+        print(f'exception finding start day for epf {ex}')
+
+    try:
+        espp_objs = Espp.objects.all()
+        for espp_obj in espp_objs:
+            start_day = start_day if start_day < espp_obj.purchase_date else espp_obj.purchase_date
+    except Exception as ex:
+        print(f'exception finding start day for espp {ex}')
+
+    try:
+        fd_objs = FixedDeposit.objects.all()
+        for fd_obj in fd_objs:
+            start_day = start_day if start_day < fd_obj.start_date else fd_obj.start_date
+    except Exception as ex:
+        print(f'exception finding start day for fd {ex}')
+
+    try:
+        ppf_objs = Ppf.objects.all()
+        for ppf_obj in ppf_objs:
+            start_day = start_day if start_day < ppf_obj.start_date else ppf_obj.start_date
+    except Exception as ex:
+        print(f'exception finding start day for ppf {ex}')
+
+    try:
+        ssy_objs = Ssy.objects.all()
+        for ssy_obj in ssy_objs:
+            start_day = start_day if start_day < ssy_obj.start_date else ssy_obj.start_date
+    except Exception as ex:
+        print(f'exception finding start day for ssy {ex}')
+
+    try:
+        mf_trans = MutualFundTransaction.objects.all()
+        for trans in mf_trans:
+            start_day = start_day if start_day < trans.trans_date else trans.trans_date
+    except Exception as ex:
+        print(f'exception finding start day for mf {ex}')
+
+    try:
+        share_trans = Transactions.objects.all()
+        for trans in share_trans:
+            start_day = start_day if start_day < trans.trans_date else trans.trans_date
+    except Exception as ex:
+        print(f'exception finding start day for shares {ex}')
     
     new_start_day = datetime.date(start_day.year, start_day.month, 1)
     return new_start_day

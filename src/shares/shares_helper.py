@@ -431,7 +431,7 @@ def reconcile_share(share_obj, log_calc=False):
                 realised_gain += trans.trans_price
             quantity -= trans.quantity
         if log_calc:
-                    print(f'{trans.trans_date}: {trans.trans_type} {trans.quantity}, {quantity}')
+            print(f'{trans.trans_date}: {trans.trans_type} {trans.quantity}, {quantity}')
         #print(f"After transaction {trans.trans_type} on {trans.trans_date} at {str(quantity)}")
         last_trans = trans
     

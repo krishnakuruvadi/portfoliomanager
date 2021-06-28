@@ -258,6 +258,7 @@ def get_mutual_funds(request):
     '''
     mf = Mftool()
     sc = get_scheme_codes(mf)
+    print(f'Total number of schemes: {len(sc)}')
     i = 0
     for code, details in sc.items():
         if details['fund_house'] == fund_house and filte in details['name'].lower():
@@ -269,6 +270,8 @@ def get_mutual_funds(request):
             if i > 10:
                 break
     #s = json.dumps(mfs)
+    print(f'returning {len(mfs)} matching items')
+
     return JsonResponse(mfs, safe=False)
 
 class ScrollDataView(APIView):

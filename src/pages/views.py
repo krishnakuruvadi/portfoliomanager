@@ -33,13 +33,13 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         context['users'][str(i)] = {'name':user}
         id = get_user_id_from_name(user)
         contrib = get_user_contributions(id)
-        debt = contrib['debt']
+        debt = contrib.get('debt', 0)
         all_debt += debt
-        equity = contrib['equity']
+        equity = contrib.get('equity', 0)
         all_equity += equity
-        achieved = contrib['total']
+        achieved = contrib.get('total', 0)
         all_achieved += achieved
-        target = contrib['target']
+        target = contrib.get('target', 0)
         if target < 1:
             target = 1
         all_target += target
