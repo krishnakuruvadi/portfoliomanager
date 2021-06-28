@@ -3,7 +3,7 @@ from ssy.models import Ssy, SsyEntry
 from fixed_deposit.models import FixedDeposit
 from fixed_deposit.fixed_deposit_helper import get_maturity_value
 from espp.models import Espp, EsppSellTransactions
-from rsu.models import RSUAward, RestrictedStockUnits
+from rsu.models import RSUAward, RestrictedStockUnits, RSUSellTransactions
 from epf.models import Epf, EpfEntry
 from goal.models import Goal
 from shares.models import Share, Transactions
@@ -712,7 +712,11 @@ def get_investment_data(start_date):
         rsu_val = 0
         for rsu_entry in rsu_entries:
             print("rsu entry")
-            if rsu_entry.sell_date is None or rsu_entry.sell_date < data_end_date:
+            su = 0
+            for st in RSUSellTransactions.objects.filter(rsu_vest=rsu_entry, trans_date__lte=data_end_date):
+                su += float(st.units)
+            unsold_shares = float(rsu_entry.shares_for_sale) - su
+            if unsold_shares > 0:
                 try:
                     stock = Stock.objects.get(symbol=rsu_entry.award.symbol, exchange=rsu_entry.award.exchange)
                     historical_stock_prices = get_historical_stock_price(stock, data_end_date+relativedelta(days=-5), data_end_date)
@@ -724,11 +728,11 @@ def get_investment_data(start_date):
                                 conv_val = get_conversion_rate('USD', 'INR', data_end_date)
                                 #print('conversion value', conv_val)
                                 if conv_val:
-                                    rsu_val += float(conv_val)*float(v)*int(rsu_entry.shares_for_sale)
+                                    rsu_val += float(conv_val)*float(v)*unsold_shares
                                     found = True
                                     break
                             else:
-                                rsu_val += float(v)*int(rsu_entry.shares_for_sale)
+                                rsu_val += float(v)*unsold_shares
                                 found = True
                                 break
                         if found:

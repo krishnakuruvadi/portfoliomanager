@@ -77,8 +77,6 @@ class HistoricalMFPriceList(ListView):
 
 class StockListView(ListView):
     template_name = 'common/stock_list.html'
-
-    paginate_by = 15
     model = Stock
 
 class StockDetailView(DetailView):

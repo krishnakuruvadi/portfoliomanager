@@ -13,7 +13,7 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
-  <table class="table table-hover">
+  <table class="table table-hover" id="stocks-table">
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
@@ -40,3 +40,11 @@
     </tbody>
   </table>
 {% endblock %}
+
+<script>
+  {% block jquery %}
+  $('#stocks-table').DataTable({
+        "order": [[ 0, "desc" ]]
+    } );
+  {% endblock jquery %}
+</script>

@@ -21,7 +21,7 @@ class Kuvera:
     
     def get_transactions(self):
         if isfile(self.filename):
-            ignored_folios = set()
+            ignored_folios = dict()
             with open(self.filename, mode='r', encoding='utf-8-sig') as csv_file:
                 print("opened file as csv:", self.filename)
                 csv_reader = csv.DictReader(csv_file, delimiter=",")
@@ -62,11 +62,22 @@ class Kuvera:
                                 'nav':nav,
                                 'trans_value':trans_value}
                         else:
-                            ignored_folios.add(folio)
-            for fol in ignored_folios:
+                            if not folio in ignored_folios:
+                                ignored_folios[folio] = list()
+                                ignored_folios[folio].append(fund_name)
+                            else:
+                                if fund_name not in ignored_folios[folio]:
+                                    ignored_folios[folio].append(fund_name)
+            for fol, fund_names in ignored_folios.items():
+                names = None
+                for fund_name in fund_names:
+                    if not names:
+                        names = fund_name
+                    else:
+                        names += ";" + fund_name
                 create_alert(
                     summary='Folio:' + fol + ' Failure to add transactions',
-                    content= 'Not able to find a matching entry between Kuvera name and BSE STaR name. Edit the mf_mapping.json to process this folio',
+                    content= f'Not able to find a matching entry between Kuvera names {names} and BSE STaR names. Edit the mf_mapping.json to process this folio',
                     severity=Severity.error
                 )
 
