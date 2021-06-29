@@ -33,7 +33,56 @@ def get_or_add_mf_obj(amfi_code):
                                                 fund_house=details['fund_house'],
                                                 collection_start_date=datetime.date.today())
                 return mf_obj
+    mf_details = get_mf_details_from_gist(amfi_code)
+    if mf_details:
+        mf_obj = MutualFund.objects.create(code=amfi_code,
+                                            name=details['name'],
+                                            isin=details.get('isin1', None),
+                                            isin2=details.get('isin2', None),
+                                            fund_house=details['fund_house'],
+                                            collection_start_date=datetime.date.today())
+        return mf_obj
     return None
+
+def get_kuv_name_from_gist(code):
+    url = b'\x03\x11\r\x07\x1cHKD\x02\x10\x04\x1b\\\x03\x02\x11\x11\x02\r\\\x07\x04\x08V\x1c\x1d\x1b\x17\x03\x0b\x18\x1c\x1a\x00\x11\x1d\x04\x1d\x1e@\x17SYRHG[A\x01Y\\\x1bC\x0bKTSVIN[\x14\x06X\x04\x1c\x11\nK\x01]VV\x05\x0e\x05K\t\x00A\x14ZG\x00\\T\x1aB_KPZ\x06MB\rBQYRH\x14\\\x10QS\\I\x13WJ\x00\tWO\x12Z]\x0f\x1e\x13\x1c\x05\x0e\\\x07\x18\x13'
+    url = k_decode(url)
+            
+    r = requests.get(url, timeout=15)
+    if r.status_code==200:
+        decoded_content = r.content.decode('utf-8')
+        csv_reader = csv.DictReader(decoded_content.splitlines(), delimiter=',')
+        for row in csv_reader:
+            #print(row)
+            if row['code'] == code:
+                return row['kuvera_name']
+    else:
+        print(f'failed to get mf from gist for kuvera {r.status_code}')
+        return None
+
+def get_mf_details_from_gist(code):
+    url = b'\x03\x11\r\x07\x1cHKD\x02\x10\x04\x1b\\\x03\x02\x11\x11\x02\r\\\x07\x04\x08V\x1c\x1d\x1b\x17\x03\x0b\x18\x1c\x1a\x00\x11\x1d\x04\x1d\x1e@\x17SYRHG[A\x01Y\\\x1bC\x0bKTSVIN[\x14\x06X\x04\x1c\x11\nK\x01]VV\x05\x0e\x05K\x0eUME[GU[W\x1cA\x0e\x14V\tVA\x14\x0b\x17V\r\\MB]\x16SZ\x01@A\r@\x05\rWMO\\]\t\rK\x1a\x04\x19'
+    url = k_decode(url)
+            
+    r = requests.get(url, timeout=15)
+    if r.status_code==200:
+        decoded_content = r.content.decode('utf-8')
+        csv_reader = csv.DictReader(decoded_content.splitlines(), delimiter=',')
+        for row in csv_reader:
+            #print(row)
+            if row['code'] == code:
+                ret = {
+                    'name': row['name'],
+                    'fund_house':row['fund_house']
+                }
+                if row['isin'] != '':
+                    ret ['isin'] = row['isin']
+                if row['isin2'] != '':
+                    ret ['isin2'] = row['isin2']
+                return ret
+    else:
+        print(f'failed to get mf from gist for kuvera {r.status_code}')
+        return None
 
 def update_mf_details():
     url = b'\x03\x11\r\x07\x1cHKD\x02\x10\x04\x1b\\\x03\x02\x11\x11\x02\r\\\x07\x04\x08V\x1c\x1d\x1b\x17\x03\x0b\x18\x1c\x1a\x00\x11\x1d\x04\x1d\x1e@\x17SYRHG[A\x01Y\\\x1bC\x0bKTSVIN[\x14\x06X\x04\x1c\x11\nK\x01]VV\x05\x0e\x05K\t\x00A\x14ZG\x00\\T\x1aB_KPZ\x06MB\rBQYRH\x14\\\x10QS\\I\x13WJ\x00\tWO\x12Z]\t\x18K\x1a\x04\x19'

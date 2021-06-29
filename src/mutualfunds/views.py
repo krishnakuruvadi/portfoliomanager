@@ -24,12 +24,12 @@ from .kuvera import Kuvera
 from .pull_coin import pull_coin
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .mf_helper import insert_trans_entry, calculate_xirr_all_users, calculate_xirr
+from .mf_helper import *
 from tasks.tasks import add_mf_transactions
 from .pull_kuvera import pull_kuvera
 from goal.goal_helper import get_goal_id_name_mapping_for_user
 from decimal import Decimal
-from common.helper import get_fund_houses
+from common.helper import get_fund_houses, get_or_add_mf_obj
 
 # Create your views here.
 
@@ -232,7 +232,10 @@ def add_two(first, second):
 
 def add_folio(request):
     template = 'mutualfunds/add_folio.html'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
+        message_color = 'green'
         print('inside add_folio')
         folio = request.POST['folio']
         fund = request.POST['fund']
@@ -240,32 +243,41 @@ def add_folio(request):
         print('user is of type:',type(user))
         notes = request.POST['notes']
         goal_id = None
-        goal = request.POST['goal']
+        goal = request.POST.get('goal', '')
         if goal != '':
             goal_id = Decimal(goal)
         
-        mf_obj = MutualFund.objects.get(code=fund)
-        found = False
-        try:
-            fos = Folio.objects.filter(folio=folio)
-            for fo in fos:
-                if fo.fund.code == fund:
-                    found = True
-        except Exception as ex:
-            pass
-        
-        if not found:
-            Folio.objects.create(folio=folio,
-                                 fund=mf_obj,
-                                 user=user,
-                                 goal=goal_id,
-                                 notes=notes)
+        mf_obj = get_or_add_mf_obj(fund)                
+        if mf_obj:
+            found = False
+            try:
+                fos = Folio.objects.filter(folio=folio)
+                for fo in fos:
+                    if fo.fund.code == fund:
+                        found = True
+            except Exception as ex:
+                pass
+                
+            if not found:
+                Folio.objects.create(folio=folio,
+                                    fund=mf_obj,
+                                    user=user,
+                                    goal=goal_id,
+                                    notes=notes)
+                message = 'New folio addition successful'
+            else:
+                message = 'Folio already being tracked'
+                message_color = 'red'
+        else:
+            message = f'Failed to find mutual fund with code {fund}.  Folio not added.'
+            message_color = 'red'
+
     users = get_all_users()
     fund_houses = dict()
     resp = get_fund_houses()
     for fh in sorted(resp):
         fund_houses[fh] = fh
-    context = {'users':users, 'operation': 'Add Folio', 'fund_houses':fund_houses}
+    context = {'users':users, 'operation': 'Add Folio', 'fund_houses':fund_houses, 'message':message, 'message_color':message_color}
     return render(request, template, context)
 
 def add_transaction(request, id):
