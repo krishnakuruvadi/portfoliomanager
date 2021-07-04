@@ -1,254 +1,227 @@
-#!/usr/bin/env python
+import bs4
+import datetime
+import json
+import os
 import pathlib
+import requests
 
-EXCEL_PATH = pathlib.Path(__file__).parent.parent.parent.absolute()
 
-def google_moneycontrol_base_sitename(stock_ticker):
-    """
-    This function will search the base name for the moneycontrol site of the stock_ticker. 
-    """
-    from googlesearch import search
-    import re
-    query_string = "moneycontrol fianacial ratio of " + stock_ticker
-    ratio_url = ""
-    google_search_op_string = search(query_string, num_results=20 )
-    for url in google_search_op_string:
-        #print(url)
-        match = re.match("(.*moneycontrol.*)ratio.*?[/]([0-9A-Z]+)", url)
-        if match:
-            ratio_url = match.group(1)
-            MC_ticker = match.group(2)
-            break
-    return [ratio_url, MC_ticker]
+DEFAULT_DOWNLOAD_DIR = str(pathlib.Path(__file__).parent.parent.parent.absolute())
+
+
+def extract_stock_data(tickerName):
+    
+    url = "https://www.moneycontrol.com/mccode/common/autosuggestion_solr.php?classic=true&query="+tickerName+"&type=1&format=json"
+    print("Retrieving stock data from money control {}".format(url))
+    
+    # fetch data
+    response = requests.get(url, timeout=15)
+    response_body = response.json()
+    
+    assert len(response_body) == 1
+    
+    print("Information fetched:")
+    print(response_body[0])
+    
+    link_src = response_body[0]['link_src']
+    extracted_link = link_src.split('/')
+    
+    return extracted_link[-1] , extracted_link[-2]
+
+
+def nse_bse_eq_file_path():
+    full_file_path = os.path.join(DEFAULT_DOWNLOAD_DIR, 'nse_bse_eq.json')
+    return full_file_path
+
+def is_nse_bse_eq_file_exists():
+    full_file_path = nse_bse_eq_file_path()
+    if os.path.exists(full_file_path):
+        return True
+    return False
+
+def get_dividends(mc_code, dest_file=None):
+    if not dest_file:
+        dest_file = os.path.join(DEFAULT_DOWNLOAD_DIR, mc_code+'.json')
+    
+    data = dict()
+    if os.path.exists(dest_file):
+        with open(dest_file) as f:
+            data = json.load(f)
+    
+    if not 'dividends' in data:
+        data['dividends'] = list()
+    
+    dividends_url = f'https://www.moneycontrol.com/company-facts/infosys/dividends/{mc_code}#{mc_code}'
+    r = requests.get(dividends_url, timeout=15)
+    if r.status_code==200:
+        print(f'found page')
+        soup = bs4.BeautifulSoup(r.content, 'html.parser')
+        table = soup.find("table", {"class":"mctable1"})
+        tbody = table.find("tbody")
+        rows = tbody.findChildren("tr")
+        ret_dict = dict()
+        for row in rows:
+            print(f'row {row}')
+            cols = row.findChildren("td")
+            if cols and len(cols) >=5:
+                ret_dict[cols[0].text.strip()] = {'amount': get_float_or_zero_from_string(cols[4].text.strip()), 'ex_date':get_date_or_none_from_string(cols[1].text, '%d-%m-%Y')}
+        for dt,v in ret_dict.items():
+            found = False
+            announcement_date = get_date_or_none_from_string(dt, '%d-%m-%Y')
+            for s in data['dividends']:
+                if get_date_or_none_from_string(s['announcement_date'], '%d-%m-%Y') == announcement_date:
+                    found = True
+            if not found:
+                data['dividends'].append({'announcement_date':announcement_date, 'amount': v['amount'], 'ex_date':v['ex_date']})
         
-
-#print(google_moneycontrol_base_sitename("SBIN"))
-
-def pull_ratio_from_moneycontrol(stock_ticker, ratio):
-    """
-    This function will pull the historical ratios for a stock_ticker
-    from the moneycontrol website.
-    pulled data:
-    1. eps
-    2. current ratio
-    3. price / book value
-    4. dividend payout ratio
-    5. net profit margin
-    6. EV/EBITDA
-    7. debt to equity ratio
-
-    Need: 
-    1. D/E 
-    2. EPS 
-    3. ROCE
-    4. ROA
-    5. EV
-    6. EV/EBITDA
-    7. P/BV 
-    8. Net Profit Margin  
-    9. Book Value
-    10. P/E (Calculated from xlsx)
-
-    In moneycontrol the ratios are listed as old and new format. 
-    Old Format:
-    url https://www.moneycontrol.com/financials/statebankofindia/ratios/SBI#SBI
-    ratios: 
-    current ratio
-    dividend payout ratio net profit
-    net profit margin
-    ROCE
-
-    New Format:
-    url https://www.moneycontrol.com/financials/statebankofindia/ratiosVI/SBI#SBI
-    ratios:
-    eps
-    price / book value
-    ROCE
-    ROA
-    EV
-    Book Value
-    D/E
-    EV/EBITDA
-    """
-    import requests, re
-    from bs4 import BeautifulSoup
-    base_url, MC_ticker = google_moneycontrol_base_sitename(stock_ticker)
-    # if ratio == "Basic EPS" or ratio == "Price/BV" or ratio == "Return on Capital Employed" or ratio == "Return on Assets" or ratio == "Enterprise Value" or ratio == "Book Value .ExclRevalReserve..Share" or ratio == "Total Debt.Equity" or ratio == "EV.EBITDA" or ratio == "Current Ratio" or ratio == "Dividend Payout Ratio Net Profit" or ratio == "Net Profit Margin":
-    ratio_consolidated_url1 = base_url + 'consolidated-ratiosVI/'+MC_ticker+'#'+MC_ticker
-    ratio_consolidated_url2 = base_url + 'consolidated-ratiosVI/'+MC_ticker+'/2#'+MC_ticker
-    ratio_consolidated_url3 = base_url + 'consolidated-ratiosVI/'+MC_ticker+'/3#'+MC_ticker
-    ratio_consolidated_url4 = base_url + 'consolidated-ratiosVI/'+MC_ticker+'/4#'+MC_ticker
-    ratio_url1 = base_url + 'ratiosVI/'+MC_ticker+'#'+MC_ticker
-    ratio_url2 = base_url + 'ratiosVI/'+MC_ticker+'/2#'+MC_ticker
-    ratio_url3 = base_url + 'ratiosVI/'+MC_ticker+'/3#'+MC_ticker
-    ratio_url4 = base_url + 'ratiosVI/'+MC_ticker+'/4#'+MC_ticker
-    # elif ratio == "Current Ratio" or ratio == "Dividend Payout Ratio Net Profit" or ratio == "Net Profit Margin":
-    #     ratio_consolidated_url1 = base_url + 'ratios/'+MC_ticker+'#'+MC_ticker
-    #     ratio_consolidated_url2 = base_url + 'ratios/'+MC_ticker+'/2#'+MC_ticker
-    #     ratio_consolidated_url3 = base_url + 'ratios/'+MC_ticker+'/3#'+MC_ticker
-    #     ratio_consolidated_url4 = base_url + 'ratios/'+MC_ticker+'/4#'+MC_ticker
-    #     ratio_url1 = base_url + 'ratios/'+MC_ticker+'#'+MC_ticker
-    #     ratio_url2 = base_url + 'ratios/'+MC_ticker+'/2#'+MC_ticker
-    #     ratio_url3 = base_url + 'ratios/'+MC_ticker+'/3#'+MC_ticker
-    #     ratio_url4 = base_url + 'ratios/'+MC_ticker+'/4#'+MC_ticker
-    standalone_ratio = []
-    consolidated_ratio = []
-    ratio_values = {}
-    regex_pattern = "[-]?[0-9]+[,]?[0-9]*?[.]?[0-9]+|[-][-]"
-    print("Consolidated " + ratio)
-    for url in [ratio_consolidated_url1, ratio_consolidated_url2, ratio_consolidated_url3, ratio_consolidated_url4]:
-        page          = requests.get(url)
-        soup          = BeautifulSoup(page.text, 'html.parser')
-        td_all  = soup.find_all('td')
-        ratio_name = ratio
-        for td in td_all:
-            if td.find(text=re.compile(ratio)):
-                ratio_name = td.text.strip()
-                year1_ratio = td.find_next('td').text.strip()
-                if not re.match(regex_pattern, year1_ratio):
-                    break
-                else:
-                    consolidated_ratio.append(year1_ratio)
-                year2_ratio = td.find_next('td').find_next('td').text.strip()
-                if not re.match(regex_pattern, year2_ratio):
-                    break
-                else:
-                    consolidated_ratio.append(year2_ratio)
-                year3_ratio = td.find_next('td').find_next('td').find_next('td').text.strip()
-                if not re.match(regex_pattern, year3_ratio):
-                    break
-                else:
-                    consolidated_ratio.append(year3_ratio)
-                year4_ratio = td.find_next('td').find_next('td').find_next('td').find_next('td').text.strip()
-                if not re.match(regex_pattern, year4_ratio):
-                    break
-                else:
-                    consolidated_ratio.append(year4_ratio)
-                year5_ratio = td.find_next('td').find_next('td').find_next('td').find_next('td').find_next('td').text.strip()
-                if not re.match(regex_pattern, year5_ratio):
-                    break
-                else:
-                    consolidated_ratio.append(year5_ratio)
-    consolidated_ratio_name = "consolidated " + ratio_name
-    ratio_values.update({consolidated_ratio_name:consolidated_ratio})
-    print(consolidated_ratio)
-    print("Standalone " + ratio)
-    for url in [ratio_url1, ratio_url2, ratio_url3, ratio_url4]:
-        page          = requests.get(url)
-        soup          = BeautifulSoup(page.text, 'html.parser')
-        td_all  = soup.find_all('td')
-        for td in td_all:
-            if td.find(text=re.compile(ratio)):
-                ratio_name = td.text.strip()
-                year1_ratio = td.find_next('td').text.strip()
-                if not re.match(regex_pattern, year1_ratio):
-                    break
-                else:
-                    standalone_ratio.append(year1_ratio)
-                year2_ratio = td.find_next('td').find_next('td').text.strip()
-                if not re.match(regex_pattern, year2_ratio):
-                    break
-                else:
-                    standalone_ratio.append(year2_ratio)
-                year3_ratio = td.find_next('td').find_next('td').find_next('td').text.strip()
-                if not re.match(regex_pattern, year3_ratio):
-                    break
-                else:
-                    standalone_ratio.append(year3_ratio)
-                year4_ratio = td.find_next('td').find_next('td').find_next('td').find_next('td').text.strip()
-                if not re.match(regex_pattern, year4_ratio):
-                    break
-                else:
-                    standalone_ratio.append(year4_ratio)
-                year5_ratio = td.find_next('td').find_next('td').find_next('td').find_next('td').find_next('td').text.strip()
-                if not re.match(regex_pattern, year5_ratio):
-                    break
-                else:
-                    standalone_ratio.append(year5_ratio)
-    print(standalone_ratio)
-    standalone_ratio_name = "standalone " + ratio_name
-    ratio_values.update({"Standalone "+ratio_name:standalone_ratio})
-    #print(len(standalone_ratio))
-    return(ratio_values)
-                    
-
+        print(data)
+        with open(dest_file, 'w') as json_file:
+            json.dump(data, json_file, indent=1, default=default)
     
-#pull_ratio_from_moneycontrol('SBI', 'Basic EPS')
-#pull_ratio_from_moneycontrol('SBI', 'Current Ratio')
-#pull_ratio_from_moneycontrol('SBI', 'Price/BV')
-#pull_ratio_from_moneycontrol('SBI', 'Dividend Payout Ratio .NP.')
-#pull_ratio_from_moneycontrol('SBI', 'Net Profit Margin')
-#pull_ratio_from_moneycontrol('HAL', 'Current Ratio')
+    elif r.status_code==404:
+        print(f"Page not found url: {r.url}")
+    else:
+        print(f"A different status code received : {str(r.status_code)} for url: {r.url}")
 
-def Historical_Performance_of_stock(stock_ticker, excel_path = EXCEL_PATH):
-    """
-    This function will give the historical performance of a stock with
-    max value going to 20 years.
-    The Data is collected from the moneycontrol key ratios.
-    Covered ratios are :
-    1. Basic EPS
-    2. Current Ratio
-    3. Debt/ Equity Ratio
-    4. Dividend Payout Ratio
+def get_bonus(mc_code, dest_file=None):
+    if not dest_file:
+        dest_file = os.path.join(DEFAULT_DOWNLOAD_DIR, mc_code+'.json')
     
-    1. D/E 
-    2. EPS 
-    3. ROCE
-    4. ROA
-    5. EV
-    6. EV/EBITDA
-    7. P/BV 
-    8. Net Profit Margin  
-    9. Book Value
-    10. P/E (Calculated from xlsx)
+    data = dict()
+    if os.path.exists(dest_file):
+        with open(dest_file) as f:
+            data = json.load(f)
+    
+    if not 'bonus' in data:
+        data['bonus'] = list()
+    
+    bonus_url = f'https://www.moneycontrol.com/company-facts/infosys/bonus/{mc_code}#{mc_code}'
+    r = requests.get(bonus_url, timeout=15)
+    if r.status_code==200:
+        print(f'found page')
+        soup = bs4.BeautifulSoup(r.content, 'html.parser')
+        table = soup.find("table", {"class":"mctable1"})
+        tbody = table.find("tbody")
+        rows = tbody.findChildren("tr")
+        ret_dict = dict()
+        for row in rows:
+            print(f'row {row}')
+            cols = row.findChildren("td")
+            if cols and len(cols) >=3:
+                ret_dict[cols[0].text.strip()] = {'ratio': cols[1].text.strip(), 'record_date':get_date_or_none_from_string(cols[2].text, '%d-%m-%Y'), 'ex_date':get_date_or_none_from_string(cols[3].text, '%d-%m-%Y')}
+        for dt,v in ret_dict.items():
+            found = False
+            announcement_date = get_date_or_none_from_string(dt, '%d-%m-%Y')
+            for s in data['bonus']:
+                if get_date_or_none_from_string(s['announcement_date'], '%d-%m-%Y') == announcement_date:
+                    found = True
+            if not found:
+                data['bonus'].append({'announcement_date':announcement_date, 'ratio': v['ratio'], 'record_date':v['record_date'], 'ex_date':v['ex_date']})
+        
+        print(data)
+        with open(dest_file, 'w') as json_file:
+            json.dump(data, json_file, indent=1, default=default)
+    
+    elif r.status_code==404:
+        print(f"Page not found url: {r.url}")
+    else:
+        print(f"A different status code received : {str(r.status_code)} for url: {r.url}")
 
-    Then the details are store in the xls. The XLS is same as the valuation.
-    Need to seperate the standalone & consolidated dataframes & print in xlsx.
+def get_splits(mc_code, dest_file=None):
+    if not dest_file:
+        dest_file = os.path.join(DEFAULT_DOWNLOAD_DIR, mc_code+'.json')
+    
+    data = dict()
+    if os.path.exists(dest_file):
+        with open(dest_file) as f:
+            data = json.load(f)
+    
+    if not 'splits' in data:
+        data['splits'] = list()
+    
+    splits_url = f'https://www.moneycontrol.com/company-facts/infosys/splits/{mc_code}#{mc_code}'
+    r = requests.get(splits_url, timeout=15)
+    if r.status_code==200:
+        print(f'found page')
+        soup = bs4.BeautifulSoup(r.content, 'html.parser')
+        table = soup.find("table", {"class":"mctable1"})
+        tbody = table.find("tbody")
+        rows = tbody.findChildren("tr")
+        ret_dict = dict()
+        for row in rows:
+            print(f'row {row}')
+            cols = row.findChildren("td")
+            if cols and len(cols) >=3:
+                ret_dict[cols[0].text.strip()] = {'old_fv': int(cols[1].text), 'new_fv':int(cols[2].text), 'ex_date':get_date_or_none_from_string(cols[3].text, '%d-%m-%Y')}
+        for dt,v in ret_dict.items():
+            found = False
+            for s in data['splits']:
+                if s['old_fv'] == v['old_fv']:
+                    found = True
+            if not found:
+                data['splits'].append({'announcement_date':get_date_or_none_from_string(dt, '%d-%m-%Y'), 'old_fv': v['old_fv'], 'new_fv':v['new_fv'], 'ex_date':v['ex_date']})
+        
+        print(data)
+        with open(dest_file, 'w') as json_file:
+            json.dump(data, json_file, indent=1, default=default)
+    
+    elif r.status_code==404:
+        print(f"Page not found url: {r.url}")
+    else:
+        print(f"A different status code received : {str(r.status_code)} for url: {r.url}")
 
-    """
-    from datetime import date
-    today                                = date.today()
-    current_year                         = today.year
-    historical_data                      = {}
-    eps_from_moneycontrol                = pull_ratio_from_moneycontrol(stock_ticker, 'Basic EPS')
-    current_ratio_from_moneycontrol      = pull_ratio_from_moneycontrol(stock_ticker, 'Current Ratio')
-    net_profit_margin_from_moneycontrol  = pull_ratio_from_moneycontrol(stock_ticker, 'Net Profit Margin')
-    price_to_book_from_moneycontrol      = pull_ratio_from_moneycontrol(stock_ticker, 'Price/BV')
-    dividend_payout_from_moneycontrol    = pull_ratio_from_moneycontrol(stock_ticker, 'Dividend Payout Ratio Net Profit')
-    ROCE_from_moneycontrol               = pull_ratio_from_moneycontrol(stock_ticker, 'Return on Capital Employed')
-    ROA_from_moneycontrol                = pull_ratio_from_moneycontrol(stock_ticker, 'Return on Assets')
-    EV_from_moneycontrol                 = pull_ratio_from_moneycontrol(stock_ticker, 'Enterprise Value')
-    BV_from_moneycontrol                 = pull_ratio_from_moneycontrol(stock_ticker, 'Book Value .ExclRevalReserve..Share')
-    DE_from_moneycontrol                 = pull_ratio_from_moneycontrol(stock_ticker, 'Total Debt.Equity')
-    EVEBITDA_from_moneycontrol           = pull_ratio_from_moneycontrol(stock_ticker, 'EV.EBITDA')
-    historical_data.update(eps_from_moneycontrol)
-    historical_data.update(current_ratio_from_moneycontrol)
-    historical_data.update(net_profit_margin_from_moneycontrol)
-    historical_data.update(price_to_book_from_moneycontrol)
-    historical_data.update(dividend_payout_from_moneycontrol)
-    historical_data.update(ROCE_from_moneycontrol)
-    historical_data.update(ROA_from_moneycontrol)
-    historical_data.update(EV_from_moneycontrol)
-    historical_data.update(BV_from_moneycontrol)
-    historical_data.update(DE_from_moneycontrol)
-    historical_data.update(EVEBITDA_from_moneycontrol)
-    print(historical_data)
-    for key in historical_data:
-        length = len(historical_data[key])
-        if length == 0:
-            historical_data[key] = ["--"] * 20
-        length = len(historical_data[key])
-        if length < 20:
-            filler = ["--"] * (20 - length)
-            historical_data[key].extend(filler)
-    #print(historical_data)
-    for key in historical_data:
-        historical_data[key] = historical_data[key][0:20]
-    print(historical_data)
+def default(o):
+    if type(o) is datetime.date or type(o) is datetime.datetime:
+        return o.strftime('%d-%m-%Y')
+    return o
 
+# default format expected of kind 2020-06-01
+def get_date_or_none_from_string(input, format='%Y-%m-%d', printout=True):
+    if input != None and input != '':
+        if type(input) is datetime.date:
+            return input
+        try:
+            res = datetime.datetime.strptime(input, format).date()
+            return res
+        except Exception as e:
+            if printout:
+                print('error converting ', input, ' to date. returning none' + str(e))
+    return None
 
-print(EXCEL_PATH)
-#Historical_Performance_of_stock('BDL')
-Historical_Performance_of_stock('SBIN')
-#Historical_Performance_of_stock('HAL')
-#Historical_Performance_of_stock('COCHINSHIP')
+def get_float_or_zero_from_string(input):
+    if input != None and input != '':
+        try:
+            res = float(input)
+            return res
+        except Exception as e:
+            print('error converting ', input, ' to float. returning 0')
+    return 0
+
+def fill_mc_code(n_b_path):
+    stocks = dict()
+
+    if is_nse_bse_eq_file_exists():
+        with open(n_b_path) as f:
+            stocks = json.load(f)
+    
+    print(stocks)
+    for k in stocks.keys():
+        try:
+            c, _ = extract_stock_data(k)
+            stocks[k]['mc_code'] = c
+        except Exception as ex:
+            print(f'{ex} finding mc code for {k}')
+    
+    with open(n_b_path, 'w') as json_file:
+        json.dump(stocks, json_file)
+
+if __name__ == "__main__":
+    print(f'DEFAULT_DOWNLOAD_DIR {DEFAULT_DOWNLOAD_DIR}')
+    '''
+    n_b_path = nse_bse_eq_file_path()
+    fill_mc_code(n_b_path)
+    '''
+    get_splits('SP19', '/Users/kkuruvad/Desktop/krishna/personal/portfoliomanager/src/media/corporateActions/INE03QK01018.json')
+    get_bonus('SP19', '/Users/kkuruvad/Desktop/krishna/personal/portfoliomanager/src/media/corporateActions/INE03QK01018.json')
+    get_dividends('SP19', '/Users/kkuruvad/Desktop/krishna/personal/portfoliomanager/src/media/corporateActions/INE03QK01018.json')
+    

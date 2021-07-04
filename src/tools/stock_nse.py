@@ -8,6 +8,10 @@ import requests
 
 DEFAULT_DOWNLOAD_DIR = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 nse_url = 'http://www1.nseindia.com/content/equities/EQUITY_L.csv'
+nse_midcap_url = 'https://www1.nseindia.com/content/indices/ind_niftymidcap150list.csv'
+nse_largecap_url = 'https://www1.nseindia.com/content/indices/ind_nifty100list.csv'
+nse_smallcap_url = 'https://www1.nseindia.com/content/indices/ind_niftysmallcap250list.csv'
+nse_microcap_url = 'https://www1.nseindia.com/content/indices/ind_niftymicrocap250_list.csv'
 
 
 def nse_headers():
@@ -33,12 +37,33 @@ def pull_nse():
     with open(full_file_path, 'wb') as f:
         f.write(r.content)
 
+def pull_nse_cap_file(cap):
+    headers = nse_headers()
+    if cap == 'Large':
+        url = nse_largecap_url
+    elif cap == 'Mid':
+        url = nse_midcap_url
+    elif cap == 'Small':
+        url = nse_smallcap_url
+    else:
+        url = nse_microcap_url
+    r = requests.get(url, headers=headers, timeout=15)
+    if r.status_code==200:
+        decoded_content = r.content.decode('utf-8')
+        csv_reader = csv.DictReader(decoded_content.splitlines(), delimiter=',')
+        ret = list()
+        for row in csv_reader:
+            #print(row)
+            ret.append({'isin':row['ISIN Code'], 'symbol':row['Symbol'], 'industry':row['Industry']})
+        return ret
+    print(f'Got different response {r.status_code}')
+    return None
+
 def is_nse_eq_file_exists():
     full_file_path = nse_eq_file_path()
     if os.path.exists(full_file_path):
         return True
     return False
-
 
 def nse_bse_eq_file_path():
     full_file_path = os.path.join(DEFAULT_DOWNLOAD_DIR, 'nse_bse_eq.json')
@@ -49,7 +74,6 @@ def is_nse_bse_eq_file_exists():
     if os.path.exists(full_file_path):
         return True
     return False
-
 
 def add_or_append(inp, new_str):
     if not inp or inp == '':
@@ -113,7 +137,8 @@ if __name__ == "__main__":
                                 'face_value':row['FACE VALUE'],
                                 'old_nse_symbol':'',
                                 'nse_symbol':'',
-                                'mc_code':''
+                                'mc_code':'',
+                                'cap':''
                                 }
 
             stocks[isin]['nse_name'] = row['NAME OF COMPANY']
@@ -124,9 +149,18 @@ if __name__ == "__main__":
                     stocks[isin]['old_nse_symbol'] = add_or_append(stocks[isin].get('old_nse_symbol', None), row['SYMBOL'])
                 stocks[isin]['nse_symbol'] = row['SYMBOL']
       
-    
+    for cap in ['Large','Mid','Small','Micro']:
+        ret = pull_nse_cap_file(cap)
+        for entry in ret:
+            if entry['isin'] in stocks:
+                stocks[entry['isin']]['cap'] = cap+'-Cap'
+                if stocks[entry['isin']]['industry'] == '':
+                    stocks[entry['isin']]['industry'] = entry['industry']
+            else:
+                print(f'Unknown isin to fill capitalization {entry["isin"]} {entry["symbol"]}')
+
     with open(n_b_path, 'w') as json_file:
-        json.dump(stocks, json_file)
+        json.dump(stocks, json_file, indent=1)
     
     os.remove(n_path)
     

@@ -1,0 +1,95 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'rsus:rsu-list' %}">RSU</a></li>
+    <li><a href="{% url 'rsus:rsu-vest-list' id %}">{{exchange}}/{{symbol}}</a></li>
+    <li><a href="#">Update RSU Award</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+  <div class="form-group row">
+      <div class="col-sm-2"><span>User</span></div>
+      <div class="col-sm-2"><span>{{user}}</span></div>
+  </div>
+  <div class="form-group row">
+      <div class="col-sm-2">Exchange</div>
+      <div class="col-sm-2">{{exchange}}</div>
+  </div>
+  <div class="form-group row">
+      <div class="col-sm-2">Symbol</div>
+      <div class="col-sm-2">{{symbol}}</div>
+  </div>
+  <br>
+  <form action="." method="POST" class="form-horizontal">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6'>
+
+        <div class="form-group row">
+          <label class="control-label col-sm-2 col-form-label" for="id_award_date">Award Date</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="date" name="award_date" value={{award_date}} placeholder="Select a date" required="" id="id_award_date">
+            </div>
+          </div>
+        </div>
+      
+        <div class="form-group row">
+          <label class="control-label col-sm-2 col-form-label" for="id_award_id">Award id</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" name="award_id" value="{{award_id}}" maxlength="20" required="" id="id_award_id">
+            </div>
+          </div>
+        </div>
+      
+        <div class="form-group row">
+          <label class="control-label col-sm-2 col-form-label" for="id_goal">Goal</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="goal" id="id_goal">
+                <option value=""></option>
+              </select>
+            </div>
+          </div>
+        </div>
+      
+        <div class="form-group row">
+          <label class="control-label col-sm-2 col-form-label" for="id_shares_awarded">Awarded</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" name="shares_awarded" value="{{shares_awarded}}" step="1" required="" id="id_shares_awarded">
+            </div>
+          </div>
+        </div>
+      
+        <input type="submit" value="Submit" class="btn btn-primary">&nbsp;<a href="../.." class="btn btn-danger" role="button">Cancel</a>
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+
+{% block ajaxcalls %}
+          {
+            url      : '/goal/get-goals/{{user|safe}}',
+            data     : null,
+            callback : get_goals_and_set_goal
+          },
+{% endblock ajaxcalls %}
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    function get_goals_and_set_goal(response) {
+      set_goals(response, '{{goal|safe}}');
+    }
+  </script>
+{% endblock javascript %}

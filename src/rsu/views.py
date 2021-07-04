@@ -47,28 +47,35 @@ def create_rsu(request):
     return render(request, template, context)
 
 
-class RsuUpdateView(UpdateView):
-    template_name = 'rsus/rsu_create.html'
-    form_class = RsuModelForm
+def update_rsu(request, id):
+    template = "rsus/rsu_update.html"
+    obj = RSUAward.objects.get(id=id)
 
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(RSUAward, id=id_)
-    '''
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
-    '''
-    
-    def get_success_url(self):
-        return reverse('rsus:rsu-list')
+    if request.method == 'POST':
+        award_date = get_date_or_none_from_string(request.POST.get('award_date'))
+        award_id = request.POST.get('award_id')
+        goal = get_int_or_none_from_string(request.POST.get('goal'))
+        shares_awarded = get_int_or_none_from_string(request.POST.get('shares_awarded'))
 
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        #self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
-        self.object.save()
-        form.save_m2m()
-        return HttpResponseRedirect(self.get_success_url())
+        obj.award_date=award_date
+        obj.award_id=award_id
+        obj.shares_awarded = shares_awarded
+        obj.goal = goal
+        obj.save()
+        return HttpResponseRedirect(reverse('rsus:rsu-list'))
+
+    context = {
+        'id':obj.id,
+        'symbol':obj.symbol,
+        'exchange':obj.exchange,
+        'award_date':obj.award_date.strftime("%Y-%m-%d"), 
+        'award_id': obj.award_id, 
+        'goal':obj.goal, 
+        'shares_awarded':obj.shares_awarded,
+        'user':obj.user
+        }
+    print(context)
+    return render(request, template, context)
 
 class RsuListView(ListView):
     template_name = 'rsus/rsu_list.html'

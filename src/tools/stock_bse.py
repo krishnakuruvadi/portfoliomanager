@@ -156,7 +156,8 @@ if __name__ == "__main__":
                                 'listing_date':'',
                                 'old_nse_symbol':'',
                                 'nse_symbol':'',
-                                'mc_code':''
+                                'mc_code':'',
+                                'cap':''
                                 }
             else:
                 if row['Security Code'] != stocks[isin]['bse_security_code']:
