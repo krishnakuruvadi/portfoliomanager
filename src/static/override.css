@@ -254,3 +254,8 @@ div {
         left: -60px;
     }
 }
+
+.paddingBetweenCols td
+{
+    padding:0 15px;
+}

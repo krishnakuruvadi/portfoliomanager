@@ -11,10 +11,11 @@ import time
 #from dateutil import tz
 
 class YahooFinance2(Exchange):
-    timeout = 2
+    timeout = 5
     crumb_link = 'https://finance.yahoo.com/quote/{0}/history?p={0}'
     crumble_regex = r'CrumbStore":{"crumb":"(.*?)"}'
     quote_link = 'https://query1.finance.yahoo.com/v7/finance/download/{quote}?period1={dfrom}&period2={dto}&interval=1d&events=history&crumb={crumb}'
+    quote_link_no_crumb = 'https://query1.finance.yahoo.com/v7/finance/download/{quote}?period1={dfrom}&period2={dto}&interval=1d&events=history'
     live_link = 'https://query1.finance.yahoo.com/v8/finance/chart/{quote}?region=US&lang=en-US&includePrePost=false&interval=2m&useYfid=true&range=1d&corsDomain=finance.yahoo.com&.tsrc=finance'
     retries = 5
 
@@ -40,19 +41,21 @@ class YahooFinance2(Exchange):
         dt = datetime.datetime.combine(date_obj, datetime.datetime.min.time() if use_min else datetime.datetime.max.time())
         return dt
 
-    def get_historical_value(self, start, end):
+    def get_historical_value(self, start, end, include_crumb=False):
         print('getting historical values from ', start, ' to ', end, ' for symbol ', self.symbol)
         for _ in range(self.retries):
             try:
                 if not self.session or len(self.session.cookies) == 0:
                     self.get_session()
-                if not self.crumb:
+                if not self.crumb and include_crumb:
                     self.get_crumb()
                 dt_to =  self.get_datetime_from_date(end,False)
                 dt_from = self.get_datetime_from_date(start)
                 dateto = int(dt_to.timestamp())
                 datefrom = int(dt_from.timestamp())
-                url = self.quote_link.format(quote=self.symbol, dfrom=datefrom, dto=dateto, crumb=self.crumb)
+                url = self.quote_link_no_crumb.format(quote=self.symbol, dfrom=datefrom, dto=dateto)
+                if include_crumb:
+                    url = self.quote_link.format(quote=self.symbol, dfrom=datefrom, dto=dateto, crumb=self.crumb)
                 response = self.session.get(url)
                 response.raise_for_status()
                 text = StringIO(response.text)#response.text
@@ -75,6 +78,8 @@ class YahooFinance2(Exchange):
                 return response
             except Exception as e:
                 print(e)
+        if not include_crumb:
+            return self.get_historical_value(start, end, True)
         return None
 
     def get_live_price(self, name):
@@ -91,6 +96,7 @@ class YahooFinance2(Exchange):
                 text = StringIO(response.text)#response.text
                 #print("in YahooFinance2 response.text:", response.text)
                 data = response.json()
+                print(data)
                 ret = dict()
                 ret['name'] = name
                 meta_data = data["chart"]["result"][0]['meta']

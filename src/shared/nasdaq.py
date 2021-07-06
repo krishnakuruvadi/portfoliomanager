@@ -49,13 +49,16 @@ class Nasdaq(Exchange):
                 time.sleep(3)
         if not get_response or get_response.status_code != 200:
             return None
-        json_data = get_response.json()
-        data = dict()
-        if 'data' in json_data:
-            if 'tradesTable' in json_data['data']:
-                for row in json_data['data']['tradesTable']['rows']:
-                    data[row['date']] = row['close']
-                return data
+        try:
+            json_data = get_response.json()
+            data = dict()
+            if 'data' in json_data:
+                if 'tradesTable' in json_data['data']:
+                    for row in json_data['data']['tradesTable']['rows']:
+                        data[row['date']] = row['close']
+                    return data
+        except Exception as ex:
+            print(f'exception while getting historical value using alternate channel for {self.stock} {ex}')
         return None
 
     def get_historical_value(self, start, end):
@@ -90,24 +93,29 @@ class Nasdaq(Exchange):
         if not get_response or get_response.status_code != 200:
             ret = self.get_alternate_historical_value(start, end)
             return ret
-        text = get_response.iter_lines()
-        reader = csv.DictReader(codecs.iterdecode(text, 'utf-8'), delimiter=',')
-        response = dict()
-        for row in reader:
-            date= None
-            latest_val = None
-            for k,v in row.items():
-                if "Date" in k:
-                    date = datetime.datetime.strptime(v, "%m/%d/%Y").date()
-                elif "Close/Last" in k:
-                    latest_val = v.strip()
+        try:
+            text = get_response.iter_lines()
+            reader = csv.DictReader(codecs.iterdecode(text, 'utf-8'), delimiter=',')
+            response = dict()
+            for row in reader:
+                date= None
+                latest_val = None
+                for k,v in row.items():
+                    if "Date" in k:
+                        date = datetime.datetime.strptime(v, "%m/%d/%Y").date()
+                    elif "Close/Last" in k:
+                        latest_val = v.strip()
 
-            if date and latest_val:
-                response[date] = get_float_or_zero_from_string(latest_val.replace('$',''))
-        print('done with request')
-        print(response)
-        return response
-    
+                if date and latest_val:
+                    response[date] = get_float_or_zero_from_string(latest_val.replace('$',''))
+            print('done with request')
+            print(response)
+            return response
+        except Exception as ex:
+            print(f'exception while getting historical value.  Trying alternate channel for {row} {self.stock} {ex}')
+            ret = self.get_alternate_historical_value(start, end)
+            return ret
+
     def get_index_val(self):
         get_response = None
         for _ in range(3):
