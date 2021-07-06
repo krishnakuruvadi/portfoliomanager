@@ -82,13 +82,13 @@ class YahooFinance2(Exchange):
             return self.get_historical_value(start, end, True)
         return None
 
-    def get_live_price(self, name):
+    def get_live_price(self, name, include_crumb=False):
         print('getting live values for symbol ', self.symbol)
         for _ in range(self.retries):
             try:
                 if not self.session or len(self.session.cookies) == 0:
                     self.get_session()
-                if not self.crumb:
+                if not self.crumb and include_crumb:
                     self.get_crumb()
                 url= self.live_link.format(quote=self.symbol)
                 response = self.session.get(url)
@@ -118,4 +118,7 @@ class YahooFinance2(Exchange):
 
             except Exception as e:
                 print(e)
+        if not include_crumb:
+            return self.get_live_price(name, True)
+
         return None
