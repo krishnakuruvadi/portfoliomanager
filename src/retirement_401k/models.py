@@ -40,7 +40,7 @@ class NAVHistory(models.Model):
     account = models.ForeignKey('Account401K', on_delete=models.CASCADE)
     nav_value = models.DecimalField(max_digits=20, decimal_places=6)
     nav_date = models.DateField()
-    comparision_nav_value = models.DecimalField(max_digits=20, decimal_places=6)
+    comparision_nav_value = models.DecimalField(max_digits=20, decimal_places=6, default=0)
     class Meta:
         unique_together = ('account', 'nav_date')
     

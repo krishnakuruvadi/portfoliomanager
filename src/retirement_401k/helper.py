@@ -78,6 +78,8 @@ def upload_nav(id):
                     NAVHistory.objects.create(account=account, nav_date=date, nav_value=nav_value)
                 except IntegrityError:
                     print(f'NAV entry for {date} exists')
+    else:
+        print(f'couldnt find 401k nav file fo {id} at {nav_file}')
 
 def create_nav_file(id):
     location = os.path.join(settings.MEDIA_ROOT, '401k')
