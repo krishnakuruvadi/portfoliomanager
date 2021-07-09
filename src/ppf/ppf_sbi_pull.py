@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, ElementNotInteractableException
-from .models import Ppf, PpfEntry
+from .models import Ppf
 from shared.utils import *
 
 def get_path_to_chrome_driver():
@@ -37,6 +37,9 @@ def pull_sbi_transactions(user, password, number, start_date):
         continue_elem = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@class,'login_button')]")))
         continue_elem.click()
         time.sleep(2)
+        #captcha_id = driver.find_element_by_id('refreshImgCaptcha')
+        #print(captcha_id)        
+        #https://retail.onlinesbi.com/retail/simpleCaptchaServ?1625812148436
         login_id = driver.find_element_by_id('username')
         login_id.send_keys(user)
         passwd_id = driver.find_element_by_id('label2')
@@ -44,11 +47,23 @@ def pull_sbi_transactions(user, password, number, start_date):
         for i in range(10):
             time.sleep(2)
             captcha_id = driver.find_element_by_id('loginCaptchaValue')
-            if len(captcha_id.get_attribute("value")) > 5:
+            if len(captcha_id.get_attribute("value")) > 4:
                 break
         login_button = driver.find_element_by_id('Button2')
         login_button.click()
         time.sleep(5)
+        #https://retail.onlinesbi.com/retail/loginsubmit.htm
+
+        for i in range(60):
+            time.sleep(2)
+            sms_pass = driver.find_element_by_id('smsPassword')
+            if len(sms_pass.get_attribute("value")) > 7:
+                break
+
+        continue_button = driver.find_element_by_id('btContinue')
+        continue_button.click()
+        time.sleep(5)
+
         try:
             for fy in range(start_date.year, datetime.date.today().year):
                 from_date = datetime.date(year=fy,month=4,day=1)

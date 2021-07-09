@@ -7,6 +7,7 @@
 {% block viewname %} 
   <ul class="breadcrumb">
     <li><a href="{% url 'ssys:ssy-list' %}">SSY</a></li>
+    <li><a href="{% url 'ssys:ssy-detail' number %}">{{number}}</a></li>
     <li><a href="#">Upload SSY Transactions</a></li>
   </ul>
 {% endblock viewname %}

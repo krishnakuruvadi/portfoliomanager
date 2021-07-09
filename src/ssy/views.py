@@ -197,7 +197,10 @@ def upload_ssy_trans(request, id):
             full_file_path = settings.MEDIA_ROOT + '/' + file_locn
             ssy_add_transactions(request.POST.get('bankFormControlSelect'), full_file_path)
             fs.delete(file_locn)
-    return render(request, 'ssys/ssy_add_entries.html')
+    context = dict()
+    context['number'] = id
+    print(context)
+    return render(request, 'ssys/ssy_add_entries.html', context)
 
 class ChartData(APIView):
     authentication_classes = []

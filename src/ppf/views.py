@@ -197,7 +197,10 @@ def upload_ppf_trans(request, id):
             full_file_path = settings.MEDIA_ROOT + '/' + file_locn
             ppf_add_transactions(request.POST.get('bankFormControlSelect'), full_file_path)
             fs.delete(file_locn)
-    return render(request, 'ppfs/ppf_add_entries.html')
+    context = dict()
+    context['number'] = id
+    print(context)
+    return render(request, 'ppfs/ppf_add_entries.html', context)
 
 class ChartData(APIView):
     authentication_classes = []

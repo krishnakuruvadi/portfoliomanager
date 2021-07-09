@@ -7,6 +7,7 @@
 {% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'ppfs:ppf-list' %}">PPFs</a></li>
+    <li><a href="{% url 'ppfs:ppf-detail' number %}">{{number}}</a></li>
     <li><a href="#">Upload PPF Transactions</a></li>
   </ul>
 {% endblock viewname %}
