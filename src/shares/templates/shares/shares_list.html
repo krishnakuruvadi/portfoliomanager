@@ -93,6 +93,8 @@
         <th scope="col">Latest Value</th>
         <th scope="col">P&L</th>
         <th scope="col">Realised P&L</th>
+        <th scope="col">Unrealised P&L</th>
+        <th scope="col">Unrealised XIRR <i class="far fa-question-circle" data-toggle="tooltip" data-placement="top" title="XIRR is annualised return over multiple unevenly spaced investments"></i></th>
         <th scope="col"></th>
       </tr>
     </thead>
@@ -110,6 +112,8 @@
         <td>{{ instance.latest_value }}</td>
         <td>{{ instance.gain }}</td>
         <td>{{ instance.realised_gain }}</td>
+        <td>{{ instance.gain }}</td>
+        <td>{{ instance.roi }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
           <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>

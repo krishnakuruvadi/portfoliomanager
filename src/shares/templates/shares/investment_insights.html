@@ -39,13 +39,13 @@
     <table>
       {% for color in country_colors %}
         <tr>
-          <td>
+          <td style="padding:0 5px 0 5px;">
             <div id="rectangle" style="width:30px;height:15px;background:{{color}}"></div>
           </td>
-          <td>
+          <td style="padding:0 5px 0 5px;">
             {{country_labels|indexone:forloop.counter}}
           </td>
-          <td>
+          <td style="padding:0 5px 0 5px;">
             {{country_vals|indexone:forloop.counter}} ({{country_percents|indexone:forloop.counter}}%)
           </td>
         </tr>
@@ -57,13 +57,13 @@
     <table>
       {% for color in blend_colors %}
         <tr>
-          <td>
+          <td style="padding:0 5px 0 5px;">
             <div id="rectangle" style="width:30px;height:15px;background:{{color}}"></div>
           </td>
-          <td>
+          <td style="padding:0 5px 0 5px;">
             {{blend_labels|indexone:forloop.counter}}
           </td>
-          <td>
+          <td style="padding:0 5px 0 5px;">
             {{blend_vals|indexone:forloop.counter}} ({{blend_percents|indexone:forloop.counter}}%)
           </td>
         </tr>

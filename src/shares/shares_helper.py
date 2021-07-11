@@ -410,6 +410,10 @@ def reconcile_share(share_obj):
         share_obj.buy_price = buy_price
         share_obj.realised_gain = realised_gain
         share_obj.gain = unrealised_gain
+        roi = 0
+        if qty > 0:
+            roi = get_roi(transactions, share_obj.latest_value)
+        share_obj.roi = roi
         share_obj.save()
     except Stock.DoesNotExist:
         description='Stock not found in db. No splits/bonuses data available.  This affects other calculations.'
@@ -418,6 +422,20 @@ def reconcile_share(share_obj):
             content=description,
             severity=Severity.warning
         )
+
+def get_roi(transactions, latest_value):
+    from shared.financial import xirr
+    cash_flows = list()
+    for t in transactions:
+        if t.trans_type == 'Buy':
+            cash_flows.append((t.trans_date, -1*float(t.trans_price)))
+        else:
+            cash_flows.append((t.trans_date, float(t.trans_price)))
+    if latest_value > 0:
+        cash_flows.append((datetime.date.today(), float(latest_value)))
+    roi = xirr(cash_flows, 0.1)*100
+    roi = round(roi, 2)
+    return roi
 
 '''
 def reconcile_share(share_obj, log_calc=False):
