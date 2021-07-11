@@ -40,6 +40,7 @@ from common.helper import get_mf_passwords
 from .tasks_helper import *
 from common.nse import NSE
 from rsu.rsu_helper import update_rsu_latest_vals
+from common.shares_helper import update_stocks, update_tracked_stocks
 
 
 def set_task_state(name, state):
@@ -301,6 +302,7 @@ def update_goal_contrib():
 def update_shares_latest_vals():
     set_task_state('update_shares_latest_vals', TaskState.Running)
     add_untracked_transactions()
+    update_tracked_stocks()
     reconcile_shares()
     update_shares_latest_val()
     set_task_state('update_shares_latest_vals', TaskState.Successful)
@@ -898,10 +900,13 @@ def poll_market_news():
     from markets.markets_helper import get_news
     get_news()
 
-@db_periodic_task(crontab(minute='30', hour='*/4', day='1-10'))
+@db_periodic_task(crontab(minute='30', hour='*/12'))
 def pull_corporate_actions_shares():
     from shares.shares_helper import pull_and_store_corporate_actions
+    set_task_state('pull_corporate_actions_shares', TaskState.Running)
     pull_and_store_corporate_actions()
+    update_stocks()
+    set_task_state('pull_corporate_actions_shares', TaskState.Successful)
 
 @db_task()
 def update_401k_month_end_vals():

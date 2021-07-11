@@ -2,7 +2,7 @@
 
 {% block viewname %}
   <ul class="breadcrumb">
-    <li><a href="#">Shares </a></li>
+    <li><a href="#">Shares</a></li>
   </ul>
 {% endblock %} 
 
@@ -16,6 +16,21 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
+  <table class="table table-borderless">
+    <tr>
+      <td>
+        <ul class="nav nav-pills">
+          <li class="nav-item">
+            <a class="nav-link active" href="#">Shares</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="insights">Insights</a>
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
   <table class="table table-borderless">
     <tr>
       <td>

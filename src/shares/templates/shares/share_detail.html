@@ -62,10 +62,18 @@
         {% if split %}
           <h5>Split</h5>
           <table class="table table-hover">
+            <tr>
+              <th>Announcement Date</th>
+              <th>Ex-Date</th>
+              <th>Old FV</th>
+              <th>New FV</th>
+            </tr>
             {% for s in split %}
               <tr>
-                <td>{{s.date}}</td>
-                <td>{{s.ratio}}</td>
+                <td>{{s.announcement_date}}</td>
+                <td>{{s.ex_date}}</td>
+                <td>{{s.old_fv}}</td>
+                <td>{{s.new_fv}}</td>
               </tr>
             {% endfor %}
           </table>
@@ -74,9 +82,17 @@
         {% if bonus %}
           <h5>Bonus</h5>
           <table class="table table-hover">
+            <tr>
+              <th>Announcement Date</th>
+              <th>Record-Date</th>
+              <th>Ex-Date</th>
+              <th>Ratio</th>
+            </tr>
             {% for b in bonus %}
               <tr>
-                <td>{{b.date}}</td>
+                <td>{{b.announcement_date}}</td>
+                <td>{{b.record_date}}</td>
+                <td>{{b.ex_date}}</td>
                 <td>{{b.ratio}}</td>
               </tr>
             {% endfor %}
@@ -86,9 +102,15 @@
         {% if dividend %}
         <h5>Dividend</h5>
         <table class="table table-hover">
+          <tr>
+            <th>Announcement Date</th>
+            <th>Ex-Date</th>
+            <th>Amount</th>
+          </tr>
           {% for d in dividend %}
             <tr>
-                <td>{{d.date}}</td>
+                <td>{{d.announcement_date}}</td>
+                <td>{{d.ex_date}}</td>
                 <td>{{d.amount}}</td>
             </tr>
           {% endfor %}

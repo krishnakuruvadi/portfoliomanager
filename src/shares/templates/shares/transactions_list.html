@@ -3,6 +3,9 @@
 {% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'shares:shares-list' %}">Shares</a></li>
+    {% if share_name != '' %}
+    <li><a href="{% url 'shares:share-detail' share_id %}">{{share_name}}</a></li>
+    {% endif %}
     <li><a href="#">Transactions</a></li>
   </ul>
 {% endblock %} 

@@ -54,6 +54,9 @@ def get_tasks(request):
         },
         'update_rsu': {
             'description':'Update RSU investment with latest value'
+        },
+        'pull_corporate_actions_shares': {
+            'description':'Pull corporate actions of shares'
         }
     }
     for task in available_tasks.keys():

@@ -14,7 +14,8 @@ from .views import (
     update_share,
     refresh,
     CurrentShares,
-    delete_shares
+    delete_shares,
+    shares_insights
     #ChartData
 )
 
@@ -27,6 +28,7 @@ urlpatterns = [
     path('transactions', TransactionsListView.as_view(), name='transactions-list'),
     path('upload/', upload_transactions, name='transaction-upload'),
     path('delete/', delete_shares, name='shares-delete'),
+    path('insights', shares_insights, name='shares-insights'),
     path('transaction/<id>/delete', TransactionDeleteView.as_view(), name='transaction-delete'),
     path('<id>/', ShareDetailView.as_view(), name='share-detail'),
     path('<id>/update', update_share, name='share-update'),

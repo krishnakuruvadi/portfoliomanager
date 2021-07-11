@@ -35,6 +35,8 @@ class Share(models.Model):
     notes = models.CharField(max_length=80, null=True, blank=True)
     realised_gain = models.DecimalField(_('Realised Gain'), max_digits=20, decimal_places=2, null=True, blank=True)
     etf = models.BooleanField(default=False)
+    roi = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+
     
     def get_absolute_url(self):
         return reverse('shares:share-detail', args=[str(self.id)])

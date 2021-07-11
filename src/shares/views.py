@@ -15,7 +15,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from .models import Share, Transactions
-from common.models import Dividend, Bonus, Split
+from common.models import Dividendv2, Bonusv2, Splitv2, Stock
 from .shares_helper import *
 from shared.utils import *
 from shared.handle_get import *
@@ -33,6 +33,13 @@ import time
 class TransactionsListView(ListView):
     template_name = 'shares/transactions_list.html'
     queryset = Transactions.objects.all()
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        print(data)
+        data['share_name'] = ''
+        data['share_id'] = ''
+        return data
 
 def get_shares_list(request):
     template = 'shares/shares_list.html'
@@ -113,7 +120,11 @@ class ShareTransactionsListView(ListView):
         print("id is:",id_)
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
         data['user_name_mapping'] = get_all_users()
+        o = get_object_or_404(Share, id=id_)
+        data['share_name'] = o.exchange+'/'+o.symbol+'/'+get_user_short_name_or_name_from_id(o.user)
+        data['share_id'] = o.id
         return data
+
     def get_queryset(self):
         id_ = self.kwargs.get("id")
         print("id is:",id_)
@@ -153,25 +164,26 @@ class ShareDetailView(DetailView):
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
-        obj = self.get_object()
-        exchange = obj.exchange
-        if exchange == 'NSE/BSE':
-            exchange = 'NSE'
-        divs = list()
-        for dividend in Dividend.objects.filter(exchange=exchange, symbol=obj.symbol):
-            divs.append({'date':dividend.date, 'amount':dividend.amount})
-        if len(divs) > 0:
-            data['dividend'] = divs
-        splits = list()
-        for split in Split.objects.filter(exchange=exchange, symbol=obj.symbol):
-            splits.append({'date':split.date, 'ratio':str(split.ratio_num)+':'+str(split.ratio_denom)})
-        if len(splits) > 0:
-            data['split'] = splits
-        bonuses = list()
-        for bonus in Bonus.objects.filter(exchange=exchange, symbol=obj.symbol):
-            bonuses.append({'date':bonus.date, 'ratio':str(bonus.ratio_num)+':'+str(bonus.ratio_denom)})
-        if len(bonuses) > 0:
-            data['bonus'] = bonuses
+        obj = self.get_object()        
+        try:
+            stock = Stock.objects.get(exchange=obj.exchange, symbol=obj.symbol)
+            divs = list()
+            for dividend in Dividendv2.objects.filter(stock=stock).order_by('-announcement_date'):
+                divs.append({'announcement_date':dividend.announcement_date, 'ex_date':dividend.ex_date, 'amount':dividend.amount})
+            if len(divs) > 0:
+                data['dividend'] = divs
+            splits = list()
+            for split in Splitv2.objects.filter(stock=stock).order_by('-announcement_date'):
+                splits.append({'announcement_date':split.announcement_date, 'ex_date':split.ex_date, 'old_fv':str(split.old_fv), 'new_fv':str(split.new_fv)})
+            if len(splits) > 0:
+                data['split'] = splits
+            bonuses = list()
+            for bonus in Bonusv2.objects.filter(stock=stock).order_by('-announcement_date'):
+                bonuses.append({'announcement_date':bonus.announcement_date, 'record_date':bonus.record_date, 'ex_date':bonus.ex_date, 'ratio':str(bonus.ratio_num)+':'+str(bonus.ratio_denom)})
+            if len(bonuses) > 0:
+                data['bonus'] = bonuses
+        except Stock.DoesNotExist:
+            print(f'stock doesnt exist in db {obj.exchange} {obj.symbol}')
         return data
 
 class TransactionDetailView(DetailView):
@@ -390,3 +402,69 @@ class CurrentShares(APIView):
 def delete_shares(request):
     Share.objects.all().delete()
     return HttpResponseRedirect('../')
+
+def shares_insights(request):
+    template = 'shares/investment_insights.html'
+    queryset = Share.objects.all()
+    data = dict()
+    country = dict()
+    blend = dict()
+    total = 0
+    for s in queryset:
+        if s.exchange in ['BSE', 'NSE', 'NSE/BSE']:
+            country['India'] = add_two(country.get('India', 0), s.latest_value)
+        elif s.exchange in ['NASDAQ', 'NYSE']:
+            country['USA'] = add_two(country.get('USA', 0), s.latest_value)
+        else:
+            country['Others'] = add_two(country.get('Others', 0), s.latest_value)
+        try:
+            stock = Stock.objects.get(symbol=s.symbol,exchange=s.exchange)
+            cap = stock.capitalisation if stock.capitalisation and stock.capitalisation != '' else 'Unknown'
+            blend[cap] = add_two(blend.get(cap,0),s.latest_value)
+        except Stock.DoesNotExist:
+            cap = 'Unknown'
+            blend[cap] = add_two(blend.get(cap,0),s.latest_value)
+
+        total = add_two(total, s.latest_value)
+
+    data['blend_labels'] = list()
+    data['blend_vals'] = list()
+    data['blend_colors'] = list()
+    data['blend_percents'] = list()
+    for k,v in blend.items():
+        if v:
+            data['blend_labels'].append(k)
+            data['blend_vals'].append(float(v))
+            import random
+            r = lambda: random.randint(0,255)
+            data['blend_colors'].append('#{:02x}{:02x}{:02x}'.format(r(), r(), r()))
+            h = float(v)*100/float(total)
+            h = int(round(h))
+            data['blend_percents'].append(h)
+    
+    data['country_labels'] = list()
+    data['country_vals'] = list()
+    data['country_colors'] = list()
+    data['country_percents'] = list()
+    for k,v in country.items():
+        if v:
+            data['country_labels'].append(k)
+            data['country_vals'].append(float(v))
+            import random
+            r = lambda: random.randint(0,255)
+            data['country_colors'].append('#{:02x}{:02x}{:02x}'.format(r(), r(), r()))
+            h = float(v)*100/float(total)
+            h = int(round(h))
+            data['country_percents'].append(h)
+    print('returning:', data)
+    return render(request, template, data)
+
+
+def add_two(first, second):
+    if first and second:
+        return int(first+second)
+    if first:
+        return int(first)
+    if second:
+        return int(second)
+    return None

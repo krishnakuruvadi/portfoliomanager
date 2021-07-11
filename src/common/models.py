@@ -10,53 +10,62 @@ EXCHANGE_CHOICES = [
     ('NYSE', 'NYSE'),
     ('BSE', 'BSE'),
     ('NSE', 'NSE'),
+    ('NSE/BSE', 'NSE/BSE'),
 ]
 
-class Bonus(models.Model):
-    class Meta:
-        unique_together = (('exchange', 'symbol', 'date'),)
-    exchange = models.CharField(max_length=10, choices=EXCHANGE_CHOICES)
-    symbol = models.CharField(max_length=20)
-    isin = models.CharField(max_length=20)
-    ratio_num = models.DecimalField( max_digits=20, decimal_places=2, null=False)
-    ratio_denom = models.DecimalField( max_digits=20, decimal_places=2, null=False)
-    date = models.DateField(null=False)
-    subject = models.CharField(max_length=200)
-    def __str__(self):
-        return self.symbol + '/' + self.exchange + ': ' + self.isin + ': ' + self.subject + ' on ' + str(self.date)
+CAPITALISATION_CHOICES = [
+    ('Large-Cap','Large-Cap'),
+    ('Mid-Cap','Mid-Cap'),
+    ('Small-Cap','Small-Cap'),
+    ('Micro-Cap','Micro-Cap'),
+]
 
-class Split(models.Model):
+class Bonusv2(models.Model):
     class Meta:
-        unique_together = (('exchange', 'symbol', 'date'),)
-    exchange = models.CharField(max_length=10, choices=EXCHANGE_CHOICES)
-    symbol = models.CharField(max_length=20)
-    isin = models.CharField(max_length=20)
+        unique_together = (('stock', 'announcement_date'),)
+    stock = models.ForeignKey('Stock', on_delete=models.CASCADE)
     ratio_num = models.DecimalField( max_digits=20, decimal_places=2, null=False)
     ratio_denom = models.DecimalField( max_digits=20, decimal_places=2, null=False)
-    date = models.DateField(null=False)
-    subject = models.CharField(max_length=200)
+    announcement_date = models.DateField(null=False)
+    record_date = models.DateField(null=False)
+    ex_date = models.DateField(null=False)
+
+    def __str__(self):
+        return self.stock.symbol + '/' + self.stock.exchange + ': ' + self.stock.isin + ' on ' + str(self.announcement_date)
+
+class Splitv2(models.Model):
+    class Meta:
+        unique_together = (('stock', 'announcement_date'),)
+    stock = models.ForeignKey('Stock', on_delete=models.CASCADE)
+    old_fv = models.DecimalField( max_digits=20, decimal_places=2, null=False)
+    new_fv = models.DecimalField( max_digits=20, decimal_places=2, null=False)
+    announcement_date = models.DateField(null=False)    
+    ex_date = models.DateField(null=False)
+
+    def __str__(self):
+        return self.stock.symbol + '/' + self.stock.exchange + ': ' + self.stock.isin + ' on ' + str(self.announcement_date)
+
+class Dividendv2(models.Model):
+    class Meta:
+        unique_together = (('stock', 'announcement_date'),)
+    stock = models.ForeignKey('Stock', on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=20, decimal_places=2, null=False)
+    announcement_date = models.DateField(null=False)
+    ex_date = models.DateField(null=False)
     
     def __str__(self):
-        return self.symbol + '/' + self.exchange + ': ' + self.isin + ': ' + self.subject + ' on ' + str(self.date)
-
-class Dividend(models.Model):
-    class Meta:
-        unique_together = (('exchange', 'symbol', 'date'),)
-    exchange = models.CharField(max_length=10, choices=EXCHANGE_CHOICES)
-    symbol = models.CharField(max_length=20)
-    isin = models.CharField(max_length=20)
-    amount = models.DecimalField(max_digits=20, decimal_places=2, null=False)
-    date = models.DateField(null=False)
-    subject = models.CharField(max_length=200)
-    def __str__(self):
-        return self.symbol + '/' + self.exchange + ': ' + self.isin + ': ' + str(self.amount) + ' on ' + str(self.date)
-
+        return self.stock.symbol + '/' + self.stock.exchange + ': ' + self.stock.isin + str(self.amount) + ' on ' + str(self.announcement_date)
+    
 class Stock(models.Model):
     class Meta:
         unique_together = (('exchange','symbol'),)
     exchange = models.CharField(max_length=10, choices=EXCHANGE_CHOICES)
     symbol = models.CharField(max_length=20)
+    isin = models.CharField(max_length=20, default='')
     collection_start_date = models.DateField(_('Collection Start Date'), )
+    capitalisation = models.CharField(max_length=15, choices=CAPITALISATION_CHOICES, null=True, blank=True)
+    industry = models.CharField(max_length=50, null=True, blank=True)
+    etf = models.BooleanField(default=False)
     
     def get_absolute_url(self):
         return reverse("common:stock-detail", kwargs={'id': self.id})

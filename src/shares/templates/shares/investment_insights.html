@@ -1,0 +1,130 @@
+{% extends 'base.html' %} 
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Shares</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="transactions"><i class="far fa-file-alt" aria-hidden="true" title="All Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="upload"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="add"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;padding-right:25px;" href="delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Shares" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+<table class="table table-borderless">
+  <tr>
+    <td>
+      <ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link" href="../shares/">Shares</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Insights</a>
+        </li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+<div class="row">
+  <div class='col-sm-2'>
+    <canvas id="countryChart" width="200" height="200"></canvas>
+  </div>
+  <div class='col-sm-4'>
+    <table>
+      {% for color in country_colors %}
+        <tr>
+          <td>
+            <div id="rectangle" style="width:30px;height:15px;background:{{color}}"></div>
+          </td>
+          <td>
+            {{country_labels|indexone:forloop.counter}}
+          </td>
+          <td>
+            {{country_vals|indexone:forloop.counter}} ({{country_percents|indexone:forloop.counter}}%)
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class='col-sm-1'></div>
+  <div class='col-sm-3'>
+    <table>
+      {% for color in blend_colors %}
+        <tr>
+          <td>
+            <div id="rectangle" style="width:30px;height:15px;background:{{color}}"></div>
+          </td>
+          <td>
+            {{blend_labels|indexone:forloop.counter}}
+          </td>
+          <td>
+            {{blend_vals|indexone:forloop.counter}} ({{blend_percents|indexone:forloop.counter}}%)
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class='col-sm-2'>
+    <canvas id="blendChart" width="200" height="200"></canvas>
+  </div>
+</div>
+{% endblock content %}
+
+<script>
+{% block jquery %}
+var blend_colors = {{blend_colors|safe}}
+var blend_vals = {{blend_vals|safe}}
+var blend_labels = {{blend_labels|safe}}
+var country_colors = {{country_colors|safe}}
+var country_vals = {{country_vals|safe}}
+var country_labels = {{country_labels|safe}}
+setChart()
+
+function setChart(){
+    var ctx = document.getElementById('countryChart').getContext('2d');
+    var config = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: country_vals,
+          backgroundColor: country_colors,
+          label: 'Country'
+        }],
+        labels: country_labels
+      },
+      options: {
+        responsive: true,
+        legend: {
+          display: false
+        }
+      }
+    };
+    var ctx2 = document.getElementById('blendChart').getContext('2d');
+    var config2 = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: blend_vals,
+          backgroundColor: blend_colors,
+          label: 'Blend'
+        }],
+        labels: blend_labels
+      },
+      options: {
+        responsive: true,
+        legend: {
+          display: false
+        }
+      }
+    };
+    var countryChart = new Chart(ctx,config);
+    var blendChart = new Chart(ctx2, config2);
+  }
+{% endblock jquery %}
+</script>

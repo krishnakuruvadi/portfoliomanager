@@ -16,6 +16,10 @@ import os
 import zipfile
 import csv
 import json
+from shared.utils import *
+from common.models import Bonusv2, Splitv2, Stock
+from tools.stock_reconcile import reconcile_event_based
+
 
 
 def shares_add_transactions(broker, user, full_file_path):
@@ -388,11 +392,35 @@ def reconcile_shares(log_calc=False):
     merge_bse_nse()
     share_objs = Share.objects.all()
     for share_obj in share_objs:
-        reconcile_share(share_obj, log_calc)
+        reconcile_share(share_obj)
+        
     check_discrepancies()
 
+
+def reconcile_share(share_obj):
+    transactions = Transactions.objects.filter(share=share_obj).order_by('trans_date')
+    try:
+        stock = Stock.objects.get(exchange=share_obj.exchange, symbol=share_obj.symbol)
+        bonuses = Bonusv2.objects.filter(stock=stock)
+        splits = Splitv2.objects.filter(stock=stock)
+        round_qty_to_int = True if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE'] else False
+        qty, buy_value, buy_price, realised_gain, unrealised_gain = reconcile_event_based(transactions, bonuses, splits, round_qty_to_int=round_qty_to_int, latest_price=share_obj.latest_price, latest_conversion_rate=share_obj.conversion_rate)
+        share_obj.quantity = qty
+        share_obj.buy_value = buy_value
+        share_obj.buy_price = buy_price
+        share_obj.realised_gain = realised_gain
+        share_obj.gain = unrealised_gain
+        share_obj.save()
+    except Stock.DoesNotExist:
+        description='Stock not found in db. No splits/bonuses data available.  This affects other calculations.'
+        create_alert(
+            summary=f'{share_obj.exchange} {share_obj.symbol}  not found in db.',
+            content=description,
+            severity=Severity.warning
+        )
+
+'''
 def reconcile_share(share_obj, log_calc=False):
-    from common.models import Bonus, Split
     quantity = 0
     buy_value = 0
     buy_price = 0
@@ -403,83 +431,88 @@ def reconcile_share(share_obj, log_calc=False):
         print('***********************************************************************************')
         print(f'    {share_obj.exchange} {share_obj.symbol}')
         print('***********************************************************************************')
-    for trans in transactions:
-        #print(f"start at {str(quantity)}")
-        if last_trans and quantity>0:
-            bonus = Bonus.objects.filter(exchange='NSE' if share_obj.exchange == 'NSE/BSE' else share_obj.exchange, symbol=share_obj.symbol, date__lte=trans.trans_date, date__gte=last_trans.trans_date)
-            for b in bonus:
-                quantity = quantity + (quantity*b.ratio_num)/b.ratio_denom
-                if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
-                    quantity = int(quantity)
-                if log_calc:
-                    print(f'{b.date}: {b.subject}, {quantity}')
-            split = Split.objects.filter(exchange='NSE' if share_obj.exchange == 'NSE/BSE' else share_obj.exchange, symbol=share_obj.symbol, date__lte=trans.trans_date, date__gte=last_trans.trans_date)
-            for s in split:
-                quantity = (quantity*s.ratio_num)/s.ratio_denom
-                if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
-                    quantity = int(quantity)
-                if log_calc:
-                    print(f'{s.date}: {s.subject}, {quantity}')
-            #print(f"After bonus and split at {str(quantity)}")
-        if trans.trans_type == 'Buy':
-            quantity += trans.quantity
-            buy_value += trans.trans_price
-        else:
-            if quantity != 0:
-                realised_gain += trans.trans_price - ((buy_value*trans.quantity)/quantity)
+    try:
+        stock = Stock.objects.get(exchange=share_obj.exchange, symbol=share_obj.symbol)
+        for trans in transactions:
+            #print(f"start at {str(quantity)}")
+            if last_trans and quantity>0:
+                #https://www.chittorgarh.com/faq/what_is_bonus_share_and_its_record_date/95/
+                bonus = Bonusv2.objects.filter(stock=stock, record_date__lte=trans.trans_date, record_date__gte=last_trans.trans_date)
+                for b in bonus:
+                    quantity = quantity + (quantity*b.ratio_num)/b.ratio_denom
+                    if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                        quantity = int(quantity)
+                    if log_calc:
+                        print(f'{b.date}: {quantity}')
+                split = Splitv2.objects.filter(stock=stock, ex_date__lte=trans.trans_date, ex_date__gte=last_trans.trans_date)
+                for s in split:
+                    quantity = (quantity*s.old_fv)/s.new_fv
+                    if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                        quantity = int(quantity)
+                    if log_calc:
+                        print(f'{s.date}: {quantity}')
+                #print(f"After bonus and split at {str(quantity)}")
+            if trans.trans_type == 'Buy':
+                quantity += trans.quantity
+                buy_value += trans.trans_price
             else:
-                realised_gain += trans.trans_price
-            quantity -= trans.quantity
-        if log_calc:
-            print(f'{trans.trans_date}: {trans.trans_type} {trans.quantity}, {quantity}')
-        #print(f"After transaction {trans.trans_type} on {trans.trans_date} at {str(quantity)}")
-        last_trans = trans
-    
-    if quantity > 0:
-        sqty = quantity
-        if last_trans:
-            bonus = Bonus.objects.filter(exchange='NSE' if share_obj.exchange == 'NSE/BSE' else share_obj.exchange, symbol=share_obj.symbol, date__lte=datetime.date.today(), date__gte=last_trans.trans_date)
-            for b in bonus:
-                quantity = quantity + (quantity*b.ratio_num)/b.ratio_denom
-                if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
-                    quantity = int(quantity)
-                if log_calc:
-                    print(f'{b.date}: {b.subject}, {quantity}')
-            split = Split.objects.filter(exchange='NSE' if share_obj.exchange == 'NSE/BSE' else share_obj.exchange, symbol=share_obj.symbol, date__lte=datetime.date.today(), date__gte=last_trans.trans_date)
-            for s in split:
-                quantity = (quantity*s.ratio_num)/s.ratio_denom
-                if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
-                    quantity = int(quantity)
-                if log_calc:
-                    print(f'{s.date}: {s.subject}, {quantity}')
+                if quantity != 0:
+                    realised_gain += trans.trans_price - ((buy_value*trans.quantity)/quantity)
+                else:
+                    realised_gain += trans.trans_price
+                quantity -= trans.quantity
+            if log_calc:
+                print(f'{trans.trans_date}: {trans.trans_type} {trans.quantity}, {quantity}')
+            #print(f"After transaction {trans.trans_type} on {trans.trans_date} at {str(quantity)}")
+            last_trans = trans
+        
         if quantity > 0:
-            buy_price = buy_value/quantity
+            sqty = quantity
+            if last_trans:
+                bonus = Bonusv2.objects.filter(stock=stock, record_date__lte=datetime.date.today(), record_date__gte=last_trans.trans_date)
+                for b in bonus:
+                    quantity = quantity + (quantity*b.ratio_num)/b.ratio_denom
+                    if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                        quantity = int(quantity)
+                    if log_calc:
+                        print(f'{b.date}: {quantity}')
+                split = Splitv2.objects.filter(stock=stock, ex_date__lte=datetime.date.today(), ex_date__gte=last_trans.trans_date)
+                for s in split:
+                    quantity = (quantity*s.old_fv)/s.new_fv
+                    if share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                        quantity = int(quantity)
+                    if log_calc:
+                        print(f'{s.date}: {quantity}')
+            if quantity > 0:
+                buy_price = buy_value/quantity
+            else:
+                print(f"weird that we started at {str(sqty)} and ended up with {str(quantity)} after bonus and split for {share_obj.symbol}")
+        elif quantity < 0:
+            description='Selling more than available. This affects other calculations. Please correct'
+            create_alert(
+                summary=share_obj.symbol + ' Quantity adding up to ' + str(quantity) + '. This affects other calculations.',
+                content=description,
+                severity=Severity.warning
+            )
+            quantity = 0
         else:
-            print(f"weird that we started at {str(sqty)} and ended up with {str(quantity)} after bonus and split for {share_obj.symbol}")
-    elif quantity < 0:
-        description='Selling more than available. This affects other calculations. Please correct'
-        create_alert(
-            summary=share_obj.symbol + ' Quantity adding up to ' + str(quantity) + '. This affects other calculations.',
-            content=description,
-            severity=Severity.warning
-        )
-        quantity = 0
-    else:
-        buy_price = 0
-    if log_calc:
-        print('***********************************************************************************')
-        print(f'    {quantity}')
-        print('***********************************************************************************')
-    #print(f'ended up with {str(quantity)}')
-    share_obj.quantity = quantity
-    share_obj.buy_value = buy_value
-    share_obj.buy_price = buy_price
-    share_obj.realised_gain = realised_gain
-    if share_obj.latest_price and share_obj.conversion_rate:
-        share_obj.latest_value = share_obj.quantity*share_obj.latest_price*share_obj.conversion_rate
-        share_obj.gain = share_obj.latest_value-share_obj.buy_value
-    share_obj.save()        
-
+            buy_price = 0
+        if log_calc:
+            print('***********************************************************************************')
+            print(f'    {quantity}')
+            print('***********************************************************************************')
+        #print(f'ended up with {str(quantity)}')
+        share_obj.quantity = quantity
+        share_obj.buy_value = buy_value
+        share_obj.buy_price = buy_price
+        share_obj.realised_gain = realised_gain
+        if share_obj.latest_price and share_obj.conversion_rate:
+            share_obj.latest_value = share_obj.quantity*share_obj.latest_price*share_obj.conversion_rate
+            share_obj.gain = share_obj.latest_value-share_obj.buy_value
+        share_obj.save()
+    except Stock.DoesNotExist:
+        print(f'no stock found {share_obj.exchange} {share_obj.symbol}')
+'''
 
 def check_discrepancies():
     share_objs = Share.objects.all()
@@ -499,6 +532,7 @@ def check_discrepancies():
                 severity=Severity.warning
             )
     '''
+
 def move_trans(from_share_obj, to_share_obj, delete_from_share_obj=False):
     print(f'moving transactions from {from_share_obj.exchange}:{from_share_obj.symbol} to {to_share_obj.exchange}:{to_share_obj.symbol}')
     for trans in Transactions.objects.filter(share=from_share_obj):
@@ -621,6 +655,7 @@ def update_shares_latest_val():
             share_obj.latest_value = 0
             share_obj.latest_price = 0
             share_obj.gain= 0
+            share_obj.roi = 0
             share_obj.as_on_date = datetime.date.today()
             share_obj.save()
         else:
