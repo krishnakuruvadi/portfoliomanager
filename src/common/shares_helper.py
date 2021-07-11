@@ -410,15 +410,17 @@ def update_stocks():
 def get_usa_details(symbol):
     mCap = None
     industry = None
+    user_agent_headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+
     try:
-        summaryDetail = requests.get(f'https://query2.finance.yahoo.com/v10/finance/quoteSummary/{symbol}?formatted=true&crumb=8ldhetOu7RJ&lang=en-US&region=US&modules=summaryDetail&corsDomain=finance.yahoo.com', timeout=15)
+        summaryDetail = requests.get(f'https://query2.finance.yahoo.com/v10/finance/quoteSummary/{symbol}?formatted=true&crumb=8ldhetOu7RJ&lang=en-US&region=US&modules=summaryDetail&corsDomain=finance.yahoo.com', timeout=15, headers=user_agent_headers)
         summaryDetail = summaryDetail.json()
         print(summaryDetail)
         mCap = summaryDetail['quoteSummary']['result'][0]['summaryDetail']['marketCap']['raw']
     except Exception as ex:
         print(f'Exception {ex} while trying to find market cap for {symbol}')
     try:
-        profile = requests.get(f'https://query1.finance.yahoo.com/v10/finance/quoteSummary/{symbol}?modules=assetProfile', timeout=15)
+        profile = requests.get(f'https://query1.finance.yahoo.com/v10/finance/quoteSummary/{symbol}?modules=assetProfile', timeout=15, headers=user_agent_headers)
         profile = profile.json()
         #print(profile)
         industry = profile['quoteSummary']['result'][0]['assetProfile']['industry']

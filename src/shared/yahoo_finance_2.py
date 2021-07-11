@@ -18,6 +18,7 @@ class YahooFinance2(Exchange):
     quote_link_no_crumb = 'https://query1.finance.yahoo.com/v7/finance/download/{quote}?period1={dfrom}&period2={dto}&interval=1d&events=history'
     live_link = 'https://query1.finance.yahoo.com/v8/finance/chart/{quote}?region=US&lang=en-US&includePrePost=false&interval=2m&useYfid=true&range=1d&corsDomain=finance.yahoo.com&.tsrc=finance'
     retries = 5
+    user_agent_headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 
     def __init__(self, symbol):
         self.symbol = symbol
@@ -29,7 +30,7 @@ class YahooFinance2(Exchange):
         self.session = requests.Session()
 
     def get_crumb(self):
-        response = self.session.get(self.crumb_link.format(self.symbol), timeout=self.timeout)
+        response = self.session.get(self.crumb_link.format(self.symbol), timeout=self.timeout, headers=self.user_agent_headers)
         response.raise_for_status()
         match = re.search(self.crumble_regex, response.text)
         if not match:
@@ -56,7 +57,7 @@ class YahooFinance2(Exchange):
                 url = self.quote_link_no_crumb.format(quote=self.symbol, dfrom=datefrom, dto=dateto)
                 if include_crumb:
                     url = self.quote_link.format(quote=self.symbol, dfrom=datefrom, dto=dateto, crumb=self.crumb)
-                response = self.session.get(url)
+                response = self.session.get(url, timeout=self.timeout, headers=self.user_agent_headers)
                 response.raise_for_status()
                 text = StringIO(response.text)#response.text
                 print("in YahooFinance2 response.text:", response.text)
@@ -91,7 +92,7 @@ class YahooFinance2(Exchange):
                 if not self.crumb and include_crumb:
                     self.get_crumb()
                 url= self.live_link.format(quote=self.symbol)
-                response = self.session.get(url)
+                response = self.session.get(url, timeout=self.timeout, headers=self.user_agent_headers)
                 response.raise_for_status()
                 text = StringIO(response.text)#response.text
                 #print("in YahooFinance2 response.text:", response.text)

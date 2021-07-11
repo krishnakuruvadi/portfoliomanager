@@ -58,9 +58,11 @@ def get_init_data(dest=None):
     return data
 
 def get_mcap(symbol):
-    defaultKeyStatistics = requests.get(f'https://query2.finance.yahoo.com/v10/finance/quoteSummary/{symbol}?formatted=true&crumb=8ldhetOu7RJ&lang=en-US&region=US&modules=defaultKeyStatistics%2CfinancialData%2CcalendarEvents&corsDomain=finance.yahoo.com')
-    summaryDetail = requests.get(f'https://query2.finance.yahoo.com/v10/finance/quoteSummary/{symbol}?formatted=true&crumb=8ldhetOu7RJ&lang=en-US&region=US&modules=summaryDetail&corsDomain=finance.yahoo.com')
-    profile = requests.get(f'https://query1.finance.yahoo.com/v10/finance/quoteSummary/{symbol}?modules=assetProfile')
+    user_agent_headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+
+    defaultKeyStatistics = requests.get(f'https://query2.finance.yahoo.com/v10/finance/quoteSummary/{symbol}?formatted=true&crumb=8ldhetOu7RJ&lang=en-US&region=US&modules=defaultKeyStatistics%2CfinancialData%2CcalendarEvents&corsDomain=finance.yahoo.com', timeout=15, headers=user_agent_headers)
+    summaryDetail = requests.get(f'https://query2.finance.yahoo.com/v10/finance/quoteSummary/{symbol}?formatted=true&crumb=8ldhetOu7RJ&lang=en-US&region=US&modules=summaryDetail&corsDomain=finance.yahoo.com', timeout=15, headers=user_agent_headers)
+    profile = requests.get(f'https://query1.finance.yahoo.com/v10/finance/quoteSummary/{symbol}?modules=assetProfile', timeout=15, headers=user_agent_headers)
     defaultKeyStatistics = defaultKeyStatistics.json()
     summaryDetail = summaryDetail.json()
     profile = profile.json()
