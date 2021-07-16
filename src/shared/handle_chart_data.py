@@ -17,6 +17,17 @@ from shared.handle_create import add_common_stock
 from mutualfunds.models import Folio, MutualFundTransaction
 from shared.financial import xirr
 from retirement_401k.helper import get_401k_amount_for_goal, get_401k_amount_for_user, get_r401k_value_as_on
+from shared.utils import get_min
+from epf.epf_interface import EpfInterface
+from espp.espp_interface import EsppInterface
+from fixed_deposit.fd_interface import FdInterface
+from ppf.ppf_interface import PpfInterface
+from ssy.ssy_interface import SsyInterface
+from shares.share_interface import ShareInterface
+from mutualfunds.mf_interface import MfInterface
+from retirement_401k.r401k_interface import R401KInterface
+from rsu.rsu_interface import RsuInterface
+
 
 def get_ppf_amount_for_goal(id):
     ppf_objs = Ppf.objects.filter(goal=id)
@@ -149,16 +160,104 @@ def add_or_create(year, key, contrib_obj, deduct_obj, port_obj, contrib, deduct,
     if deduct: 
         deduct_obj[year][key] = float(deduct) + deduct_obj[year].get(key, 0)
 
-def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
-    if expected_return:
-        expected_return = int(expected_return)
-    print("inside get_goal_yearly_contrib")
+
+def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
+    start_day = datetime.date.today()
+    start_day = get_min(EpfInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(EsppInterface.get_start_day_for_goal(goal_id), start_day)
+    #start_day = get_min(FdInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(MfInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(PpfInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(SsyInterface.get_start_day_for_goal(goal_id), start_day)
+    #start_day = get_min(ShareInterface.get_start_day_for_goal(goal_id), start_day)
+    #start_day = get_min(R401KInterface.get_start_day_for_goal(goal_id), start_day)
+    #start_day = get_min(RsuInterface.get_start_day_for_goal(goal_id), start_day)
+
+    new_start_day = datetime.date(start_day.year, start_day.month, 1)
+    
     contrib = dict()
     total = dict()
     deduct = dict()
     ret = dict()
     cash_flows = list()
+    latest_value = 0
+    total_contrib = 0
+    total_deduct = 0
 
+    curr_yr = datetime.date.today().year
+
+    for yr in range(start_day.year, curr_yr+1):
+        cf, c, d, t = PpfInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'PPF', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding Ppf {t} latest_value is {latest_value}')
+
+
+        cf, c, d, t = EpfInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'EPF', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding Epf {t} latest_value is {latest_value}')
+
+        cf, c, d, t = SsyInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'SSY', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding Ssy {t} latest_value is {latest_value}')
+
+        cf, c, d, t = MfInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'MutualFunds', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding Mf {t} latest_value is {latest_value}')
+
+        cf, c, d, t = EsppInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'ESPP', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding Espp {t} latest_value is {latest_value}')
+
+    print(f'total_contrib {total_contrib}  total_deduct {total_deduct}  latest_value {latest_value}')
+    if len(cash_flows) > 0  and latest_value != 0:
+        cash_flows.append((datetime.date.today(), latest_value))
+    cash_flows = sort_set(cash_flows)
+    return contrib, deduct, total, latest_value, cash_flows
+
+
+def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
+    if expected_return:
+        expected_return = int(expected_return)
+    print(f"inside get_goal_yearly_contrib {goal_id} {expected_return}")
+
+    ret = dict()
+    curr_yr = datetime.datetime.now().year
+
+    '''
+    contrib = dict()
+    total = dict()
+    deduct = dict()
+    cash_flows = list()
     for ppf_obj in Ppf.objects.filter(goal=goal_id):
         for ppf_trans in PpfEntry.objects.filter(number=ppf_obj):
             #entry_date = (datetime.date(ppf_trans.year + (ppf_trans.month == 12), 
@@ -272,7 +371,7 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                 for k,v in historical_mf_prices[0].items():
                     add_or_create(yr, 'MutualFunds',contrib, deduct, total,0,0,v*qty)
     
-    curr_yr = datetime.datetime.now().year
+    
     if len(contrib.keys()):
         for i in range (curr_yr, min(contrib.keys())-1, -1):
             print('i:', i)
@@ -286,6 +385,11 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                 total[i]['EPF'] = total[i].get('EPF', 0) + total[j].get('EPF', 0)
                 total[i]['SSY'] = total[i].get('SSY', 0) + total[j].get('SSY', 0)
 
+    
+
+    '''
+    contrib, deduct, total, latest_value, cash_flows = get_goal_yearly_contrib_v2(goal_id, expected_return)
+
     total_contribution = 0
     total_years = 0
     last_yr_contrib = 0
@@ -297,16 +401,57 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                     total_contribution += amt
                     if yr == datetime.date.today().year -1:
                         last_yr_contrib += amt
+    
+    '''
+    if len(contrib.keys()):
+        print('************** time for comparision ***************')
+        print('Contribution:"')
+        for yr in range(curr_yr, min(contrib.keys())-1, -1):
+            if yr in contrib:
+                print(f'{yr}: {contrib[yr]} \t {contrib2.get(yr,None)}')
+        print('Deduction:"')
+        for yr in range(curr_yr, min(deduct.keys())-1, -1):
+            if yr in deduct:
+                print(f'{yr}: {deduct[yr]} \t {deduct2.get(yr, None)}')
+        print('Total:"')
+        for yr in range(curr_yr, min(total.keys())-1, -1):
+            if yr in total:
+                print(f'{yr}: {total[yr]} \t {total2.get(yr, None)}')
+        print('************** end of comparision ***************')
+    '''
+
     #print('total @299', total)
     if total_contribution:        
         avg_contrib = total_contribution/total_years
+        '''
         latest_value = 0
         for k,v in total[curr_yr].items():
             latest_value += v
         cash_flows.append((datetime.date.today(), latest_value))
         
         cash_flows = sort_set(cash_flows)
+        
+
+        if round(latest_value, 2) == round(latest_value2, 2):
+            print('same latest values')
+        else:
+            print('different latest values')
         print('cash flows', cash_flows)
+        if cash_flows == cash_flows2:
+            print('same cash flows')
+        else:
+            print('different cash flows')
+            i = 0
+            while True:
+                if i < len(cash_flows):
+                    till = 5 if len(cash_flows) - i > 5 else len(cash_flows) - i
+                    print(cash_flows[i:i+till])
+                    print(cash_flows2[i:i+till])
+                    i += till
+                    print('')
+                else:
+                    break
+        '''
         #calc_avg_growth = (latest_value-total_contribution)/(total_contribution*total_years)
         calc_avg_growth = None
         try:
@@ -340,7 +485,7 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
             if 'Projected' in total[yr-1]:
                 total[yr]['Projected'] = (float(total[yr-1]['Projected'])+float(avg_contrib))*(1+float(avg_growth))
             else:
-                total[yr]['Projected'] = (float(total_contribution)+float(avg_contrib))*(1+float(avg_growth))
+                total[yr]['Projected'] = (float(latest_value)+float(avg_contrib))*(1+float(avg_growth))
             deduct[yr]['Projected'] = 0
             ret['final_projection'] = int(total[yr]['Projected'])
 
@@ -354,39 +499,43 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
     for i in sorted (contrib.keys()):
         data['labels'].append(str(i))
     print('data at 294', data)
-    for val in ['PPF', 'EPF', 'SSY', 'ESPP', 'MutualFunds', 'Projected']:
-        entry = dict()
-        entry['label'] = val+' contribution'
-        entry['type'] = 'bar'
-        entry['stack'] = 'contribution'
-        entry['backgroundColor'] = colormap[val]
-        entry['data'] = list()
+
+    alloted_types = dict()
+    for k,v in contrib.items():
+        for typ, val in v.items():
+            alloted_types[typ] = None
+
+
+    for val in alloted_types.keys():
+        centry = dict()
+        centry['label'] = val+' contribution'
+        centry['type'] = 'bar'
+        centry['stack'] = 'contribution'
+        centry['backgroundColor'] = colormap[val]
+        centry['data'] = list()
         for i in sorted (contrib.keys()):
-            entry['data'].append(int(contrib[i].get(val,0)))
-        data['datasets'].append(entry)
-    print('data at 305', data)
-    for val in ['PPF', 'EPF', 'SSY', 'ESPP', 'MutualFunds']:
-        entry = dict()
-        entry['label'] = val+ ' deduction'
-        entry['type'] = 'bar'
-        entry['stack'] = 'deduction'
-        entry['backgroundColor'] = colormap[val]
-        entry['data'] = list()
+            centry['data'].append(int(contrib[i].get(val,0)))
+        data['datasets'].append(centry)
+
+        dentry = dict()
+        dentry['label'] = val+ ' deduction'
+        dentry['type'] = 'bar'
+        dentry['stack'] = 'deduction'
+        dentry['backgroundColor'] = colormap[val]
+        dentry['data'] = list()
         for i in sorted (contrib.keys()):
-            entry['data'].append(deduct[i].get(val,0))
-        data['datasets'].append(entry)
-    print('data at 316', data)
-    
-    for val in ['PPF', 'EPF', 'SSY', 'ESPP', 'MutualFunds', 'Projected']:
-        entry = dict()
-        entry['label'] = val + ' total'
-        entry['type'] = 'bar'
-        entry['stack'] = 'total'
-        entry['backgroundColor'] = colormap[val]
-        entry['data'] = list()
+            dentry['data'].append(deduct[i].get(val,0))
+        data['datasets'].append(dentry)
+
+        tentry = dict()
+        tentry['label'] = val + ' total'
+        tentry['type'] = 'bar'
+        tentry['stack'] = 'total'
+        tentry['backgroundColor'] = colormap[val]
+        tentry['data'] = list()
         for i in sorted (contrib.keys()):
-            entry['data'].append(int(total[i].get(val,0)))
-        data['datasets'].append(entry)
+            tentry['data'].append(int(total[i].get(val,0)))
+        data['datasets'].append(tentry)
 
     return data, ret
 

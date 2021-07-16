@@ -34,10 +34,3 @@ def get_maturity_value(principal, start_date, roi, time_period_days, compound_fr
 def compound_interest_quarterly(principal, roi, time):
     result = principal * (pow((1 + roi / (100*4)), time*4))
     return result
-
-def get_no_goal_amount():
-    amt = 0
-    for obj in FixedDeposit.objects.all():
-        if not obj.goal:
-            amt += 0 if not obj.final_val else obj.final_val
-    return amt

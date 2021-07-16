@@ -102,3 +102,10 @@ def k_obfuscate(byt):
 
 def k_decode(data):
     return k_obfuscate(data).decode()
+
+def get_min(a, b):
+    if not a:
+        return b
+    if not b:
+        return a
+    return a if a<b else b

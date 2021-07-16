@@ -111,25 +111,27 @@ def get_goal_id_name_mapping_for_user(id):
     return data
 
 def get_unallocated_amount():
-    from ssy.ssy_helper import get_no_goal_amount as sssya
-    from ppf.ppf_helper import get_no_goal_amount as ppfa
-    from epf.epf_helper import get_no_goal_amount as epfa
-    from espp.espp_helper import get_no_goal_amount as espa
-    from fixed_deposit.fixed_deposit_helper import get_no_goal_amount as fda
-    from mutualfunds.mf_helper import get_no_goal_amount as mfa
-    from ppf.ppf_helper import get_no_goal_amount as ppfa
-    from retirement_401k.helper import get_no_goal_amount as r4a
-    from shares.shares_helper import get_no_goal_amount as sa
+    from ssy.ssy_interface import SsyInterface
+    from ppf.ppf_interface import PpfInterface
+    from epf.epf_interface import EpfInterface
+    from espp.espp_interface import EsppInterface
+    from fixed_deposit.fd_interface import FdInterface
+    from mutualfunds.mf_interface import MfInterface
+    from ppf.ppf_interface import PpfInterface
+    from retirement_401k.r401k_interface import R401KInterface
+    from shares.share_interface import ShareInterface
+    from rsu.rsu_interface import RsuInterface
 
     amt = 0
-    amt += sssya()
-    amt += ppfa()
-    amt += epfa()
-    amt += espa()
-    amt += fda()
-    amt += mfa()
-    amt += ppfa()
-    amt += r4a()
-    amt += sa()
+    amt += SsyInterface.get_no_goal_amount()
+    amt += PpfInterface.get_no_goal_amount()
+    amt += EpfInterface.get_no_goal_amount()
+    amt += EsppInterface.get_no_goal_amount()
+    amt += FdInterface.get_no_goal_amount()
+    amt += MfInterface.get_no_goal_amount()
+    amt += PpfInterface.get_no_goal_amount()
+    amt += R401KInterface.get_no_goal_amount()
+    amt += ShareInterface.get_no_goal_amount()
+    amt += RsuInterface.get_no_goal_amount()
 
     return round(amt, 2)

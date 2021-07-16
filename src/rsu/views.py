@@ -18,6 +18,7 @@ from django.shortcuts import redirect
 from shared.utils import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from tasks.tasks import update_rsu
 
 
 def create_rsu(request):
@@ -47,7 +48,7 @@ def create_rsu(request):
     return render(request, template, context)
 
 
-def update_rsu(request, id):
+def view_update_rsu(request, id):
     template = "rsus/rsu_update.html"
     obj = RSUAward.objects.get(id=id)
 
@@ -203,6 +204,7 @@ def delete_vest_sell_trans(request, id, vestid, selltransid):
     try:
         trans = RSUSellTransactions.objects.get(id=selltransid)
         trans.delete()
+        update_rsu()
     except RSUSellTransactions.DoesNotExist:
         print(f'{selltransid} RSUSellTransaction does not exist')
     return HttpResponseRedirect(reverse('rsus:rsu-sell-vest',kwargs={'id':id,'vestid':vestid}))
@@ -211,6 +213,7 @@ def delete_vest(request, id, vestid):
     try:
         vest = RestrictedStockUnits.objects.get(id=vestid)
         vest.delete()
+        update_rsu()
     except RestrictedStockUnits.DoesNotExist:
         print(f'{vestid} RestrictedStockUnits does not exist')
     return HttpResponseRedirect(reverse('rsus:rsu-vest-list',kwargs={'id':id}))
@@ -240,6 +243,7 @@ def add_vest_sell_trans(request, id, vestid):
             )
             st.realised_gain = float(st.trans_price) - float(rsu_vest.aquisition_price)*float(st.units)*float(rsu_vest.conversion_rate)
             st.save()
+            update_rsu()
             return HttpResponseRedirect(reverse('rsus:rsu-sell-vest',kwargs={'id':id,'vestid':vestid}))
         else:
             context = {'award_date':award_obj.award_date, 'symbol':award_obj.symbol, 'award_id':award_obj.award_id,
@@ -274,6 +278,7 @@ def add_vest(request,id):
                                                       total_aquisition_price=total_aquisition_price,
                                                       notes=notes)
             rsu.save()
+            update_rsu()
             return redirect('rsus:rsu-vest-list', id=id)
 
     context = {'award_id':award_obj.award_id, 'exchange':award_obj.exchange, 'symbol':award_obj.symbol, 'award_date':award_obj.award_date}
@@ -298,6 +303,7 @@ def update_vest(request,id,vestid):
             rsu_obj.notes = request.POST.get('notes')
             rsu_obj.unsold_shares = rsu_obj.shares_for_sale
             rsu_obj.save()
+            update_rsu()
             return redirect('rsus:rsu-vest-list', id=id)
     else:
         context = {'award_id':award_obj.award_id, 'exchange':award_obj.exchange, 'symbol':award_obj.symbol, 'award_date':award_obj.award_date}

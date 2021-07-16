@@ -33,6 +33,23 @@ def get_latest_vals(stock, exchange, start, end, etf=False):
         response = YahooFinance2(stock+'.BO').get_historical_value(start, end)
         return response
 
+
+def get_historic_vals(stock, exchange, start, end, etf=False):
+    print("inside get_historic_vals exchange ", exchange, "start date:", start, " end date:", end)
+    if exchange == 'NASDAQ':
+        response = Nasdaq(stock, etf).get_historical_value(start, end)
+        if not response:
+            response = YahooFinance2(stock).get_historical_value(start, end)
+        return response
+    if exchange == 'NSE' or exchange == 'NSE/BSE':
+        #response = Nse(stock).get_historical_value(start, end)
+        response = YahooFinance2(stock+'.NS').get_historical_value(start, end)
+        return response
+    if exchange == 'BSE':
+        #response = Nse(stock).get_historical_value(start, end)
+        response = YahooFinance2(stock+'.BO').get_historical_value(start, end)
+        return response
+
 def get_mf_vals(amfi_code, start, end):
     mf = Mftool()
     response = dict()
@@ -135,7 +152,7 @@ def get_historical_stock_price(stock, start, end):
             pass
         start_date = start_date+relativedelta(days=-1)
     if len(ret_vals) == 0:
-        get_vals = get_latest_vals(stock.symbol, stock.exchange, end+relativedelta(days=-5), datetime.date.today())
+        get_vals = get_historic_vals(stock.symbol, stock.exchange, end+relativedelta(days=-5), datetime.date.today())
         if not get_vals:
             return ret_vals
         for k,v in get_vals.items():

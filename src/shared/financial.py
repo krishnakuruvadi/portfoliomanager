@@ -116,6 +116,7 @@ def get_required_yrly_investment(initial_amt, xirr, target_date, target_amt):
     initial_amt_final_return = get_fd_final_val(initial_amt, 'fd_compound_yearly', period_months, xirr)
     remaining_amt = target_amt - initial_amt_final_return
     print(f'{remaining_amt} remaining of {target_amt}')
+    yrly_investment = 0
     if remaining_amt > 0:
         yrly_investment = remaining_amt/2
         diff = remaining_amt/2

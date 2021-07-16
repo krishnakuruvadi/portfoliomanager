@@ -6,6 +6,7 @@ import codecs
 from contextlib import closing
 from shared.handle_real_time_data import get_latest_vals, get_forex_rate
 from .models import Espp, EsppSellTransactions
+from common.models import Stock
 
 def update_latest_vals(espp_obj):
     start = datetime.date.today()+relativedelta(days=-5)
@@ -15,7 +16,15 @@ def update_latest_vals(espp_obj):
     for sell_trans in EsppSellTransactions.objects.filter(espp=espp_obj):
         sold_units += sell_trans.units
         realised_gain += sell_trans.realised_gain
-
+    try:
+        _ = Stock.objects.get(exchange=espp_obj.exchange, symbol=espp_obj.symbol)
+    except Stock.DoesNotExist:
+        _ = Stock.objects.create(
+                exchange = espp_obj.exchange,
+                symbol=espp_obj.symbol,
+                etf=False,
+                collection_start_date=datetime.date.today()
+            )
     remaining_units = espp_obj.shares_purchased - sold_units
     espp_obj.shares_avail_for_sale = remaining_units
     espp_obj.realised_gain = realised_gain
@@ -40,9 +49,3 @@ def update_latest_vals(espp_obj):
     espp_obj.save()
     print('done with update request')
 
-def get_no_goal_amount():
-    amt = 0
-    for obj in Espp.objects.all():
-        if not obj.goal:
-            amt += 0 if not obj.latest_value else obj.latest_value
-    return amt

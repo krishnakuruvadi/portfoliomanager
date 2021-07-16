@@ -268,13 +268,6 @@ def mf_add_or_update_sip(folio, amount, date):
     except Sip.DoesNotExist:
         Sip.objects.create(folio=folio, sip_date=date, amount=amount)
 
-def get_no_goal_amount():
-    amt = 0
-    for obj in Folio.objects.all():
-        if not obj.goal:
-            amt += 0 if not obj.latest_value else obj.latest_value
-    return amt
-
 def get_summary_for_range(obj, start_date, end_date):
     realised_gain = 0
     st_realised_gain = 0

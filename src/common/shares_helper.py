@@ -8,6 +8,8 @@ from .models import Dividendv2, Bonusv2, Splitv2, Stock
 from .nse_bse import get_nse_bse
 import traceback
 from shares.models import Share
+from espp.models import Espp
+from rsu.models import RSUAward
 
 def pull_corporate_actions(symbol, exchange, from_date, to_date):
     dest_path = os.path.join(settings.MEDIA_ROOT, 'corporateActions')
@@ -440,7 +442,7 @@ def update_tracked_stocks():
             id.append(s.id)
         except Stock.DoesNotExist:
             s = Stock.objects.create(
-                exchange = share.exchange,
+                exchange=share.exchange,
                 symbol=share.symbol,
                 etf=share.etf,
                 collection_start_date=datetime.date.today()
@@ -462,6 +464,32 @@ def update_tracked_stocks():
                     break
             if not found:
                 print(f'failed to find {share.exchange} {share.symbol} in gist')
+    for espp in Espp.objects.all():
+        try:
+            s = Stock.objects.get(exchange=espp.exchange, symbol=espp.symbol)
+            id.append(s.id)
+        except Stock.DoesNotExist:
+            s = Stock.objects.create(
+                exchange=espp.exchange,
+                symbol=espp.symbol,
+                etf=False,
+                collection_start_date=datetime.date.today()
+            )
+            added += 1
+            id.append(s.id)
+    for rsu in RSUAward.objects.all():
+        try:
+            s = Stock.objects.get(exchange=rsu.exchange, symbol=rsu.symbol)
+            id.append(s.id)
+        except Stock.DoesNotExist:
+            s = Stock.objects.create(
+                exchange=rsu.exchange,
+                symbol=rsu.symbol,
+                etf=False,
+                collection_start_date=datetime.date.today()
+            )
+            added += 1
+            id.append(s.id)
     for st in Stock.objects.all():
         if st.id not in id:
             st.delete()

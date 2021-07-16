@@ -82,7 +82,7 @@ class HistoricalStockPrice(models.Model):
     price = models.DecimalField(_('Price'), max_digits=20, decimal_places=2, null=False)
     #face_value = models.DecimalField(_('Face Value'), max_digits=20, decimal_places=2, null=False)
     def __str__(self):
-        return str(self.id) + ":" + self.symbol.exchange + ":" + self.symbol.symbol + " " + self.date + " " + self.price
+        return str(self.id) + ":" + self.symbol.exchange + ":" + self.symbol.symbol + " " + self.date.strftime('%d-%m-%Y') + " " + str(self.price)
 
 
 class MutualFund(models.Model):

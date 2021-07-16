@@ -127,7 +127,7 @@
   function setStatusLineChart(status_line) {
     colors = ['green','grey', 'red']
     div_parent_elem = document.getElementById("progressLine")
-
+    var width = 0;
     for (x in status_line) {
       entry = status_line[x]
       color = colors[x]
@@ -138,7 +138,15 @@
 
       // add the text node to the newly created div
       newDiv.appendChild(newContent);
-      newDiv.style.width=entry.toString()+'%';
+      div_width = entry
+      if (width+div_width > 100) {
+        div_width=98-width;
+      }
+      if (div_width == 0) {
+        div_width=2;
+      }
+      newDiv.style.width=(div_width).toString()+'%';
+      width = width + div_width
       newDiv.style.height='20px';
       newDiv.style.textAlign='center';
       newDiv.style.background=color+' none repeat scroll 0% 0%';

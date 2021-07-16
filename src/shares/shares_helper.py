@@ -425,16 +425,21 @@ def reconcile_share(share_obj):
 
 def get_roi(transactions, latest_value):
     from shared.financial import xirr
-    cash_flows = list()
-    for t in transactions:
-        if t.trans_type == 'Buy':
-            cash_flows.append((t.trans_date, -1*float(t.trans_price)))
-        else:
-            cash_flows.append((t.trans_date, float(t.trans_price)))
-    if latest_value > 0:
-        cash_flows.append((datetime.date.today(), float(latest_value)))
-    roi = xirr(cash_flows, 0.1)*100
-    roi = round(roi, 2)
+    roi = 0
+    try:
+        cash_flows = list()
+        for t in transactions:
+            if t.trans_type == 'Buy':
+                cash_flows.append((t.trans_date, -1*float(t.trans_price)))
+            else:
+                cash_flows.append((t.trans_date, float(t.trans_price)))
+        if latest_value > 0:
+            cash_flows.append((datetime.date.today(), float(latest_value)))
+        roi = xirr(cash_flows, 0.1)*100
+        roi = round(roi, 2)
+    except Exception as ex:
+        print(f'exception {ex} when getting roi {roi} with cash flows {cash_flows}')
+        roi = 0
     return roi
 
 '''
@@ -749,9 +754,3 @@ def pull_and_store_corporate_actions():
     process_corporate_actions()
     store_corporate_actions()
 
-def get_no_goal_amount():
-    amt = 0
-    for obj in Share.objects.all():
-        if not obj.goal:
-            amt += 0 if not obj.latest_value else obj.latest_value
-    return amt

@@ -43,12 +43,7 @@ def update_epf_vals():
         epf_obj.roi = res['roi']
         epf_obj.save()
 
-def get_no_goal_amount():
-    amt = 0
-    for obj in Epf.objects.all():
-        if not obj.goal:
-            amt += 0 if not obj.total else obj.total
-    return amt
+
 
 def get_summary_for_range(epf_obj, start_date, end_date):
     print(f'getting summary for {epf_obj.number} between {start_date} and {end_date}')

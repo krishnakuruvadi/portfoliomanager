@@ -1,16 +1,19 @@
-from epf.models import Epf, EpfEntry
-from espp.models import Espp
-from fixed_deposit.models import FixedDeposit
-from ppf.models import Ppf, PpfEntry
-from ssy.models import Ssy, SsyEntry
-from users.models import User
-from goal.models import Goal
-from shares.models import Transactions
-from mutualfunds.models import MutualFundTransaction
 import calendar
 import datetime
 import os
 import pathlib
+from epf.epf_interface import EpfInterface
+from espp.espp_interface import EsppInterface
+from fixed_deposit.fd_interface import FdInterface
+from ppf.ppf_interface import PpfInterface
+from ssy.ssy_interface import SsyInterface
+from shares.share_interface import ShareInterface
+from mutualfunds.mf_interface import MfInterface
+from retirement_401k.r401k_interface import R401KInterface
+from rsu.rsu_interface import RsuInterface
+from users.models import User
+from goal.models import Goal
+from shared.utils import get_min
 
 def get_all_users_names_as_list():
     users_list = list()
@@ -90,58 +93,20 @@ def get_day_range_of_month(year, month):
     last_day = datetime.datetime(year, month, last_day_of_month)
     return first_day, last_day
 
-def get_start_day_across_portfolio():
+
+def get_start_day_across_portfolio(user_id=None):
     #TODO: Fill for other investment avenues
     start_day = datetime.date.today()
-    try:
-        epf_objs = Epf.objects.all()
-        for epf_obj in epf_objs:    
-            start_day = start_day if start_day < epf_obj.start_date else epf_obj.start_date
-    except Exception as ex:
-        print(f'exception finding start day for epf {ex}')
+    start_day = get_min(EpfInterface.get_start_day(user_id), start_day)
+    start_day = get_min(EsppInterface.get_start_day(user_id), start_day)
+    start_day = get_min(FdInterface.get_start_day(user_id), start_day)
+    start_day = get_min(MfInterface.get_start_day(user_id), start_day)
+    start_day = get_min(PpfInterface.get_start_day(user_id), start_day)
+    start_day = get_min(SsyInterface.get_start_day(user_id), start_day)
+    start_day = get_min(ShareInterface.get_start_day(user_id), start_day)
+    start_day = get_min(R401KInterface.get_start_day(user_id), start_day)
+    start_day = get_min(RsuInterface.get_start_day(user_id), start_day)
 
-    try:
-        espp_objs = Espp.objects.all()
-        for espp_obj in espp_objs:
-            start_day = start_day if start_day < espp_obj.purchase_date else espp_obj.purchase_date
-    except Exception as ex:
-        print(f'exception finding start day for espp {ex}')
-
-    try:
-        fd_objs = FixedDeposit.objects.all()
-        for fd_obj in fd_objs:
-            start_day = start_day if start_day < fd_obj.start_date else fd_obj.start_date
-    except Exception as ex:
-        print(f'exception finding start day for fd {ex}')
-
-    try:
-        ppf_objs = Ppf.objects.all()
-        for ppf_obj in ppf_objs:
-            start_day = start_day if start_day < ppf_obj.start_date else ppf_obj.start_date
-    except Exception as ex:
-        print(f'exception finding start day for ppf {ex}')
-
-    try:
-        ssy_objs = Ssy.objects.all()
-        for ssy_obj in ssy_objs:
-            start_day = start_day if start_day < ssy_obj.start_date else ssy_obj.start_date
-    except Exception as ex:
-        print(f'exception finding start day for ssy {ex}')
-
-    try:
-        mf_trans = MutualFundTransaction.objects.all()
-        for trans in mf_trans:
-            start_day = start_day if start_day < trans.trans_date else trans.trans_date
-    except Exception as ex:
-        print(f'exception finding start day for mf {ex}')
-
-    try:
-        share_trans = Transactions.objects.all()
-        for trans in share_trans:
-            start_day = start_day if start_day < trans.trans_date else trans.trans_date
-    except Exception as ex:
-        print(f'exception finding start day for shares {ex}')
-    
     new_start_day = datetime.date(start_day.year, start_day.month, 1)
     return new_start_day
 
