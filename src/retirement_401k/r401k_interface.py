@@ -32,9 +32,9 @@ class R401KInterface:
                 trans = Transaction401K.objects.filter(account=obj)
                 for t in trans:
                     if not start_day:
-                        start_day = obj.trans_date
+                        start_day = t.trans_date
                     else:
-                        start_day = start_day if start_day < obj.trans_date else obj.trans_date
+                        start_day = start_day if start_day < t.trans_date else t.trans_date
         except Exception as ex:
             print(f'exception finding start day for goal {goal_id} RSU {ex}')
         return start_day
