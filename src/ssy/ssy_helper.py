@@ -79,9 +79,3 @@ def update_ssy_vals():
         ssy_obj.roi = res['roi']
         ssy_obj.save()
 
-def get_no_goal_amount():
-    amt = 0
-    for obj in Ssy.objects.all():
-        if not obj.goal:
-            amt += 0 if not obj.total else obj.total
-    return amt

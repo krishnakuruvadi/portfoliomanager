@@ -64,10 +64,12 @@ class EsppInterface:
             if espp_obj.purchase_date >= st_date:
                 contrib += float(espp_obj.total_purchase_price)
                 cash_flows.append((espp_obj.purchase_date, -1*float(espp_obj.total_purchase_price)))
-                for st in EsppSellTransactions.objects.filter(espp=espp_obj, trans_date__lte=end_date):
+            for st in EsppSellTransactions.objects.filter(espp=espp_obj, trans_date__lte=end_date):
+                if st.trans_date >= st_date:
                     cash_flows.append((st.trans_date, float(st.trans_price)))
-                    units -= st.units
                     deduct += -1*float(st.trans_price)
+                units -= st.units
+                
             if units > 0:
                 year_end_value_vals = get_historical_stock_price_based_on_symbol(espp_obj.symbol, espp_obj.exchange, end_date+relativedelta(days=-5), end_date)
                 if year_end_value_vals:
@@ -79,4 +81,6 @@ class EsppInterface:
                         for k,v in year_end_value_vals.items():
                             total += float(v)*float(conv_rate)*float(units)
                             break
+                else:
+                    print(f'failed to get year end values for {espp_obj.exchange} {espp_obj.symbol} {end_date}')
         return cash_flows, contrib, deduct, total

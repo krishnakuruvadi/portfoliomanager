@@ -165,13 +165,13 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
     start_day = datetime.date.today()
     start_day = get_min(EpfInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(EsppInterface.get_start_day_for_goal(goal_id), start_day)
-    #start_day = get_min(FdInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(FdInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(MfInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(PpfInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(SsyInterface.get_start_day_for_goal(goal_id), start_day)
-    #start_day = get_min(ShareInterface.get_start_day_for_goal(goal_id), start_day)
-    #start_day = get_min(R401KInterface.get_start_day_for_goal(goal_id), start_day)
-    #start_day = get_min(RsuInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(ShareInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(R401KInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(RsuInterface.get_start_day_for_goal(goal_id), start_day)
 
     new_start_day = datetime.date(start_day.year, start_day.month, 1)
     
@@ -182,6 +182,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
     cash_flows = list()
     latest_value = 0
     total_contrib = 0
+    # Deduction is a -ve number
     total_deduct = 0
 
     curr_yr = datetime.date.today().year
@@ -237,6 +238,46 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         total_deduct += float(d)
         if yr == curr_yr:
             print(f'after adding Espp {t} latest_value is {latest_value}')
+
+        cf, c, d, t = FdInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'FD', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding FD {t} latest_value is {latest_value}')
+
+        cf, c, d, t = ShareInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'Shares', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding shares {t} latest_value is {latest_value}')
+        
+        cf, c, d, t = RsuInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'RSU', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding RSU {t} latest_value is {latest_value}')
+    
+        cf, c, d, t = R401KInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, '401K', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding 401K {t} latest_value is {latest_value}')
 
     print(f'total_contrib {total_contrib}  total_deduct {total_deduct}  latest_value {latest_value}')
     if len(cash_flows) > 0  and latest_value != 0:
@@ -492,7 +533,7 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
     print('contrib', contrib)
     print('deduct', deduct)
     print('total', total)
-    colormap = {'EPF':'#f15664','ESPP':'#DC7633','FD':'#006f75','PPF':'#92993c','SSY':'#f9c5c6','RSU':'#AA12E8','Shares':'#e31219', 'MutualFunds':'#bfff00', 'Projected':'#cbcdd1'}
+    colormap = {'401K': '#617688', 'EPF':'#f15664','ESPP':'#DC7633','FD':'#006f75','PPF':'#92993c','SSY':'#f9c5c6','RSU':'#AA12E8','Shares':'#e31219', 'MutualFunds':'#bfff00', 'Projected':'#cbcdd1'}
     data = dict()
     data['labels'] = list()
     data['datasets'] = list()

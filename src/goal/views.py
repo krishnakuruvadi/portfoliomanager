@@ -44,6 +44,8 @@ def goal_list(request):
                 'end_date':g.start_date+relativedelta(months=g.time_period),
                 'time_period':g.time_period,
                 'final_val':g.final_val,
+                'achieved_amt':g.achieved_amt,
+                'achieved_percent':g.achieved_percent,
                 'user':g.user,
                 'notes':g.notes,
                 'id':g.id
@@ -416,7 +418,7 @@ class GoalDetailView(DetailView):
         data['final_projection'] = ret.get('final_projection', 0)
         total_contribution = ret.get('total_contribution', 0)
         contrib_percent = int(total_contribution*100/float(data['object'].final_val))
-        project_percent = int(data['final_projection']*100/float(data['object'].final_val))
+        project_percent = int(float(data['final_projection']-data['object'].achieved_amt)*100/float(data['object'].final_val))
         remaining_percent = 100 - contrib_percent - project_percent
         if remaining_percent < 0:
             remaining_percent = 0

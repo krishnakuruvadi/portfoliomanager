@@ -32,7 +32,7 @@ class EpfInterface:
                 else:
                     start_day = start_day if start_day < obj.start_date else obj.start_date
         except Exception as ex:
-            print(f'exception finding start day for goal {goal_id} ppf {ex}')
+            print(f'exception finding start day for goal {goal_id} epf {ex}')
         return start_day
 
     @classmethod
@@ -59,7 +59,7 @@ class EpfInterface:
             for epf_trans in EpfEntry.objects.filter(epf_id=epf_obj, trans_date__lte=end_date):
                 if epf_trans.trans_date >= st_date:
                     contrib += float(epf_trans.employer_contribution + epf_trans.employee_contribution)
-                    deduct += float(epf_trans.withdrawl)
+                    deduct += -1*float(epf_trans.withdrawl)
                     cash_flows.append((epf_trans.trans_date, -1*float(epf_trans.employer_contribution+ epf_trans.employee_contribution)))
                     if epf_trans.withdrawl and epf_trans.withdrawl > 0:
                         cash_flows.append((epf_trans.trans_date, float(epf_trans.withdrawl)))

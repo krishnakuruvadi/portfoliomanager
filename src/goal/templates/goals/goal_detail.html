@@ -122,9 +122,14 @@
   var progress_data = {{progress_data|safe}}
   setProgressChart()
   var status_line = {{status_line|safe}}
-  setStatusLineChart(status_line)
+  rem = {{object.final_val}}-{{final_projection}};
+  if (rem < 0) {
+    rem = 0
+  }
+  status_line_vals = [{{ object.achieved_amt}},{{final_projection}}-{{ object.achieved_amt}},rem]
+  setStatusLineChart(status_line, status_line_vals)
 
-  function setStatusLineChart(status_line) {
+  function setStatusLineChart(status_line, status_line_vals) {
     colors = ['green','grey', 'red']
     div_parent_elem = document.getElementById("progressLine")
     var width = 0;
@@ -150,6 +155,7 @@
       newDiv.style.height='20px';
       newDiv.style.textAlign='center';
       newDiv.style.background=color+' none repeat scroll 0% 0%';
+      newDiv.title=status_line_vals[x];
       //style="width: 11%; background: rgb(239, 49, 137) none repeat scroll 0% 0%;"
       div_parent_elem.appendChild(newDiv)
     }

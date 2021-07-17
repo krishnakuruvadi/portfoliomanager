@@ -1,6 +1,6 @@
 from .models import FixedDeposit
 from dateutil.relativedelta import relativedelta
-from datetime import datetime
+from datetime import datetime, date
 
 def add_fd_entry(number, bank_name, start_date, principal, time_period_days,
                     final_val, user, notes, goal, roi, mat_date):
@@ -17,7 +17,12 @@ def add_fd_entry(number, bank_name, start_date, principal, time_period_days,
                                 mat_date=mat_date)
 
 def get_maturity_value(principal, start_date, roi, time_period_days, compound_frequency=4):
-    maturity_date = datetime.strptime(start_date, "%Y-%m-%d").date()+relativedelta(days=time_period_days)
+    '''
+    start_date should either be a date object or of format "%Y-%m-%d"
+    '''
+    if not isinstance(start_date, date):
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+    maturity_date = start_date+relativedelta(days=time_period_days)
     #maturity_value = principal*(1+(roi/(100*compound_frequency))**(compound_frequency*float(time_period_days/365)))
     maturity_value = compound_interest_quarterly(principal, roi, float(time_period_days/365))
 

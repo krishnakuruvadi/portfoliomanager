@@ -159,18 +159,12 @@ def get_historical_stock_price(stock, start, end):
             new_date = k
             if isinstance(new_date, datetime.datetime):
                 new_date = new_date.date()
-            else:
-                print('new_date is already of type date')
 
             if isinstance(start, datetime.datetime):
                 start = start.date()
-            else:
-                print('start is already of type date')
 
             if isinstance(end, datetime.datetime):
                 end = end.date()
-            else:
-                print('end is already of type date')
                 
             if new_date >= start and new_date<= end:
                 new_entry = HistoricalStockPrice(symbol=stock, date=new_date, price=v)

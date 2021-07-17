@@ -37,6 +37,8 @@
         <th scope="col">Time Period</th>
         <th scope="col">End Date</th>
         <th scope="col">Target Value</th>
+        <th scope="col">Achieved</th>
+        <th scope="col">Achieved %</th>
         <th scope="col">User</th>
         <th scope="col">Notes</th>
         <th scope="col"></th>
@@ -54,6 +56,8 @@
         <td>{{ instance.time_period }}</td>
         <td>{{ instance.end_date }}</td>
         <td>{{ instance.final_val }}</td>
+        <td>{{ instance.achieved_amt }}</td>
+        <td> {{ instance.achieved_percent }}</td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ instance.notes }}</td>
         <td>
