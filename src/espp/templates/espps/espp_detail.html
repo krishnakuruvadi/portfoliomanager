@@ -93,7 +93,7 @@
     </tr>
   </table>
   <br>
-  <table class="table table-hover" id="espp-sell-table">
+  <table class="table table-hover dt-responsive" id="espp-sell-table" style="width:100%">
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
@@ -108,7 +108,7 @@
     <tbody>
       {% for instance in transactions %}
       <tr>
-        <th scope="row"><a href="{{ instance.id }}">{{ instance.id }}</a></th>
+        <td>{{ instance.id }}</th>
         <td>{{ instance.trans_date }}</td>
         <td>{{ instance.price }}</td>
         <td>{{ instance.units }}</td>
@@ -125,8 +125,9 @@
   </div>
 {% endblock content %}
 
-<script>
-{% block jquery %}
 
-{% endblock jquery %}
+<script>
+  {% block jquery %}
+  $('#espp-sell-table').DataTable();
+  {% endblock jquery %}
 </script>

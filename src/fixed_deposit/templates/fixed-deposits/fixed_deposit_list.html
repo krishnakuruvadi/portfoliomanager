@@ -13,7 +13,7 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
-  <table class="table table-hover" id="fixed_deposits">
+  <table class="table table-hover dt-responsive" id="fixed_deposits" style="width:100%">
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
@@ -24,14 +24,16 @@
         <th scope="col">ROI</th>
         <th scope="col">Goal</th>
         <th scope="col">User</th>
-        <th scope="col"></th>
+        <th scope="col">Start Date</th>
+        <th scope="col">Time Period (days)</th>
+        <th scope="col">Notes</th>
+        <th scope="col">Actions</th>
       </tr>
     </thead>
     <tbody>
       {% for instance in object_list %}
-      <tr data-toggle="collapse" data-target="#collapse{{forloop.counter}}">
+      <tr>
         <th scope="row">{{ forloop.counter }}</th>
-
         <td>
           <a href="{{ instance.get_absolute_url }}">{{ instance.number }}</a>
         </td>
@@ -40,22 +42,22 @@
         <td>{{ instance.mat_date }}</td>
         <td>{{ instance.roi }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
-        <td>{{ user_name_mapping |lookup:instance.user }}</td>
-        <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
-        </td>
-      </tr>
-      <tr class="collapse out" id="collapse{{forloop.counter}}">
-        <td></td>
-        <th>Start Date</th>
+        <td>{{ user_name_mapping|lookup:instance.user }}</td>
         <td>{{ instance.start_date }}</td>
-        <th>Time Period (days)</th>
         <td>{{ instance.time_period }}</td>
-        <th>Notes</th>
         <td>{{ instance.notes }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
+        </td> 
       </tr>
       {% endfor %}
     </tbody>
   </table>
 {% endblock %}
+
+<script>
+  {% block jquery %}
+  $('#fixed_deposits').DataTable();
+  {% endblock jquery %}
+</script>
