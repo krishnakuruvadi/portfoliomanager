@@ -88,9 +88,9 @@ def goals_insight(request):
         target_date = goal_obj.start_date+relativedelta(months=goal_obj.time_period)
         months_to_goal = relativedelta(target_date, today)
         mtg = months_to_goal.months + months_to_goal.years*12
-        projected = get_fd_final_val(float(goal_obj.achieved_amt), 'fd_compound_yearly', mtg, 8)
+        projected = get_fd_final_val(float(goal_obj.achieved_amt), 'fd_compound_yearly', mtg, exp_growth)
 
-        target_dates_and_amts.append({'date':target_date, 'target':remaining-projected, 'id':goal_obj.id})
+        target_dates_and_amts.append({'id':goal_obj.id, 'user':goal_obj.user, 'name':goal_obj.name, 'date':target_date, 'achieved':int(goal_obj.achieved_amt), 'target':int(remaining-projected+float(goal_obj.achieved_amt)), 'id':goal_obj.id, 'remaining':int(remaining), 'projected':int(projected)})
         '''
         yrly_investment_reqd_12 = int(get_required_yrly_investment(float(goal_obj.achieved_amt), 12, target_date, target))
         yrly_investment_reqd_8 = int(get_required_yrly_investment(float(goal_obj.achieved_amt), 8, target_date, target))
@@ -158,23 +158,29 @@ def goals_insight(request):
     fv, fvs = get_fv_from_cashflows(cash_flows=cash_flows, roi=exp_growth)
     print(f'****** Done fv for total ***********')
 
-    table_goal_yrly_inv = '<tr><th>Investment Required</th>'
+    table_goal_yrly_inv = '<thead><tr><th>Investment Required</th><th>Total</th>'
     for goal_obj in goal_objs:
-        table_goal_yrly_inv += '<th>' + get_user_short_name_or_name_from_id(goal_obj.user) + '/' + goal_obj.name + '</th>'
-    table_goal_yrly_inv += '<th>Total</th></tr>' 
+        table_goal_yrly_inv += '<th>' + get_user_short_name_or_name_from_id(goal_obj.user) + '/' + goal_obj.name 
+        #target_dates_and_amts.append({'id':goal_obj.id, 'user':goal_obj.user, 'name':goal_obj.name, 'date':target_date, 'achieved':int(goal_obj.achieved_amt), 'target':int(remaining-projected), 'id':goal_obj.id, 'remaining':int(remaining), 'projected':int(projected)})
+        for t in target_dates_and_amts:
+            if t['id'] == goal_obj.id:
+                tip = f"Achieved {t['achieved']}. Projected to grow to {t['projected']} at {exp_growth}%. Target {goal_obj.final_val}"
+                break
+        table_goal_yrly_inv += f'<i class="far fa-question-circle" data-toggle="tooltip" data-placement="top" title="{tip}"></i></th>'
+    table_goal_yrly_inv += '</tr></thead><tbody>' 
     for yr in range(today.year, last_date.year+1):
         yr_total = 0
         table_goal_yrly_inv += '<tr><th>' + str(yr) + '</th>'
+        yr_ind = ''
         for goal_obj in goal_objs:
             if yr in goal_yrly_inv[goal_obj.id]:
-                table_goal_yrly_inv += '<td>' + str(goal_yrly_inv[goal_obj.id][yr]) + '</td>'
+                yr_ind += '<td>' + str(goal_yrly_inv[goal_obj.id][yr]) + '</td>'
                 yr_total += goal_yrly_inv[goal_obj.id][yr]
             else:
-                table_goal_yrly_inv += '<td></td>'
-        table_goal_yrly_inv += '<td>' + str(round(yr_total,2)) + '</td>'
+                yr_ind += '<td>0</td>'
+        table_goal_yrly_inv += '<td>' + str(round(yr_total,2)) + '</td>' + yr_ind
         table_goal_yrly_inv += '</tr>'
-    context['table_goal_yrly_inv'] = table_goal_yrly_inv
-
+    context['table_goal_yrly_inv'] = table_goal_yrly_inv+'</tbody>'
 
     #print(f'fv: {fv}')
     #print(f'fvs: {fvs}')
