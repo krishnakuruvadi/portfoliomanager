@@ -425,10 +425,8 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                 total[i]['PPF'] = total[i].get('PPF', 0) + total[j].get('PPF', 0)
                 total[i]['EPF'] = total[i].get('EPF', 0) + total[j].get('EPF', 0)
                 total[i]['SSY'] = total[i].get('SSY', 0) + total[j].get('SSY', 0)
-
-    
-
     '''
+    
     contrib, deduct, total, latest_value, cash_flows = get_goal_yearly_contrib_v2(goal_id, expected_return)
 
     total_contribution = 0

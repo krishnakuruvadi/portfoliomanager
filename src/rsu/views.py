@@ -119,13 +119,12 @@ class RsuVestDetailView(DetailView):
     template_name = 'rsus/rsu_vest_detail.html'
 
     def get_object(self):
-        id_ = self.kwargs.get("id")
+        id_ = self.kwargs.get("vestid")
         return get_object_or_404(RestrictedStockUnits, id=id_)
     
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['sell_trans'] = RSUSellTransactions.objects.filter(rsu_vest=data['object'])
-        print(data)
         return data
 
 def refresh_rsu_trans(request):
