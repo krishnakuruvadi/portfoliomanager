@@ -33,11 +33,11 @@
             {% for key, value in pe_vals.items %}
             <div style="text-align:center; margin: 70px 0px 0px 0px;font-weight: bold;">{{key}}</div>
             <div class="row">
-                <div class='col-sm-6'>
-                    <canvas id="{{key}}_pe_chart" width="500" height="500"></canvas>
+                <div class='col-sm-6' style='width:95%;height:50vh'>
+                    <canvas id="{{key}}_pe_chart"></canvas>
                 </div>
-                <div class='col-sm-6'>
-                    <canvas id="{{key}}_pb_chart" width="500" height="500"></canvas>
+                <div class='col-sm-6' style='width:95%;height:50vh'>
+                    <canvas id="{{key}}_pb_chart"></canvas>
                 </div>
             </div>
             {% endfor %}
@@ -83,6 +83,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio:false,
                 title:      {
                     display: true,
                     text:    id + " PE Ratio"
@@ -128,6 +129,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio:false,
                 title:      {
                     display: true,
                     text:    id + " PB Ratio"

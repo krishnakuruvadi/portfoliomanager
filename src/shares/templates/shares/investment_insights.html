@@ -32,10 +32,10 @@
 </table>
 
 <div class="row">
-  <div class='col-sm-2'>
-    <canvas id="countryChart" width="200" height="200"></canvas>
+  <div class='col-sm-6 col-lg-2 col-md-4' style="width:75%;height:30vh">
+    <canvas id="countryChart"></canvas>
   </div>
-  <div class='col-sm-4'>
+  <div class='col-sm-6 col-md-6 col-lg-3'>
     <table>
       {% for color in country_colors %}
         <tr>
@@ -52,8 +52,8 @@
       {% endfor %}
     </table>
   </div>
-  <div class='col-sm-1'></div>
-  <div class='col-sm-3'>
+  <div class='col-sm-12 col-lg-1 col-md-1'><br><br></div>
+  <div class='col-sm-6 col-lg-3 col-md-6'>
     <table>
       {% for color in blend_colors %}
         <tr>
@@ -70,8 +70,8 @@
       {% endfor %}
     </table>
   </div>
-  <div class='col-sm-2'>
-    <canvas id="blendChart" width="200" height="200"></canvas>
+  <div class='col-sm-6 col-lg-2 col-md-4' style="width:75%;height:30vh">
+    <canvas id="blendChart"></canvas>
   </div>
 </div>
 {% endblock content %}
@@ -100,6 +100,7 @@ function setChart(){
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         legend: {
           display: false
         }
@@ -118,6 +119,7 @@ function setChart(){
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         legend: {
           display: false
         }

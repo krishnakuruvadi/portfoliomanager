@@ -50,8 +50,8 @@
     </tr>
   </table>
 
-  <div class='col-sm-6'>
-    <canvas id="myChart" width="400" height="400"></canvas>
+  <div class='col-sm-6 col-md-4 col-lg-4' style="width:95%;height:45vh">
+    <canvas id="myChart"></canvas>
   </div>
 {% endblock content %}
 
@@ -130,6 +130,7 @@
       },
       options: {
         responsive: true,
+        maintainAspectRatio:false,
         title:      {
           display: true,
           text:    "PPF"

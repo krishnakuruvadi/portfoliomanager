@@ -15,7 +15,7 @@
 
 {% block content %}
   <div class="row">
-    <div class='col-sm-6'>
+    <div class='col-sm-12 col-md-6 col-lg-4'>
       <table class="table table-borderless">
         <tr>
           <td>Company</td>
@@ -67,8 +67,8 @@
         </tr>
       </table>
     </div>
-    <div class='col-sm-6'>
-      <canvas id="bar-vertical" width="800" height = "450"></canvas>
+    <div class='col-sm-12 col-md-6 col-lg-4' style="width:75%;height:40vh">
+      <canvas id="bar-vertical"></canvas>
     </div>
   </div>
   <hr>
@@ -99,13 +99,9 @@
         </div>
       </div>
     </div>
-    <div class="col-sm-4">
-      <div class="row">
-        <div class="col">
-          <canvas id="fund-compare" width="800" height = "600"></canvas>
+        <div class="col-sm-12 col-md-6 col-lg-4" style="width:75%;height:40vh">
+          <canvas id="fund-compare"></canvas>
         </div>
-      </div>
-    </div>
   </div>
 {% endblock content %}
 
@@ -158,6 +154,8 @@
           ]
         },
         options: {
+          responsive: true,
+          maintainAspectRatio:false,
           title: {
             display: true,
             text: 'Contribution (approx)'
@@ -189,6 +187,8 @@
           }]
         },
         options: {
+          responsive: true,
+          maintainAspectRatio:false,
           title: {
             display: true,
             text: 'Fund vs SPY'
