@@ -278,9 +278,9 @@ def alternate_investment_strategy(target_dates_and_amts, roi):
                     temp1 = rd_calc_final_val(max_yrs_investment/12, m, roi, None)
                     temp2 = curr_goal['target'] - temp1
                     print(f'temp1 {temp1} temp2 {temp2}')
-                    add_each_year = get_required_yrly_investment(0,roi, last_goal["date"], temp2)
+                    add_each_year = get_required_yrly_investment(0,roi, curr_goal["date"], temp2)
                     print(f'Add {max_yrs_investment} to each year from {last_goal["date"].year} to {curr_goal["date"].year+1}.')
-                    print(f'Add additional {add_each_year} to each year from {today.year} to {curr_goal["date"].year+1} to reach goal')
+                    print(f'Add additional {add_each_year} to each year from {today.year} to {curr_goal["date"].year} to reach goal')
                     monthly1 = round(add_each_year/12, 2)
                     for j in range(today.year, curr_goal["date"].year+1):
                         months = 12
