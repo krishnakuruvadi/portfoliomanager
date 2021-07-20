@@ -66,3 +66,6 @@ userid@host portfoliomanager %  source ./venv/bin/activate
 (venv) userid@host src % python manage.py run_huey
 ```
 * Copy chrome driver to root of the project (portfoliomanager) from here: https://chromedriver.chromium.org/downloads
+
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kkuruvadi)
