@@ -235,7 +235,7 @@ div {
     }
     .main
     {
-        left: -50px;
+        margin-left:0px;
         width:100%;
         padding: 60px 0px 0px 0px;
     }
