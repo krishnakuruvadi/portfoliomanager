@@ -186,7 +186,7 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
     try:
         share_obj = None
         try:
-            share_obj = Share.objects.get(exchange=exchange, symbol=symbol)
+            share_obj = Share.objects.get(exchange=exchange, symbol=symbol, user=user)
         except Share.DoesNotExist:
             if exchange == 'NSE' or exchange == 'BSE':
                 print("Couldnt find share object exchange:", exchange, " symbol:", symbol)
@@ -202,18 +202,21 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
                 if nse_bse_data and 'nse' in nse_bse_data:
                     print(f'checking if {symbol} with nse {nse_bse_data["nse"]} exists')
                     nse_objs = Share.objects.filter(exchange='NSE/BSE',
-                                                    symbol=nse_bse_data['nse'])
+                                                    symbol=nse_bse_data['nse'],
+                                                    user=user)
                     if len(nse_objs) == 1:
                         share_obj = nse_objs[0]
                     else:
                         nse_objs = Share.objects.filter(exchange='NSE',
-                                                    symbol=nse_bse_data['nse'])
+                                                    symbol=nse_bse_data['nse'],
+                                                    user=user)
                         if len(nse_objs) == 1:
                             share_obj = nse_objs[0]
                         else:
                             print(f'share with nse {nse_bse_data["nse"]} doesnt exist')
 
             if not share_obj:
+                print(f'creating share object {exchange} {symbol} for user {user}')
                 share_obj = Share.objects.create(exchange=exchange,
                                                 symbol=symbol,
                                                 user=user,
@@ -251,6 +254,7 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
 
 def merge_bse_nse():
     merge_data = list()
+    #Filter NSE shares to be merged
     share_objs = Share.objects.filter(exchange='NSE')
     for share_obj in share_objs:
         nse_bse_data = get_nse_bse(share_obj.symbol, None, None)
@@ -261,15 +265,19 @@ def merge_bse_nse():
                     merge_content = dict()
                     merge_content['nse'] = share_obj.id
                     merge_content['bse'] = bse_shares[0].id
+                    print(f'merge candidate found {share_obj.symbol} {share_obj.id} and {bse_shares[0].symbol} {bse_shares[0].id}')
                     merge_data.append(merge_content)
             isin_shares = Share.objects.filter(exchange='NSE/BSE', symbol=nse_bse_data['nse'], user=share_obj.user)
             if isin_shares:
                 merge_content = dict()
                 merge_content['nse'] = share_obj.id
                 merge_content['isin'] = isin_shares[0].id
+                print(f'merge candidate found {share_obj.symbol} {share_obj.id} and {isin_shares[0].symbol} {isin_shares[0].id}')
                 merge_data.append(merge_content)
         else:
             print(f'couldnt find data for nse symbol {share_obj.symbol}')
+
+    # Filter BSE shares to be merged
     share_objs = Share.objects.filter(exchange='BSE')
     for share_obj in share_objs:
         nse_bse_data = get_nse_bse(None, share_obj.symbol, None)
@@ -295,6 +303,7 @@ def merge_bse_nse():
                     merge_data.append(merge_content)
         else:
             print(f'couldnt find data for bse symbol {share_obj.symbol}')
+
     if len(merge_data) > 0:
         print(f'Merge data {merge_data}')
         for merge_inst in merge_data:
@@ -302,8 +311,9 @@ def merge_bse_nse():
             if 'nse' in merge_inst and 'bse' in merge_inst:
                 try:
                     nse_share_obj = Share.objects.get(id=merge_inst['nse'])
-                    try:
-                        isin_obj = Share.objects.get(exchange='NSE/BSE', symbol=nse_share_obj.symbol)
+                    if 'isin' in merge_inst and merge_inst['isin'] != '':
+                        isin_obj = Share.objects.get(id=merge_inst['isin'])
+                        print(f'moving transactions from NSE {nse_share_obj.id} to NSE/BSE {isin_obj.id}')
                         for trans in Transactions.objects.filter(share=nse_share_obj):
                             try:
                                 trans.share=isin_obj
@@ -311,24 +321,26 @@ def merge_bse_nse():
                             except IntegrityError:
                                 print(f'Transaction exists.  Deleting instead')
                                 trans.delete()
+                        print(f"merge_bse_nse nse_share_obj deleting {nse_share_obj.exchange}: {nse_share_obj.symbol}")
+                        nse_share_obj.delete()
                         try:
                             bse_share_obj = Share.objects.get(id=merge_inst['bse'])
                             bse_transactions = Transactions.objects.filter(share=bse_share_obj)
+                            print(f'moving transactions from BSE {bse_share_obj.id} to NSE/BSE {isin_obj.id}')
                             for trans in bse_transactions:
                                 try:
-                                    trans.share=nse_share_obj
+                                    trans.share=isin_obj
                                     trans.save()
                                     print('mapped bse transaction to NSE/BSE object')
                                 except IntegrityError:
                                     print(f'Transaction exists.  Deleting instead')
                                     trans.delete()
-                            print(f"deleting {bse_share_obj.exchange}: {bse_share_obj.symbol}")
+                            print(f"merge_bse_nse: deleting bse_share_obj {bse_share_obj.exchange}: {bse_share_obj.symbol}")
                             bse_share_obj.delete()
                         except Share.DoesNotExist:
                             print(f"Might be already deleted BSE: {merge_inst['bse']}")
-                        print(f"deleting {nse_share_obj.exchange}: {nse_share_obj.symbol}")
-                        nse_share_obj.delete()
-                    except Share.DoesNotExist:
+
+                    else:
                         print(f'{nse_share_obj.symbol} : merging {merge_inst["bse"]} into {merge_inst["nse"]}')
                         nse_share_obj.exchange = 'NSE/BSE'
                         nse_share_obj.save()
@@ -343,11 +355,11 @@ def merge_bse_nse():
                             except IntegrityError:
                                 print(f'Transaction exists.  Deleting instead')
                                 trans.delete()
-                        print(f"deleting {bse_share_obj.exchange}: {bse_share_obj.symbol}")
+                        print(f"merge_bse_nse 351 deleting bse_share_obj {bse_share_obj.exchange}: {bse_share_obj.symbol}")
                         bse_share_obj.delete()
                 except Share.DoesNotExist:
                     print(f"Might be already deleted NSE: {merge_inst['nse']}")
-            elif 'nse' in merge_inst:
+            elif 'nse' in merge_inst and 'isin' in merge_inst:
                 try:
                     nse_share_obj = Share.objects.get(id=merge_inst['nse'])
                     isin_share_obj = Share.objects.get(id=merge_inst['isin'])
@@ -361,12 +373,12 @@ def merge_bse_nse():
                         except IntegrityError:
                             print(f'Transaction exists.  Deleting instead')
                             trans.delete()
-                    print(f"deleting {nse_share_obj.exchange}: {nse_share_obj.symbol}")
+                    print(f"merge_bse_nse 369 nse_share_obj deleting {nse_share_obj.exchange}: {nse_share_obj.symbol}")
                     nse_share_obj.delete()
                 except Share.DoesNotExist:
                     print(f"Might be already deleted NSE: {merge_inst['nse']}")
 
-            else:
+            elif 'bse' in merge_inst and 'isin' in merge_inst:
                 try:
                     bse_share_obj = Share.objects.get(id=merge_inst['bse'])
                     isin_share_obj = Share.objects.get(id=merge_inst['isin'])
@@ -380,12 +392,15 @@ def merge_bse_nse():
                         except IntegrityError:
                             print(f'Transaction exists.  Deleting instead')
                             trans.delete()
-                    print(f"deleting {bse_share_obj.exchange}: {bse_share_obj.symbol}")
+                    print(f"merge_bse_nse 388 bse_share_obj deleting {bse_share_obj.exchange}: {bse_share_obj.symbol}")
                     bse_share_obj.delete()
                 except Share.DoesNotExist:
                     print(f"Might be already deleted BSE: {merge_inst['bse']}")
+            else:
+                print(f'ignoring {merge_inst}')
     else:
         print('nothing to merge')
+    print('done with merging shares')
 
 
 def reconcile_shares(log_calc=False):
@@ -565,7 +580,7 @@ def move_trans(from_share_obj, to_share_obj, delete_from_share_obj=False):
         except IntegrityError:
             trans.delete()
     if delete_from_share_obj:
-        print(f'deleting {from_share_obj.exchange}:{from_share_obj.symbol}')
+        print(f'move_trans: deleting {from_share_obj.exchange}:{from_share_obj.symbol}')
         try:
             from_share_obj.delete()
         except Exception as ex:

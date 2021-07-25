@@ -37,20 +37,25 @@
       </tr>
     </tbody>
   </table>
-  <table class="table table-hover">
+  <table class="table table-hover" style="width:50%">
       <tr>
-        <th scope="col">Fund House</th>
-        <th scope="col">Kuvera Name</th>
-        <th scope="col">BSEStar Name</th>
-        <th scope="col">Collection Start Date</th>
-        <th scope="col">MS Name</th>
+        <th scope="col">Fund House</th> <td>{{ object.fund_house }}</td>
       </tr>
       <tr>
-        <td>{{ object.fund_house }}</td>
-        <td>{{ object.kuvera_name }}</td>
-        <td>{{ object.bse_star_name }}</td>
-        <td>{{ object.collection_start_date }}</td>
-        <td>{{ object.ms_name }}</td>
+        <th scope="col">Kuvera Name</th>        <td>{{ object.kuvera_name }}</td>
+      </tr>
+      <tr>
+        <th scope="col">BSEStar Name</th>        <td>{{ object.bse_star_name }}</td>
+      </tr>
+      <tr>
+        <th scope="col">Collection Start Date</th>        <td>{{ object.collection_start_date }}</td>
+      </tr>
+      <tr>
+        <th scope="col">MS Name</th>        <td>{{ object.ms_name }}</td>
+      </tr>
+
+      <tr>
+        <th scope="col">MS Id</th>        <td>{{ object.ms_id }}</td>
       </tr>
   </table>
 {% endblock %}

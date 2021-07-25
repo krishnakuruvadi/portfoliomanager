@@ -19,7 +19,7 @@ TRANSACTION_TYPE_CHOICES = [
 
 class Share(models.Model):
     class Meta:
-        unique_together = (('exchange','symbol'),)
+        unique_together = (('exchange','symbol','user'),)
     exchange = models.CharField(max_length=10, choices=EXCHANGE_CHOICES)
     symbol = models.CharField(max_length=20)
     user = models.IntegerField()
@@ -37,7 +37,6 @@ class Share(models.Model):
     etf = models.BooleanField(default=False)
     roi = models.DecimalField(max_digits=20, decimal_places=2, default=0)
 
-    
     def get_absolute_url(self):
         return reverse('shares:share-detail', args=[str(self.id)])
 
