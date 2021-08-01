@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import DeleteView
 from .helper import reconcile_401k, create_nav_file, remove_nav_file, get_yearly_contribution, get_nav_file_locn
 from dateutil.relativedelta import relativedelta
+from django.db import IntegrityError
 # Create your views here.
 
 
@@ -202,23 +203,36 @@ def get_transactions(request, id):
 def add_transaction(request, id):
     template_name = 'retirement_401k/add_transaction.html'
     account = Account401K.objects.get(id=id)
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
+        message_color = 'green'
         print(request.POST)
         trans_date = get_date_or_none_from_string(request.POST['trans_date'])
         employee_contribution = get_float_or_none_from_string(request.POST['employee_contribution'])
         employer_contribution = get_float_or_none_from_string(request.POST['employee_contribution'])
         notes = request.POST['notes']
         units = get_float_or_none_from_string(request.POST['units'])
-        Transaction401K.objects.create(
-            account=account,
-            trans_date=trans_date,
-            employee_contribution=employee_contribution,
-            employer_contribution=employer_contribution,
-            units=units,
-            notes=notes
-        )
+        try:
+            Transaction401K.objects.create(
+                account=account,
+                trans_date=trans_date,
+                employee_contribution=employee_contribution,
+                employer_contribution=employer_contribution,
+                units=units,
+                notes=notes
+            )
+            message = 'Transaction addition successful'
+        except IntegrityError:
+            message = 'Transaction already being tracked'
+            message_color = 'red'
+        except Exception as ex:
+            message = 'Transaction add failed'
+            message_color = 'red'
+            print(f'Exception {ex} encountered during transaction add')
         reconcile_401k()
-    context = {'company':account.company, 'id':account.id, 'operation':'Add'}
+
+    context = {'company':account.company, 'id':account.id, 'operation':'Add', 'message':message, 'message_color':message_color}
     return render(request, template_name, context)
 
 def edit_transaction(request, id):

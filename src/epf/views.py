@@ -90,7 +90,37 @@ class EpfDetailView(DetailView):
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
-        data[ 'curr_module_id'] = 'id_epf_module'
+        data['curr_module_id'] = 'id_epf_module'
+        contribs = EpfEntry.objects.filter(epf_id=data['object']).order_by('trans_date')
+        e = 0
+        em = 0
+        t = 0
+        i = 0
+        t_list = list()
+        e_list = list()
+        em_list = list()
+        i_list = list()
+        for c in contribs:
+            e += int(c.employee_contribution)
+            em += int(c.employer_contribution)
+            i += int(c.interest_contribution)
+            t += int(c.employee_contribution) + int(c.interest_contribution) + int(c.employer_contribution) - int(c.withdrawl)
+            dt = c.trans_date.strftime('%Y-%m-%d')
+            t_list.append({'x':dt, 'y':t})
+            em_list.append({'x':dt, 'y':em})
+            e_list.append({'x':dt, 'y':e})
+            i_list.append({'x':dt, 'y':i})
+        dt = datetime.date.today().strftime('%Y-%m-%d')
+        t_list.append({'x':dt, 'y':t})
+        em_list.append({'x':dt, 'y':em})
+        e_list.append({'x':dt, 'y':e})
+        i_list.append({'x':dt, 'y':i})
+        data['chart_data'] = dict()
+        data['chart_data']['employee'] = e_list
+        data['chart_data']['employer'] = em_list
+        data['chart_data']['total'] = t_list
+        data['chart_data']['interest'] = i_list
+
         return data
 
 def update_epf(request, id):
@@ -176,6 +206,7 @@ def show_contributions(request, id, year=None):
         entry['em_contrib'] = contrib.employee_contribution
         entry['er_contrib'] = contrib.employer_contribution
         entry['interest'] = contrib.interest_contribution
+        entry['withdrawl'] = contrib.withdrawl
         fy_trans.append(entry)
     summ = get_summary_for_range(epf_obj, get_date_or_none_from_string(start_date), get_date_or_none_from_string(end_date))
     context = {'fy_trans':fy_trans, 
@@ -220,10 +251,12 @@ def add_contribution(request, id):
                 interest_str = request.POST.get(month_abbr[i] + 'int')
                 employee_str = request.POST.get(month_abbr[i] + 'em')
                 employer_str = request.POST.get(month_abbr[i] + 'er')
-                print('interest_str',interest_str,' employee_str', employee_str, ' employer_str', employer_str)
+                withdrawl_str = request.POST.get(month_abbr[i] + 'wd')
+                print(f'interest_str {interest_str}  employee_str {employee_str} employer_str {employer_str} withdrawl_str {withdrawl_str}')
                 interest = int(float(interest_str)) if interest_str != '' else 0
                 employee = int(float(employee_str)) if employee_str != '' else 0
                 employer = int(float(employer_str)) if employer_str != '' else 0
+                withdrawl = int(float(withdrawl_str)) if withdrawl_str != '' else 0
                 if (interest + employee + employer) > 0:
                     date = datetime_object+relativedelta(months=i)
                     try:
@@ -231,13 +264,15 @@ def add_contribution(request, id):
                         contrib.employee_contribution = employee
                         contrib.employer_contribution = employer
                         contrib.interest_contribution = interest
+                        contrib.withdrawl = withdrawl
                         contrib.save()
                     except EpfEntry.DoesNotExist:
                         EpfEntry.objects.create(epf_id=epf_obj,
                                                 trans_date=date,
                                                 employee_contribution=employee,
                                                 employer_contribution=employer,
-                                                interest_contribution=interest)
+                                                interest_contribution=interest,
+                                                withdrawl=withdrawl)
         else:
             print("fetch button pressed")
             fy = request.POST.get('fy')

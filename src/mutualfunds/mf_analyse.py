@@ -14,6 +14,9 @@ import pprint
 import json
 import re
 
+from alerts.alert_helper import create_alert, Severity
+
+
 def obfuscate(byt):
     # Use same function in both directions.  Input and output are bytes
     # objects.
@@ -275,6 +278,11 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
     try:
         fund = MutualFund.objects.get(code=code)
     except MutualFund.DoesNotExist:
+        create_alert(
+            summary='Code:' + code + ' Mutual fund not present',
+            content= 'Not able to find a matching Mutual Fund with the code.',
+            severity=Severity.error
+        )
         return None, token
     mf_name = None
     if token and fund.ms_id:

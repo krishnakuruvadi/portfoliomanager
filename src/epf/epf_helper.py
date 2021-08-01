@@ -11,6 +11,7 @@ def get_epf_details(number):
         principal = 0
         employer_contrib = 0
         employee_contrib = 0
+        withdrawl = 0
         cash_flows = list()
         epf_trans = EpfEntry.objects.filter(epf_id=epf_obj).order_by('trans_date')
         for entry in epf_trans:
@@ -25,11 +26,12 @@ def get_epf_details(number):
                     interest += principal
                     principal = 0
                 cash_flows.append((entry.trans_date, float(entry.withdrawl)))
+                withdrawl += entry.withdrawl
         total = principal + interest
         cash_flows.append((datetime.date.today(), float(total)))
         roi = xirr(cash_flows, 0.1)*100
         roi = round(roi, 2)
-        return {'number': number, 'total': total, 'employer_contrib':employer_contrib, 'employee_contrib':employee_contrib, 'interest':interest, 'roi':roi}
+        return {'number': number, 'total': total, 'employer_contrib':employer_contrib, 'employee_contrib':employee_contrib, 'interest':interest, 'roi':roi, 'withdrawl':withdrawl}
     except Epf.DoesNotExist:
         return None
 
@@ -39,6 +41,7 @@ def update_epf_vals():
         epf_obj.employee_contribution = res['employee_contrib']
         epf_obj.employer_contribution = res['employer_contrib']
         epf_obj.interest_contribution = res['interest']
+        epf_obj.withdrawl = res['withdrawl']
         epf_obj.total = res['total']
         epf_obj.roi = res['roi']
         epf_obj.save()

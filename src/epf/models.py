@@ -16,6 +16,7 @@ class Epf(models.Model):
     employee_contribution = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
     employer_contribution = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
     interest_contribution = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+    withdrawl = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
     total = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
     roi = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
 

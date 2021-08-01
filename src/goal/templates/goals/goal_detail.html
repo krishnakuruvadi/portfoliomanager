@@ -14,7 +14,7 @@
 {% block content %}
 
 <div class="row">
-  <div class='col-sm-4'>
+  <div class='col-sm-4 col-lg-4 col-md-12'>
     <table class="table table-condensed table-borderless" id="goal-table">
       <tr>
         <td>Number</td>
@@ -63,11 +63,10 @@
 
   </div>
 
-  <div class='col-sm-1'></div>
-  <div class='col-sm-5'>
-    <canvas id="progressChart" width="200" height="200"></canvas>
+  <div class='col-sm-12 col-md-12 col-lg-6 card' style="width:100%;height:60vh;box-shadow: 2px 4px #888888;">
+    <canvas id="progressChart"></canvas>
   </div>
-  <div class='col-sm-2'>
+  <div class='col-sm-12 col-lg-2 col-md-12'>
     <table class="table table-condensed table-borderless">
       <tr>
         <td>Average New Investment</td>
@@ -92,15 +91,15 @@
   </div>
 </div>
 <br><br><br>
-<div class="row">
-  <div class='col-sm-3'>
-    <canvas id="classificationChart" width="300" height="200"></canvas>
+<div class="card-deck">
+  <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="classificationChart"></canvas>
   </div>
-  <div class='col-sm-4'>
-    <canvas id="distributionChart" width="300" height="150"></canvas>
+  <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="distributionChart"></canvas>
   </div>
-  <div class='col-sm-3'>
-    <canvas id="statusChart" width="300" height="200"></canvas>
+  <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="statusChart"></canvas>
   </div>
 </div>
 {% endblock content %}
@@ -187,6 +186,8 @@
       type: 'bar',
       data: progress_data.chart_data,
       options: {
+        responsive: true,
+        maintainAspectRatio:false,
         scales: {
             xAxes: [{
                 stacked: true,
@@ -228,7 +229,21 @@
         labels: debt_equity_labels
       },
       options: {
-        responsive: true
+        responsive: true,
+        maintainAspectRatio:false,
+        tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
       }
     };
     var ctx2 = document.getElementById('distributionChart').getContext('2d');
@@ -243,7 +258,21 @@
         labels: distribution_labels
       },
       options: {
-        responsive: true
+        responsive: true,
+        maintainAspectRatio:false,
+        tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
       }
     };
     var ctx3 = document.getElementById('statusChart').getContext('2d');
@@ -260,7 +289,21 @@
         labels: status_labels
       },
       options: {
-        responsive: true
+        responsive: true,
+        maintainAspectRatio:false,
+        tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
       }
     };
     var classificationChart = new Chart(ctx,config);
