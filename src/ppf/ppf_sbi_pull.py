@@ -65,7 +65,7 @@ def pull_sbi_transactions(user, password, number, start_date):
         time.sleep(5)
 
         try:
-            for fy in range(start_date.year, datetime.date.today().year):
+            for fy in range(start_date.year, datetime.date.today().year+1):
                 from_date = datetime.date(year=fy,month=4,day=1)
                 to_date = datetime.date(year=fy+1,month=3,day=31)
                 if to_date > datetime.date.today():

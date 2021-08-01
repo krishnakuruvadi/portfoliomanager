@@ -25,6 +25,7 @@
         <th scope="col">Purchase Date</th>
         <th scope="col">Symbol</th>
         <th scope="col">Purchase Price</th>
+        <th scope="col">FMV</th>
         <th scope="col">Quantity</th>
         <th scope="col">Total Cost</th>
         <th scope="col">User</th>
@@ -33,7 +34,8 @@
         <th scope="col">Latest Price</th>
         <th scope="col">Latest Value</th>
         <th scope="col">As On Date</th>
-        <th scope="col">Gain</th>
+        <th scope="col">Unrealised Gain</th>
+        <th scope="col">XIRR</th>
         <th scope="col"></th>
       </tr>
     </thead>
@@ -44,6 +46,7 @@
         <td>{{ instance.purchase_date }}</td>
         <td>{{ instance.symbol }}</td>
         <td>{{ instance.purchase_price }}</td>
+        <td>{{ instance.purchase_fmv }}</td>
         <td>{{ instance.shares_purchased }}</td>
         <td>{{ instance.total_purchase_price }}</td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
@@ -53,6 +56,7 @@
         <td>{{ instance.latest_value }}</td>
         <td>{{ instance.as_on_date }}</td>
         <td>{{ instance.unrealised_gain }}</td>
+        <td>{{ instance.xirr }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete" title="Delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
           <a href="{{ instance.get_absolute_url }}update" title="Update"><i class="far fa-edit" aria-hidden="true"></i> </a>

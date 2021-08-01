@@ -33,6 +33,7 @@ class Espp(models.Model):
     as_on_date = models.DateField(_('As On Date'), blank=True, null=True)
     unrealised_gain = models.DecimalField(_('Unrealised Gain'), max_digits=20, decimal_places=2, default=0)
     realised_gain = models.DecimalField(_('Realised Gain'), max_digits=20, decimal_places=2, default=0)
+    xirr = models.DecimalField(_('XIRR'), max_digits=20, decimal_places=2, null=True, blank=True)
 
     def get_absolute_url(self):
         return reverse("espps:espp-detail", kwargs={'id': self.id})
