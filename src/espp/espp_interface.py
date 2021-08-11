@@ -35,6 +35,20 @@ class EsppInterface:
         except Exception as ex:
             print(f'exception finding start day for goal {goal_id} ppf {ex}')
         return start_day
+    
+    @classmethod
+    def get_start_day_for_user(self, user_id):
+        start_day = None
+        try:
+            objs = Espp.objects.filter(user=user_id)
+            for obj in objs:
+                if not start_day:
+                    start_day = obj.purchase_date
+                else:
+                    start_day = start_day if start_day < obj.purchase_date else obj.purchase_date
+        except Exception as ex:
+            print(f'exception finding start day for user {user_id} ppf {ex}')
+        return start_day
 
     @classmethod
     def get_no_goal_amount(self, user_id=None):
@@ -84,3 +98,17 @@ class EsppInterface:
                 else:
                     print(f'failed to get year end values for {espp_obj.exchange} {espp_obj.symbol} {end_date}')
         return cash_flows, contrib, deduct, total
+
+    @classmethod
+    def get_user_yearly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        contrib = 0
+        deduct = 0
+        for espp_obj in Espp.objects.filter(user=user_id, purchase_date__lte=end_date):
+            if espp_obj.purchase_date >= st_date:
+                contrib += float(espp_obj.total_purchase_price)
+            for st in EsppSellTransactions.objects.filter(espp=espp_obj, trans_date__lte=end_date):
+                if st.trans_date >= st_date:
+                    deduct += -1*float(st.trans_price)
+        return contrib, deduct

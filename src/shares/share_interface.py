@@ -36,11 +36,27 @@ class ShareInterface:
                 share_trans = Transactions.objects.filter(share=obj)
                 for trans in share_trans:
                     if not start_day:
-                        start_day = obj.start_date
+                        start_day = trans.trans_date
                     else:
                         start_day = start_day if start_day < trans.trans_date else trans.trans_date
         except Exception as ex:
             print(f'exception finding start day for goal {goal_id} shares {ex}')
+        return start_day
+
+    @classmethod
+    def get_start_day_for_user(self, user_id):
+        start_day = None
+        try:
+            objs = Share.objects.filter(user=user_id)
+            for obj in objs:
+                share_trans = Transactions.objects.filter(share=obj)
+                for trans in share_trans:
+                    if not start_day:
+                        start_day = trans.trans_date
+                    else:
+                        start_day = start_day if start_day < trans.trans_date else trans.trans_date
+        except Exception as ex:
+            print(f'exception finding start day for user {user_id} shares {ex}')
         return start_day
 
     @classmethod
@@ -95,3 +111,18 @@ class ShareInterface:
                 else:
                     print(f'failed to get year end values for {share_obj.exchange} {share_obj.symbol} {end_date}')            
         return cash_flows, contrib, deduct, total
+
+    @classmethod
+    def get_user_yearly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        contrib = 0
+        deduct = 0
+        for share_obj in Share.objects.filter(user=user_id):
+            transactions = Transactions.objects.filter(share=share_obj, trans_date__gte=st_date, trans_date__lte=end_date)
+            for t in transactions:
+                if t.trans_type == 'Buy':
+                    contrib += float(t.trans_price)
+                else:
+                    deduct += -1*float(t.trans_price)
+        return contrib, deduct

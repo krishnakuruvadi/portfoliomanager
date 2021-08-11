@@ -36,6 +36,20 @@ class FdInterface:
         return start_day
 
     @classmethod
+    def get_start_day_for_user(self, user_id):
+        start_day = None
+        try:
+            objs = FixedDeposit.objects.filter(user=user_id)
+            for obj in objs:
+                if not start_day:
+                    start_day = obj.start_date
+                else:
+                    start_day = start_day if start_day < obj.start_date else obj.start_date
+        except Exception as ex:
+            print(f'exception finding start day for user {user_id} fd {ex}')
+        return start_day
+
+    @classmethod
     def get_no_goal_amount(self, user_id=None):
         amt = 0
         if user_id:
@@ -69,3 +83,16 @@ class FdInterface:
                 _, mat_value = get_maturity_value(float(obj.principal), obj.start_date, float(obj.roi), days)
                 total += mat_value
         return cash_flows, contrib, deduct, total
+
+    @classmethod
+    def get_user_yearly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        contrib = 0
+        deduct = 0
+        for obj in FixedDeposit.objects.filter(user=user_id, start_date__lte=end_date):
+            if obj.start_date.year == yr:
+                contrib += float(obj.principal)
+            if obj.mat_date.year == yr:
+                deduct += -1*float(obj.final_val)
+        return contrib, deduct

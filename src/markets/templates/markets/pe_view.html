@@ -1,6 +1,24 @@
 {% extends 'base.html' %} 
 
-{% block applicableactions %}{% endblock applicableactions %} 
+{% block applicableactions %}
+<div class="btn-toolbar mb-2 mb-md-0">
+    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span data-feather="calendar"></span>
+      Interval
+      <div class="dropdown-menu" id="chart_interval">
+        <a class="dropdown-item" href="#" id="action-month">1 Month</a>
+        <a class="dropdown-item" href="#" id="action-3month">3 Months</a>
+        <a class="dropdown-item" href="#" id="action-6month">6 Months</a>
+        <a class="dropdown-item" href="#" id="action-1year">1 Year</a>
+        <a class="dropdown-item" href="#" id="action-2year">2 Years</a>
+        <a class="dropdown-item" href="#" id="action-3year">3 Years</a>
+        <a class="dropdown-item" href="#" id="action-5year">5 Years</a>
+        <a class="dropdown-item" href="#" id="action-ytd">YTD</a>
+        <a class="dropdown-item" href="#" id="action-all">Max</a>
+      </div>
+    </button>
+  </div>
+{% endblock applicableactions %} 
 
 {%block canvas %}{% endblock canvas %}
 
@@ -64,6 +82,46 @@
     for (x in pb_vals) {
         pb = pb_vals[x];
         setPBChart(x, pb);
+    }
+    document.getElementById("action-month").addEventListener ("click", function(){updateInterval(1)}, false);
+    document.getElementById("action-3month").addEventListener ("click", function(){updateInterval(3)}, false);
+    document.getElementById("action-6month").addEventListener ("click", function(){updateInterval(6)}, false);
+    document.getElementById("action-1year").addEventListener ("click", function(){updateInterval(12)}, false);
+    document.getElementById("action-2year").addEventListener ("click", function(){updateInterval(24)}, false);
+    document.getElementById("action-3year").addEventListener ("click", function(){updateInterval(36)}, false);
+    document.getElementById("action-5year").addEventListener ("click", function(){updateInterval(60)}, false);
+    document.getElementById("action-ytd").addEventListener ("click", function(){updateInterval(0)}, false);
+    document.getElementById("action-all").addEventListener ("click", function(){updateInterval(-1)}, false);
+
+    function updateInterval(duration) {
+      console.log(duration)
+
+      var today = new Date();
+      var from_date = "none"
+      if (duration == 0) {
+        let year = today.getFullYear()
+        from_date = [year, 1, 1].join('-')
+      }
+      if (duration > 0) {
+        let year = today.getFullYear()
+        let month = today.getMonth()
+        while (duration > 0) {
+          month = month -1
+          if (month == 0) {
+            month = 12
+            year = year - 1
+          }
+          duration = duration -1
+        }
+        from_date = [year, month, 1].join('-')
+      }
+
+      Chart.helpers.each(Chart.instances, function(instance){
+        console.log(instance);
+        instance.options.scales.xAxes[0].time.min = from_date;
+        instance.update();
+      });
+      return false;
     }
 
     function setPEChart(id, pe) {

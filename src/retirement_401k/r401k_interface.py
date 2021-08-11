@@ -40,6 +40,22 @@ class R401KInterface:
         return start_day
 
     @classmethod
+    def get_start_day_for_user(self, user_id):
+        start_day = None
+        try:
+            objs = Account401K.objects.filter(user=user_id)
+            for obj in objs:
+                trans = Transaction401K.objects.filter(account=obj)
+                for t in trans:
+                    if not start_day:
+                        start_day = t.trans_date
+                    else:
+                        start_day = start_day if start_day < t.trans_date else t.trans_date
+        except Exception as ex:
+            print(f'exception finding start day for user {user_id} RSU {ex}')
+        return start_day
+
+    @classmethod
     def get_no_goal_amount(self, user_id=None):
         amt = 0
         if user_id:
@@ -86,3 +102,20 @@ class R401KInterface:
 
                 total += float(nav_objs[0].nav_value)*qty*float(conv_rate)
         return cash_flows, contrib, deduct, total
+    
+    @classmethod
+    def get_user_yearly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        contrib = 0
+        deduct = 0
+        for obj in Account401K.objects.filter(user=user_id):
+            for trans in Transaction401K.objects.filter(account=obj, trans_date__gte=st_date, trans_date__lte=end_date):
+                conv_rate = 1
+                conv_val = get_conversion_rate('USD', 'INR', trans.trans_date)
+                if conv_val:
+                    conv_rate = conv_val
+                else:
+                    print(f'failed to get conversion rate from USD to INR for date {trans.trans_date}')
+                contrib += float(trans.employee_contribution + trans.employer_contribution) * float(conv_rate)
+        return contrib, deduct

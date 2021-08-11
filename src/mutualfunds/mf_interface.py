@@ -41,6 +41,22 @@ class MfInterface:
         return start_day
 
     @classmethod
+    def get_start_day_for_user(self, user_id):
+        start_day = None
+        try:
+            objs = Folio.objects.filter(user=user_id)
+            for obj in objs:
+                mf_trans = MutualFundTransaction.objects.filter(folio=obj)
+                for trans in mf_trans:
+                    if not start_day:
+                        start_day = trans.trans_date
+                    else:
+                        start_day = start_day if start_day < trans.trans_date else trans.trans_date
+        except Exception as ex:
+            print(f'exception finding start day for user {user_id} ppf {ex}')
+        return start_day
+
+    @classmethod
     def get_no_goal_amount(self, user_id=None):
         amt = 0
         if user_id:
@@ -92,3 +108,17 @@ class MfInterface:
                     total += v*qty
         return cash_flows, contrib, deduct, total
     
+    @classmethod
+    def get_user_yearly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        contrib = 0
+        deduct = 0
+        for folio_obj in Folio.objects.filter(user=user_id):
+            for trans in MutualFundTransaction.objects.filter(folio=folio_obj, trans_date__lte=end_date):
+                    if trans.trans_date.year == yr:
+                        if trans.trans_type == 'Buy' and not trans.switch_trans:
+                            contrib += trans.trans_price
+                        elif trans.trans_type == 'Sell' and not trans.switch_trans:
+                            deduct += -1*trans.trans_price
+        return contrib, deduct

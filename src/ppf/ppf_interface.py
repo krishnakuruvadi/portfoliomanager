@@ -35,6 +35,20 @@ class PpfInterface:
         return start_day
 
     @classmethod
+    def get_start_day_for_user(self, user_id):
+        start_day = None
+        try:
+            objs = Ppf.objects.filter(user=user_id)
+            for obj in objs:
+                if not start_day:
+                    start_day = obj.start_date
+                else:
+                    start_day = start_day if start_day < obj.start_date else obj.start_date
+        except Exception as ex:
+            print(f'exception finding start day for user {user_id} ppf {ex}')
+        return start_day
+
+    @classmethod
     def get_no_goal_amount(self, user_id=None):
         amt = 0
         if user_id:
@@ -73,3 +87,17 @@ class PpfInterface:
                     total += -1*float(ppf_trans.amount)
                 print(f'total: {total}')
         return cash_flows, contrib, deduct, total
+    
+    @classmethod
+    def get_user_yearly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        contrib = 0
+        deduct = 0
+        for ppf_obj in Ppf.objects.filter(user=user_id):
+            for ppf_trans in PpfEntry.objects.filter(number=ppf_obj, trans_date__gte=st_date, trans_date__lte=end_date):
+                if ppf_trans.entry_type == 'CR':
+                    contrib += float(ppf_trans.amount)
+                else:
+                    deduct += -1*float(ppf_trans.amount)
+        return contrib, deduct

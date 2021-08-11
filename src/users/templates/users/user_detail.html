@@ -48,8 +48,39 @@
   </div>
 </div>
 <div>&nbsp;</div>
+{% if investment_types|length > 0 %}
+<h5>Contributions and withdrawls over the years</h5><hr>
+<table class="table table-hover dt-responsive" id="yrly-contrib" style="width:100%">
+  <thead>
+    <tr>
+      <th>Year</th>
+      {% for inv_type in investment_types %}
+      <th>{{inv_type}}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for key,value in  yrly_investment.items %}
+      <tr>
+        <td>{{key}}</td>
+        {% for inv_type in investment_types %}
+        <td>
+          {{value|lookup:inv_type}}
+        </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+  <div>&nbsp;</div>
 {% endblock content %}
 
+<script>
+  {% block jquery %}
+  $('#yrly-contrib').DataTable();
+  {% endblock jquery %}
+</script>
 
 {% block ajaxcalls %}
           {

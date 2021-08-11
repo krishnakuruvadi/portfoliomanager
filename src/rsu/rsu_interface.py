@@ -33,11 +33,27 @@ class RsuInterface:
                 trans = RestrictedStockUnits.objects.filter(award=obj)
                 for t in trans:
                     if not start_day:
-                        start_day = obj.vest_date
+                        start_day = t.vest_date
                     else:
-                        start_day = start_day if start_day < obj.vest_date else obj.vest_date
+                        start_day = start_day if start_day < t.vest_date else t.vest_date
         except Exception as ex:
             print(f'exception finding start day for goal {goal_id} RSU {ex}')
+        return start_day
+
+    @classmethod
+    def get_start_day_for_user(self, user_id):
+        start_day = None
+        try:
+            objs = RSUAward.objects.filter(user=user_id)
+            for obj in objs:
+                trans = RestrictedStockUnits.objects.filter(award=obj)
+                for t in trans:
+                    if not start_day:
+                        start_day = t.vest_date
+                    else:
+                        start_day = start_day if start_day < t.vest_date else t.vest_date
+        except Exception as ex:
+            print(f'exception finding start day for user {user_id} RSU {ex}')
         return start_day
 
     @classmethod
@@ -90,3 +106,17 @@ class RsuInterface:
                     else:
                         print(f'failed to get year end values for {aw_obj.exchange} {aw_obj.symbol} {end_date}')
         return cash_flows, contrib, deduct, total
+    
+    @classmethod
+    def get_user_yearly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        contrib = 0
+        deduct = 0
+        for aw_obj in RSUAward.objects.filter(user=user_id):
+            for rsu_obj in RestrictedStockUnits.objects.filter(award=aw_obj, vest_date__lte=end_date):
+                if rsu_obj.vest_date >= st_date:
+                    contrib += float(rsu_obj.total_aquisition_price)
+                for st in RSUSellTransactions.objects.filter(rsu_vest=rsu_obj, trans_date__gte=st_date, trans_date__lte=end_date):
+                    deduct += -1*float(st.trans_price)
+        return contrib, deduct
