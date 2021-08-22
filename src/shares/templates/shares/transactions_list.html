@@ -62,11 +62,11 @@
 <script>
   {% block jquery %}
   $('#trans-table').DataTable({
-        "columnDefs": [
-            { "type": "num", "targets": [0,5,6,7,8] },
-            { "type": "date", "targets": [3] }
-        ],
-        "order": [[ 3, "desc" ]]
-      });
+    "columnDefs": [
+      { "type": "num", "targets": [0,5,6,7,8] },
+      { "type": "date", "targets": [3] }
+    ],
+    "order": [[ 3, "desc" ]]
+  });
 {% endblock jquery %}
 </script>

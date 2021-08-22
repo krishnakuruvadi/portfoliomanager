@@ -58,6 +58,7 @@ def get_shares_list(request):
     context['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
     context['user_name_mapping'] = get_all_users()
     context['show_zero_val'] = show_zero_val_shares
+    current_investment = 0
     total_investment = 0
     latest_value = 0
     as_on_date= None
@@ -97,10 +98,15 @@ def get_shares_list(request):
             if as_on_date < share_obj.as_on_date:
                 as_on_date = share_obj.as_on_date
         latest_value += share_obj.latest_value
-        total_investment += share_obj.buy_value
+        current_investment += share_obj.buy_value
         total_gain += share_obj.gain
+        transactions = Transactions.objects.filter(share=share_obj, trans_type='Buy')
+        for t in transactions:
+            total_investment += t.trans_price
+
     context['as_on_date'] = as_on_date
     context['total_gain'] = round(total_gain, 2)
+    context['current_investment'] = round(current_investment, 2)
     context['total_investment'] = round(total_investment, 2)
     context['latest_value'] = round(latest_value, 2)
     #cur_ret, all_ret = calculate_xirr(folio_objs)

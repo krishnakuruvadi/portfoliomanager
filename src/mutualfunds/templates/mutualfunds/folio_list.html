@@ -69,7 +69,53 @@
       </td>
     </tr>
     <tr>
-      <td style="text-align:right"><b>Total Investment:</b> {{total_investment}} &nbsp;&nbsp;&nbsp;<b>Current Value:</b> {{latest_value}} &nbsp;&nbsp;&nbsp;<b>Gain:</b> {{total_gain}} &nbsp;&nbsp;&nbsp;<b>Current XIRR:</b> {{curr_ret}}% &nbsp;&nbsp;&nbsp;<b>All time XIRR:</b> {{all_ret}}% &nbsp;&nbsp;&nbsp;<b>Last Updated:</b> {{as_on_date}}</td>
+      <td style="text-align:right">
+        <div class="row">
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Total Investment</h5>
+                  <p class="card-text">{{total_investment}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Current Value</h5>
+                  <p class="card-text">{{latest_value}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Gain</h5>
+                  <p class="card-text">{{total_gain}} </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Current XIRR</h5>
+                  <p class="card-text">{{curr_ret}}% </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">All time XIRR</h5>
+                  <p class="card-text">{{all_ret}}% </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:right"><small class="text-muted">Last updated  {{as_on_date}}</small></td>
     </tr>
   </table>
   <table class="table table-hover dt-responsive" id="folio-table" style="width:100%">

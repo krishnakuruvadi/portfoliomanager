@@ -408,7 +408,7 @@ def reconcile_shares(log_calc=False):
     share_objs = Share.objects.all()
     for share_obj in share_objs:
         reconcile_share(share_obj)
-        
+
     check_discrepancies()
 
 
@@ -437,6 +437,8 @@ def reconcile_share(share_obj):
             content=description,
             severity=Severity.warning
         )
+    except Exception as ex:
+        print(f'exception {ex} when reconciling {share_obj.exchange} {share_obj.symbol}')
 
 def get_roi(transactions, latest_value):
     from shared.financial import xirr
