@@ -76,11 +76,76 @@ def get_mcap(symbol):
     #print("industry " + str(profile['quoteSummary']['result'][0]['assetProfile']['industry']))
     print("fullTimeEmployees " + str(profile['quoteSummary']['result'][0]['assetProfile']['fullTimeEmployees']))
 
+def get_corp_actions(symbol, dest_file=None):
+    import yfinance as yf
+    t = yf.Ticker(symbol)
+    hist = t.history(period="max")
+    ss = t.get_splits()
+    ss = ss.to_dict()
+    ds = t.get_dividends()
+    ds = ds.to_dict()
+    splits = dict()
+    dividends = dict()
+    data = dict()
+    if os.path.exists(dest_file):
+        with open(dest_file) as f:
+            data = json.load(f)
+    
+    if not 'splits' in data:
+        data['splits'] = list()
+
+    for dt, val in ss.items():
+        #print(f'split: {type(dt)} {dt} {val}')
+        splits[dt.to_pydatetime().date()] = float(val)
+    
+    for dt, val in ds.items():
+        #print(f'dividend: {type(dt)} {dt} {val}')
+        dividends[dt.to_pydatetime().date()] = float(val)
+    
+    for k,v in splits.items():
+        new_fv = 1
+        old_fv = v
+
+        x = get_date_or_none_from_string(k, '%d-%m-%Y')
+
+        data['splits'].append({'announcement_date':x, 'old_fv': old_fv, 'new_fv':new_fv, 'ex_date':x})
+
+
+    print(data)
+    with open(dest_file, 'w') as json_file:
+        json.dump(data, json_file, indent=1, default=default)
+    return splits, dividends
+
+def default(o):
+    if type(o) is datetime.date or type(o) is datetime.datetime:
+        return o.strftime('%d-%m-%Y')
+    return o
+
+# default format expected of kind 2020-06-01
+def get_date_or_none_from_string(input, format='%Y-%m-%d', printout=True):
+    if input != None and input != '':
+        if type(input) is datetime.date:
+            return input
+        try:
+            res = datetime.datetime.strptime(input, format).date()
+            return res
+        except Exception as e:
+            if printout:
+                print('error converting ', input, ' to date. returning none' + str(e))
+    return None
 
 if __name__ == "__main__":
-    stock = yf.Ticker('QQQ')
-    print(stock.get_info())
+    #stock = yf.Ticker('QQQ')
+    #print(stock.get_info())
+    #get_corp_actions('NVDA')
     #get_mcap('FB')
+
+
+    # show actions (dividends, splits)
+    splits, dividends = get_corp_actions('NVDA')
+    print(splits)
+    
+
     exit(0)
     data = get_init_data()
     data = get_sp_large_cap_500(data)

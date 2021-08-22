@@ -122,8 +122,6 @@ def reconcile_event_based(transactions, bonuses, splits, round_qty_to_int=False,
         e.setQty(trans.quantity)
         e.setPrice(trans.price)
         event_list.append(e)
-        buy_value += float(trans.trans_price)
-        buy_price += float(trans.price)
     
     for b in bonuses:
         #https://www.angelbroking.com/knowledge-center/demat-account/what-are-bonus-shares
@@ -177,14 +175,20 @@ def reconcile_event_based(transactions, bonuses, splits, round_qty_to_int=False,
     realised_gain = 0
     qty = 0
     unrealised_gain = 0
+    current_buy = 0
     for deal in deals:
         print(f'\t {deal}')
         if deal.profit:
             realised_gain += deal.profit
         if deal.can_sell():
             qty += deal.qty
+            current_buy += deal.price*deal.qty
     if qty > 0 and latest_price:
-        unrealised_gain = float(qty) * float(latest_price) * float(latest_conversion_rate)
-    print(f'quantity: {qty}, realised gain: {realised_gain}, unrealised gain: {unrealised_gain}')
+        unrealised_gain = (float(qty) * float(latest_price) * float(latest_conversion_rate)) - float(current_buy)
+        buy_price = float(current_buy)/float(qty)
+        buy_value = float(qty) * buy_price * float(latest_conversion_rate)
+        #buy_price = buy_price/float(latest_conversion_rate)
+        
+    print(f'buy_value: {buy_value}, quantity: {qty}, realised gain: {realised_gain}, unrealised gain: {unrealised_gain}')
     return qty, buy_value, buy_price, realised_gain, unrealised_gain
 

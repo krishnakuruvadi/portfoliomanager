@@ -62,20 +62,35 @@
         {% if split %}
           <h5>Split</h5>
           <table class="table table-hover">
-            <tr>
-              <th>Announcement Date</th>
-              <th>Ex-Date</th>
-              <th>Old FV</th>
-              <th>New FV</th>
-            </tr>
-            {% for s in split %}
+            {% if object.exchange in 'NASDAQ,NYSE' %}
               <tr>
-                <td>{{s.announcement_date}}</td>
-                <td>{{s.ex_date}}</td>
-                <td>{{s.old_fv}}</td>
-                <td>{{s.new_fv}}</td>
+                <th>Announcement Date</th>
+                <th>Ex-Date</th>
+                <th>Split Ratio</th>
               </tr>
-            {% endfor %}
+              {% for s in split %}
+                <tr>
+                  <td>{{s.announcement_date}}</td>
+                  <td>{{s.ex_date}}</td>
+                  <td>{{s.old_fv}} for {{s.new_fv}}</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <th>Announcement Date</th>
+                <th>Ex-Date</th>
+                <th>Old FV</th>
+                <th>New FV</th>
+              </tr>
+              {% for s in split %}
+                <tr>
+                  <td>{{s.announcement_date}}</td>
+                  <td>{{s.ex_date}}</td>
+                  <td>{{s.old_fv}}</td>
+                  <td>{{s.new_fv}}</td>
+                </tr>
+              {% endfor %}
+            {% endif %}
           </table>
         {% endif %}
 

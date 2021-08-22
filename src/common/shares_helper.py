@@ -391,7 +391,9 @@ def update_stocks():
                     print(f'unable to process {obj.symbol} due to lack of symbol data')
             else:
                 print(f'unable to process {obj.symbol} due to lack of exchange {obj.exchange} data')
-        elif obj.exchange in ['NASDAQ', 'NYSE'] and not obj.etf:
+        elif obj.exchange in ['NASDAQ', 'NYSE']:
+            if obj.etf:
+                continue
             mCap, industry = get_usa_details(obj.symbol)
             if mCap:
                 if mCap > 1:
@@ -405,7 +407,18 @@ def update_stocks():
                 obj.save()
             else:
                 print(f'unable to process industry data for {obj.symbol} {obj.exchange}')
+            try:
+                from tools.stock_usa import get_corp_actions
 
+                dest_path = os.path.join(settings.MEDIA_ROOT, 'corporateActions', obj.exchange+'_'+obj.symbol+'.json')
+                splits, _ = get_corp_actions(obj.symbol, dest_path)
+                for dt, val in splits.items():
+                    pass
+            except Exception as ex:
+                print(f'Exception during getting splits information for {obj.exchange} {obj.symbol}: {ex}')
+            
+        else:
+            print(f'unknown exchange {obj.exchange}')
     update_tracked_stocks()
     store_corporate_actions()
 
