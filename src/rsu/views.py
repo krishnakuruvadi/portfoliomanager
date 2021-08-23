@@ -266,6 +266,7 @@ def add_vest(request,id):
             shares_vested = get_int_or_none_from_string(request.POST.get('shares_vested'))
             shares_for_sale = get_int_or_none_from_string(request.POST.get('shares_for_sale'))
             total_aquisition_price = get_float_or_none_from_string(request.POST.get('total_aquisition_price'))
+            conversion_rate = get_float_or_none_from_string(request.POST.get('conversion_rate'))
             notes = request.POST.get('notes')
             rsu = RestrictedStockUnits.objects.create(award=award_obj,
                                                       vest_date=vest_date,
@@ -275,6 +276,7 @@ def add_vest(request,id):
                                                       shares_for_sale=shares_for_sale,
                                                       unsold_shares=shares_for_sale,
                                                       total_aquisition_price=total_aquisition_price,
+                                                      conversion_rate=conversion_rate,
                                                       notes=notes)
             rsu.save()
             update_rsu()

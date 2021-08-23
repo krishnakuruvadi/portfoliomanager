@@ -84,8 +84,9 @@ class RsuInterface:
             for rsu_obj in RestrictedStockUnits.objects.filter(award=aw_obj, vest_date__lte=end_date):
                 units = rsu_obj.shares_for_sale
                 if rsu_obj.vest_date >= st_date:
-                    contrib += float(rsu_obj.total_aquisition_price)
-                    cash_flows.append((rsu_obj.vest_date, -1*float(rsu_obj.total_aquisition_price)))
+                    current_cost = float(rsu_obj.shares_for_sale*rsu_obj.aquisition_price*rsu_obj.conversion_rate)
+                    contrib += current_cost
+                    cash_flows.append((rsu_obj.vest_date, -1*current_cost))
                 for st in RSUSellTransactions.objects.filter(rsu_vest=rsu_obj, trans_date__lte=end_date):
                     if st.trans_date >= st_date:
                         cash_flows.append((st.trans_date, float(st.trans_price)))

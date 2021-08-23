@@ -28,6 +28,7 @@
         <th scope="col">Latest Conversion Price</th>
         <th scope="col">Latest Price</th>
         <th scope="col">Available For Sell</th>
+        <th scope="col">Aquisition Value</th>
         <th scope="col">Latest Value</th>
         <th scope="col">As On Date</th>
         <th scope="col">Actions</th>
@@ -60,6 +61,7 @@
         <td>{{ award_latest_vals|lookup:instance.id|lookup:'latest_conversion_rate' }}</td>
         <td>{{ award_latest_vals|lookup:instance.id|lookup:'latest_price' }}</td>
         <td>{{ award_latest_vals|lookup:instance.id|lookup:'shares_for_sale' }}</td>
+        <td>{{ award_latest_vals|lookup:instance.id|lookup:'aquisition_price' }}</td>
         <td>{{ award_latest_vals|lookup:instance.id|lookup:'latest_value' }}</td>
         <td>{{ award_latest_vals|lookup:instance.id|lookup:'as_on_date' }}</td>
         {% endif %}

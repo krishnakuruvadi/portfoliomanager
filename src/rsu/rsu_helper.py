@@ -53,6 +53,7 @@ def get_rsu_award_latest_vals():
         shares_for_sale = None
         latest_value = None
         shares_vested = None
+        aquisition_price = 0
         for rsu_obj in RestrictedStockUnits.objects.filter(award=rsu_award):
             if rsu_obj.as_on_date:
                 as_on_date = rsu_obj.as_on_date
@@ -75,11 +76,13 @@ def get_rsu_award_latest_vals():
                     latest_value = rsu_obj.latest_value
                 else:
                     latest_value += rsu_obj.latest_value
+            aquisition_price += rsu_obj.total_aquisition_price
         if as_on_date:
             ret[rsu_award.id] = {'as_on_date':as_on_date, 'latest_conversion_rate':latest_conversion_rate, 'latest_price':latest_price}
             ret[rsu_award.id]['shares_for_sale'] = shares_for_sale
             ret[rsu_award.id]['latest_value'] = latest_value
             ret[rsu_award.id]['shares_vested'] = shares_vested
+            ret[rsu_award.id]['aquisition_price'] = aquisition_price
     return ret
 
 def get_no_goal_amount():
