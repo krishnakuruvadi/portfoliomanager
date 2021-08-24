@@ -1,7 +1,7 @@
 from huey.contrib.djhuey import task, periodic_task, db_task, db_periodic_task
 from huey import crontab
 from mutualfunds.models import Folio, MutualFundTransaction
-from common.models import MutualFund, HistoricalMFPrice, MFYearlyReturns
+from common.models import HistoricalStockPrice, MutualFund, HistoricalMFPrice, MFYearlyReturns, Stock
 from espp.models import Espp
 from espp.espp_helper import update_latest_vals
 from shared.handle_real_time_data import get_historical_year_mf_vals
@@ -917,6 +917,37 @@ def update_401k_month_end_vals():
 def check_updates_pending():
     update_401k_month_end_vals()
 
+@db_task()
+def pull_and_store_stock_historical_vals(exchange, symbol, dt):
+    if exchange in ['NSE','NSE/BSE']:
+        from tools.stock_nse_historical_price import pull_historical_values
+        try:
+            stock = Stock.objects.get(exchange=exchange, symbol=symbol)
+        except Stock.DoesNotExist:
+            print(f'stock doesnt exist in db {exchange}, {symbol}')
+            return
+        added = 0
+        exists = 0
+        for yr in range(dt.year, datetime.date.today().year):
+            from_dt = datetime.date(year=yr, month=1, day=1)
+            to_dt = datetime.date(year=yr, month=12, day=31)
+            if to_dt > datetime.date.today():
+                to_dt = datetime.date.today()
+            vals = pull_historical_values(symbol, from_dt, to_dt)
+            for dt, val in vals.items():
+                if dt.day in [27,28,29,30,31]:
+                    try:
+                        HistoricalStockPrice.objects.create(symbol=stock, date=dt, price=val)
+                        added += 1
+                    except IntegrityError:
+                        exists += 1
+                        pass
+        if added > 0:
+            print(f'added {added}, retained {exists} historical stock price entries for {exchange} {symbol} ')
+        elif exists > 0:
+            print(f'retained {exists} historical stock price entries for {exchange} {symbol} ')
+        else:
+            print(f'failed to add any historical stock price entries for {exchange} {symbol} starting {dt}')
 
 '''
 #  example code below

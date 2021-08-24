@@ -80,7 +80,7 @@ def get_historical_year_mf_vals(amfi_code, year):
             vals = mf.get_scheme_historical_nav_year(amfi_code,year)
             if vals:
                 data = vals['data']
-                #print(" data in get_mf_vals ", amfi_code, data)
+                print(" data in get_mf_vals ", amfi_code, data)
                 for entry in data:
                     entry_date = datetime.datetime.strptime(entry['date'], "%d-%m-%Y").date()
                     if entry_date.day in [27,28,29,30,31,1] or (entry_date.year == today.year and abs((today - entry_date).days) <= 5):
@@ -154,6 +154,8 @@ def get_historical_stock_price(stock, start, end):
     if len(ret_vals) == 0:
         get_vals = get_historic_vals(stock.symbol, stock.exchange, end+relativedelta(days=-5), datetime.date.today())
         if not get_vals:
+            from tasks.tasks import pull_and_store_stock_historical_vals
+            pull_and_store_stock_historical_vals(stock.exchange, stock.symbol, start)
             return ret_vals
         for k,v in get_vals.items():
             new_date = k
