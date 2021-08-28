@@ -39,7 +39,7 @@ def get_datetime_or_none_from_string(input, format='%Y-%m-%d'):
             res = datetime.datetime.strptime(input, format)
             return res
         except Exception as e:
-            print('error converting ', input, ' to date. returning none')
+            print(f'error converting {input} to date using format {format}. returning none')
     return None
 
 # default format expected of kind 2020-06-01

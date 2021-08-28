@@ -949,6 +949,14 @@ def pull_and_store_stock_historical_vals(exchange, symbol, dt):
         else:
             print(f'failed to add any historical stock price entries for {exchange} {symbol} starting {dt}')
 
+@db_periodic_task(crontab(minute='20', hour='*/8'))
+def update_markets():
+    from markets.vr_returns import get_india_index_returns
+    from markets.markets_helper import update_india_market_returns
+    ret = get_india_index_returns()
+    update_india_market_returns(ret)
+
+
 '''
 #  example code below
 

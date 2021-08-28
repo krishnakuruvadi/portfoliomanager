@@ -1,9 +1,10 @@
 from django.shortcuts import render
-from .models import PEMonthy, PBMonthy, News
+from .models import IndexRollingReturns, IndexYearlyReturns, IndexQuarterlyReturns, IndexMonthlyReturns, PEMonthy, PBMonthy, News
 from common.models import Preferences
 from shared.utils import get_float_or_zero_from_string, convert_date_to_string
 from newspaper import Article
 import requests
+from functools import cmp_to_key
 # Create your views here.
 
 def markets_home(request):
@@ -113,3 +114,84 @@ def pe_view(request):
     context['curr_module_id'] = 'id_markets_module'
     print(context)
     return render(request, template, context)
+
+def returns_view(request):
+    template = 'markets/returns_view.html'
+    c =['India', 'USA']
+    roll_ret = IndexRollingReturns.objects.filter(country__in=c)
+    yrly_ret = IndexYearlyReturns.objects.filter(country__in=c)
+    monthly_ret = IndexMonthlyReturns.objects.filter(country__in=c)
+    qtrly_ret = IndexQuarterlyReturns.objects.filter(country__in=c)
+    
+    years = dict()
+    for yr in yrly_ret:
+        years[yr.year] = None
+    ys = sorted(years.keys(),reverse=True)
+    y_ret = list()
+    for y in yrly_ret:
+        found = False
+        for e in y_ret:
+            if e['country'] == y.country and e['name'] == y.name:
+                found = True
+                e[y.year] = y.ret
+                break
+        if not found:
+            y_ret.append({'country':y.country, 'name':y.name, y.year:y.ret, 'as_on_date':y.as_on_date})
+
+    qtrs = dict()
+    for qtr in qtrly_ret:
+        qtrs[qtr.quarter] = None
+    qs = sorted(qtrs.keys(),reverse=True, key=cmp_to_key(month_compare))
+    q_ret = list()
+    for q in qtrly_ret:
+        found = False
+        for e in q_ret:
+            if e['country'] == q.country and e['name'] == q.name:
+                found = True
+                e[q.quarter] = q.ret
+                break
+        if not found:
+            q_ret.append({'country':q.country, 'name':q.name, q.quarter:q.ret, 'as_on_date':q.as_on_date})
+
+    months = dict()
+    for month in monthly_ret:
+        months[month.month] = None
+    ms = sorted(months.keys(),reverse=True, key=cmp_to_key(month_compare))
+    m_ret = list()
+    for m in monthly_ret:
+        found = False
+        for e in m_ret:
+            if e['country'] == m.country and e['name'] == m.name:
+                found = True
+                e[m.month] = m.ret
+                break
+        if not found:
+            m_ret.append({'country':m.country, 'name':m.name, m.month:m.ret, 'as_on_date':m.as_on_date})
+
+    context = {
+        'roll_ret':roll_ret, 
+        'yrly_ret':y_ret, 'years':ys,
+        'monthly_ret':m_ret, 'months':ms,
+        'qtrly_ret':q_ret, 'quarters':qs}
+    #print(context)
+    return render(request, template, context)
+
+def month_compare(item1, item2):
+    i1 = item1.split('-')[1]
+    i2 = item2.split('-')[1]
+    if i1 < i2:
+        return -1
+    if i1 > i2:
+        return 1
+    mn = {
+        'Jan':1,'Feb':2,'Mar':3,'Apr':4,
+        'May':5,'Jun':6,'Jul':7,'Aug':8,
+        'Sep':9,'Oct':10,'Nov':11,'Dec':12
+    }
+    i1 = mn[item1.split('-')[0]]
+    i2 = mn[item2.split('-')[0]]
+    if i1 < i2:
+        return -1
+    if i1 > i2:
+        return 1
+    return 0

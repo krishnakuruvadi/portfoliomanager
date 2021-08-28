@@ -1,0 +1,216 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'markets:markets-home' %}">Markets</a></li>
+    <li><a href="#">Returns</a></li>
+  </ul> 
+{% endblock viewname %}
+
+{% block content %}
+    <table class="table table-borderless">
+        <tr>
+        <td><ul class="nav nav-pills">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'markets:markets-home' %}">Markets</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'markets:pe-view' %}">Valuation</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'markets:news-view' %}">News</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'markets:returns-view' %}">Returns</a>
+              </li>
+        </ul></td>
+        </tr>
+        <tr></tr>
+    </table>
+    <div class="btn-toolbar mb-2 mb-md-0" style="float: right;" >
+        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <span data-feather="calendar"></span>
+          View
+          <div class="dropdown-menu" id="chart_interval">
+            <a class="dropdown-item" href="#" id="action-rolling">Rolling</a>
+            <a class="dropdown-item" href="#" id="action-yearly">Yearly</a>
+            <a class="dropdown-item" href="#" id="action-quarterly">Quarterly</a>
+            <a class="dropdown-item" href="#" id="action-monthly">Monthly</a>
+          </div>
+        </button>
+    </div>
+    
+    <table  class="table table-hover dt-responsive" id='yearly_returns' style="width:100%">
+        <thead class="thead-dark">
+            <tr>
+                <th>Country</th>
+                <th>Index</th>
+                {% for yr in years %}
+                <th>{{yr}}</th>
+                {% endfor %}
+                <th>As On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in yrly_ret %}
+            <tr>
+                <td>{{entry.country}}</td>
+                <td>{{entry.name}}</td>
+                {% for yr in years %}
+                    <td>{{entry|lookup:yr}}</td>
+                {% endfor %}
+                <td><small>{{entry.as_on_date}}</small></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table  class="table table-hover dt-responsive" id='monthly_returns' style="width:100%">
+        <thead class="thead-dark">
+            <tr>
+                <th>Country</th>
+                <th>Index</th>
+                {% for month in months %}
+                <th>{{month}}</th>
+                {% endfor %}
+                <th>As On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in monthly_ret %}
+            <tr>
+                <td>{{entry.country}}</td>
+                <td>{{entry.name}}</td>
+                {% for month in months %}
+                    <td>{{entry|lookup:month}}</td>
+                {% endfor %}
+                <td><small>{{entry.as_on_date}}</small></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table  class="table table-hover dt-responsive" id='quarterly_returns' style="width:100%">
+        <thead class="thead-dark">
+            <tr>
+                <th>Country</th>
+                <th>Index</th>
+                {% for qtr in quarters %}
+                <th>{{qtr}}</th>
+                {% endfor %}
+                <th>As On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in qtrly_ret %}
+            <tr>
+                <td>{{entry.country}}</td>
+                <td>{{entry.name}}</td>
+                {% for qtr in quarters %}
+                    <td>{{entry|lookup:qtr}}</td>
+                {% endfor %}
+                <td><small>{{entry.as_on_date}}</small></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table  class="table table-hover dt-responsive" id='rolling_returns' style="width:100%">
+        <thead class="thead-dark">
+            <tr>
+                <th>Country</th>
+                <th>Index</th>
+                <th>1D</th>
+                <th>1W</th>
+                <th>1M</th>
+                <th>3M</th>
+                <th>6M</th>
+                <th>YTD</th>
+                <th>1Y</th>
+                <th>3Y</th>
+                <th>5Y</th>
+                <th>10Y</th>
+                <th>15Y</th>
+                <th>Inception</th>
+                <th>As On</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entry in roll_ret %}
+        <tr>
+            <td>{{entry.country}}</td>
+            <td>{{entry.name}}</td>
+            <td>{{entry.return_1d}}</td>
+            <td>{{entry.return_1w}}</td>
+            <td>{{entry.return_1m}}</td>
+            <td>{{entry.return_3m}}</td>
+            <td>{{entry.return_6m}}</td>
+            <td>{{entry.return_ytd}}</td>
+            <td>{{entry.return_1y}}</td>
+            <td>{{entry.return_3y}}</td>
+            <td>{{entry.return_5y}}</td>
+            <td>{{entry.return_10y}}</td>
+            <td>{{entry.return_15y}}</td>
+            <td>{{entry.return_incep}}</td>
+            <td><small>{{entry.as_on_date}}</small></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}
+
+
+<script>
+    {% block jquery %}
+    $('#rolling_returns').DataTable({
+        "order": [[ 0, "desc" ]],
+        "pageLength": 50
+    });
+    $('#yearly_returns').DataTable({
+        "order": [[ 0, "desc" ]],
+        "pageLength": 50
+    });
+    $('#quarterly_returns').DataTable({
+        "order": [[ 0, "desc" ]],
+        "pageLength": 50
+    });
+    $('#monthly_returns').DataTable({
+        "order": [[ 0, "desc" ]],
+        "pageLength": 50
+    });
+    document.getElementById("action-monthly").addEventListener ("click", function(){updateView("month")}, false);
+    document.getElementById("action-rolling").addEventListener ("click", function(){updateView("rolling")}, false);
+    document.getElementById("action-quarterly").addEventListener ("click", function(){updateView("qtr")}, false);
+    document.getElementById("action-yearly").addEventListener ("click", function(){updateView("year")}, false);
+    updateView("rolling");
+
+    function updateView(duration) {
+      console.log(duration)
+      if (duration == "month") {
+        $('#rolling_returns').parents('div.dataTables_wrapper').first().hide()
+        $('#yearly_returns').parents('div.dataTables_wrapper').first().hide()
+        $('#quarterly_returns').parents('div.dataTables_wrapper').first().hide()
+        $('#monthly_returns').parents('div.dataTables_wrapper').first().show()
+      } else if (duration == "rolling") {
+        $('#rolling_returns').parents('div.dataTables_wrapper').first().show()
+        $('#yearly_returns').parents('div.dataTables_wrapper').first().hide()
+        $('#quarterly_returns').parents('div.dataTables_wrapper').first().hide()
+        $('#monthly_returns').parents('div.dataTables_wrapper').first().hide()
+      } else if (duration == "qtr") {
+        $('#rolling_returns').parents('div.dataTables_wrapper').first().hide()
+        $('#yearly_returns').parents('div.dataTables_wrapper').first().hide()
+        $('#quarterly_returns').parents('div.dataTables_wrapper').first().show()
+        $('#monthly_returns').parents('div.dataTables_wrapper').first().hide()
+      } else {
+        $('#rolling_returns').parents('div.dataTables_wrapper').first().hide()
+        $('#yearly_returns').parents('div.dataTables_wrapper').first().show()
+        $('#quarterly_returns').parents('div.dataTables_wrapper').first().hide()
+        $('#monthly_returns').parents('div.dataTables_wrapper').first().hide()
+      }
+    }
+    {% endblock jquery %}
+</script>
