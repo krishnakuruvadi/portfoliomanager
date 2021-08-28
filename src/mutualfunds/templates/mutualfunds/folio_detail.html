@@ -12,177 +12,221 @@
 {% endblock viewname %}
 
 {% block content %}
+  <h4>Folio: {{object.folio}}</h4>
+  <div class="shadow p-3 mb-5 bg-white rounded">
+    <table class="table table-hover">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Units</th>
+          <th scope="col">Latest Price</th>
+          <th scope="col">As On</th>
+          <th scope="col">Avg. Buy Price</th>
+          <th scope="col">Total Buy Value</th>
+          <th scope="col">Latest Value</th>
+          <th scope="col">Gain/Loss</th>
+          <th scope="col">User</th>
+          <th scope="col">Goal</th>
+          <th scope="col">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>{{ object.id }}</th>
+          <td>{{ object.units }}</td>
+          <td>{{ object.latest_price }}</td>
+          <td>{{ object.as_on_date }}</td>
+          <td>{{ object.buy_price }}</td>
+          <td>{{ object.buy_value }}</td>
+          <td>{{ object.latest_value }}</td>
+          <td>{{ object.gain }}</td>
+          <td>{{ user_str }}</td>
+          <td>{{ goal_str }}</td>
+          <td>{{ object.notes }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-  <table class="table table-hover">
-    <thead class="thead-dark">
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Units</th>
-        <th scope="col">Latest Price</th>
-        <th scope="col">As On</th>
-        <th scope="col">Avg. Buy Price</th>
-        <th scope="col">Total Buy Value</th>
-        <th scope="col">Latest Value</th>
-        <th scope="col">Gain/Loss</th>
-        <th scope="col">User</th>
-        <th scope="col">Goal</th>
-        <th scope="col">Notes</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <th>{{ object.id }}</th>
-        <td>{{ object.units }}</td>
-        <td>{{ object.latest_price }}</td>
-        <td>{{ object.as_on_date }}</td>
-        <td>{{ object.buy_price }}</td>
-        <td>{{ object.buy_value }}</td>
-        <td>{{ object.latest_value }}</td>
-        <td>{{ object.gain }}</td>
-        <td>{{ user_str }}</td>
-        <td>{{ goal_str }}</td>
-        <td>{{ object.notes }}</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="container">
+  <div class="container" style="margin-right: 0;margin-left: 0;">
     <div class="row">
-      <div class="col-sm">
-        <h5>Returns</h5>
-        <table class="table table-condensed">
-          <thead>
-            <tr>
-              <th scope="col"></th>
-              <th scope="col">Fund</th>
-              <th scope="col">Category Avg</th>
-              <th scope="col">Category Top</th>
-              <th scope="col">Category Bottom</th>
-              <th scope="col">Index</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="col">1D</th>
-              <td>{{1D}}</td>
-              <td>{{cat_1D_avg}}</td>
-              <td>{{cat_1D_top}}</td>
-              <td>{{cat_1D_bot}}</td>
-            </tr>
-            <tr>
-              <th scope="col">1W</th>
-              <td>{{1W}}</td>
-              <td>{{cat_1W_avg}}</td>
-              <td>{{cat_1W_top}}</td>
-              <td>{{cat_1W_bot}}</td>
-            </tr>
-            <tr>
-              <th scope="col">1M</th>
-              <td>{{1M}}</td>
-              <td>{{cat_1M_avg}}</td>
-              <td>{{cat_1M_top}}</td>
-              <td>{{cat_1M_bot}}</td>
-            </tr>
-            <tr>
-              <th scope="col">3M</th>
-              <td>{{3M}}</td>
-              <td>{{cat_3M_avg}}</td>
-              <td>{{cat_3M_top}}</td>
-              <td>{{cat_3M_bot}}</td>
-            </tr>
-            <tr>
-              <th scope="col">6M</th>
-              <td>{{6M}}</td>
-              <td>{{cat_6M_avg}}</td>
-              <td>{{cat_6M_top}}</td>
-              <td>{{cat_6M_bot}}</td>
-            </tr>
-            <tr>
-              <th scope="col">YTD</th>
-              <td>{{YTD}}</td>
-              <td>{{cat_YTD_avg}}</td>
-              <td>{{cat_YTD_top}}</td>
-              <td>{{cat_YTD_bot}}</td>
-            </tr>
-            <tr>
-              <th scope="col">1Y</th>
-              <td>{{1Y}}</td>
-              <td>{{cat_1Y_avg}}</td>
-              <td>{{cat_1Y_top}}</td>
-              <td>{{cat_1Y_bot}}</td>
-            </tr>
-            <tr>
-              <th scope="col">3Y</th>
-              <td>{{3Y}}</td>
-              <td>{{cat_3Y_avg}}</td>
-              <td>{{cat_3Y_top}}</td>
-              <td>{{cat_3Y_bot}}</td>
-            </tr>
-            <tr>
-              <th scope="col">5Y</th>
-              <td>{{5Y}}</td>
-              <td>{{cat_5Y_avg}}</td>
-              <td>{{cat_5Y_top}}</td>
-              <td>{{cat_5Y_bot}}</td>
-            </tr>
-            <tr>
-              <th scope="col">10Y</th>
-              <td>{{10Y}}</td>
-              <td>{{cat_10Y_avg}}</td>
-              <td>{{cat_10Y_top}}</td>
-              <td>{{cat_10Y_bot}}</td>
-            </tr>
-            <tr>
-              <th scope="col">15Y</th>
-              <td>{{15Y}}</td>
-              <td>{{cat_15Y_avg}}</td>
-              <td>{{cat_15Y_top}}</td>
-              <td>{{cat_15Y_bot}}</td>
-            </tr>
-            <tr>
-              <th scope="col">Inception</th>
-              <td>{{Inception}}</td>
-              <td>{{cat_Inception_avg}}</td>
-              <td>{{cat_Inception_top}}</td>
-              <td>{{cat_Inception_bot}}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="shadow p-3 mb-5 bg-white rounded col-sm-12 col-md-8 col-lg-8">
+          <h5>Returns</h5>
+          <table class="table table-condensed">
+            <thead>
+              <tr>
+                <th scope="col"></th>
+                <th scope="col">Fund</th>
+                <th scope="col">Category Avg</th>
+                <th scope="col">Category Top</th>
+                <th scope="col">Category Bottom</th>
+                {% for index in indexes %}
+                  <th scope="col">{{index}}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="col">1D</th>
+                <td>{{1D}}</td>
+                <td>{{cat_1D_avg}}</td>
+                <td>{{cat_1D_top}}</td>
+                <td>{{cat_1D_bot}}</td>
+                {% for index in index_1D %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                <th scope="col">1W</th>
+                <td>{{1W}}</td>
+                <td>{{cat_1W_avg}}</td>
+                <td>{{cat_1W_top}}</td>
+                <td>{{cat_1W_bot}}</td>
+                {% for index in index_1W %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                <th scope="col">1M</th>
+                <td>{{1M}}</td>
+                <td>{{cat_1M_avg}}</td>
+                <td>{{cat_1M_top}}</td>
+                <td>{{cat_1M_bot}}</td>
+                {% for index in index_1M %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                <th scope="col">3M</th>
+                <td>{{3M}}</td>
+                <td>{{cat_3M_avg}}</td>
+                <td>{{cat_3M_top}}</td>
+                <td>{{cat_3M_bot}}</td>
+                {% for index in index_3M %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                <th scope="col">6M</th>
+                <td>{{6M}}</td>
+                <td>{{cat_6M_avg}}</td>
+                <td>{{cat_6M_top}}</td>
+                <td>{{cat_6M_bot}}</td>
+                {% for index in index_6M %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                <th scope="col">YTD</th>
+                <td>{{YTD}}</td>
+                <td>{{cat_YTD_avg}}</td>
+                <td>{{cat_YTD_top}}</td>
+                <td>{{cat_YTD_bot}}</td>
+                {% for index in index_YTD %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                <th scope="col">1Y</th>
+                <td>{{1Y}}</td>
+                <td>{{cat_1Y_avg}}</td>
+                <td>{{cat_1Y_top}}</td>
+                <td>{{cat_1Y_bot}}</td>
+                {% for index in index_1Y %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                <th scope="col">3Y</th>
+                <td>{{3Y}}</td>
+                <td>{{cat_3Y_avg}}</td>
+                <td>{{cat_3Y_top}}</td>
+                <td>{{cat_3Y_bot}}</td>
+                {% for index in index_3Y %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                <th scope="col">5Y</th>
+                <td>{{5Y}}</td>
+                <td>{{cat_5Y_avg}}</td>
+                <td>{{cat_5Y_top}}</td>
+                <td>{{cat_5Y_bot}}</td>
+                {% for index in index_5Y %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                <th scope="col">10Y</th>
+                <td>{{10Y}}</td>
+                <td>{{cat_10Y_avg}}</td>
+                <td>{{cat_10Y_top}}</td>
+                <td>{{cat_10Y_bot}}</td>
+                {% for index in index_10Y %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                <th scope="col">15Y</th>
+                <td>{{15Y}}</td>
+                <td>{{cat_15Y_avg}}</td>
+                <td>{{cat_15Y_top}}</td>
+                <td>{{cat_15Y_bot}}</td>
+                {% for index in index_15Y %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                <th scope="col">Inception</th>
+                <td>{{Inception}}</td>
+                <td>{{cat_Inception_avg}}</td>
+                <td>{{cat_Inception_top}}</td>
+                <td>{{cat_Inception_bot}}</td>
+                {% for index in index_incep %}
+                  <td>{{index}}</th>
+                {% endfor %}
+              </tr>
+            </tbody>
+          </table>
       </div>
-      <div class="col-sm">
-        <div class="row">
-          <div class="col">
-            Category
+      <div class="col-sm-12 col-md-4 col-lg-4">
+        <div class="shadow p-3 mb-5 bg-white rounded">
+          <div class="row">
+            <div class="col">
+              Category
+            </div>
+            <div class="col">
+              {{category}}
+            </div>
           </div>
-          <div class="col">
-            {{category}}
+          <div class="row">
+            <div class="col">
+              Investment Style
+            </div>
+            <div class="col">
+              {{investment_style}}
+            </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            Investment Style
+          <div class="row">
+            <div class="col">
+              <a href="{% url 'common:mf-detail' mf_ref_id %}" target="_">Internal MF page</a>
+            </div>
           </div>
-          <div class="col">
-            {{investment_style}}
+          <div class="row">
+            <div class="col">
+              ISIN
+            </div>
+            <div class="col">
+              {{isin}}
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="col-sm">
-        <a href="{% url 'common:mf-detail' mf_ref_id %}" target="_">Internal MF page</a>
-        <div class="row">
-          <div class="col">
-            ISIN
-          </div>
-          <div class="col">
-            {{isin}}
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            Alt ISIN
-          </div>
-          <div class="col">
-            {{isin2}}
+          <div class="row">
+            <div class="col">
+              Alt ISIN
+            </div>
+            <div class="col">
+              {{isin2}}
+            </div>
           </div>
         </div>
       </div>

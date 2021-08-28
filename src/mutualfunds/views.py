@@ -30,6 +30,7 @@ from .pull_kuvera import pull_kuvera
 from goal.goal_helper import get_goal_id_name_mapping_for_user
 from decimal import Decimal
 from common.helper import get_fund_houses, get_or_add_mf_obj
+from markets.models import IndexRollingReturns
 
 # Create your views here.
 
@@ -350,7 +351,7 @@ class FolioDetailView(DetailView):
         data['isin2'] = folio_obj.fund.isin2
         data['mf_ref_id'] = folio_obj.fund.id
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
-        data['user_str'] = get_user_name_from_id(data['object'].user)
+        data['user_str'] = get_user_short_name_or_name_from_id(data['object'].user)
         data['category'] = folio_obj.fund.category
         data['investment_style'] = folio_obj.fund.investment_style
         data['1D'] = folio_obj.fund.return_1d
@@ -402,6 +403,71 @@ class FolioDetailView(DetailView):
             data['cat_Inception_top'] = cat_returns.return_inception_top
         except MFCategoryReturns.DoesNotExist:
             print(f'not able to find returns for category {folio_obj.fund.category}')
+        indexes = list()
+        index_1D = list()
+        index_1W = list()
+        index_1M = list()
+        index_3M = list()
+        index_6M = list()
+        index_1Y = list()
+        index_3Y = list()
+        index_5Y = list()
+        index_10Y = list()
+        index_15Y = list()
+        index_incep = list()
+        index_YTD = list()
+        
+        indexes.append('S&P BSE Sensex Index')
+
+        if data['category'] == 'Large-Cap':
+            indexes.append('S&P BSE 100 Index')
+        elif data['category'] == 'Mid-Cap':
+            indexes.append('S&P BSE Mid Cap Index')
+        elif data['category'] == 'Small-Cap':
+            indexes.append('S&P BSE Small Cap Index')
+        elif data['category'] == 'Sector - Healthcare':
+            indexes.append('S&P BSE Healthcare Index')
+        elif data['category'] in ['Sector - Financial Services', 'Banking & PSU']:
+            indexes.append('S&P BSE Finance Index')
+            indexes.append('S&P BSE Bankex Index')
+        elif data['category'] == 'Sector - Technology':
+            indexes.append('S&P BSE IT Index')
+            indexes.append('S&P BSE Teck Index')
+        elif data['category'] == 'Large & Mid- Cap':
+            indexes.append('S&P BSE 100 Index')
+            indexes.append('S&P BSE Mid Cap Index')
+        data['indexes'] = list()
+        for i in indexes:
+            try:
+                iret = IndexRollingReturns.objects.get(country='India', name=i)
+                data['indexes'].append(i)
+                index_1D.append(iret.return_1d)
+                index_1W.append(iret.return_1w)
+                index_1M.append(iret.return_1m)
+                index_3M.append(iret.return_3m)
+                index_6M.append(iret.return_6m)
+                index_1Y.append(iret.return_1y)
+                index_3Y.append(iret.return_3y)
+                index_5Y.append(iret.return_5y)
+                index_10Y.append(iret.return_10y)
+                index_15Y.append(iret.return_15y)
+                index_incep.append(iret.return_incep)
+                index_YTD.append(iret.return_ytd)
+            except IndexRollingReturns.DoesNotExist:
+                print(f'failed to get index India {i} returns')
+
+        data['index_1D'] = index_1D
+        data['index_1W'] = index_1W
+        data['index_1M'] = index_1M
+        data['index_3M'] = index_3M
+        data['index_6M'] = index_6M
+        data['index_1Y'] = index_1Y
+        data['index_3Y'] = index_3Y
+        data['index_5Y'] = index_5Y
+        data['index_10Y'] = index_10Y
+        data['index_15Y'] = index_15Y
+        data['index_incep'] = index_incep
+        data['index_YTD'] = index_YTD
         data['curr_module_id'] = 'id_mf_module'
         return data
 
