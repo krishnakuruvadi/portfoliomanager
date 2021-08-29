@@ -3,7 +3,7 @@ astroid==2.4.2
 attrs==20.3.0
 autobahn==20.12.3
 Automat==20.2.0
-beautifulsoup4==4.9.1
+beautifulsoup4==4.9.3
 bs4==0.0.1
 bsedata==0.4.0
 casparser==0.4.7
@@ -26,6 +26,7 @@ djangorestframework==3.11.2
 feedfinder2==0.0.4
 feedparser==6.0.2
 filelock==3.0.12
+google-currency==1.0.9
 huey==2.3.0
 hyperlink==20.0.1
 idna==2.9
@@ -37,11 +38,13 @@ lazy-object-proxy==1.4.3
 lxml==4.6.3
 mccabe==0.6.1
 mftool==1.8
+multitasking==0.0.9
 newspaper3k==0.2.8
 nltk==3.5
 nsetools==1.0.11
 numpy==1.19.5
 packaging==20.9
+pandas==1.2.5
 pdfminer.six==20201018
 Pillow==8.2.0
 pyasn1==0.4.8
@@ -83,4 +86,5 @@ urllib3==1.26.5
 wcwidth==0.2.5
 whitenoise==5.2.0
 wrapt==1.12.1
+yfinance==0.1.63
 zope.interface==5.2.0
