@@ -55,6 +55,7 @@ def get_path_to_media():
 def download_bsestar_schemes():
     url = 'https://www.bsestarmf.in/RptSchemeMaster.aspx'
     chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--headless")
     path_to_media = get_path_to_media()
     prefs = {'download.default_directory' : path_to_media}
     chrome_options.add_experimental_option('prefs', prefs)

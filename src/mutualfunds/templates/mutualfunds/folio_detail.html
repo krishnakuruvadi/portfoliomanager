@@ -186,6 +186,16 @@
                   <td>{{index}}</th>
                 {% endfor %}
               </tr>
+              <tr>
+                <th scope="col">As on</th>
+                <td></td>
+                <td><small>{{cat_avg_as_on}}</small></td>
+                <td><small>{{cat_top_as_on}}</small></td>
+                <td><small>{{cat_bottom_as_on}}</small></td>
+                {% for index in index_as_on_date %}
+                  <td><small>{{index}}</small></th>
+                {% endfor %}
+              </tr>
             </tbody>
           </table>
       </div>

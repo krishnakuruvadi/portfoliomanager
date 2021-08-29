@@ -196,7 +196,10 @@ def get_scheme_codes(mf, as_json=False):
     return mf.render_response(scheme_info, as_json)
 
 def update_category_returns(json_input):
+    as_on = json_input.get('as_on', None)
     for k,v in json_input.items():
+        if k == 'as_on':
+            continue
         cat_row = None
         try:
             cat_row = MFCategoryReturns.objects.get(category=k)
@@ -236,6 +239,7 @@ def update_category_returns(json_input):
             cat_row.return_inception_avg = get_float_or_none_from_string(v['Inception']['avg'])
             cat_row.return_inception_top = get_float_or_none_from_string(v['Inception']['top'])
             cat_row.return_inception_bot = get_float_or_none_from_string(v['Inception']['bottom'])
+            cat_row.as_on_date = as_on
             cat_row.save()
 
 def get_preferences(key):

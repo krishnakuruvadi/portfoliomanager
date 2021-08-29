@@ -401,6 +401,9 @@ class FolioDetailView(DetailView):
             data['cat_Inception_avg'] = cat_returns.return_inception_avg
             data['cat_Inception_bot'] = cat_returns.return_inception_bot
             data['cat_Inception_top'] = cat_returns.return_inception_top
+            data['cat_avg_as_on'] = cat_returns.as_on_date
+            data['cat_top_as_on'] = cat_returns.as_on_date
+            data['cat_bottom_as_on'] = cat_returns.as_on_date
         except MFCategoryReturns.DoesNotExist:
             print(f'not able to find returns for category {folio_obj.fund.category}')
         indexes = list()
@@ -416,6 +419,7 @@ class FolioDetailView(DetailView):
         index_15Y = list()
         index_incep = list()
         index_YTD = list()
+        index_as_on_date = list()
         
         indexes.append('S&P BSE Sensex Index')
 
@@ -453,6 +457,7 @@ class FolioDetailView(DetailView):
                 index_15Y.append(iret.return_15y)
                 index_incep.append(iret.return_incep)
                 index_YTD.append(iret.return_ytd)
+                index_as_on_date.append(iret.as_on_date)
             except IndexRollingReturns.DoesNotExist:
                 print(f'failed to get index India {i} returns')
 
@@ -468,6 +473,7 @@ class FolioDetailView(DetailView):
         data['index_15Y'] = index_15Y
         data['index_incep'] = index_incep
         data['index_YTD'] = index_YTD
+        data['index_as_on_date'] = index_as_on_date
         data['curr_module_id'] = 'id_mf_module'
         return data
 
