@@ -167,39 +167,44 @@ def update_bse_star_schemes():
 @db_periodic_task(crontab(minute='45', hour='*/12'))
 def update_investment_data():
     set_task_state('update_investment_data', TaskState.Running)
-    start_date = get_start_day_across_portfolio()
-    investment_data = get_investment_data(start_date)
     try:
-        all_investment_data = InvestmentData.objects.get(user='all')
-        all_investment_data.ppf_data=investment_data['ppf']
-        all_investment_data.epf_data=investment_data['epf']
-        all_investment_data.ssy_data=investment_data['ssy']
-        all_investment_data.fd_data=investment_data['fd']
-        all_investment_data.espp_data=investment_data['espp']
-        all_investment_data.rsu_data=investment_data['rsu']
-        all_investment_data.shares_data=investment_data['shares']
-        all_investment_data.mf_data=investment_data['mf']
-        all_investment_data.total_data=investment_data['total']
-        all_investment_data.r401k_data=investment_data['401K']
-        all_investment_data.start_day_across_portfolio=start_date
-        all_investment_data.as_on_date=datetime.datetime.now()
-        all_investment_data.save()
-    except InvestmentData.DoesNotExist:
-        InvestmentData.objects.create(
-            user='all',
-            ppf_data=investment_data['ppf'],
-            epf_data=investment_data['epf'],
-            ssy_data=investment_data['ssy'],
-            fd_data=investment_data['fd'],
-            espp_data=investment_data['espp'],
-            rsu_data=investment_data['rsu'],
-            shares_data=investment_data['shares'],
-            mf_data=investment_data['mf'],
-            total_data=investment_data['total'],
-            start_day_across_portfolio=start_date,
-            as_on_date=datetime.datetime.now()
-        )
-    set_task_state('update_investment_data', TaskState.Successful)
+        start_date = get_start_day_across_portfolio()
+        investment_data = get_investment_data(start_date)
+
+        try:
+            all_investment_data = InvestmentData.objects.get(user='all')
+            all_investment_data.ppf_data=investment_data['ppf']
+            all_investment_data.epf_data=investment_data['epf']
+            all_investment_data.ssy_data=investment_data['ssy']
+            all_investment_data.fd_data=investment_data['fd']
+            all_investment_data.espp_data=investment_data['espp']
+            all_investment_data.rsu_data=investment_data['rsu']
+            all_investment_data.shares_data=investment_data['shares']
+            all_investment_data.mf_data=investment_data['mf']
+            all_investment_data.total_data=investment_data['total']
+            all_investment_data.r401k_data=investment_data['401K']
+            all_investment_data.start_day_across_portfolio=start_date
+            all_investment_data.as_on_date=datetime.datetime.now()
+            all_investment_data.save()
+        except InvestmentData.DoesNotExist:
+            InvestmentData.objects.create(
+                user='all',
+                ppf_data=investment_data['ppf'],
+                epf_data=investment_data['epf'],
+                ssy_data=investment_data['ssy'],
+                fd_data=investment_data['fd'],
+                espp_data=investment_data['espp'],
+                rsu_data=investment_data['rsu'],
+                shares_data=investment_data['shares'],
+                mf_data=investment_data['mf'],
+                total_data=investment_data['total'],
+                start_day_across_portfolio=start_date,
+                as_on_date=datetime.datetime.now()
+            )
+        set_task_state('update_investment_data', TaskState.Successful)
+    except Exception as ex:
+        print(f'exception updating investment data {ex}')
+        set_task_state('update_investment_data', TaskState.Failed)
 
 @db_periodic_task(crontab(minute='0', hour='1'))
 def clean_db():

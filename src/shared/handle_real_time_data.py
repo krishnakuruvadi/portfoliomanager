@@ -1,12 +1,10 @@
 import requests
 from dateutil.relativedelta import relativedelta
 import datetime
-import csv
-import codecs
-from contextlib import closing
+import json
 from common.models import HistoricalForexRates, HistoricalStockPrice, MutualFund, HistoricalMFPrice
+from shared.utils import get_float_or_none_from_string
 from .nasdaq import Nasdaq
-#from .nse import Nse
 from .yahoo_finance_2 import YahooFinance2
 from mftool import Mftool
 from common.models import Stock
@@ -113,6 +111,45 @@ def get_forex_rate(date, from_cur, to_cur):
             return response.json().get('rates').get(to_cur)
         except Exception as ex:
             print(f'exception while getting forex rate for: date {date}, from_cur {from_cur}, to_cur {to_cur}')
+            time.sleep(5)
+    if date == datetime.date.today():
+        r = get_forex_goog(from_cur, to_cur)
+        if r:
+            return r
+    r = get_forex_xe(date, from_cur, to_cur)
+    return r
+
+def get_forex_goog(from_cur, to_cur):
+    from google_currency import convert
+    for _ in range(5):
+        try:
+            res = json.loads(convert(from_cur, to_cur, 1))
+            print(res)
+            print(type(res))
+            if res['converted']:
+                a = get_float_or_none_from_string(res['amount'])
+                if a:
+                    return a
+        except Exception as ex:
+            print(f'goog exception while getting forex rate for: {from_cur} to {to_cur} {ex}')
+            time.sleep(5)
+    return None
+
+def get_forex_xe(date, from_cur, to_cur):
+    for _ in range(5):
+        try:
+            url = 'https://www.xe.com/_next/data/2erF0jj1nxvJi0kCVnQuw/en/currencytables.json?from='+from_cur+'&date='+date.strftime('%Y-%m-%d')
+            response = requests.get(url, timeout=15) 
+            # print response 
+            # print json content
+            j = response.json()
+            #print(j)
+            #print(j['pageProps']['historicRates'])
+            for entry in j['pageProps']['historicRates']:
+                if entry['currency'] == to_cur:
+                    return entry['rate'] 
+        except Exception as ex:
+            print(f'xe exception while getting forex rate for: date {date}, from_cur {from_cur}, to_cur {to_cur} {ex}')
             time.sleep(5)
     return None
 
