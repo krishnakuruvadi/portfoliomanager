@@ -1,6 +1,6 @@
 from .models import Share, Transactions
 from django.db import IntegrityError
-from shared.handle_real_time_data import get_latest_vals, get_forex_rate
+from shared.handle_real_time_data import get_latest_vals, get_conversion_rate
 from shared.utils import get_date_or_none_from_string, get_float_or_zero_from_string
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -676,7 +676,7 @@ def update_shares_latest_val():
                 if latest_date and latest_val:
                     share_obj.as_on_date = latest_date
                     if share_obj.exchange == 'NASDAQ':
-                        share_obj.conversion_rate = get_forex_rate(k, 'USD', 'INR')
+                        share_obj.conversion_rate = get_conversion_rate('USD', 'INR', k)
                     else:
                         share_obj.conversion_rate = 1
                     share_obj.latest_value = float(latest_val) * float(share_obj.conversion_rate) * float(share_obj.quantity)
@@ -735,7 +735,7 @@ def add_untracked_transactions():
                             if exchange == 'NSE' or exchange == 'BSE':
                                 conversion_rate = 1
                             elif exchange == 'NASDAQ' or exchange == 'NYSE':
-                                conversion_rate = get_forex_rate(date, 'USD', 'INR')
+                                conversion_rate = get_conversion_rate('USD', 'INR', date)
                             else:
                                 raise Exception('unsupported exchange %s' %exchange)
                             insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate)

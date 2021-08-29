@@ -8,7 +8,7 @@ from django.views.generic import (
 )
 from .models import Stock, MutualFund, HistoricalStockPrice, HistoricalMFPrice, ScrollData, Preferences, Passwords
 from .helper import *
-from shared.handle_real_time_data import get_latest_vals, get_historical_mf_nav, get_forex_rate
+from shared.handle_real_time_data import get_latest_vals, get_historical_mf_nav, get_conversion_rate
 from dateutil.relativedelta import relativedelta
 import datetime
 from mftool import Mftool
@@ -304,7 +304,7 @@ class ForexDataView(APIView):
     def get(self, request, year, month, day, from_currency, to_currency, format=None):
         data = dict()
         date = datetime.date(year=year, month=month, day=day)
-        ret = get_forex_rate(date, from_currency, to_currency)
+        ret = get_conversion_rate(from_currency, to_currency, date)
         print(ret)
         data[convert_date_to_string(date)] = ret
         return Response(data)

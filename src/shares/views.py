@@ -19,7 +19,7 @@ from common.models import Dividendv2, Bonusv2, Splitv2, Stock
 from .shares_helper import *
 from shared.utils import *
 from shared.handle_get import *
-from shared.handle_real_time_data import get_latest_vals, get_forex_rate
+from shared.handle_real_time_data import get_latest_vals, get_conversion_rate
 from .zerodha import Zerodha
 from django.db import IntegrityError
 from rest_framework.views import APIView
@@ -330,7 +330,7 @@ def add_transaction(request):
             trans_date = get_datetime_or_none_from_string(request.POST['trans_date'])
             exchange_rate = 1
             if exchange == 'NASDAQ' or exchange == 'NYSE':
-                exchange_rate = get_forex_rate(trans_date, 'USD', 'INR')
+                exchange_rate = get_conversion_rate('USD', 'INR', trans_date)
             users = get_all_users()
             context = {'users':users, 'operation': 'Add Transaction', 'conversion_rate':exchange_rate,
                         'trans_date':trans_date.strftime("%Y-%m-%d"), 'user':user, 'exchange':exchange, 'symbol':symbol}

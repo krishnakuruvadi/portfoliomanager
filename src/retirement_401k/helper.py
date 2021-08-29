@@ -1,5 +1,5 @@
 from .models import Account401K, Transaction401K, NAVHistory
-from shared.handle_real_time_data import get_forex_rate
+from shared.handle_real_time_data import get_conversion_rate
 from shared.financial import xirr
 from django.conf import settings
 import csv
@@ -39,7 +39,7 @@ def reconcile_401k():
             if nav_date and nav_date > latest_date:
                 latest_date = nav_date
                 latest_nav = nav_value
-            fx = get_forex_rate(latest_date, 'USD', 'INR')
+            fx = get_conversion_rate('USD', 'INR', latest_date)
             account.latest_value = float(latest_nav)*float(account.units)*fx
             account.gain = float(account.latest_value) - float(account.total)*fx
             if len(cash_flows) > 1:
@@ -163,7 +163,7 @@ def get_r401k_value_as_on_for_account(account, dt, currency):
         break
     fr = 1
     if currency != 'USD':
-        fr = get_forex_rate(dt, 'USD', currency)
+        fr = get_conversion_rate('USD', currency, dt)
     print(f'using units {str(total_units)}, forex rate {str(fr)}, nav {str(latest_nav)} on {latest_nav_date} for total calculation')
     total_value = float(total_units) * float(latest_nav) * float(fr)
 
@@ -203,7 +203,7 @@ def get_yearly_contribution(id, currency='INR'):
             if dt > datetime.date.today():
                 dt = datetime.date.today()
             total[i] = int(get_r401k_value_as_on_for_account(account, dt, currency))
-            fr = get_forex_rate(dt, 'USD', currency)
+            fr = get_conversion_rate('USD', currency, dt)
             er_contrib[i] *= fr
             em_contrib[i] *= fr
             er_contrib[i] = int(er_contrib[i])

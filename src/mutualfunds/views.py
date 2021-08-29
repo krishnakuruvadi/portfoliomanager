@@ -16,7 +16,7 @@ from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from shared.utils import *
 from shared.handle_get import *
-from shared.handle_real_time_data import get_latest_vals, get_forex_rate, get_historical_mf_nav
+from shared.handle_real_time_data import get_historical_mf_nav
 from django.db import IntegrityError
 from .models import Folio, MutualFundTransaction, Sip
 from common.models import MutualFund, MFYearlyReturns, MFCategoryReturns

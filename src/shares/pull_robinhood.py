@@ -10,7 +10,7 @@ import time
 import datetime
 from robin_stocks.robinhood.orders import *
 from shared.utils import get_date_or_none_from_string, get_float_or_none_from_string
-from shared.handle_real_time_data import get_forex_rate
+from shared.handle_real_time_data import get_conversion_rate
 
 
 class Robinhood:
@@ -133,7 +133,7 @@ class Robinhood:
                         o['quantity'] = get_float_or_none_from_string(order['cumulative_quantity'])
                         o['div_reinv'] = True if order['drip_dividend_id'] else False
                         o['price'] = get_float_or_none_from_string(order['average_price'])
-                        o['conv_price'] = get_forex_rate(o['date'], 'USD', 'INR')
+                        o['conv_price'] = get_conversion_rate('USD', 'INR', o['date'])
                         o['trans_price'] = o['quantity'] * o['price'] * o['conv_price']
                         ret[ot].append(o)
                     except Exception as ex:

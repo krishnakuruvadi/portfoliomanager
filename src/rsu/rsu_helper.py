@@ -4,7 +4,7 @@ import datetime
 import csv
 import codecs
 from contextlib import closing
-from shared.handle_real_time_data import get_latest_vals, get_forex_rate
+from shared.handle_real_time_data import get_latest_vals, get_conversion_rate
 from .models import RSUAward, RestrictedStockUnits, RSUSellTransactions
 
 def update_latest_vals(rsu_obj):
@@ -31,7 +31,7 @@ def update_latest_vals(rsu_obj):
                         rsu_obj.as_on_date = k
                         rsu_obj.latest_price = v
                         if rsu_award.exchange == 'NASDAQ':
-                            rsu_obj.latest_conversion_rate = get_forex_rate(k, 'USD', 'INR')
+                            rsu_obj.latest_conversion_rate = get_conversion_rate('USD', 'INR', k)
                         else:
                             rsu_obj.latest_conversion_rate = 1
     rsu_obj.latest_value = float(rsu_obj.latest_price) * float(rsu_obj.latest_conversion_rate) * float(rsu_obj.unsold_shares)
