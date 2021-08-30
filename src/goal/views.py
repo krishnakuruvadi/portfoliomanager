@@ -166,7 +166,7 @@ def goals_insight(request):
             if t['id'] == goal_obj.id:
                 tip = f"Achieved {t['achieved']}. Projected to grow to {t['projected']} at {exp_growth}%. Target {goal_obj.final_val}"
                 break
-        table_goal_yrly_inv += f'<i class="far fa-question-circle" data-toggle="tooltip" data-placement="top" title="{tip}"></i></th>'
+        table_goal_yrly_inv += f' <i class="far fa-question-circle" data-toggle="tooltip" style="font-size:0.8em;" data-placement="top" title="{tip}"></i></th>'
     table_goal_yrly_inv += '</tr></thead><tbody>' 
     for yr in range(today.year, last_date.year+1):
         yr_total = 0
@@ -429,26 +429,23 @@ class GoalDetailView(DetailView):
         if remaining_percent < 0:
             remaining_percent = 0
         data['status_line'] = [contrib_percent, project_percent, remaining_percent]
-        data['status_text'] = ''
+        data['status_text'] = list()
         if ret.get('avg_growth', 0) > 0:
             yrly_investment_reqd = get_required_yrly_investment(total_contribution,ret.get('avg_growth'), data['target_date'], data['object'].final_val)
-            data['status_text'] = data['status_text'] + ' If '+str(yrly_investment_reqd) + ' per year is invested at '+ str(ret.get('avg_growth', 0))
-            data['status_text'] = data['status_text'] + '% you will reach target.'
+            data['status_text'].append(['avg_growth', yrly_investment_reqd, ret.get('avg_growth', 0)])
         if ret.get('avg_contrib', 0) > 0:
             growth_reqd = get_required_xirr(total_contribution, ret.get('avg_contrib', 0), data['target_date'], data['object'].final_val)
-            data['status_text'] = data['status_text'] + ' Current investment of '+ str(ret.get('avg_contrib', 0)) + ' per year should grow at ' + str(growth_reqd) + '% to reach target.'
+            data['status_text'].append(['avg_contrib', ret.get('avg_contrib', 0), growth_reqd])
         if ret.get('last_yr_contrib', 0)>0:
             growth_reqd = get_required_xirr(total_contribution, ret.get('last_yr_contrib', 0), data['target_date'], data['object'].final_val)
-            data['status_text'] = data['status_text'] + ' Last year investment of '+ str(ret.get('last_yr_contrib', 0)) + ' per year should grow at ' + str(growth_reqd) + '% to reach target.'
+            data['status_text'].append(['last_year', ret.get('last_yr_contrib', 0), growth_reqd])
  
-        if data['status_text'] == '':
-            data['status_text'] = 'Currently investing ' + str(ret.get('avg_contrib', 0)) + ' per year.'
-            yrly_investment_reqd = get_required_yrly_investment(0,12, data['target_date'], data['object'].final_val)
-            data['status_text'] = data['status_text'] + ' If '+str(yrly_investment_reqd) + ' per year is invested at '+ str(12)
-            data['status_text'] = data['status_text'] + '% you will reach target.'
-            yrly_investment_reqd = get_required_yrly_investment(0,8, data['target_date'], data['object'].final_val)
-            data['status_text'] = data['status_text'] + ' If '+str(yrly_investment_reqd) + ' per year is invested at '+ str(8)
-            data['status_text'] = data['status_text'] + '% you will reach target.'
+        yrly_investment_reqd = get_required_yrly_investment(total_contribution,8, data['target_date'], data['object'].final_val)
+        data['status_text'].append(['default_8', yrly_investment_reqd, 8])
+
+        yrly_investment_reqd = get_required_yrly_investment(total_contribution,12, data['target_date'], data['object'].final_val)
+        data['status_text'].append(['default_12',yrly_investment_reqd, 12])
+
         data['curr_module_id'] = 'id_goal_module'
         print("GoalProgressData - returning:", data)
         print(data)

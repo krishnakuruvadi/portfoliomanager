@@ -21,7 +21,7 @@
         <td colspan=2>{{ object.id }}</td>
       </tr>
       <tr>
-        <td>Name</td>
+        <td>Goal</td>
         <td colspan=2>{{ object.name }}</td>
       </tr>
       <tr>
@@ -55,10 +55,30 @@
             <div id="rectangle" style="width:25px;height:17px;background:grey"></div>&nbsp;Projected&nbsp;&nbsp;
             <div id="rectangle" style="width:25px;height:17px;background:red"></div>&nbsp;Remaining
           </div>
-          <div class="row">{{ status_text}}</div>
-          
         </td>
       </tr>
+      {% if status_text|length > 0 %}
+        <tr>
+          <td>Ways to achieve target</td>
+          <td colspan=2>
+            <ul>
+              {% for r in status_text %}
+                {% if r.0 == "avg_growth" %}
+                  <li> {{r.1}} per year at {{r.2}}% <i class="far fa-question-circle" style="font-size:0.8em;" data-toggle="tooltip" title="Avg growth"></i></li>
+                {% elif r.0 == "avg_contrib" %}
+                  <li> {{r.1}} <i class="far fa-question-circle" style="font-size:0.8em;" data-toggle="tooltip" title="Avg annual investment"></i> per year at {{r.2}}%</li>
+                {% elif r.0 == "last_year" %}
+                  <li>{{r.1}} <i class="far fa-question-circle" style="font-size:0.8em;" data-toggle="tooltip" title="Investment in last 1 year"></i> per year at {{r.2}}%</li>
+                {% elif r.0 == "default_8" %}
+                  <li>{{r.1}} per year at {{r.2}}%</li>
+                {% else %}
+                  <li>{{r.1}} per year at {{r.2}}%</li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+      {% endif %}
     </table>
 
   </div>
