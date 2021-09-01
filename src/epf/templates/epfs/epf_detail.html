@@ -27,6 +27,14 @@
       <td>{{ object.number }}</td>
     </tr>
     <tr>
+      <td>UAN</td>
+      <td>{{ object.uan }}</td>
+    </tr>
+    <tr>
+      <td>EPS</td>
+      <td>{{ object.eps }}</td>
+    </tr>
+    <tr>
       <td>Start Date</td>
       <td>{{ object.start_date }}</td>
     </tr>
@@ -112,7 +120,7 @@ function setChart(cdata) {
           maintainAspectRatio:false,
           title:      {
             display: true,
-            text:    "Contributions"
+            text:    "Contributions (Total)"
           },
           scales:     {
             xAxes: [{

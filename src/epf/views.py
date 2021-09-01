@@ -35,6 +35,8 @@ def create_epf(request):
         notes = request.POST['notes']
         user = request.POST['user']
         goal = request.POST['goal']
+        uan = request.POST['uan']
+        eps = request.POST['eps']
         if goal != '':
             goal_id = Decimal(goal)
         else:
@@ -47,7 +49,9 @@ def create_epf(request):
                 company=company,
                 user=user,
                 goal=goal_id,
-                notes=notes
+                notes=notes,
+                uan=uan,
+                eps=eps
             )
         except IntegrityError:
             print('EPF already exists')
@@ -137,6 +141,8 @@ def update_epf(request, id):
             notes = request.POST['notes']
             user = request.POST['user']
             goal = request.POST['goal']
+            uan = request.POST['uan']
+            eps = request.POST['eps']
             if goal != '':
                 goal_id = Decimal(goal)
             else:
@@ -148,6 +154,8 @@ def update_epf(request, id):
             epf_obj.user=user
             epf_obj.goal=goal_id
             epf_obj.notes=notes
+            epf_obj.uan = uan
+            epf_obj.eps = eps
             epf_obj.save()
             return HttpResponseRedirect("../")
         else:
@@ -155,7 +163,7 @@ def update_epf(request, id):
             goals = get_goal_id_name_mapping_for_user(epf_obj.user)
             context = {'goals':goals, 'users':users, 'user':epf_obj.user, 'number':epf_obj.number, 'start_date':epf_obj.start_date.strftime("%Y-%m-%d"),
                     'notes':epf_obj.notes, 'goal':epf_obj.goal, 'end_date':epf_obj.end_date.strftime("%Y-%m-%d") if epf_obj.end_date else None,
-                    'operation': 'Edit EPF', 'company':epf_obj.company, 'curr_module_id': 'id_epf_module'}
+                    'operation': 'Edit EPF', 'company':epf_obj.company, 'curr_module_id': 'id_epf_module', 'uan':epf_obj.uan if epf_obj.uan else '', 'eps':epf_obj.eps if epf_obj.eps else ''}
 
     except Epf.DoesNotExist:
         return HttpResponseRedirect("../")

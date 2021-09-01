@@ -33,7 +33,7 @@ def get_latest_vals(stock, exchange, start, end, etf=False):
 
 
 def get_historic_vals(stock, exchange, start, end, etf=False):
-    print("inside get_historic_vals exchange ", exchange, "start date:", start, " end date:", end)
+    print(f"inside get_historic_vals exchange {exchange} start date: {start} end date: {end}")
     if exchange == 'NASDAQ':
         response = Nasdaq(stock, etf).get_historical_value(start, end)
         if not response:

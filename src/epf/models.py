@@ -19,6 +19,8 @@ class Epf(models.Model):
     withdrawl = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
     total = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
     roi = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+    uan = models.CharField(max_length=50, null=True, blank=True)
+    eps = models.CharField(max_length=50, null=True, blank=True)
 
     def get_absolute_url(self):
         return reverse("epfs:epf-detail", kwargs={'id': self.id})

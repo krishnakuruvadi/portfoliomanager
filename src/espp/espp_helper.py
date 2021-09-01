@@ -4,7 +4,7 @@ import datetime
 import csv
 import codecs
 from contextlib import closing
-from shared.handle_real_time_data import get_latest_vals, get_forex_rate
+from shared.handle_real_time_data import get_latest_vals, get_conversion_rate
 from .models import Espp, EsppSellTransactions
 from common.models import Stock
 from shared.financial import xirr
@@ -42,7 +42,7 @@ def update_latest_vals(espp_obj):
                         espp_obj.as_on_date = k
                         espp_obj.latest_price = v
                         if espp_obj.exchange == 'NASDAQ':
-                            espp_obj.latest_conversion_rate = get_forex_rate(k, 'USD', 'INR')
+                            espp_obj.latest_conversion_rate = get_conversion_rate('USD', 'INR', k)
                         else:
                             espp_obj.latest_conversion_rate = 1
                         espp_obj.latest_value = float(espp_obj.latest_price) * float(espp_obj.latest_conversion_rate) * float(espp_obj.shares_avail_for_sale)

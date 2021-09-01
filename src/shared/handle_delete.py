@@ -8,6 +8,7 @@ from users.models import User
 from shares.models import Share
 from mutualfunds.models import Folio
 from rsu.models import RSUAward
+from retirement_401k.models import Account401K
 
 def delete_user(id):
     try:
@@ -22,6 +23,7 @@ def delete_user(id):
         Share.objects.filter(user=id).delete()
         Folio.objects.filter(user=id).delete()
         RSUAward.objects.filter(user=id).delete()
+        Account401K.objects.filter(user=id).delete()
 
     except User.DoesNotExist:
         print("No user with that id found")
