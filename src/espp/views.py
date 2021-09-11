@@ -135,6 +135,11 @@ class EsppUpdateView(UpdateView):
         print(form.cleaned_data)
         return super().form_valid(form)
     '''
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['curr_module_id'] = 'id_espp_module'
+        return data
+
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
@@ -172,6 +177,7 @@ def get_sell_trans(request, id):
             })
             total_realised_gain += float(st.realised_gain)
         context['total_realised_gain'] = total_realised_gain
+        context['curr_module_id'] = 'id_espp_module'
     except Espp.DoesNotExist:
         print(f"ESPP with id {id} does not exist")
     return render(request, template, context)
@@ -191,6 +197,7 @@ def add_sell_trans(request, id):
     template = "espps/add_sell_transaction.html"
     context = dict()
     context['espp_id'] = id
+    context['curr_module_id'] = 'id_espp_module'
     try:
         espp_obj = Espp.objects.get(id=id)
         if request.method == 'POST':

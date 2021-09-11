@@ -39,7 +39,7 @@ def markets_home(request):
             context['instruments'].append(inst)
     else:
         print(f'failed to get response {r.status_code}')
-
+    context['curr_module_id'] = 'id_markets_module'
     print(context)
     return render(request, template, context)
 
@@ -172,7 +172,8 @@ def returns_view(request):
         'roll_ret':roll_ret, 
         'yrly_ret':y_ret, 'years':ys,
         'monthly_ret':m_ret, 'months':ms,
-        'qtrly_ret':q_ret, 'quarters':qs}
+        'qtrly_ret':q_ret, 'quarters':qs,
+        'curr_module_id': 'id_markets_module'}
     #print(context)
     return render(request, template, context)
 

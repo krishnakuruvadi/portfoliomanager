@@ -156,14 +156,14 @@ def get_forex_xe(date, from_cur, to_cur):
 def get_conversion_rate(from_cur, to_cur, date):
     try:
         forex_rate = HistoricalForexRates.objects.get(from_cur=from_cur, to_cur=to_cur, date=date)
-        return forex_rate.rate
+        return float(forex_rate.rate)
     except HistoricalForexRates.DoesNotExist:
         val = get_forex_rate(date, from_cur, to_cur)
         if val:
             new_entry = HistoricalForexRates(from_cur=from_cur, to_cur=to_cur, date=date, rate=val)
             new_entry.save()
             print(val)
-            return val
+            return float(val)
         else:
             return None
 
@@ -206,8 +206,10 @@ def get_historical_stock_price(stock, start, end):
                 end = end.date()
                 
             if new_date >= start and new_date<= end:
-                new_entry = HistoricalStockPrice(symbol=stock, date=new_date, price=v)
-                new_entry.save()
+                try:
+                    new_entry = HistoricalStockPrice.objects.create(symbol=stock, date=new_date, price=v)
+                except IntegrityError as ex:
+                    print(f'entry exists {stock.symbol} {stock.exchange} {new_date} {ex}')
         start_date = end
         while(start_date>start):
             try:

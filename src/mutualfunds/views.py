@@ -79,6 +79,7 @@ def get_folios(request):
     cur_ret, all_ret = calculate_xirr(folio_objs)
     context['curr_ret'] = cur_ret
     context['all_ret'] = all_ret
+    context['curr_module_id'] = 'id_mf_module'
     return render(request, template, context)
 
 class FolioTransactionsListView(ListView):
@@ -91,6 +92,7 @@ class FolioTransactionsListView(ListView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['folio_id'] = self.kwargs['id']
+        data['curr_module_id'] = 'id_mf_module'
         print(data)
         return data
 
@@ -122,6 +124,7 @@ def sip_list(request):
     data['sip_count'] = len(data['sips'])
     data['sip_amount'] = amount
     data['user_name_mapping'] = get_all_users()
+    data['curr_module_id'] = 'id_mf_module'
     return render(request, template, data)
 
 def fund_insights(request):
@@ -171,6 +174,7 @@ def fund_insights(request):
             h = float(v)*100/float(total)
             h = int(round(h))
             data['category_percents'].append(h)
+    data['curr_module_id'] = 'id_mf_module'
     print('returning:', data)
     return render(request, template, data)
 
@@ -220,6 +224,7 @@ def fund_returns(request):
     for _,v in data['object_list'].items():
         if v['units']:
             ret['object_list'].append(v)
+    ret['curr_module_id'] = 'id_mf_module'
     return render(request, template, ret)
 
 def add_two(first, second):
@@ -279,6 +284,7 @@ def add_folio(request):
     for fh in sorted(resp):
         fund_houses[fh] = fh
     context = {'users':users, 'operation': 'Add Folio', 'fund_houses':fund_houses, 'message':message, 'message_color':message_color}
+    context['curr_module_id'] = 'id_mf_module'
     return render(request, template, context)
 
 def add_transaction(request, id):
@@ -297,6 +303,7 @@ def add_transaction(request, id):
         insert_trans_entry(folio.folio, folio.fund.code, folio.user, trans_type, units, price, trans_date, notes, broker, conversion_rate, trans_price)
     users = get_all_users()
     context = {'users':users, 'operation': 'Add Transaction', 'folio':folio.folio, 'user':user, 'fund_name':folio.fund.name, 'folio_id':id}
+    context['curr_module_id'] = 'id_mf_module'
     return render(request, template, context)
 
 def update_transaction(request, id):
@@ -330,7 +337,8 @@ def update_transaction(request, id):
     context['trans_price'] = transaction.trans_price
     context['broker'] = transaction.broker
     context['notes'] = transaction.notes
-    context['switch_trans'] = transaction.switch_trans  
+    context['switch_trans'] = transaction.switch_trans
+    context['curr_module_id'] = 'id_mf_module'
     print('context', context) 
     return render(request, template, context)
 
@@ -499,6 +507,13 @@ class TransactionsListView(ListView):
     model = MutualFundTransaction
     ordering = ['-trans_date']
 
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        #data['folio_id'] = self.kwargs['id']
+        data['curr_module_id'] = 'id_mf_module'
+        print(data)
+        return data
+
 class TransactionDeleteView(DeleteView):
     template_name = 'mutualfunds/transaction_delete.html'
     
@@ -546,7 +561,7 @@ def upload_transactions(request):
             print(f'Read transactions from file: {uploaded_file} {broker} {passwd} {file_locn} {full_file_path}')
             add_mf_transactions(broker, user, full_file_path, passwd)
     users = get_all_users()
-    context = {'users':users}
+    context = {'users':users, 'curr_module_id': 'id_mf_module'}
     return render(request, template, context)
 
 def update_folio(request, id):
@@ -572,7 +587,8 @@ def update_folio(request, id):
                    'user':folio.user,
                    'goal':folio.goal,
                    'notes':folio.notes,
-                   'goals':get_goal_id_name_mapping_for_user(folio.user)}
+                   'goals':get_goal_id_name_mapping_for_user(folio.user),
+                   'curr_module_id': 'id_mf_module'}
         print(context)
         return render(request, template, context)
     return HttpResponseRedirect("../")

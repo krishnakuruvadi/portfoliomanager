@@ -46,8 +46,13 @@ def calculator(request):
     context = {'fd_prin':fd_prin, 'fd_time':fd_time,
                  'fd_int':fd_roi, 'fd_final_val':fd_final_val, 'rd_final_val':rd_final_val,
                  'fd_compound':fd_compound, 'rd_prin':rd_prin, 'rd_time':rd_time, 'rd_int':rd_roi,
-                'rd_compound':rd_compound}
+                'rd_compound':rd_compound, 'curr_module_id': 'id_calculator_module'}
     print('context', context)
+    #if request.is_ajax():
+    #    print('request is ajax')
+    #    return HttpResponseRedirect('/calculator/',context)
+    #else:
+    #    print('request is not ajax')
     return render(request, template, context=context)
 
 def fd_calc_final_val(fd_prin, fd_time, fd_roi, fd_compound):

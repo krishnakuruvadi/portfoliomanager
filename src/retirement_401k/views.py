@@ -39,7 +39,7 @@ def add_account(request):
         create_nav_file(account.id)
 
     users = get_all_users()
-    context = {'users':users}
+    context = {'users':users, 'curr_module_id':'id_401k_module'}
     return render(request, template_name, context)
 
 def update_account(request, id):
@@ -75,6 +75,7 @@ def update_account(request, id):
         acct['goal'] = account.goal
         acct['goals'] = goals
         acct['user'] = account.user
+        acct['curr_module_id'] = 'id_401k_module'
         print(f'context {acct}')
         return render(request, template_name, acct)
 
@@ -113,6 +114,7 @@ def get_accounts(request):
     context['total_investment'] = round(total_investment, 2)
     context['latest_value'] = round(latest_value, 2)
     context['total_gain'] = round(total_gain, 2)
+    context['curr_module_id'] = 'id_401k_module'
     return render(request, template_name, context)
 
 def links(request):
@@ -180,6 +182,7 @@ def account_detail(request, id):
     acct['chart_labels'] = chart_labels
     
     acct['spy_vals'] = spy_vals
+    acct['curr_module_id'] = 'id_401k_module'
     return render(request, template_name, acct)
 
 def get_transactions(request, id):
@@ -198,6 +201,7 @@ def get_transactions(request, id):
         trans['notes'] = transaction.notes
         trans['units'] = transaction.units
         context['trans_list'].append(trans)
+    context['curr_module_id'] = 'id_401k_module'
     return render(request, template_name, context)
 
 def add_transaction(request, id):
@@ -233,6 +237,7 @@ def add_transaction(request, id):
         reconcile_401k()
 
     context = {'company':account.company, 'id':account.id, 'operation':'Add', 'message':message, 'message_color':message_color}
+    context['curr_module_id'] = 'id_401k_module'
     return render(request, template_name, context)
 
 def edit_transaction(request, id):
@@ -260,6 +265,7 @@ def edit_transaction(request, id):
     context['notes'] = transaction.notes
     context['units'] = transaction.units
     context['operation'] = 'Edit'
+    context['curr_module_id'] = 'id_401k_module'
     return render(request, template_name, context)
 
 class TransactionDeleteView(DeleteView):

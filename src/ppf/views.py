@@ -47,7 +47,7 @@ def add_ppf(request):
         )
 
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add PPF'}
+    context = {'users':users, 'operation': 'Add PPF', 'curr_module_id': 'id_ppf_module'}
     return render(request, template_name, context)
 
 class PpfListView(ListView):
@@ -70,6 +70,7 @@ class PpfListView(ListView):
             data['principal'][ppf_obj.number] = ppf_details['principal']
             data['interest'][ppf_obj.number] = ppf_details['interest']
             data['roi'][ppf_obj.number] = ppf_details['roi']
+        data['curr_module_id'] = 'id_ppf_module'
         return data
 
 class PpfDetailView(DetailView):
@@ -90,6 +91,7 @@ class PpfDetailView(DetailView):
         data['principal'] = ppf_details['principal']
         data['interest'] = ppf_details['interest']
         data['roi'] = ppf_details['roi']
+        data['curr_module_id'] = 'id_ppf_module'
         return data
 
 def update_ppf(request, id):
@@ -118,7 +120,7 @@ def update_ppf(request, id):
             goals = get_goal_id_name_mapping_for_user(ppf_obj.user)
             context = {'goals':goals, 'users':users,'user':ppf_obj.user, 'number':ppf_obj.number, 'start_date':ppf_obj.start_date.strftime("%Y-%m-%d"),
                     'notes':ppf_obj.notes, 'goal':ppf_obj.goal,
-                    'operation': 'Edit PPF'}
+                    'operation': 'Edit PPF', 'curr_module_id': 'id_ppf_module'}
         except Ppf.DoesNotExist:
             context = {'operation': 'Edit PPF'}
     print(context)
@@ -147,6 +149,7 @@ class PpfEntryListView(ListView):
         context = super(PpfEntryListView, self).get_context_data(**kwargs)
         # Create any data and add it to the context
         context['ppf_num'] = self.kwargs['id']
+        context['curr_module_id'] = 'id_ppf_module'
         return context
 
 def add_trans(request, id):
@@ -173,7 +176,7 @@ def add_trans(request, id):
             
         except Ppf.DoesNotExist:
             print(f'PPF with number {id} doesnt exist')
-        
+    context['curr_module_id'] = 'id_ppf_module'
     return render(request, template_name, context)
 
 
@@ -199,6 +202,7 @@ def upload_ppf_trans(request, id):
             fs.delete(file_locn)
     context = dict()
     context['number'] = id
+    context['curr_module_id'] = 'id_ppf_module'
     print(context)
     return render(request, 'ppfs/ppf_add_entries.html', context)
 

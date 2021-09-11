@@ -27,6 +27,7 @@ class FixedDepositListView(ListView):
         print(data)
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
         data['user_name_mapping'] = get_all_users()
+        data['curr_module_id'] = 'id_fd_module'
         return data
 
 class FixedDepositDetailView(DetailView):
@@ -42,6 +43,7 @@ class FixedDepositDetailView(DetailView):
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
+        data['curr_module_id'] = 'id_fd_module'
         return data
 
 class FixedDepositDeleteView(DeleteView):
@@ -95,10 +97,10 @@ def add_fixed_deposit(request):
             goals = get_goal_id_name_mapping_for_user(user)
             context = {'users':users,'user':user, 'number':number, 'start_date':start_date, 'bank_name': bank_name, 'roi': roi,
                 'time_period_days': time_period_days, 'principal': principal, 'final_val':val, 'notes': notes,
-                'goal':goal, 'mat_date':mat_date, 'operation': 'Add Fixed Deposit', 'goals':goals}
+                'goal':goal, 'mat_date':mat_date, 'operation': 'Add Fixed Deposit', 'goals':goals, 'curr_module_id': 'id_fd_module'}
             return render(request, template, context=context)
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add Fixed Deposit'}
+    context = {'users':users, 'operation': 'Add Fixed Deposit', 'curr_module_id': 'id_fd_module'}
     return render(request, template, context)
 
 
@@ -146,7 +148,7 @@ def update_fixed_deposit(request, id):
             goals = get_goal_id_name_mapping_for_user(user)
             context = {'goals':goals, 'users':users,'user':user, 'number':number, 'start_date':start_date, 'bank_name': bank_name, 'roi': roi,
                 'time_period_days': time_period_days, 'principal': principal, 'final_val':val, 'notes': notes,
-                'goal':goal, 'mat_date':mat_date, 'operation': 'Edit Fixed Deposit'}
+                'goal':goal, 'mat_date':mat_date, 'operation': 'Edit Fixed Deposit', 'curr_module_id': 'id_fd_module'}
             return render(request, template, context=context)
         return HttpResponseRedirect("../")
     else:
@@ -158,7 +160,7 @@ def update_fixed_deposit(request, id):
             context = {'goals':goals, 'users':users,'user':fd_obj.user, 'number':fd_obj.number, 'start_date':fd_obj.start_date.strftime("%Y-%m-%d"), 'bank_name':fd_obj.bank_name,
                     'roi':fd_obj.roi, 'time_period_days': fd_obj.time_period, 'principal': fd_obj.principal, 'final_val':fd_obj.final_val,
                     'notes':fd_obj.notes, 'goal':fd_obj.goal, 'mat_date':fd_obj.mat_date.strftime("%Y-%m-%d"),
-                    'operation': 'Edit Fixed Deposit'}
+                    'operation': 'Edit Fixed Deposit', 'curr_module_id': 'id_fd_module'}
         except FixedDeposit.DoesNotExist:
             context = {'operation': 'Edit Fixed Deposit'}
         return render(request, template, context=context)

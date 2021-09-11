@@ -44,7 +44,7 @@ def create_rsu(request):
             shares_awarded=shares_awarded
         )
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add RSU Award'}
+    context = {'users':users, 'operation': 'Add RSU Award', 'curr_module_id': 'id_rsu_module'}
     return render(request, template, context)
 
 
@@ -73,7 +73,8 @@ def view_update_rsu(request, id):
         'award_id': obj.award_id, 
         'goal':obj.goal, 
         'shares_awarded':obj.shares_awarded,
-        'user':obj.user
+        'user':obj.user,
+        'curr_module_id': 'id_rsu_module'
         }
     print(context)
     return render(request, template, context)
@@ -87,6 +88,7 @@ class RsuListView(ListView):
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
         data['user_name_mapping'] = get_all_users()
         data['award_latest_vals'] = get_rsu_award_latest_vals()
+        data['curr_module_id'] = 'id_rsu_module'
         print(data)
         return data
 
@@ -113,6 +115,7 @@ class RsuDetailView(DetailView):
         print(data)
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
+        data['curr_module_id'] = 'id_rsu_module'
         return data
 
 class RsuVestDetailView(DetailView):
@@ -125,6 +128,7 @@ class RsuVestDetailView(DetailView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['sell_trans'] = RSUSellTransactions.objects.filter(rsu_vest=data['object'])
+        data['curr_module_id'] = 'id_rsu_module'
         return data
 
 def refresh_rsu_trans(request):
@@ -172,7 +176,7 @@ def show_vest_list(request,id):
         vest_list.append(entry)
      
     context = {'vest_list':vest_list, 'award_id':rsu_award.award_id, 'symbol':rsu_award.symbol, 'award_date':rsu_award.award_date}
-    
+    context['curr_module_id'] = 'id_rsu_module'
     return render(request, template, context)
 
 def show_vest_sell_trans(request, id, vestid):
@@ -194,6 +198,7 @@ def show_vest_sell_trans(request, id, vestid):
             }
             vest_sell_list.append(vs)
         context = {'vest_sell_list':vest_sell_list, 'vest_date':rsu_vest.vest_date, 'award_date':rsu_vest.award.award_date, 'symbol':rsu_vest.award.symbol, 'award_id':rsu_vest.award.award_id}
+        context['curr_module_id'] = 'id_rsu_module'
         return render(request, template, context)
     except Exception as ex:
         print(f'exception getting sell transactions  {ex}')
@@ -247,6 +252,7 @@ def add_vest_sell_trans(request, id, vestid):
         else:
             context = {'award_date':award_obj.award_date, 'symbol':award_obj.symbol, 'award_id':award_obj.award_id,
              'vest_date':rsu_vest.vest_date, 'unsold_shares':rsu_vest.unsold_shares, 'aquisition_price':rsu_vest.aquisition_price, 'exchange':award_obj.exchange}
+            context['curr_module_id'] = 'id_rsu_module'
             return render(request, template, context)
     except Exception as ex:
         print(f'exception adding sell transaction {ex}')
@@ -283,7 +289,7 @@ def add_vest(request,id):
             return redirect('rsus:rsu-vest-list', id=id)
 
     context = {'award_id':award_obj.award_id, 'exchange':award_obj.exchange, 'symbol':award_obj.symbol, 'award_date':award_obj.award_date}
-    
+    context['curr_module_id'] = 'id_rsu_module'
     return render(request, template, context)
 
 def update_vest(request,id,vestid):
@@ -316,11 +322,12 @@ def update_vest(request,id,vestid):
         context['total_aquisition_price'] = rsu_obj.total_aquisition_price
         context['conversion_rate'] = rsu_obj.conversion_rate
         context['notes'] = rsu_obj.notes
+        context['curr_module_id'] = 'id_rsu_module'
         print(context)
         return render(request, template, context)
 
     context = {'award_id':award_obj.award_id, 'exchange':award_obj.exchange, 'symbol':award_obj.symbol, 'award_date':award_obj.award_date}
-    
+    context['curr_module_id'] = 'id_rsu_module'
     return render(request, template, context)
 
 class CurrentRsus(APIView):

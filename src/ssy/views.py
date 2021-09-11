@@ -47,7 +47,7 @@ def add_ssy(request):
         )
 
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add SSY'}
+    context = {'users':users, 'operation': 'Add SSY', 'curr_module_id': 'id_ssy_module'}
     return render(request, template_name, context)
 
 
@@ -77,7 +77,7 @@ def update_ssy(request, id):
             goals = get_goal_id_name_mapping_for_user(ssy_obj.user)
             context = {'goals':goals, 'users':users,'user':ssy_obj.user, 'number':ssy_obj.number, 'start_date':ssy_obj.start_date.strftime("%Y-%m-%d"),
                     'notes':ssy_obj.notes, 'goal':ssy_obj.goal,
-                    'operation': 'Edit SSY'}
+                    'operation': 'Edit SSY', 'curr_module_id': 'id_ssy_module'}
         except Ssy.DoesNotExist:
             context = {'operation': 'Edit SSY'}
     print(context)
@@ -103,6 +103,7 @@ class SsyListView(ListView):
             data['principal'][ssy_obj.number] = ssy_details['principal']
             data['interest'][ssy_obj.number] = ssy_details['interest']
             data['roi'][ssy_obj.number] = ssy_details['roi']
+        data['curr_module_id'] = 'id_ssy_module'
         return data
 
 class SsyDetailView(DetailView):
@@ -123,6 +124,7 @@ class SsyDetailView(DetailView):
         data['principal'] = ssy_details['principal']
         data['interest'] = ssy_details['interest']
         data['roi'] = ssy_details['roi']
+        data['curr_module_id'] = 'id_ssy_module'
         return data
 
 class SsyDeleteView(DeleteView):
@@ -147,12 +149,14 @@ class SsyEntryListView(ListView):
         context = super(SsyEntryListView, self).get_context_data(**kwargs)
         # Create any data and add it to the context
         context['ssy_num'] = self.kwargs['id']
+        context['curr_module_id'] = 'id_ssy_module'
         return context
 
 def add_trans(request, id):
     template_name = 'ssys/ssy_add_trans.html'
     context = dict()
     context['number'] = id
+    context['curr_module_id'] = 'id_ssy_module'
     if request.method == 'POST':
         try:
             ssy_obj = Ssy.objects.get(number=id)
@@ -199,6 +203,7 @@ def upload_ssy_trans(request, id):
             fs.delete(file_locn)
     context = dict()
     context['number'] = id
+    context['curr_module_id'] = 'id_ssy_module'
     print(context)
     return render(request, 'ssys/ssy_add_entries.html', context)
 

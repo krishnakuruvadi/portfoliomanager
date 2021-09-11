@@ -30,9 +30,16 @@ from shared.utils import get_min
 class UserListView(ListView):
     template_name = 'users/user_list.html'
     queryset = User.objects.all()
+    
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['curr_module_id'] = 'id_user_module'
+        print(data)
+        return data
 
 def contrib_deduct_str(c, d):
     return str(int(c)) + ' / ' + str(int(d))
+
 class UserDetailView(DetailView):
     template_name = 'users/user_detail.html'
 
@@ -137,6 +144,7 @@ class UserDetailView(DetailView):
 
         data['yrly_investment'] = yrly
         data['investment_types'] = investment_types
+        data['curr_module_id'] = 'id_user_module'
         print(data)
         return data
 

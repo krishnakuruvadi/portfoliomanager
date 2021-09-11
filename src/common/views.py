@@ -36,7 +36,8 @@ import shutil
 
 def common_list_view(request):
     template = 'common/common_list.html'
-    return render(request, template)
+    context = {'curr_module_id': 'id_internals_module'}
+    return render(request, template, context)
 
 def refresh(request):
     print("inside refresh")
@@ -50,8 +51,12 @@ def refresh(request):
                 collection_start_date = entry.date
         vals = get_latest_vals(stock.symbol, stock.exchange, collection_start_date, datetime.date.today())
         for k,v in vals.items():
-            entry = HistoricalStockPrice(symbol=stock, date=k, price=v)
-            entry.save()
+            try:
+                entry = HistoricalStockPrice.objects.create(symbol=stock, date=k, price=v)
+                entry.save()
+            except IntegrityError as ex:
+                print(f'entry exists {stock.symbol} {stock.exchange} {k} {ex}')
+
         print(vals)
     return HttpResponseRedirect(reverse('common:common-list'))
 
@@ -72,12 +77,23 @@ class HistoricalMFPriceList(ListView):
 
     paginate_by = 15
     model = HistoricalMFPrice
+
     def get_queryset(self):
         return HistoricalMFPrice.objects.filter(code__id=self.kwargs['id'])
+    
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['curr_module_id'] = 'id_internals_module'
+        return data
 
 class StockListView(ListView):
     template_name = 'common/stock_list.html'
     model = Stock
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['curr_module_id'] = 'id_internals_module'
+        return data
 
 class StockDetailView(DetailView):
     template_name = 'common/stock_detail.html'
@@ -93,6 +109,7 @@ class MFListView(ListView):
     
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
+        data['curr_module_id'] = 'id_internals_module'
         print(data)
         return data
 

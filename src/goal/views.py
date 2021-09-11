@@ -204,6 +204,7 @@ def goals_insight(request):
         #    print(f'goal2 fvs {fvs}')
         context['chart_data'].append({'label':g.name, 'data':fvs, 'borderColor':colors[i], 'fill':'false'})
         i += 1
+    context['curr_module_id'] = 'id_goal_module'
     print(context)
     return render(request, template, context)
 
@@ -504,7 +505,7 @@ def add_goal(request):
                 'curr_module_id':'id_goal_module'}
             return render(request, template, context=context)
     users = get_all_users()
-    context = {'users':users}
+    context = {'users':users, 'curr_module_id': 'id_goal_module'}
     return render(request, template, context=context)
 
 def add_retirement_goal(request):
@@ -552,7 +553,7 @@ def add_retirement_goal(request):
                         'corpus_vals': corpus_vals, 'expense_vals': expense_vals, 'operation':operation, 'curr_module_id':'id_goal_module'}
             return render(request, template, context=context)
     users = get_all_users()
-    context = {'users':users, "labels":None, "data":None, 'operation':operation}
+    context = {'users':users, "labels":None, "data":None, 'operation':operation, 'curr_module_id': 'id_goal_module'}
     return render(request, template, context)
 
 def update_goal(request, id):

@@ -39,6 +39,7 @@ class TransactionsListView(ListView):
         print(data)
         data['share_name'] = ''
         data['share_id'] = ''
+        data['curr_module_id'] = 'id_shares_module'
         return data
 
 def get_shares_list(request):
@@ -113,6 +114,7 @@ def get_shares_list(request):
     #context['curr_ret'] = cur_ret
     #context['all_ret'] = all_ret
     context['realised_gain'] = round(realised_gain, 2)
+    context['curr_module_id'] = 'id_shares_module'
     return render(request, template, context)
 
 class ShareTransactionsListView(ListView):
@@ -129,6 +131,7 @@ class ShareTransactionsListView(ListView):
         o = get_object_or_404(Share, id=id_)
         data['share_name'] = o.exchange+'/'+o.symbol+'/'+get_user_short_name_or_name_from_id(o.user)
         data['share_id'] = o.id
+        data['curr_module_id'] = 'id_shares_module'
         return data
 
     def get_queryset(self):
@@ -190,6 +193,7 @@ class ShareDetailView(DetailView):
                 data['bonus'] = bonuses
         except Stock.DoesNotExist:
             print(f'stock doesnt exist in db {obj.exchange} {obj.symbol}')
+        data['curr_module_id'] = 'id_shares_module'
         return data
 
 class TransactionDetailView(DetailView):
@@ -229,7 +233,9 @@ def update_share(request, id):
                    'user':share.user,
                    'goal':share.goal,
                    'notes':share.notes,
-                   'etf':share.etf}
+                   'etf':share.etf,
+                   'curr_module_id':'id_shares_module'
+                   }
         return render(request, template, context)
     return HttpResponseRedirect("../")
 
@@ -303,6 +309,7 @@ def upload_transactions(request):
     context = {'users':users, 'get_challenge':get_challenge, 'pull_message':pull_message}
     if user_id:
         context['user'] = user_id
+    context['curr_module_id'] = 'id_shares_module'
     return render(request, template, context)
 
 def add_transaction(request):
@@ -332,12 +339,12 @@ def add_transaction(request):
             if exchange == 'NASDAQ' or exchange == 'NYSE':
                 exchange_rate = get_conversion_rate('USD', 'INR', trans_date)
             users = get_all_users()
-            context = {'users':users, 'operation': 'Add Transaction', 'conversion_rate':exchange_rate,
+            context = {'users':users, 'operation': 'Add Transaction', 'conversion_rate':exchange_rate, 'curr_module_id': 'id_shares_module',
                         'trans_date':trans_date.strftime("%Y-%m-%d"), 'user':user, 'exchange':exchange, 'symbol':symbol}
             return render(request, template, context)
 
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add Transaction', 'conversion_rate':1}
+    context = {'users':users, 'operation': 'Add Transaction', 'conversion_rate':1, 'curr_module_id': 'id_shares_module'}
     return render(request, template, context)
 
 def update_transaction(request,id):
@@ -362,7 +369,7 @@ def update_transaction(request,id):
         'user':get_user_name_from_id(trans.share.user), 'operation': 'Update Transaction',
         'exchange': trans.share.exchange, 'symbol':trans.share.symbol, 'trans_date':trans.trans_date.strftime("%Y-%m-%d"),
         'price': trans.price, 'quantity':trans.quantity, 'conversion_rate':trans.conversion_rate,
-        'trans_price': trans.trans_price, 'broker':trans.broker, 'notes':trans.notes
+        'trans_price': trans.trans_price, 'broker':trans.broker, 'notes':trans.notes, 'curr_module_id':'id_shares_module'
     }
     return render(request, template, context)
 
@@ -462,6 +469,7 @@ def shares_insights(request):
             h = float(v)*100/float(total)
             h = int(round(h))
             data['country_percents'].append(h)
+    data['curr_module_id'] = 'id_shares_module'
     print('returning:', data)
     return render(request, template, data)
 
