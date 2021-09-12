@@ -22,7 +22,7 @@ def add_account(request):
         start_date = get_date_or_none_from_string(request.POST['start_date'])
         end_date = get_date_or_none_from_string(request.POST['end_date'])
         user = request.POST['user']
-        goal = request.POST['goal']
+        goal = request.POST.get('goal', '')
         notes = request.POST['notes']
         if goal != '':
             goal_id = Decimal(goal)
@@ -51,7 +51,7 @@ def update_account(request, id):
         start_date = get_date_or_none_from_string(request.POST['start_date'])
         end_date = get_date_or_none_from_string(request.POST['end_date'])
         #user = request.POST['user']
-        goal = request.POST['goal']
+        goal = request.POST.get('goal', '')
         notes = request.POST['notes']
         if goal != '':
             goal_id = Decimal(goal)

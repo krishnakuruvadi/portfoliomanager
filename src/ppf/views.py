@@ -34,7 +34,7 @@ def add_ppf(request):
         number = request.POST['number']
         start_date = request.POST['start_date']
         user = request.POST['user']
-        goal = request.POST['goal']
+        goal = request.POST.get('goal', '')
         if goal != '':
             goal_id = Decimal(goal)
         else:
@@ -102,7 +102,7 @@ def update_ppf(request, id):
             ppf_obj = Ppf.objects.get(number=id)
             ppf_obj.start_date = request.POST['start_date']
             ppf_obj.user = request.POST['user']
-            goal = request.POST['goal']
+            goal = request.POST.get('goal', '')
             if goal != '':
                 goal_id = Decimal(goal)
             else:

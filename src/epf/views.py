@@ -34,7 +34,7 @@ def create_epf(request):
         company = request.POST['company']
         notes = request.POST['notes']
         user = request.POST['user']
-        goal = request.POST['goal']
+        goal = request.POST.get('goal', '')
         uan = request.POST['uan']
         eps = request.POST['eps']
         if goal != '':
@@ -140,7 +140,7 @@ def update_epf(request, id):
             company = request.POST['company']
             notes = request.POST['notes']
             user = request.POST['user']
-            goal = request.POST['goal']
+            goal = request.POST.get('goal', '')
             uan = request.POST['uan']
             eps = request.POST['eps']
             if goal != '':

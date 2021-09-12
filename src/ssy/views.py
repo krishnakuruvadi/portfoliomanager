@@ -34,7 +34,7 @@ def add_ssy(request):
         number = request.POST['number']
         start_date = request.POST['start_date']
         user = request.POST['user']
-        goal = request.POST['goal']
+        goal = request.POST.get('goal', '')
         if goal != '':
             goal_id = Decimal(goal)
         else:
@@ -59,7 +59,7 @@ def update_ssy(request, id):
             ssy_obj = Ssy.objects.get(number=id)
             ssy_obj.start_date = request.POST['start_date']
             ssy_obj.user = request.POST['user']
-            goal = request.POST['goal']
+            goal = request.POST.get('goal', '')
             if goal != '':
                 goal_id = Decimal(goal)
             else:

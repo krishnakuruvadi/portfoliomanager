@@ -570,7 +570,7 @@ def update_folio(request, id):
     if request.method == 'POST':
         folio.user = int(request.POST['user'])
         print('user is:',folio.user)
-        goal = request.POST['goal']
+        goal = request.POST.get('goal', '')
         if goal != '':
             folio.goal = int(goal)
         else:

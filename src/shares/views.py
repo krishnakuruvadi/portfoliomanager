@@ -208,7 +208,7 @@ def update_share(request, id):
     template = 'shares/update_share.html'
     share = Share.objects.get(id=id)
     if request.method == 'POST':
-        goal = request.POST['goal']
+        goal = request.POST.get('goal', '')
         share.user = int(request.POST['user'])
         print('user is:',share.user)
         if goal != '':

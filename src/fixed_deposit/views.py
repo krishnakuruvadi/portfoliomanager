@@ -71,7 +71,7 @@ def add_fixed_deposit(request):
             roi = Decimal(request.POST['roi'])
             principal = Decimal(request.POST['principal'])
             final_val = Decimal(request.POST['final_val'])
-            goal = request.POST['goal']
+            goal = request.POST.get('goal', '')
             if goal != '':
                 goal_id = Decimal(goal)
             else:
@@ -90,7 +90,7 @@ def add_fixed_deposit(request):
             principal = Decimal(request.POST['principal'])
             roi = Decimal(request.POST['roi'])
             notes = request.POST['notes']
-            goal = request.POST['goal']
+            goal = request.POST.get('goal', '')
             mat_date, val = get_maturity_value(int(principal), start_date, float(roi), int(time_period_days))
             print("calculated value", val)
             users = get_all_users()
@@ -121,7 +121,7 @@ def update_fixed_deposit(request, id):
                 fd_obj.roi = Decimal(request.POST['roi'])
                 fd_obj.principal = Decimal(request.POST['principal'])
                 fd_obj.final_val = Decimal(request.POST['final_val'])
-                goal = request.POST['goal']
+                goal = request.POST.get('goal', '')
                 if goal != '':
                     fd_obj.goal = Decimal(goal)
                 else:
@@ -141,7 +141,7 @@ def update_fixed_deposit(request, id):
             principal = Decimal(request.POST['principal'])
             roi = Decimal(request.POST['roi'])
             notes = request.POST['notes']
-            goal = request.POST['goal']
+            goal = request.POST.get('goal', '')
             mat_date, val = get_maturity_value(int(principal), start_date, float(roi), int(time_period_days))
             print("calculated value", val)
             users = get_all_users()
