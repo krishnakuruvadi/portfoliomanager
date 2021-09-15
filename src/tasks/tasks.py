@@ -961,6 +961,10 @@ def update_markets():
     ret = get_india_index_returns()
     update_india_market_returns(ret)
 
+@db_task()
+def update_insurance_policy_vals(policy_num):
+    from insurance.insurance_helper import update_policy_val_using_policy_num
+    update_policy_val_using_policy_num(policy_num)
 
 '''
 #  example code below

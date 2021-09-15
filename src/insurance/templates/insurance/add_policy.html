@@ -1,0 +1,232 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'insurance:insurance-list' %}">Insurance</a></li>
+    <li><a href="#">Create</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6'>
+
+        {% if message_color == 'green' %}
+        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Success!</strong> {{message}}
+        </div>
+        {% elif message_color == 'red' %}
+        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Error!</strong> {{message}}
+         </div>
+        {% endif %}
+
+        <div class="form-group row">
+          <label for="policy" class="col-sm-3 col-form-label">Policy Number <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="id_policy" name="policy" value="{{policy}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="company" class="col-sm-3 col-form-label">Company <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="id_company" name="company" value="{{company}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="fund" class="col-sm-3 col-form-label">Policy Name <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input  type="text" id="id_name" name="name" value="{{name}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">   
+          <label class="control-label col-sm-3 col-form-label" for="id_policy_type">Policy Type</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="policy_type" required="" id="id_policy_type">
+                <option value="">---------</option>
+                <option value="Traditional">Traditional</option>
+                <option value="Term">Term</option>
+                <option value="ULIP">ULIP</option>
+              </select>
+            </div>
+          </div> 
+        </div>
+
+        <div class="form-group row">
+          <label for="start_date" class="col-sm-3 col-form-label">Start Date <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+              <div class="md-form mt-0">
+                  <input type="date" id="start_date" name="start_date" value="{{start_date}}" required="true">
+              </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="end_date" class="col-sm-3 col-form-label">End Date</label>
+          <div class="col-sm-3">
+              <div class="md-form mt-0">
+                  <input type="date" id="end_date" name="end_date" value="{{end_date}}">
+              </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="sum_assured" class="col-sm-3 col-form-label">Sum Assured</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" step="1" id="sum_assured" name="sum_assured" value="{{sum_assured}}">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_user" name="user" class="form-control" required="true"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="goal" class="col-sm-3 col-form-label">Goal</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_goal" name="goal" class="form-control"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+
+
+{% block javascript %}
+  <!--script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script-->
+  <!--script>
+    $('.basicAutoComplete').autoComplete(
+        {minLength: 1}
+    );
+    $('.dropdown-menu').css({'top': 'auto', 'left': 'auto'})
+
+  </script-->
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>
+    set_user_list({{users|safe}}, '{{user|safe}}');
+    set_fund_house({{fund_houses|safe}});
+    set_fund_select_status();
+
+    $("#id_fund_house").change(function () {
+      set_fund_select_status();
+    });
+
+    function set_fund_house(fund_houses) {
+      $('#id_fund_house').empty();
+      $('#id_fund_house')
+          .append($('<option>', { value : '' })
+          .text(''));
+      var dropdown = document.getElementById('id_fund_house');
+      for (x in fund_houses) {
+          fundhouse = fund_houses[x]
+          // create new option element
+          var opt = document.createElement('option');
+          // create text node to add to option element (opt)
+          opt.appendChild( document.createTextNode(fundhouse) );
+          // set value property of opt
+          opt.value = x;
+          // add opt to end of select box (sel)
+          dropdown.appendChild(opt);
+      }
+    }
+
+    function set_fund_select_status() {
+      v = document.getElementById('id_fund_house').value;
+      document.getElementById('id_fund').value='';
+      if (v != '') {
+        document.getElementById('id_fund').disabled = false;
+      } else {
+        document.getElementById('id_fund').disabled = true;
+      }
+    }
+
+    $(function() {
+      function log( message ) {
+        $( "<div>" ).text( message ).prependTo( "#log" );
+        $( "#log" ).scrollTop( 0 );
+      }
+
+      $( "#id_fund" ).autocomplete({
+        source: function( request, response ) {
+          $.ajax({
+            url: "/common/mf/avail_funds",
+            dataType: "json",
+            data: {
+              q: request.term,
+              fund_house: $("#id_fund_house").val()
+            },
+            success: function( data ) {
+              response( data );
+            }
+          });
+        },
+        minLength: 3,
+        select: function( event, ui ) {
+          log( ui.item ?
+            "Selected: " + ui.item.label :
+            "Nothing selected, input was " + this.value);
+        },
+        open: function() {
+          $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+        },
+        close: function() {
+          $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+        }
+      });
+    });
+
+
+  </script>
+{% endblock %}

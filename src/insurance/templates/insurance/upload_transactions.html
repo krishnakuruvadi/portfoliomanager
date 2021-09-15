@@ -1,0 +1,273 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'insurance:insurance-list' %}">Insurance</a></li>
+    <li><a href="{% url 'insurance:policy-detail' policy_id %}">{{policy}}</a></li>
+    <li><a href="#">Upload Transactions</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+<table class="table table-bordered">
+  <tr>
+    <td>
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %} 
+        <div class="row">
+          <div class='col-sm-12 col-md-6 col-lg-6'>
+            {% if message_color == 'green' %}
+            <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                 <span aria-hidden="true" style="font-size:20px">×</span>
+               </button>    <strong>Success!</strong> {{message}}
+            </div>
+            {% elif message_color == 'red' %}
+            <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                 <span aria-hidden="true" style="font-size:20px">×</span>
+               </button>    <strong>Error!</strong> {{message}}
+             </div>
+            {% endif %}
+             
+            <div class="form-group row">
+              <label for="policy" class="col-sm-3 col-form-label">Policy Number</label>
+              <div class="col-sm-3">
+                <div class="md-form mt-0">
+                  <label>{{policy}}</label>
+                </div>
+              </div>
+            </div>
+    
+            <div class="form-group row">
+              <label for="company" class="col-sm-3 col-form-label">Company</label>
+              <div class="col-sm-3">
+                <div class="md-form mt-0">
+                  <label>{{company}}</label>
+                </div>
+              </div>
+            </div>
+    
+            <div class="form-group row">
+              <label for="fund" class="col-sm-3 col-form-label">Policy Name</label>
+              <div class="col-sm-3">
+                <div class="md-form mt-0">
+                  <label>{{policy_name}}</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="brokerFormControlSelect" class="col-sm-3 col-form-label">Broker</label>
+              <div class="col-sm-9">
+                <div class="md-form mt-0">
+                  <select class="form-control" id="brokerControlSelect" name="brokerControlSelect">
+                    <option>ICICI Prudential</option>
+                    <!--option>COIN ZERODHA</option>
+                    <option>CAS</option-->
+                  </select>
+                </div>
+              </div>
+            </div>
+          
+            <!--div class="form-group row" id="div_cas_pass">
+              <label for="cas_pass" id="label-cas-pass" class="col-sm-3 col-form-label">Password</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <input type="text" id="id_cas_pass" name="cas-pass">
+                </div>
+              </div>
+            </div-->
+
+            <div class="form-group row">
+              <label for="file" class="col-sm-3 col-form-label">File</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <input type="file" name="document" id="document" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-sm-9">
+                <div class="md-form mt-0">
+                  <button type="submit" class="btn btn-primary" id="submit" name="submit">Submit</button>
+                  <a href="../" class="btn btn-danger" role="button">Cancel</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </td>
+    <!--td>
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %} 
+        <div class="row">
+          <div class='col-sm-12'>
+            <div class="form-group row">
+              <label for="user" class="col-sm-3 col-form-label">User</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <select id="id_pull_user" name="pull-user" class="form-control"></select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="pullBrokerFormControlSelect" class="col-sm-3 col-form-label">Broker</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <select class="form-control" id="pullBrokerControlSelect" name="pullBrokerControlSelect">
+                    <option>KUVERA</option>
+                    <option>COIN ZERODHA</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          
+            <div class="form-group row">
+              <label for="pull-emailid" id="label-pull-emailid" class="col-sm-3 col-form-label">E-Mail</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <input type="text" id="id_pull_email_id" name="pull-email-id" size="50">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="pull-passwd" class="col-sm-3 col-form-label">Password</label>
+              <div class="col-sm-6">
+                <input type="password" id="id_pull_passwd" name="pull-passwd" placeholder="Broker Password">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="pull-kuvera-name" class="col-sm-3 col-form-label" id="label-pull-kuvera-name">Kuvera User Account Name</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <input type="text" id="id_pull_kuvera_acc_name" name="pull_kuvera_acc_name"  size="50">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <button type="submit" class="btn btn-primary" id="pull-submit" name="pull-submit">Submit</button>
+                <a href="../" class="btn btn-danger" role="button">Cancel</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+    </td-->
+  </tr>
+</table>
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+    var users = {{users|safe}}
+    var userds = ['id_user', 'id_pull_user']
+    for (userd in userds) {
+      var el = document.getElementById(userds[userd]);
+      var opt = document.createElement('option');
+      // create text node to add to option element (opt)
+      opt.appendChild( document.createTextNode('') );
+      // set value property of opt
+      opt.value = ''; 
+      el.appendChild(opt);
+    }
+    console.log(users);
+    for (x in users) {
+      user = users[x]
+      for (userd in userds) {
+        var el = document.getElementById(userds[userd]);
+        // create new option element
+        var opt = document.createElement('option');
+        // create text node to add to option element (opt)
+        opt.appendChild( document.createTextNode(user) );
+        // set value property of opt
+        opt.value = x;
+        // add opt to end of select box (sel)
+        el.appendChild(opt);
+      }
+    }
+    updatePullSegment();
+    updateFileUploadSegment();
+    $("#id_pull_user").change(function () {
+      updatePullSegment();
+    });
+    $("#pullBrokerControlSelect").change(function () {
+      updatePullSegment();
+    });
+    $("#id_pull_email_id").change(function () {
+      updatePullSegment();
+    });
+    $("#id_pull_passwd").change(function () {
+      updatePullSegment();
+    });
+    $("#id_pull_kuvera_acc_name").change(function () {
+      updatePullSegment();
+    });
+    function updatePullSegment() {
+      var broker = document.getElementById('pullBrokerControlSelect').value;
+      console.log(broker);
+      if (broker == 'KUVERA') {
+        document.getElementById('label-pull-emailid').innerHTML='E-Mail';
+        document.getElementById('label-pull-kuvera-name').innerHTML='Kuvera User Account Name';
+      }
+      if (broker == 'COIN ZERODHA') {
+        document.getElementById('label-pull-emailid').innerHTML='User ID';
+        document.getElementById('label-pull-kuvera-name').innerHTML='2FA';
+      }
+      var user = document.getElementById('id_pull_user').value;
+      var userid = document.getElementById('id_pull_email_id').value;
+      var passwd = document.getElementById('id_pull_passwd').value;
+      var twofa = document.getElementById('id_pull_kuvera_acc_name').value;
+      document.getElementById('pull-submit').disabled=true;
+      if ((user!='') && (broker!='') && (userid!='') && (passwd!='') && (twofa!='')) {
+        document.getElementById('pull-submit').disabled=false;
+      }
+    }
+    $("#id_user").change(function () {
+      updateFileUploadSegment();
+    });
+    $("#brokerControlSelect").change(function () {
+      updateFileUploadSegment();
+    });
+    $("#document").change(function () {
+      updateFileUploadSegment();
+    });
+    $("#id_cas_pass").change(function () {
+      updateFileUploadSegment();
+    });
+    function updateFileUploadSegment() {
+      var broker = document.getElementById('brokerControlSelect').value;
+      var user = document.getElementById('id_user').value;
+      var doc = document.getElementById('document').value;
+      var pass = document.getElementById('id_cas_pass').value;
+      document.getElementById('submit').disabled=true;
+      if ((user!='') && (broker!='') && (doc!='')) {
+        if (broker == 'CAS') {
+          if (pass!='') {
+            document.getElementById('submit').disabled=false;
+          }
+        } else {
+          document.getElementById('submit').disabled=false;
+        }
+      }
+      if (broker != 'CAS') {
+        document.getElementById('div_cas_pass').style.display = "none";
+      } else {
+        document.getElementById('div_cas_pass').style.display=null;
+      }
+    }
+  </script>
+{% endblock %}
