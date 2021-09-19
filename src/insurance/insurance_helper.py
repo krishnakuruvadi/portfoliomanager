@@ -1,5 +1,7 @@
+from django.db.utils import IntegrityError
 from .models import InsurancePolicy, Transaction, Fund, NAVHistory
 from shared.financial import xirr
+from tools.ICICIPruLife import ICICIPruLife
 
 def update_policies():
     for policy in InsurancePolicy.objects.all():
@@ -48,15 +50,7 @@ def update_policy_val(policy):
 
     for fund_name, summ in summary.items():
         f = Fund.objects.get(policy=policy, name=fund_name)
-        nh = NAVHistory.objects.filter(fund=f).order_by('nav_date')
-        if len(nh) == 0 or nh[0].nav_date < summ['nav_date']:
-            f.nav_date =  summ['nav_date']
-            f.nav = summ['nav']
-        else:
-            f.nav_date =  nh[0].nav_date
-            f.nav = nh[0].nav
-        f.units = summ['units']
-        f.save()
+        update_fund(policy, f, summ)
     
     as_on_date = None
     premium = 0
@@ -88,3 +82,50 @@ def update_policy_val(policy):
     policy.taxes = taxes
     policy.charges = charges
     policy.save()
+
+
+def update_fund(policy, fund, summ):
+    if policy.company == 'ICICI Prudential Life Insurance Co. Ltd.':
+        ipl = ICICIPruLife()
+        res = ipl.get_fund_details(fund.code)
+        if res:
+            try:
+                NAVHistory.objects.create(
+                                            fund=fund,
+                                            nav_value=res['nav'],
+                                            nav_date=res['nav_date']
+                                        )
+            except IntegrityError as ex:
+                print('exception {ex} when adding NAV to history')
+            try:
+                fund.nav_date = res['nav_date']
+                fund.nav = res['nav']
+                fund.fund_type = res['asset_class']
+                fund.return_1d = res.get('1D', None)
+                fund.return_1w = res.get('1W', None)
+                fund.return_1m = res.get('1M', None)
+                fund.return_3m = res.get('3M', None)
+                fund.return_6m = res.get('6M', None)
+                fund.return_1y = res.get('1Y', None)
+                fund.return_3y = res.get('3Y', None)
+                fund.return_5y = res.get('5Y', None)
+                fund.return_10y = res.get('10Y', None)
+                fund.return_15y = res.get('15Y', None)
+                fund.return_incep = res.get('inception', None)
+                fund.return_ytd = res.get('YTD', None)
+                fund.save()
+            except Exception as ex:
+                print(f'exception {ex} when updating fund details')
+                
+        else:
+            nh = NAVHistory.objects.filter(fund=fund).order_by('nav_date')
+            if len(nh) == 0 or nh[0].nav_date < summ['nav_date']:
+                fund.nav_date =  summ['nav_date']
+                fund.nav = summ['nav']
+            else:
+                fund.nav_date =  nh[0].nav_date
+                fund.nav = nh[0].nav
+            fund.units = summ['units']
+            fund.save()
+    else:
+        print(f'unsupported fund update yet for company {policy.company}')

@@ -6,7 +6,8 @@ from django.urls import reverse
 POLICY_TYPE_CHOICES = [
     ('Traditional', 'Traditional'),
     ('ULIP', 'ULIP'),
-    ('Term', 'Term')
+    ('Term', 'Term'),
+    ('Health', 'Health')
 ]
 
 TRANSACTION_TYPE_CHOICES = [
@@ -27,7 +28,7 @@ class InsurancePolicy(models.Model):
     company = models.CharField(max_length=100)
     start_date = models.DateField()
     user = models.IntegerField()
-    goal =  models.IntegerField(null=True)
+    goal =  models.IntegerField(null=True, blank=True)
     notes = models.CharField(max_length=40, null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     policy_type = models.CharField(max_length=50, choices=POLICY_TYPE_CHOICES)
@@ -52,9 +53,22 @@ class Fund(models.Model):
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=100)
     notes = models.CharField(max_length=40, null=True, blank=True)
+    fund_type = models.CharField(max_length=40, null=True, blank=True)
     units = models.DecimalField(max_digits=20, decimal_places=6, null=True, default=0)
     nav = models.DecimalField(max_digits=20, decimal_places=6, null=True, default=0)
     nav_date = models.DateField(null=True, blank=True)
+    return_1d = models.DecimalField(_('1D'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1w = models.DecimalField(_('1W'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1m = models.DecimalField(_('1M'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_3m = models.DecimalField(_('3M'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_6m = models.DecimalField(_('6M'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_1y = models.DecimalField(_('1Y'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_3y = models.DecimalField(_('3Y'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_5y = models.DecimalField(_('5Y'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_10y = models.DecimalField(_('10Y'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_15y = models.DecimalField(_('15Y'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_incep = models.DecimalField(_('Inception'), max_digits=10, decimal_places=2, null=True, blank=True)
+    return_ytd = models.DecimalField(_('YTD'), max_digits=10, decimal_places=2, null=True, blank=True)
 
     class Meta:
         unique_together = ('policy', 'name')

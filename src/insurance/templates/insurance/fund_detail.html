@@ -33,6 +33,10 @@
           <td>{{fund_name}}</td>
         </tr>
         <tr>
+          <th scope="col">Fund Type</th>
+          <td>{{fund_type}}</td>
+        </tr>
+        <tr>
           <th scope="col">As On</th>
           <td>{{ as_on_date }}</td>
         </tr>
@@ -56,6 +60,107 @@
           <th scope="col">Goal</th>
           <td>{{ goal }}</td>
         </tr>
+      </table>
+    </div>
+
+    <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+      <table class="table table-hover">
+        <tr>
+          <th></th>
+          <th>Fund</th>
+          {% for index in indexes %}
+            <th scope="col">{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">1D</th>
+          <td>{{1D}}</td>
+          {% for index in index_1D %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">1W</th>
+          <td>{{1W}}</td>
+          {% for index in index_1W %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">1M</th>
+          <td>{{1M}}</td>
+          {% for index in index_1M %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">3M</th>
+          <td>{{3M}}</td>
+          {% for index in index_3M %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">6M</th>
+          <td>{{ 6M }}</td>
+          {% for index in index_6M %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">1Y</th>
+          <td>{{ 1Y }}</td>
+          {% for index in index_1Y %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">2Y</th>
+          <td>{{ 2Y }}</td>
+        </tr>
+        <tr>
+          <th scope="col">3Y</th>
+          <td>{{ 3Y }}</td>
+          {% for index in index_3Y %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">5Y</th>
+          <td>{{ 5Y }}</td>
+          {% for index in index_5Y %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">10Y</th>
+          <td>{{ 10Y }}</td>
+          {% for index in index_10Y %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">15Y</th>
+          <td>{{ 15Y }}</td>
+          {% for index in index_15Y %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">Inception</th>
+          <td>{{ inception }}</td>
+          {% for index in index_incep %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="col">YTD</th>
+          <td>{{ YTD }}</td>
+          {% for index in index_YTD %}
+            <td>{{index}}</th>
+          {% endfor %}
+        </tr>
+
       </table>
     </div>
   </div>

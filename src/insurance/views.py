@@ -12,6 +12,7 @@ from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from tools.ICICIPruLife import ICICIPruLife
 from tasks.tasks import update_insurance_policy_vals
+from markets.models import IndexRollingReturns
 
 def add_fund(request, id):
     template_name = 'insurance/add_fund.html'
@@ -373,12 +374,74 @@ def fund_detail(request, id, fund_id):
         try:
             f = Fund.objects.get(policy=o, id=fund_id)
             context['fund_name'] = f.name
-            
+            context['fund_type'] = f.fund_type
             context['as_on_date'] = f.nav_date
             context['nav'] = f.nav
             context['units'] = f.units
-            context['latest_value'] = f.nav*f.units
-            
+            context['latest_value'] = round(f.nav*f.units, 2)
+            context['1D'] = f.return_1d
+            context['1W'] = f.return_1w
+            context['1M'] = f.return_1m
+            context['3M'] = f.return_3m
+            context['6M'] = f.return_6m
+            context['1Y'] = f.return_1y
+            context['3Y'] = f.return_3y
+            context['5Y'] = f.return_5y
+            context['10Y'] = f.return_10y
+            context['15Y'] = f.return_15y
+            context['inception'] = f.return_incep
+            context['ytd'] = f.return_ytd
+            indexes = list()
+            index_1D = list()
+            index_1W = list()
+            index_1M = list()
+            index_3M = list()
+            index_6M = list()
+            index_1Y = list()
+            index_3Y = list()
+            index_5Y = list()
+            index_10Y = list()
+            index_15Y = list()
+            index_incep = list()
+            index_YTD = list()
+            index_as_on_date = list()
+            if 'equity' in f.fund_type.lower():
+                indexes.append('S&P BSE Sensex Index')
+                indexes.append('S&P BSE 100 Index')
+            context['indexes'] = list()
+            for i in indexes:
+                try:
+                    iret = IndexRollingReturns.objects.get(country='India', name=i)
+                    context['indexes'].append(i)
+                    index_1D.append(iret.return_1d)
+                    index_1W.append(iret.return_1w)
+                    index_1M.append(iret.return_1m)
+                    index_3M.append(iret.return_3m)
+                    index_6M.append(iret.return_6m)
+                    index_1Y.append(iret.return_1y)
+                    index_3Y.append(iret.return_3y)
+                    index_5Y.append(iret.return_5y)
+                    index_10Y.append(iret.return_10y)
+                    index_15Y.append(iret.return_15y)
+                    index_incep.append(iret.return_incep)
+                    index_YTD.append(iret.return_ytd)
+                    index_as_on_date.append(iret.as_on_date)
+                except IndexRollingReturns.DoesNotExist:
+                    print(f'failed to get index India {i} returns')
+
+            context['index_1D'] = index_1D
+            context['index_1W'] = index_1W
+            context['index_1M'] = index_1M
+            context['index_3M'] = index_3M
+            context['index_6M'] = index_6M
+            context['index_1Y'] = index_1Y
+            context['index_3Y'] = index_3Y
+            context['index_5Y'] = index_5Y
+            context['index_10Y'] = index_10Y
+            context['index_15Y'] = index_15Y
+            context['index_incep'] = index_incep
+            context['index_YTD'] = index_YTD
+            context['index_as_on_date'] = index_as_on_date
             print(context)
             return render(request, template, context)
         except Fund.DoesNotExist:
@@ -388,8 +451,8 @@ def fund_detail(request, id, fund_id):
 
 def add_transactions_from_file(company, policy, full_file_path):
     if company == 'ICICI Prudential':
-        ipru = ICICIPruLife(full_file_path)
-        itrans = ipru.get_transactions()
+        ipru = ICICIPruLife()
+        itrans = ipru.get_transactions(full_file_path)
         for fund_name, transactions in itrans.items():
             try:
                 fund = Fund.objects.get(policy=policy, name=fund_name)

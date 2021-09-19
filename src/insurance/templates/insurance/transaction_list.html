@@ -37,7 +37,7 @@
         <th>Date</th>
         <th>Transaction Type</th>
         <th>Amount</th>
-        {% if policy_type != 'Term' %}
+        {% if policy_type == 'ULIP' %}
         <th>Fund</th>
         <th>Units</th>
         <th>NAV</th>
@@ -53,7 +53,7 @@
         <td>{{ instance.trans_date }}</td>
         <td>{{ instance.trans_type }}</td>
         <td>{{ instance.trans_amount }}</td>
-        {% if policy_type != 'Term' %}
+        {% if policy_type == 'ULIP' %}
         <td>{{ fund_names|lookup:instance.fund.id }}</td>
         <td>{{ instance.units }}</td>
         <td>{{ instance.nav }}</td>
