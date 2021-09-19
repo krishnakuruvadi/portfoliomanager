@@ -223,6 +223,59 @@ def delete_transaction(request,id,trans_id):
 def transaction_detail(request, id, trans_id):
     pass
 
+def update_policy(request, id):
+    template_name = 'insurance/update_policy.html'
+    context = dict()
+    message = ''
+    message_color = 'ignore'
+    context['curr_module_id'] = 'id_insurance_module'
+    try:
+        policy = InsurancePolicy.objects.get(id=id)
+        if request.method == 'POST':
+            message_color = 'green'
+            print(request.POST)
+            name = request.POST['name']
+            print(f'setting name to {name}')
+            start_date = get_date_or_none_from_string(request.POST['start_date'])
+            end_date = get_date_or_none_from_string(request.POST['end_date'])
+            goal = request.POST.get('goal', '')
+            notes = request.POST['notes']
+            sum_assured = get_float_or_zero_from_string(request.POST['sum_assured'])
+            if goal != '':
+                goal_id = Decimal(goal)
+            else:
+                goal_id = None
+            try:
+                policy.start_date=start_date
+                policy.end_date=end_date
+                policy.goal=goal_id
+                policy.notes=notes
+                policy.name=name
+                policy.sum_assured=sum_assured
+                policy.save()
+                message = 'Policy updated successfully'
+            except Exception as ex:
+                print(f'{ex} exception during updating policy')
+                message = 'Failed to update policy'
+                message_color = 'red'
+        context['policy'] = policy.policy
+        context['policy_id'] = policy.id
+        context['sum_assured'] = policy.sum_assured
+        context['end_date'] = policy.end_date.strftime("%Y-%m-%d") if policy.end_date else None
+        context['start_date'] = policy.start_date.strftime("%Y-%m-%d") if policy.start_date else None
+        context['name'] = policy.name
+        context['user'] = get_user_short_name_or_name_from_id(policy.user)
+        context['goal'] = policy.goal if policy.goal else ''
+        context['goals'] = {'goal_list':get_goal_id_name_mapping_for_user(policy.user)}
+        context['company'] = policy.company
+        context['policy_type'] = policy.policy_type
+        context['message'] = message
+        context['message_color'] = message_color
+        print(context)
+        return render(request, template_name, context)
+    except InsurancePolicy.DoesNotExist:
+        return HttpResponseRedirect(reverse('insurance:policy-list'))
+
 def add_policy(request):
     template_name = 'insurance/add_policy.html'
     context = dict()

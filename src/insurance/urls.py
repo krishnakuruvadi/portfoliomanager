@@ -15,7 +15,8 @@ from .views import (
     add_nav,
     delete_all_nav,
     delete_nav,
-    fund_detail
+    fund_detail,
+    update_policy
 )
 
 app_name = 'insurance'
@@ -24,6 +25,7 @@ urlpatterns = [
     path('add/', add_policy, name='add-policy'),
     path('delete/', delete_policies, name='delete-all-policies'),
     path('<id>/', policy_detail, name='policy-detail'),
+    path('<id>/update', update_policy, name='update-policy'),
     path('<id>/add_transaction', add_transaction, name='add-transaction'),
     path('<id>/upload_transactions', upload_transactions, name='upload-transactions'),
     path('<id>/add_fund', add_fund, name='add-fund'),
