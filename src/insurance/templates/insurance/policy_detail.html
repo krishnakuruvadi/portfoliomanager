@@ -59,6 +59,18 @@
           <th scope="col">Notes</th>
           <td>{{ notes }}</td>
         </tr>
+        <tr>
+          <th scope="col">Charges</th>
+          <td>{{ charges }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Mortality Charges</th>
+          <td>{{ mc }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Taxes</th>
+          <td>{{ taxes }}</td>
+        </tr>
     </table>
     </div>
 
@@ -68,18 +80,24 @@
         <thead class="thead-dark">
           <tr>
             <th scope="col">Name</th>
+            <th scope="col">Latest Value</th>
             <th scope="col">Units</th>
             <th scope="col">NAV</th>
             <th scope="col">NAV Date</th>
+            <th scope="col">NAV History</th>
           </tr>
         </thead>
         <tbody>
           {% for f in funds %}
           <tr>
-            <td>{{ f.name }}</td>
+            <td><a href="{% url 'insurance:fund-detail' policy_id f.id %}">{{f.name}}</a></td>
+            <td>{{ f.latest_value }}</td>
             <td>{{ f.units }}</td>
             <td>{{ f.nav }}</td>
             <td>{{ f.nav_date }}</td>
+            <td>
+              <a href="{% url 'insurance:nav-history' policy_id f.id %}" style="padding-left:10px;"><i class="far fa-file-alt" aria-hidden="true"></i> </a>
+            </td>
           </tr>
           {% endfor %}
         </tbody>

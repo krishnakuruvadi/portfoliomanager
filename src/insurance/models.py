@@ -37,6 +37,9 @@ class InsurancePolicy(models.Model):
     gain = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
     sum_assured = models.DecimalField(max_digits=20, decimal_places=0, null=True, default=0)
     as_on_date = models.DateField(_('As On Date'), blank=True, null=True)
+    mortality_charges = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+    taxes = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
+    charges = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=0)
 
     class Meta:
         unique_together = ('policy', 'user')

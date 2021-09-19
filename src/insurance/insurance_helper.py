@@ -61,6 +61,9 @@ def update_policy_val(policy):
     as_on_date = None
     premium = 0
     latest_value = 0
+    mc = 0
+    taxes = 0
+    charges = 0
     for fund in Fund.objects.filter(policy=policy):
         if not as_on_date:
             as_on_date = fund.nav_date
@@ -68,6 +71,9 @@ def update_policy_val(policy):
             as_on_date = fund.nav_date
         premium += float(summary[fund.name]['premium'])
         latest_value += float(fund.nav*fund.units)
+        mc += float(summary[fund.name].get('mc', 0))
+        taxes += float(summary[fund.name].get('taxes', 0))
+        charges += float(summary[fund.name].get('charges', 0))
     gain = latest_value - premium
 
     policy.gain = gain
@@ -78,8 +84,7 @@ def update_policy_val(policy):
     print(f'cash flows for {policy.policy} {cash_flows}')
     roi = xirr(cash_flows, 0.1)*100
     policy.roi = roi
+    policy.mortality_charges = mc
+    policy.taxes = taxes
+    policy.charges = charges
     policy.save()
-
-
-
-

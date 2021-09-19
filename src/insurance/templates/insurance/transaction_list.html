@@ -73,8 +73,10 @@
   {% block jquery %}
     $('#transactions-table').DataTable({
       "columnDefs": [
-        { "type": "num", "targets": [1,2,3] }
-      ]
+        { "type": "num", "targets": [1,2,3] },
+        {"type":"date", "targets":[0]}
+      ],
+      "order": [[ 0, "desc" ]]
     });
   {% endblock jquery %}
 </script>

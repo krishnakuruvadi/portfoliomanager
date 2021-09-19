@@ -150,8 +150,14 @@ def upload_transactions(request, id):
             print(settings.MEDIA_ROOT)
             full_file_path = settings.MEDIA_ROOT + '/' + file_locn
             print(f'Read transactions from file: {uploaded_file} {company} {file_locn} {full_file_path}')
-            add_transactions_from_file(company, policy, full_file_path)
-            update_insurance_policy_vals(policy.policy)
+            try:
+                add_transactions_from_file(company, policy, full_file_path)
+                update_insurance_policy_vals(policy.policy)
+                message = 'Upload successful. Processing file'
+            except Exception as ex:
+                print(f'exception {ex} when processing file')
+                message_color = 'red'
+                message = 'Failed to process file'
         context['message'] = message
         context['message_color'] = message_color
         context['policy_id'] = policy.id
@@ -318,6 +324,7 @@ def policy_detail(request, id):
         o = InsurancePolicy.objects.get(id=id)
         context = dict()
         context['policy'] = o.policy
+        context['policy_id'] = o.id
         context['name'] = o.name
         context['company'] = o.company
         context['start_date'] = o.start_date
@@ -330,6 +337,9 @@ def policy_detail(request, id):
         context['buy_value'] = o.buy_value
         context['latest_value'] = o.latest_value
         context['gain'] = o.gain
+        context['mc'] = o.mortality_charges
+        context['taxes'] = o.taxes
+        context['charges'] = o.charges
         context['sum_assured'] = o.sum_assured
         context['as_on_date'] = o.as_on_date
         context['curr_module_id'] = 'id_insurance_module'
@@ -340,10 +350,41 @@ def policy_detail(request, id):
             f['units'] = fund.units
             f['nav'] = fund.nav
             f['nav_date'] = fund.nav_date
+            f['id'] = fund.id
+            f['latest_value'] = round(fund.units*fund.nav, 2)
             context['funds'].append(f)
+        print(context)
         return render(request, template, context)
     except InsurancePolicy.DoesNotExist:
         return HttpResponseRedirect('../')
+
+def fund_detail(request, id, fund_id):
+    template = 'insurance/fund_detail.html'
+    try:
+        o = InsurancePolicy.objects.get(id=id)
+        context = dict()
+        context['policy'] = o.policy
+        context['policy_id'] = o.id
+        context['policy_name'] = o.name
+        context['company'] = o.company
+        context['user'] = get_user_short_name_or_name_from_id(o.user)
+        context['goal'] =  get_goal_name_from_id(o.goal)
+        context['curr_module_id'] = 'id_insurance_module'
+        try:
+            f = Fund.objects.get(policy=o, id=fund_id)
+            context['fund_name'] = f.name
+            
+            context['as_on_date'] = f.nav_date
+            context['nav'] = f.nav
+            context['units'] = f.units
+            context['latest_value'] = f.nav*f.units
+            
+            print(context)
+            return render(request, template, context)
+        except Fund.DoesNotExist:
+            return HttpResponseRedirect(reverse('insurance:policy-detail', kwargs={'id':id}))
+    except InsurancePolicy.DoesNotExist:
+        return HttpResponseRedirect(reverse('insurance:policy-list'))
 
 def add_transactions_from_file(company, policy, full_file_path):
     if company == 'ICICI Prudential':
@@ -414,3 +455,95 @@ def insert_trans_entry(policy, fund, trans_date, trans_amount, nav, units, notes
         print(f'Transaction exists {ie}')
     except Exception as ex:
         print(f'exception {ex} when inserting transaction for policy {policy.id}: {policy.policy}')
+
+def get_nav_history(request, id, fund_id):
+    template = "insurance/nav_history.html"
+    context = dict()
+    try:
+        o = InsurancePolicy.objects.get(id=id)
+        try:
+            fund = Fund.objects.get(policy=o, id=fund_id)
+            history = NAVHistory.objects.filter(fund=fund)
+            object_list = list()
+            for h in history:
+                object_list.append({'date':h.nav_date, 'nav':h.nav_value, 'id':h.id})
+            context['curr_module_id'] = 'id_insurance_module'
+            context['object_list'] = object_list
+            context['policy'] = o.policy
+            context['policy_id'] = o.id
+            context['fund_name'] = fund.name
+            context['fund_id'] = fund.id
+            print(context)
+            return render(request, template, context)
+        except Fund.DoesNotExist:
+            return HttpResponseRedirect('../')
+    except InsurancePolicy.DoesNotExist:
+        return HttpResponseRedirect('../')
+
+def delete_all_nav(request, id, fund_id):
+    #template = "insurance/nav_history.html"
+    context = dict()
+    try:
+        o = InsurancePolicy.objects.get(id=id)
+        try:
+            fund = Fund.objects.get(policy=o, id=fund_id)
+            NAVHistory.objects.filter(fund=fund).delete()
+            return HttpResponseRedirect(reverse('insurance:nav-history', kwargs={'id':id, 'fund_id':fund.id}))
+        except Fund.DoesNotExist:
+            return HttpResponseRedirect(reverse('insurance:policy-list'))
+    except InsurancePolicy.DoesNotExist:
+        return HttpResponseRedirect(reverse('insurance:policy-list'))
+
+def delete_nav(request, id, fund_id, nav_id):
+    try:
+        o = InsurancePolicy.objects.get(id=id)
+        try:
+            fund = Fund.objects.get(policy=o, id=fund_id)
+            NAVHistory.objects.get(fund=fund, id=nav_id).delete()
+            return HttpResponseRedirect(reverse('insurance:nav-history', kwargs={'id':id, 'fund_id':fund.id}))
+        except Fund.DoesNotExist:
+            return HttpResponseRedirect(reverse('insurance:policy-list'))
+    except InsurancePolicy.DoesNotExist:
+        return HttpResponseRedirect(reverse('insurance:policy-list'))
+
+def add_nav(request, id, fund_id):
+    template = "insurance/add_nav.html"
+    context = dict()
+    message = ''
+    message_color = 'ignore'
+    try:
+        o = InsurancePolicy.objects.get(id=id)
+        try:
+            fund = Fund.objects.get(policy=o, id=fund_id)
+            if request.method == 'POST':
+                message_color = 'green'
+                print(request.POST)
+                nav_value = request.POST['nav']
+                nav_date = get_date_or_none_from_string(request.POST['nav_date'])
+                try:
+                    NAVHistory.objects.create(
+                            fund=fund,
+                            nav_value=nav_value,
+                            nav_date=nav_date
+                        )
+                    message = 'NAV added successfully'
+
+                except IntegrityError as ie:
+                    print(f'{ie} when adding nav')
+                    message='Failed to add NAV'
+                    message_color = 'red'
+            context['message'] = message
+            context['message_color'] = message_color
+            context['policy_id'] = o.id
+            context['policy'] = o.policy
+            context['name'] = o.name
+            context['fund_name'] = fund.name
+            context['policy_type'] = o.policy_type
+            context['company'] = o.company
+            context['fund_id'] = fund.id
+            print(context)
+            return render(request, template, context)
+        except Fund.DoesNotExist:
+            return HttpResponseRedirect(reverse('insurance:policy-list'))
+    except InsurancePolicy.DoesNotExist:
+        return HttpResponseRedirect(reverse('insurance:policy-list'))

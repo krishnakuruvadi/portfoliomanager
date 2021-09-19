@@ -1,0 +1,119 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'insurance:insurance-list' %}">Insurance</a></li>
+    <li><a href="{% url 'insurance:policy-detail' policy_id %}">{{policy}}</a></li>
+    <li><a href="#">Add Transaction</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6'>
+
+        {% if message_color == 'green' %}
+        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Success!</strong> {{message}}
+        </div>
+        {% elif message_color == 'red' %}
+        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Error!</strong> {{message}}
+         </div>
+        {% endif %}
+         
+        <div class="form-group row">
+          <label for="policy" class="col-sm-3 col-form-label">Policy Number</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{policy}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="company" class="col-sm-3 col-form-label">Company</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{company}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="fund" class="col-sm-3 col-form-label">Policy Name</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{name}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">   
+          <label class="control-label col-sm-3 col-form-label" for="id_policy_type">Policy Type</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label> {{policy_type}} </label>
+            </div>
+          </div> 
+        </div>
+
+        <div class="form-group row">   
+          <label class="control-label col-sm-3 col-form-label" for="id_fund_name">Fund Name</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label> {{fund_name}} </label>
+            </div>
+          </div> 
+        </div>
+
+        <div class="form-group row">
+          <label for="trans_date" class="col-sm-3 col-form-label">NAV Date <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+              <div class="md-form mt-0">
+                  <input type="date" id="nav_date" name="nav_date" value="{{nav_date}}" required="true">
+              </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="trans_amount" class="col-sm-3 col-form-label">NAV <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" step="0.0001" id="nav" name="nav" value="{{nav}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              <a href="{% url 'insurance:nav-history' policy_id fund_id %}" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+
+
+{% block javascript %}
+  <script>
+
+  </script>
+{% endblock %}

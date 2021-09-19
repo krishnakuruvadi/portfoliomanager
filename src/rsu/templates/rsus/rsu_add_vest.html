@@ -136,12 +136,15 @@
   <script src="{% static 'common.js' %}"></script>
   <script>
     $("#aquisition_price").change(function () {
+      console.log('aquisition Price has changed')
       setTotalAquisitionPrice();
     });
     $("#shares_vested").change(function () {
+      console.log('vest qty has changed')
       setTotalAquisitionPrice();
     });
     $("#conversion_rate").change(function () {
+      console.log('conversion rate has changed')
       setTotalAquisitionPrice();
     });
     function setTotalAquisitionPrice(){
@@ -191,6 +194,7 @@
         conv_elem = document.getElementById("conversion_rate");
         conv_elem.value = 1;
       }
+      setTotalAquisitionPrice()
     }
   </script>
 {% endblock javascript %}

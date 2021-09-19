@@ -1,0 +1,62 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'insurance:insurance-list' %}">Insurance</a></li>
+    <li><a href="{% url 'insurance:policy-detail' policy_id %}">{{policy}}</a></li>
+    <li><a href="#">{{fund_name}}</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+  <div class="card-deck">
+    <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+      <table class="table table-hover">
+        <tr>
+          <th scope="col">Policy</th>
+          <td>{{policy}}</td>
+        </tr>
+        <tr>
+          <th scope="col">Name</th>
+          <td>{{policy_name}}</td>
+        </tr>
+        <tr>
+          <th scope="col">Company</th>
+          <td>{{company}}</td>
+        </tr>
+        <tr>
+          <th scope="col">Fund</th>
+          <td>{{fund_name}}</td>
+        </tr>
+        <tr>
+          <th scope="col">As On</th>
+          <td>{{ as_on_date }}</td>
+        </tr>
+        <tr>
+          <th scope="col">NAV</th>
+          <td>{{ nav }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Units</th>
+          <td>{{ units }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Fund Value</th>
+          <td>{{ latest_value }}</td>
+        </tr>
+        <tr>
+          <th scope="col">User</th>
+          <td>{{ user }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Goal</th>
+          <td>{{ goal }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+{% endblock content %}
