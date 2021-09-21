@@ -410,7 +410,12 @@ class GoalDetailView(DetailView):
             data['distribution']['labels'].append('401K')
             data['distribution']['vals'].append(float(data['object'].r_401k_contribution))
             data['distribution']['colors'].append("#617688")
-            has_data = True        
+            has_data = True
+        if data['object'].insurance_contribution > 0:
+            data['distribution']['labels'].append('Insurance')
+            data['distribution']['vals'].append(float(data['object'].insurance_contribution))
+            data['distribution']['colors'].append("#ede76d")
+            has_data = True
         if has_data:
             print(data['distribution'])
 

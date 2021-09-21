@@ -963,8 +963,11 @@ def update_markets():
 
 @db_task()
 def update_insurance_policy_vals(policy_num):
-    from insurance.insurance_helper import update_policy_val_using_policy_num
-    update_policy_val_using_policy_num(policy_num)
+    from insurance.insurance_helper import update_policy_val_using_policy_num, update_policies
+    if policy_num:
+        update_policy_val_using_policy_num(policy_num)
+    else:
+        update_policies()
 
 '''
 #  example code below

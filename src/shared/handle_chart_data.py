@@ -27,6 +27,7 @@ from shares.share_interface import ShareInterface
 from mutualfunds.mf_interface import MfInterface
 from retirement_401k.r401k_interface import R401KInterface
 from rsu.rsu_interface import RsuInterface
+from insurance.insurance_interface import InsuranceInterface
 
 
 def get_ppf_amount_for_goal(id):
@@ -129,17 +130,23 @@ def get_goal_contributions(goal_id):
     contrib['rsu'] =int(get_rsu_amount_for_goal(goal_id))
     contrib['shares'] = int(get_shares_amount_for_goal(goal_id))
     contrib['mf'] = int(get_mf_amount_for_goal(goal_id))
+    contrib['insurance'] = int(InsuranceInterface.get_amount_for_goal(goal_id))
     contrib['equity'] = contrib['espp']+contrib['rsu']+contrib['shares']+contrib['mf']
     contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
-    contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU','Shares','MutualFunds']
-    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu'],contrib['shares'],contrib['mf']]
-    contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8','#e31219','#bfff00']
+    contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU','Shares','MutualFunds', 'Insurance']
+    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu'],contrib['shares'],contrib['mf'], contrib['insurance']]
+    contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8','#e31219','#bfff00','#ede76d']
     contrib['401k'] = int(get_401k_amount_for_goal(goal_id))
     if contrib['401k'] > 0:
         contrib['distrib_labels'].append('401K')
         contrib['distrib_vals'].append(contrib['401k'])
         contrib['distrib_colors'].append('#617688')
         contrib['equity'] += contrib['401k']
+    if contrib['insurance'] > 0:
+        contrib['distrib_labels'].append('Insurance')
+        contrib['distrib_vals'].append(contrib['insurance'])
+        contrib['distrib_colors'].append('#ede76d')
+        contrib['equity'] += contrib['insurance']
     contrib['total'] = contrib['equity'] + contrib['debt']
 
     print("contrib:", contrib)
@@ -172,6 +179,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
     start_day = get_min(ShareInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(R401KInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(RsuInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(InsuranceInterface.get_start_day_for_goal(goal_id), start_day)
 
     new_start_day = datetime.date(start_day.year, start_day.month, 1)
     
@@ -269,6 +277,16 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         if yr == curr_yr:
             print(f'after adding RSU {t} latest_value is {latest_value}')
     
+        cf, c, d, t = InsuranceInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'Insurance', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding Insurance {t} latest_value is {latest_value}')
+
         cf, c, d, t = R401KInterface.get_goal_yearly_contrib(goal_id, yr)
         if len(cf) > 0 or c+d+t != 0:
             add_or_create(yr, '401K', contrib, deduct, total, c, d, t)
@@ -531,7 +549,7 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
     print('contrib', contrib)
     print('deduct', deduct)
     print('total', total)
-    colormap = {'401K': '#617688', 'EPF':'#f15664','ESPP':'#DC7633','FD':'#006f75','PPF':'#92993c','SSY':'#f9c5c6','RSU':'#AA12E8','Shares':'#e31219', 'MutualFunds':'#bfff00', 'Projected':'#cbcdd1'}
+    colormap = {'401K': '#617688', 'EPF':'#f15664','ESPP':'#DC7633','FD':'#006f75','PPF':'#92993c','SSY':'#f9c5c6','RSU':'#AA12E8','Shares':'#e31219', 'MutualFunds':'#bfff00', 'Insurance':'#ede76d', 'Projected':'#cbcdd1'}
     data = dict()
     data['labels'] = list()
     data['datasets'] = list()
@@ -713,10 +731,11 @@ def get_user_contributions(user_id):
         contrib['PPF'] =int(get_ppf_amount_for_user(user_id))
         contrib['SSY'] =int(get_ssy_amount_for_user(user_id))
         contrib['RSU'] = int(get_rsu_amount_for_user(user_id))
+        contrib['Insurance'] = int(InsuranceInterface.get_amount_for_user(user_id))
         contrib['Shares'] = int(get_shares_amount_for_user(user_id))
         contrib['MutualFunds'] = int(get_mf_amount_for_user(user_id))
         contrib['401K'] = int(get_401k_amount_for_user(user_id))
-        contrib['equity'] = contrib['ESPP']+contrib['RSU']+contrib['Shares']+contrib['MutualFunds']+contrib['401K']
+        contrib['equity'] = contrib['ESPP']+contrib['RSU']+contrib['Shares']+contrib['MutualFunds']+contrib['401K']+contrib['Insurance']
         contrib['debt'] = contrib['EPF'] + contrib['FD'] + contrib['PPF'] + contrib['SSY']
         contrib['total'] = contrib['equity'] + contrib['debt']
         
@@ -729,7 +748,8 @@ def get_user_contributions(user_id):
             'RSU': '#AA12E8', 
             'Shares': '#e31219', 
             'MutualFunds': '#bfff00',
-            '401K': '#617688'
+            '401K': '#617688',
+            'Insurance': '#ede76d'
         }
         for k,v in item_color_mapping.items():
             if contrib[k] > 0:
@@ -949,8 +969,6 @@ def get_investment_data(start_date):
         if len(share_transactions) == 0:
             print(f'no transactions in shares in date range {data_start_date} and {data_end_date}')
         share_val = 0
-        if data_start_date.year == 2020:
-            print(share_qty)
         for s,q in share_qty.items():
             stock_obj = add_common_stock(exchange=s[0:s.find('-')], symbol=s[s.find('-')+1:], start_date=data_end_date)
             if stock_obj:

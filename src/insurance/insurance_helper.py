@@ -1,3 +1,4 @@
+from dateutil.relativedelta import relativedelta
 from django.db.utils import IntegrityError
 from .models import InsurancePolicy, Transaction, Fund, NAVHistory
 from shared.financial import xirr
@@ -129,3 +130,20 @@ def update_fund(policy, fund, summ):
             fund.save()
     else:
         print(f'unsupported fund update yet for company {policy.company}')
+
+def get_historical_nav(fund, dt):
+    nh = NAVHistory.objects.filter(fund=fund, nav_date__lte=dt, nav_date__gte=dt+relativedelta(days=-5)).order_by('nav_date')
+    if len(nh) >0:
+        return {'date':nh[0].nav_date, 'nav':nh[0].nav_value}
+    
+    if fund.policy.company == 'ICICI Prudential Life Insurance Co. Ltd.':
+        try:
+            ipl = ICICIPruLife()
+            res = ipl.get_historical_nav(fund.code, dt)
+            if res:
+                NAVHistory.objects.create(fund=fund, nav_value=res['nav'], nav_date=res['date'])
+                return {'date':res['date'], 'nav':res['nav']}
+        except Exception as ex:
+            print(f'exception adding nav to history {res} {ex}')
+
+    return None, None

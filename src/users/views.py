@@ -22,6 +22,7 @@ from shares.share_interface import ShareInterface
 from mutualfunds.mf_interface import MfInterface
 from retirement_401k.r401k_interface import R401KInterface
 from rsu.rsu_interface import RsuInterface
+from insurance.insurance_interface import InsuranceInterface
 import datetime
 from shared.utils import get_min
 
@@ -61,6 +62,7 @@ class UserDetailView(DetailView):
         start_day = get_min(ShareInterface.get_start_day_for_user(id_), start_day)
         start_day = get_min(R401KInterface.get_start_day_for_user(id_), start_day)
         start_day = get_min(RsuInterface.get_start_day_for_user(id_), start_day)
+        start_day = get_min(InsuranceInterface.get_start_day_for_user(id_), start_day)
 
         new_start_day = datetime.date(start_day.year, start_day.month, 1)
         
@@ -89,6 +91,13 @@ class UserDetailView(DetailView):
             if c > 0 and not 'RSU' in investment_types:
                 investment_types.append('RSU')
             yrly[yr]['RSU'] = contrib_deduct_str(c, d)
+            total_c += int(c)
+            total_d += int(d)
+
+            c,d = InsuranceInterface.get_user_yearly_contrib(id_, yr)
+            if c > 0 and not 'Insurance' in investment_types:
+                investment_types.append('Insurance')
+            yrly[yr]['Insurance'] = contrib_deduct_str(c, d)
             total_c += int(c)
             total_d += int(d)
 
@@ -136,7 +145,7 @@ class UserDetailView(DetailView):
 
             yrly[yr]['Total'] = contrib_deduct_str(total_c, total_d)
 
-        for item in ['PPF', '401K', 'RSU', 'EPF', 'ESPP', 'SSY', 'MF', 'FD', 'Shares']:
+        for item in ['PPF', '401K', 'RSU', 'EPF', 'ESPP', 'SSY', 'MF', 'FD', 'Shares', 'Insurance']:
             if item not in investment_types:
                 for yr in range(start_day.year, curr_yr+1):
                     del yrly[yr][item]

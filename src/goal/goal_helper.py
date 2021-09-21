@@ -90,6 +90,7 @@ def update_goal_contributions(id):
         goal_obj.ppf_conitrib = contrib['ppf']
         goal_obj.ssy_conitrib = contrib['ssy']
         goal_obj.rsu_conitrib = contrib['rsu']
+        goal_obj.insurance_contribution = contrib['insurance']
         goal_obj.shares_conitrib = contrib['shares']
         goal_obj.mf_conitrib = contrib['mf']
         goal_obj.r_401k_contribution = contrib.get('401k', 0)
@@ -121,6 +122,7 @@ def get_unallocated_amount():
     from retirement_401k.r401k_interface import R401KInterface
     from shares.share_interface import ShareInterface
     from rsu.rsu_interface import RsuInterface
+    from insurance.insurance_interface import InsuranceInterface
 
     amt = 0
     amt += SsyInterface.get_no_goal_amount()
@@ -133,5 +135,6 @@ def get_unallocated_amount():
     amt += R401KInterface.get_no_goal_amount()
     amt += ShareInterface.get_no_goal_amount()
     amt += RsuInterface.get_no_goal_amount()
+    amt += InsuranceInterface.get_no_goal_amount()
 
     return round(amt, 2)

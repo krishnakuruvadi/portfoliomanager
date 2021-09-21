@@ -30,6 +30,7 @@ class Goal(models.Model):
     shares_conitrib = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     mf_conitrib = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     r_401k_contribution = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    insurance_contribution = models.DecimalField(max_digits=20, decimal_places=2, default=0)
 
     def get_absolute_url(self):
         return reverse("goals:goal-detail", kwargs={'id': self.id})

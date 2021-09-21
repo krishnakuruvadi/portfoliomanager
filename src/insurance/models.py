@@ -99,4 +99,4 @@ class NAVHistory(models.Model):
         unique_together = ('fund', 'nav_date')
     
     def __str__(self):
-        return self.policy.policy+ ' ' + self.nav_date.strftime('%d-%b-%Y') + ' ' + str(self.nav_value)
+        return self.fund.name+ ' ' + self.nav_date.strftime('%d-%b-%Y') + ' ' + str(self.nav_value)
