@@ -9,6 +9,7 @@ from shares.models import Share
 from mutualfunds.models import Folio
 from rsu.models import RSUAward
 from retirement_401k.models import Account401K
+from insurance.models import InsurancePolicy
 
 def delete_user(id):
     try:
@@ -24,7 +25,7 @@ def delete_user(id):
         Folio.objects.filter(user=id).delete()
         RSUAward.objects.filter(user=id).delete()
         Account401K.objects.filter(user=id).delete()
-
+        InsurancePolicy.objects.filter(user=id).delete()
     except User.DoesNotExist:
         print("No user with that id found")
         pass
@@ -66,7 +67,17 @@ def delete_goal(id):
         for rsu_award in rsu_awards:
             rsu_award.goal = None
             rsu_award.save()
+        a401s = Account401K.objects.filter(goal=id)
+        for a401 in a401s:
+            a401.goal = None
+            a401.save()
+        ips = InsurancePolicy.objects.filter(goal=id)
+        for ip in ips:
+            ip.goal = None
+            ip.save()
 
     except Goal.DoesNotExist:
-        pass
+        print(f'Exception during delete goal - doesnt exist')
+    except Exception as ex:
+        print(f'Exception {ex} during deleting goal')
 

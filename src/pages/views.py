@@ -110,6 +110,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         context['investment_data']['shares'] = json.loads(investment_data.shares_data.replace("\'", "\""))
         context['investment_data']['mf'] = json.loads(investment_data.mf_data.replace("\'", "\""))
         context['investment_data']['r401k'] = json.loads(investment_data.r401k_data.replace("\'", "\""))
+        context['investment_data']['insurance'] = json.loads(investment_data.insurance_data.replace("\'", "\""))
         context['investment_data']['total'] = json.loads(investment_data.total_data.replace("\'", "\""))
         context['investment_data']['start_date'] =  investment_data.start_day_across_portfolio.strftime("%Y-%b-%d")
         utc = investment_data.as_on_date
@@ -145,6 +146,7 @@ class GetInvestmentData(APIView):
                 'shares':json.loads(investment_data.shares_data.replace("\'", "\"")),
                 'mf':json.loads(investment_data.mf_data.replace("\'", "\"")),
                 'r401k':json.loads(investment_data.r401k_data.replace("\'", "\"")),
+                'insurance':json.loads(investment_data.insurance_data.replace("\'", "\"")),
                 'total':json.loads(investment_data.total_data.replace("\'", "\"")),
                 'start_date': investment_data.start_day_across_portfolio,
                 'as_on_date_time': investment_data.as_on_date

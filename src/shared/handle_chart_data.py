@@ -778,6 +778,7 @@ def get_investment_data(start_date):
     shares_data = list()
     mf_data = list()
     r401k_data = list()
+    insurance_data = list()
     total_data = list()
 
     total_epf = 0
@@ -793,6 +794,7 @@ def get_investment_data(start_date):
     rsu_reset_on_zero = False
     shares_reset_on_zero = False
     mf_reset_on_zero = False
+    insurance_reset_on_zero = False
     total_reset_on_zero = False
 
     share_qty = dict()
@@ -873,7 +875,18 @@ def get_investment_data(start_date):
             r401k_reset_on_zero = True
         elif r401k_reset_on_zero:
             r401k_reset_on_zero = False
-            r401k_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0}) 
+            r401k_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+
+        insurance_val = InsuranceInterface.get_value_as_on(data_end_date)
+        if insurance_val != 0:
+            if not insurance_reset_on_zero:
+                insurance_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
+            insurance_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':insurance_val})
+            total += insurance_val
+            insurance_reset_on_zero = True
+        elif insurance_reset_on_zero:
+            insurance_reset_on_zero = False
+            insurance_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
 
         espp_entries = Espp.objects.filter(purchase_date__lte=data_end_date)
         espp_val = 0
@@ -1048,8 +1061,8 @@ def get_investment_data(start_date):
 
         data_start_date  = data_start_date+relativedelta(months=+1)
     print('shares data is:',shares_data)
-    print('returning', {'ppf':ppf_data, '401K': r401k_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data})
+    print('returning', {'ppf':ppf_data, 'insurance':insurance_data, '401K': r401k_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data})
 
-    return {'ppf':ppf_data, '401K': r401k_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data}
+    return {'ppf':ppf_data, 'insurance':insurance_data, '401K': r401k_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data}
         
 

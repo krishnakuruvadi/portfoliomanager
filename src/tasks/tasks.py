@@ -183,6 +183,7 @@ def update_investment_data():
             all_investment_data.mf_data=investment_data['mf']
             all_investment_data.total_data=investment_data['total']
             all_investment_data.r401k_data=investment_data['401K']
+            all_investment_data.insurance_data=investment_data['insurance']
             all_investment_data.start_day_across_portfolio=start_date
             all_investment_data.as_on_date=datetime.datetime.now()
             all_investment_data.save()
@@ -197,6 +198,8 @@ def update_investment_data():
                 rsu_data=investment_data['rsu'],
                 shares_data=investment_data['shares'],
                 mf_data=investment_data['mf'],
+                r401k_data=investment_data['401K'],
+                insurance_data=investment_data['insurance'],
                 total_data=investment_data['total'],
                 start_day_across_portfolio=start_date,
                 as_on_date=datetime.datetime.now()

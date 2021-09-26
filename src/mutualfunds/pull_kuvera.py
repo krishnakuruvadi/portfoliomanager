@@ -37,6 +37,7 @@ def pull_kuvera(user, email, passwd, pull_user_name):
     if os.path.exists(dload_file):
         os.remove(dload_file)
     chrome_options.add_experimental_option('prefs', prefs)
+    chrome_options.add_argument("--headless")
     driver = webdriver.Chrome(executable_path=get_path_to_chrome_driver(), chrome_options=chrome_options)
     driver.get(url)
     time.sleep(5)

@@ -1,3 +1,4 @@
+from types import ClassMethodDescriptorType
 from .models import InsurancePolicy, Transaction, Fund
 import datetime
 from .insurance_helper import get_historical_nav
@@ -117,3 +118,21 @@ class InsuranceInterface:
         for obj in objs:
             amt += 0 if not obj.latest_value else obj.latest_value
         return amt
+    
+    @classmethod
+    def get_value_as_on(self, end_date):
+        amt = 0
+        for ip_obj in InsurancePolicy.objects.filter(policy_type='ULIP'):
+            units = dict()
+            for tran_obj in Transaction.objects.filter(policy=ip_obj, trans_date__lte=end_date):
+                if tran_obj.trans_date <= end_date:
+                    units[tran_obj.fund.code] = units.get(tran_obj.fund.code, 0) + tran_obj.units
+
+            for f,u in units.items():
+                fund = Fund.objects.get(policy=ip_obj, code=f)
+                res = get_historical_nav(fund, end_date)
+                if res:
+                    amt += float(res['nav']) * float(u)
+                else:
+                    print(f'failed to get final value as on {end_date} fund code {f}')
+        return round(amt, 2)
