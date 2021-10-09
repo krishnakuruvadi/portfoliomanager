@@ -1,0 +1,69 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'gold:trans-list' %}">Gold</a></li>
+    <li><a href="#">{{buy_date}}</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+<div class="card-deck">
+  <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+    <table class="table table-hover">
+      <tr>
+        <th scope="col">Buy Date</th>
+        <td>{{buy_date}}</td>
+      </tr>
+      <tr>
+        <th scope="col">Weight</th>
+        <td>{{weight}} gm</td>
+      </tr>
+      <tr>
+        <th scope="col">Per Gram</th>
+        <td>{{per_gm}}</td>
+      </tr>
+      <tr>
+        <th scope="col">Buy Value</th>
+        <td>{{buy_value}}</td>
+      </tr>
+        <tr>
+          <th scope="col">As On</th>
+          <td>{{ as_on }}</td>
+        </tr>
+        <tr>
+          <th scope="col">ROI</th>
+          <td>{{ roi }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Latest Value</th>
+          <td>{{ latest_value }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Realised Gain/Loss</th>
+          <td>{{ realised_gain }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Unrealised Gain/Loss</th>
+          <td>{{ unrealised_gain }}</td>
+        </tr>
+        <tr>
+          <th scope="col">User</th>
+          <td>{{ user }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Goal</th>
+          <td>{{ goal }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Notes</th>
+          <td>{{ notes }}</td>
+        </tr>
+    </table>
+  </div>
+</div>
+{% endblock content %}

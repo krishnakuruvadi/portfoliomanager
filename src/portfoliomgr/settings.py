@@ -59,7 +59,8 @@ INSTALLED_APPS = [
     'markets',
     'retirement_401k',
     'tax',
-    'insurance'
+    'insurance',
+    'gold'
 ]
 
 MIDDLEWARE = [
@@ -96,6 +97,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "markets"),
     os.path.join(BASE_DIR, "tax"),
     os.path.join(BASE_DIR, "insurance"),
+    os.path.join(BASE_DIR, "gold"),
     os.path.join(BASE_DIR, "static"),
 ]
 
@@ -201,3 +203,27 @@ CHANNEL_LAYERS = {
 }
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+'''
+LOGGING = {
+    'version': 1,
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        }
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        }
+    }
+}
+'''

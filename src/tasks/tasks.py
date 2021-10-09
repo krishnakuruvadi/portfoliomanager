@@ -184,6 +184,7 @@ def update_investment_data():
             all_investment_data.total_data=investment_data['total']
             all_investment_data.r401k_data=investment_data['401K']
             all_investment_data.insurance_data=investment_data['insurance']
+            all_investment_data.gold_data=investment_data['gold']
             all_investment_data.start_day_across_portfolio=start_date
             all_investment_data.as_on_date=datetime.datetime.now()
             all_investment_data.save()
@@ -199,6 +200,7 @@ def update_investment_data():
                 shares_data=investment_data['shares'],
                 mf_data=investment_data['mf'],
                 r401k_data=investment_data['401K'],
+                gold_data=investment_data['gold'],
                 insurance_data=investment_data['insurance'],
                 total_data=investment_data['total'],
                 start_day_across_portfolio=start_date,
@@ -634,7 +636,7 @@ def update_scroll_data():
     n = Nasdaq('', None)
     data = n.get_all_index()
     if data:
-        print(f"data {data}")
+        print(f"data of get_all_index: {data}")
         for k, v in data.items():
             if not v['last_updated']:
                 print(f'last updated is none.  Not updating {v["name"]}')
@@ -642,6 +644,10 @@ def update_scroll_data():
             try:
                 scroll_item = None
                 try:
+                    if v['name'] == 'NASDAQ-100':
+                        v['name'] = 'NASDAQ-100 Index'
+                    elif v['name'] == 'NASDAQ Composite':
+                        v['name'] = 'NASDAQ Composite Index'
                     scroll_item = ScrollData.objects.get(scrip=v['name'])
                     if get_diff(float(scroll_item.val), float(v['lastPrice'])) > 0.1:
                         print(f"NASDAQ scroll_item.val {scroll_item.val} v['lastPrice'] {v['lastPrice']}")
@@ -971,6 +977,11 @@ def update_insurance_policy_vals(policy_num):
         update_policy_val_using_policy_num(policy_num)
     else:
         update_policies()
+
+@db_periodic_task(crontab(minute='40', hour='*/8'))
+def update_gold_vals(user):
+    from gold.gold_helper import update_latest_value
+    update_latest_value(user)
 
 '''
 #  example code below

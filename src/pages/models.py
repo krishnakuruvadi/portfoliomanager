@@ -16,4 +16,5 @@ class InvestmentData(models.Model):
     mf_data = models.CharField(max_length=6000, null=True, blank=True)
     r401k_data = models.CharField(max_length=6000, null=True, blank=True)
     insurance_data = models.CharField(max_length=6000, null=True, blank=True)
+    gold_data = models.CharField(max_length=6000, null=True, blank=True)
     total_data = models.CharField(max_length=6000, null=True, blank=True)

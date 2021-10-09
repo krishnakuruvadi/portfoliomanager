@@ -20,6 +20,16 @@ CAPITALISATION_CHOICES = [
     ('Micro-Cap','Micro-Cap'),
 ]
 
+GOLD_BUY_TYPE_CHOICES = [
+    ('Physical', 'Physical'),
+    ('Digital', 'Digital')
+]
+
+GOLD_PURITY_CHOICES = [
+    ('22K', '22K'),
+    ('24K', '24K')
+]
+
 class Bonusv2(models.Model):
     class Meta:
         unique_together = (('stock', 'announcement_date'),)
@@ -73,7 +83,18 @@ class Stock(models.Model):
     def __str__(self):
         return str(self.id) + ":" + self.exchange + ":" + self.symbol
 
-
+class HistoricalGoldPrice(models.Model):
+    class Meta:
+        unique_together = (('buy_type', 'purity', 'date'),)
+    
+    date = models.DateField(_('Date'), )
+    price = models.DecimalField(_('Price'), max_digits=20, decimal_places=2, null=False)
+    buy_type = models.CharField(max_length=10, choices=GOLD_BUY_TYPE_CHOICES)
+    purity = models.CharField(max_length=10, choices=GOLD_PURITY_CHOICES)
+    
+    def __str__(self):
+        return str(self.id) + ":" + self.date.strftime('%d-%m-%Y') + ":" + self.buy_type + " " + self.purity+ " " + str(self.price)
+   
 class HistoricalStockPrice(models.Model):
     class Meta:
         unique_together = (('symbol','date'),)

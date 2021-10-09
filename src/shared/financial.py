@@ -77,7 +77,11 @@ def xirr(cashflows,guess=0.1):
     
     #return secant_method(0.0001,lambda r: xnpv(r,cashflows),guess)
     try:
-        return optimize.newton(lambda r: xnpv(r,cashflows),guess)
+        val = optimize.newton(lambda r: xnpv(r,cashflows),guess)
+        if val > 10000000:
+            print(f'unreasonable returns {val}.  returning 0 instead')
+            return 0
+        return val
     except Exception as ex:
         print(f'exception while getting cash flows {ex}')
         print(f'cash flows: {cashflows}')

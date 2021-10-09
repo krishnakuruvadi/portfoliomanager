@@ -21,7 +21,7 @@ body
     height: 100%;
     background: #593f75;
     transition: 0.5s;
-    overflow: hidden;
+    overflow: scroll;
 }
 
 .main
@@ -62,7 +62,6 @@ body
     top:0;
     left:0;
     width:100%;
-    scroll-behavior: auto;
 }
 
 .navigation ul li:hover

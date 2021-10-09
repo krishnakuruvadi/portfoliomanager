@@ -21,6 +21,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
     context['users'] = dict()
     all_debt = 0
     all_equity = 0
+    all_gold = 0
     all_distrib_labels = list()
     all_distrib_colors = list()
     all_target = 0
@@ -37,6 +38,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         all_debt += debt
         equity = contrib.get('equity', 0)
         all_equity += equity
+        gold = contrib.get('Gold', 0)
+        all_gold += gold
         achieved = contrib.get('total', 0)
         all_achieved += achieved
         target = contrib.get('target', 0)
@@ -53,6 +56,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "id": id,
             "debt": debt,
             "equity": equity,
+            "gold": gold,
             "distrib_labels": contrib['distrib_labels'],
             "distrib_vals": contrib['distrib_vals'],
             "distrib_colors": contrib['distrib_colors'],
@@ -60,8 +64,9 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "remaining": remaining,
             "remaining_per": remaining_per,
             "achieve_per": achieve_per,
-            "debt_per": round(debt*100/(debt+equity+1), 2),
-            "equity_per": round(equity*100/(debt+equity+1), 2),
+            "debt_per": round(debt*100/(debt+equity+gold+1), 2),
+            "equity_per": round(equity*100/(debt+equity+gold+1), 2),
+            "gold_per": round(gold*100/(debt+equity+gold+1), 2)
         }
 
         for d in range(len(contrib['distrib_labels'])):
@@ -88,6 +93,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
     context['all'] = {
             "debt": all_debt,
             "equity": all_equity,
+            "gold": all_gold,
             "distrib_labels": all_distrib_labels,
             "distrib_vals": all_distrib_vals,
             "distrib_colors": all_distrib_colors,
@@ -95,8 +101,9 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "remaining": all_remaining,
             "remaining_per": all_remaining_per,
             "achieve_per": all_achieve_per,
-            "debt_per": round(all_debt*100/(all_debt+all_equity+1), 2),
-            "equity_per": round(all_equity*100/(all_debt+all_equity+1), 2),
+            "debt_per": round(all_debt*100/(all_debt+all_equity+all_gold+1), 2),
+            "equity_per": round(all_equity*100/(all_debt+all_equity+all_gold+1), 2),
+            "gold_per": round(all_gold*100/(all_debt+all_equity+all_gold+1), 2),
         }
     context['investment_data'] = dict()
     try:
@@ -111,6 +118,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         context['investment_data']['mf'] = json.loads(investment_data.mf_data.replace("\'", "\""))
         context['investment_data']['r401k'] = json.loads(investment_data.r401k_data.replace("\'", "\""))
         context['investment_data']['insurance'] = json.loads(investment_data.insurance_data.replace("\'", "\""))
+        context['investment_data']['gold'] = json.loads(investment_data.gold_data.replace("\'", "\""))
         context['investment_data']['total'] = json.loads(investment_data.total_data.replace("\'", "\""))
         context['investment_data']['start_date'] =  investment_data.start_day_across_portfolio.strftime("%Y-%b-%d")
         utc = investment_data.as_on_date
@@ -147,6 +155,7 @@ class GetInvestmentData(APIView):
                 'mf':json.loads(investment_data.mf_data.replace("\'", "\"")),
                 'r401k':json.loads(investment_data.r401k_data.replace("\'", "\"")),
                 'insurance':json.loads(investment_data.insurance_data.replace("\'", "\"")),
+                'gold':json.loads(investment_data.gold_data.replace("\'", "\"")),
                 'total':json.loads(investment_data.total_data.replace("\'", "\"")),
                 'start_date': investment_data.start_day_across_portfolio,
                 'as_on_date_time': investment_data.as_on_date

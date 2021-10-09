@@ -128,8 +128,8 @@
 <script>
   {% block jquery %}
   console.log({{distribution|safe}})
-  var debt_equity_labels = ['Debt', 'Equity']
-  var debt_equity = [{{ object.debt_contrib}}, {{ object.equity_contrib}}]
+  var debt_equity_labels = ['Debt', 'Equity', 'Gold']
+  var debt_equity = [{{ object.debt_contrib}}, {{ object.equity_contrib}}, {{ object.gold_contribution}}]
 
   var status_labels = ['Achieved', 'Remaining']
   var status_vals = [{{ object.achieved_amt}}, {{ object.pending_amt}}]
@@ -243,7 +243,7 @@
         datasets: [{
           data: debt_equity,
           backgroundColor: [
-            '#519463', '#a85b6a'
+            '#519463', '#a85b6a', '#ffd700'
           ],
           label: 'Classification'
         }],

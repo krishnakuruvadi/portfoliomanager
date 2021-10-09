@@ -1,0 +1,159 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'gold:trans-list' %}">Gold</a></li>
+    <li><a href="{% url 'gold:gold-detail' id %}">{{buy_date}}</a></li>
+    <li><a href="#">Update Buy Transaction</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6'>
+
+        {% if message_color == 'green' %}
+        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Success!</strong> {{message}}
+        </div>
+        {% elif message_color == 'red' %}
+        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Error!</strong> {{message}}
+         </div>
+        {% endif %}
+
+        <div class="form-group row">
+          <label for="buy_date" class="col-sm-3 col-form-label">Buy Date <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+              <div class="md-form mt-0">
+                  <label>{{buy_date}}</label>
+              </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{user}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">   
+          <label class="control-label col-sm-3 col-form-label" for="id_buy_type">Buy Type <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{buy_type}}</label> 
+            </div>
+          </div> 
+        </div>
+
+        <div class="form-group row">
+          <label for="weight" class="col-sm-3 col-form-label">Weight <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="id_weight" step="0.01" name="weight" value="{{weight}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="per_gram" class="col-sm-3 col-form-label">Per Gram <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" step="0.01" id="id_per_gram" name="per_gm" value="{{per_gm}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="buy_value" class="col-sm-3 col-form-label">Buy Value <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" step="0.01" id="buy_value" name="buy_value" value="{{buy_value}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="goal" class="col-sm-3 col-form-label">Goal</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_goal" name="goal" class="form-control"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+
+
+{% block javascript %}
+
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>
+    console.log({{goals|safe}})
+    console.log("{{goal|safe}}")
+    set_goals({{goals|safe}}, '{{goal|safe}}');
+    $("#id_weight").change(function () {
+      setTransPrice();
+    });
+    $("#id_per_gram").change(function () {
+      setTransPrice();
+    });
+    function setTransPrice(){
+      var perGramElem = document.getElementById("id_per_gram");
+      var ppg = perGramElem.value
+      var wtElem = document.getElementById("id_weight");
+      var weight = wtElem.value
+      console.log(ppg)
+      console.log(weight)
+      if (ppg!= '' && weight!='') {
+        totalPrice = ppg*weight
+        console.log(totalPrice)
+        totalPriceElem = document.getElementById("buy_value")
+        totalPriceElem.value = precise(totalPrice)
+      }  
+    }
+    function precise(num) {
+      //return Number.parseFloat(x).toPrecision(prec);
+      return Math.round((num + Number.EPSILON) * 1000000) / 1000000
+    }
+  </script>
+{% endblock %}

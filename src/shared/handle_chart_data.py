@@ -28,6 +28,8 @@ from mutualfunds.mf_interface import MfInterface
 from retirement_401k.r401k_interface import R401KInterface
 from rsu.rsu_interface import RsuInterface
 from insurance.insurance_interface import InsuranceInterface
+from gold.gold_interface import GoldInterface
+from shared.handle_get import get_goal_name_from_id
 
 
 def get_ppf_amount_for_goal(id):
@@ -120,7 +122,8 @@ def get_epf_amount_for_goal(id):
     return total_epf
 
 def get_goal_contributions(goal_id):
-    print("inside get_goal_contributions")
+    goal_name = get_goal_name_from_id(goal_id)
+    print(f"inside get_goal_contributions {goal_id} {goal_name}")
     contrib = dict()
     contrib['epf'] = int(get_epf_amount_for_goal(goal_id))
     contrib['espp'] = int(get_espp_amount_for_goal(goal_id))
@@ -130,24 +133,33 @@ def get_goal_contributions(goal_id):
     contrib['rsu'] =int(get_rsu_amount_for_goal(goal_id))
     contrib['shares'] = int(get_shares_amount_for_goal(goal_id))
     contrib['mf'] = int(get_mf_amount_for_goal(goal_id))
-    contrib['insurance'] = int(InsuranceInterface.get_amount_for_goal(goal_id))
+    
     contrib['equity'] = contrib['espp']+contrib['rsu']+contrib['shares']+contrib['mf']
     contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
-    contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU','Shares','MutualFunds', 'Insurance']
-    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu'],contrib['shares'],contrib['mf'], contrib['insurance']]
-    contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8','#e31219','#bfff00','#ede76d']
+    contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU','Shares','MutualFunds']
+    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu'],contrib['shares'],contrib['mf']]
+    contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8','#e31219','#bfff00']
+
     contrib['401k'] = int(get_401k_amount_for_goal(goal_id))
     if contrib['401k'] > 0:
         contrib['distrib_labels'].append('401K')
         contrib['distrib_vals'].append(contrib['401k'])
         contrib['distrib_colors'].append('#617688')
         contrib['equity'] += contrib['401k']
+
+    contrib['insurance'] = int(InsuranceInterface.get_amount_for_goal(goal_id))
     if contrib['insurance'] > 0:
         contrib['distrib_labels'].append('Insurance')
         contrib['distrib_vals'].append(contrib['insurance'])
         contrib['distrib_colors'].append('#ede76d')
         contrib['equity'] += contrib['insurance']
-    contrib['total'] = contrib['equity'] + contrib['debt']
+
+    contrib['gold'] = int(GoldInterface.get_amount_for_goal(goal_id))
+    if contrib['gold'] > 0:
+        contrib['distrib_labels'].append('Gold')
+        contrib['distrib_vals'].append(contrib['gold'])
+        contrib['distrib_colors'].append('#ffd700')
+    contrib['total'] = contrib['equity'] + contrib['debt'] + contrib['gold']
 
     print("contrib:", contrib)
     return contrib
@@ -180,6 +192,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
     start_day = get_min(R401KInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(RsuInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(InsuranceInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(GoldInterface.get_start_day_for_goal(goal_id), start_day)
 
     new_start_day = datetime.date(start_day.year, start_day.month, 1)
     
@@ -296,6 +309,16 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         total_deduct += float(d)
         if yr == curr_yr:
             print(f'after adding 401K {t} latest_value is {latest_value}')
+
+        cf, c, d, t = GoldInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'Gold', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding gold {t} latest_value is {latest_value}')
 
     print(f'total_contrib {total_contrib}  total_deduct {total_deduct}  latest_value {latest_value}')
     if len(cash_flows) > 0  and latest_value != 0:
@@ -549,7 +572,7 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
     print('contrib', contrib)
     print('deduct', deduct)
     print('total', total)
-    colormap = {'401K': '#617688', 'EPF':'#f15664','ESPP':'#DC7633','FD':'#006f75','PPF':'#92993c','SSY':'#f9c5c6','RSU':'#AA12E8','Shares':'#e31219', 'MutualFunds':'#bfff00', 'Insurance':'#ede76d', 'Projected':'#cbcdd1'}
+    colormap = {'401K': '#617688', 'EPF':'#f15664','ESPP':'#DC7633','FD':'#006f75','PPF':'#92993c','SSY':'#f9c5c6','RSU':'#AA12E8','Shares':'#e31219', 'MutualFunds':'#bfff00', 'Insurance':'#ede76d', 'Projected':'#cbcdd1', 'Gold':'#ffd700'}
     data = dict()
     data['labels'] = list()
     data['datasets'] = list()
@@ -735,9 +758,10 @@ def get_user_contributions(user_id):
         contrib['Shares'] = int(get_shares_amount_for_user(user_id))
         contrib['MutualFunds'] = int(get_mf_amount_for_user(user_id))
         contrib['401K'] = int(get_401k_amount_for_user(user_id))
+        contrib['Gold'] = int(GoldInterface.get_amount_for_user(user_id))
         contrib['equity'] = contrib['ESPP']+contrib['RSU']+contrib['Shares']+contrib['MutualFunds']+contrib['401K']+contrib['Insurance']
         contrib['debt'] = contrib['EPF'] + contrib['FD'] + contrib['PPF'] + contrib['SSY']
-        contrib['total'] = contrib['equity'] + contrib['debt']
+        contrib['total'] = contrib['equity'] + contrib['debt'] + contrib['Gold']
         
         item_color_mapping = {
             'EPF': '#f15664',
@@ -749,7 +773,8 @@ def get_user_contributions(user_id):
             'Shares': '#e31219', 
             'MutualFunds': '#bfff00',
             '401K': '#617688',
-            'Insurance': '#ede76d'
+            'Insurance': '#ede76d',
+            'Gold': '#ffd700'
         }
         for k,v in item_color_mapping.items():
             if contrib[k] > 0:
@@ -779,6 +804,7 @@ def get_investment_data(start_date):
     mf_data = list()
     r401k_data = list()
     insurance_data = list()
+    gold_data = list()
     total_data = list()
 
     total_epf = 0
@@ -795,6 +821,7 @@ def get_investment_data(start_date):
     shares_reset_on_zero = False
     mf_reset_on_zero = False
     insurance_reset_on_zero = False
+    gold_reset_on_zero = False
     total_reset_on_zero = False
 
     share_qty = dict()
@@ -865,7 +892,6 @@ def get_investment_data(start_date):
             fd_reset_on_zero = False
             fd_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
         
-        
         r401k_val = get_r401k_value_as_on(data_end_date)
         if r401k_val != 0:
             if not r401k_reset_on_zero:
@@ -877,16 +903,34 @@ def get_investment_data(start_date):
             r401k_reset_on_zero = False
             r401k_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
 
-        insurance_val = InsuranceInterface.get_value_as_on(data_end_date)
-        if insurance_val != 0:
-            if not insurance_reset_on_zero:
-                insurance_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
-            insurance_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':insurance_val})
-            total += insurance_val
-            insurance_reset_on_zero = True
-        elif insurance_reset_on_zero:
-            insurance_reset_on_zero = False
-            insurance_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+        try:
+            insurance_val = InsuranceInterface.get_value_as_on(data_end_date)
+            if insurance_val != 0:
+                if not insurance_reset_on_zero:
+                    insurance_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
+                insurance_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':insurance_val})
+                total += insurance_val
+                insurance_reset_on_zero = True
+            elif insurance_reset_on_zero:
+                insurance_reset_on_zero = False
+                insurance_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+        except Exception as ex:
+            print(f'exception {ex} when getting values for insurance as on {data_end_date}')
+
+        try:
+            gold_val = GoldInterface.get_value_as_on(data_end_date)
+            if gold_val != 0:
+                if not gold_reset_on_zero:
+                    gold_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
+                gold_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':gold_val})
+                print(f'type of data: {type(total)} {type(gold_val)}')
+                total += gold_val
+                gold_reset_on_zero = True
+            elif gold_reset_on_zero:
+                gold_reset_on_zero = False
+                gold_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+        except Exception as ex:
+            print(f'exception {ex} when getting values for gold as on {data_end_date}')
 
         espp_entries = Espp.objects.filter(purchase_date__lte=data_end_date)
         espp_val = 0
@@ -1061,8 +1105,8 @@ def get_investment_data(start_date):
 
         data_start_date  = data_start_date+relativedelta(months=+1)
     print('shares data is:',shares_data)
-    print('returning', {'ppf':ppf_data, 'insurance':insurance_data, '401K': r401k_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data})
 
-    return {'ppf':ppf_data, 'insurance':insurance_data, '401K': r401k_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data}
+    rv = {'gold':gold_data, 'ppf':ppf_data, 'insurance':insurance_data, '401K': r401k_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data}
         
-
+    print(f'returning {rv}')
+    return rv

@@ -12,6 +12,7 @@ from mutualfunds.mf_interface import MfInterface
 from retirement_401k.r401k_interface import R401KInterface
 from rsu.rsu_interface import RsuInterface
 from insurance.insurance_interface import InsuranceInterface
+from gold.gold_interface import GoldInterface
 from users.models import User
 from goal.models import Goal
 from shared.utils import get_min
@@ -108,6 +109,7 @@ def get_start_day_across_portfolio(user_id=None):
     start_day = get_min(R401KInterface.get_start_day(user_id), start_day)
     start_day = get_min(RsuInterface.get_start_day(user_id), start_day)
     start_day = get_min(InsuranceInterface.get_start_day(user_id), start_day)
+    start_day = get_min(GoldInterface.get_start_day(user_id), start_day)
 
     new_start_day = datetime.date(start_day.year, start_day.month, 1)
     return new_start_day

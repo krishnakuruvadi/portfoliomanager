@@ -416,6 +416,11 @@ class GoalDetailView(DetailView):
             data['distribution']['vals'].append(float(data['object'].insurance_contribution))
             data['distribution']['colors'].append("#ede76d")
             has_data = True
+        if data['object'].gold_contribution > 0:
+            data['distribution']['labels'].append('Gold')
+            data['distribution']['vals'].append(float(data['object'].gold_contribution))
+            data['distribution']['colors'].append("#ffd700")
+            has_data = True
         if has_data:
             print(data['distribution'])
 
@@ -697,6 +702,7 @@ class ChartData(APIView):
             contrib = get_goal_contributions(id)
             debt = contrib['debt']
             equity = contrib['equity']
+            gold = contrib['gold']
             achieved = contrib['total']
             target = goal_obj.final_val
             if target < 1:
@@ -710,6 +716,7 @@ class ChartData(APIView):
                 "id": id,
                 "debt": debt,
                 "equity": equity,
+                "gold": gold,
                 "distrib_labels": contrib['distrib_labels'],
                 "distrib_vals": contrib['distrib_vals'],
                 "distrib_colors": contrib['distrib_colors'],
@@ -746,6 +753,7 @@ class CurrentGoals(APIView):
             contrib = get_goal_contributions(goal_obj.id)
             data['debt'] = contrib['debt']
             data['equity'] = contrib['equity']
+            data['gold'] = contrib['gold']
             data['achieved'] = contrib['total']
             target = goal_obj.final_val
             if target < 1:

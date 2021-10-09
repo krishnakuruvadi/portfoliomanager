@@ -10,6 +10,7 @@ from mutualfunds.models import Folio
 from rsu.models import RSUAward
 from retirement_401k.models import Account401K
 from insurance.models import InsurancePolicy
+from gold.models import Gold
 
 def delete_user(id):
     try:
@@ -26,6 +27,7 @@ def delete_user(id):
         RSUAward.objects.filter(user=id).delete()
         Account401K.objects.filter(user=id).delete()
         InsurancePolicy.objects.filter(user=id).delete()
+        Gold.objects.filter(user=id).delete()
     except User.DoesNotExist:
         print("No user with that id found")
         pass
@@ -75,6 +77,10 @@ def delete_goal(id):
         for ip in ips:
             ip.goal = None
             ip.save()
+        gtrans = Gold.objects.filter(goal=id)
+        for gt in gtrans:
+            gt.goal = None
+            gt.save()
 
     except Goal.DoesNotExist:
         print(f'Exception during delete goal - doesnt exist')

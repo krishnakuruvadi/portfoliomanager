@@ -42,7 +42,8 @@ urlpatterns = [
     path('tasks/', include('tasks.urls')),
     path('retirement_401k/', include('retirement_401k.urls')),
     path('tax/', include('tax.urls')),
-    path('insurance/', include('insurance.urls'))
+    path('insurance/', include('insurance.urls')),
+    path('gold/', include('gold.urls'))
 ]
 
 if settings.DEBUG:
