@@ -8,6 +8,8 @@ class User(models.Model):
     dob = models.DateField(_('Date Of Birth'),null=True, blank=True)
     notes = models.CharField(max_length=60, null=True, blank=True)
     short_name = models.CharField(max_length=15, unique=True, null=True, blank=True)
-
+    total_networth = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    as_on = models.DateTimeField(null=True, blank=True)
+    
     def get_absolute_url(self):
         return reverse("users:user-detail", kwargs={'id': self.id})

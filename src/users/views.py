@@ -23,9 +23,12 @@ from mutualfunds.mf_interface import MfInterface
 from retirement_401k.r401k_interface import R401KInterface
 from rsu.rsu_interface import RsuInterface
 from insurance.insurance_interface import InsuranceInterface
+from gold.gold_interface import GoldInterface
 import datetime
 from shared.utils import get_min
-
+from dateutil import tz
+from pytz import timezone
+from common.helper import get_preferences
 
 # Create your views here.
 class UserListView(ListView):
@@ -63,6 +66,7 @@ class UserDetailView(DetailView):
         start_day = get_min(R401KInterface.get_start_day_for_user(id_), start_day)
         start_day = get_min(RsuInterface.get_start_day_for_user(id_), start_day)
         start_day = get_min(InsuranceInterface.get_start_day_for_user(id_), start_day)
+        start_day = get_min(GoldInterface.get_start_day_for_user(id_), start_day)
 
         new_start_day = datetime.date(start_day.year, start_day.month, 1)
         
@@ -98,6 +102,13 @@ class UserDetailView(DetailView):
             if c > 0 and not 'Insurance' in investment_types:
                 investment_types.append('Insurance')
             yrly[yr]['Insurance'] = contrib_deduct_str(c, d)
+            total_c += int(c)
+            total_d += int(d)
+
+            c,d = GoldInterface.get_user_yearly_contrib(id_, yr)
+            if c > 0 and not 'Gold' in investment_types:
+                investment_types.append('Gold')
+            yrly[yr]['Gold'] = contrib_deduct_str(c, d)
             total_c += int(c)
             total_d += int(d)
 
@@ -154,7 +165,14 @@ class UserDetailView(DetailView):
         data['yrly_investment'] = yrly
         data['investment_types'] = investment_types
         data['curr_module_id'] = 'id_user_module'
-        print(data)
+        utc = self.get_object().as_on
+        from_zone = tz.tzutc()
+        utc = utc.replace(tzinfo=from_zone)
+        preferred_tz = get_preferences('timezone')
+        if not preferred_tz:
+            preferred_tz = 'Asia/Kolkata'
+        data['last_updated'] = utc.astimezone(timezone(preferred_tz)).strftime("%Y-%m-%d %H:%M:%S")
+        print(f'user detail view data {data}')
         return data
 
 
@@ -230,6 +248,7 @@ class ChartData(APIView):
                 "id": id,
                 "debt": debt,
                 "equity": equity,
+                "gold":contrib['Gold'],
                 "distrib_labels": contrib['distrib_labels'],
                 "distrib_vals": contrib['distrib_vals'],
                 "distrib_colors": contrib['distrib_colors'],

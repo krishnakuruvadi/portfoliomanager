@@ -20,6 +20,7 @@
         <th scope="col">Short Name</th>
         <th scope="col">Email</th>
         <th scope="col">DOB</th>
+        <th scope="col">Networth</th>
         <th scope="col">Notes</th>
         <th scope="col">Actions</th>
       </tr>
@@ -35,6 +36,7 @@
         <td>{{ instance.short_name }}</td>
         <td>{{ instance.email }}</td>
         <td>{{ instance.dob }}</td>
+        <td>{{ instance.total_networth }}</td>
         <td>{{ instance.notes }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
