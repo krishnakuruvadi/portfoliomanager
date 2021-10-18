@@ -40,7 +40,7 @@ mccabe==0.6.1
 mftool==1.8
 multitasking==0.0.9
 newspaper3k==0.2.8
-nltk==3.5
+nltk==3.6.5
 nsetools==1.0.11
 numpy==1.19.5
 ofxparse==0.21
