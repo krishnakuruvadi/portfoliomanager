@@ -46,7 +46,7 @@ class BankAccount(models.Model):
 
 class Transaction(models.Model):
     class Meta:
-        unique_together = (('account', 'trans_date', 'trans_type', 'description'),)
+        unique_together = (('account', 'trans_date', 'amount', 'trans_type', 'description'),)
 
     account = models.ForeignKey('BankAccount',on_delete=models.CASCADE)
     trans_date = models.DateField(_('Transaction Date'), )

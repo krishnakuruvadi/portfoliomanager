@@ -62,7 +62,7 @@ def upload_transactions(full_file_path, bank_name, file_type, acc_number, accoun
                             category=category
                         )
                     except IntegrityError as ie:
-                        print(f'error {ie} when adding transaction')
+                        print(f'error {ie} when adding transaction {transaction.date} {amount}')
         else:
             print(f'unsupported type {file_type}')
     except BankAccount.DoesNotExist:
