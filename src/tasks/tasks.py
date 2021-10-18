@@ -185,6 +185,7 @@ def update_investment_data():
             all_investment_data.r401k_data=investment_data['401K']
             all_investment_data.insurance_data=investment_data['insurance']
             all_investment_data.gold_data=investment_data['gold']
+            all_investment_data.cash_data=investment_data['cash']
             all_investment_data.start_day_across_portfolio=start_date
             all_investment_data.as_on_date=datetime.datetime.now()
             all_investment_data.save()
@@ -201,6 +202,7 @@ def update_investment_data():
                 mf_data=investment_data['mf'],
                 r401k_data=investment_data['401K'],
                 gold_data=investment_data['gold'],
+                cash_data=investment_data['cash'],
                 insurance_data=investment_data['insurance'],
                 total_data=investment_data['total'],
                 start_day_across_portfolio=start_date,
@@ -979,9 +981,29 @@ def update_insurance_policy_vals(policy_num):
         update_policies()
 
 @db_periodic_task(crontab(minute='40', hour='*/8'))
-def update_gold_vals(user):
+def update_gold_vals(user=None):
     from gold.gold_helper import update_latest_value
     update_latest_value(user)
+
+@db_periodic_task(crontab(minute='0', hour='*/12'))
+def update_user_networth(user_id=None):
+    from users.user_helper import update_user_networth
+    update_user_networth(user_id)
+
+@db_periodic_task(crontab(minute='10', hour='*/12'))
+def update_bank_acc_bal(acc_id=None):
+    from bankaccounts.bank_account_helper import update_balance_for_account, update_balance_for_accounts
+    if acc_id:
+        update_balance_for_account(acc_id)
+    else:
+        update_balance_for_accounts()
+
+@db_task()
+def upload_bank_account_transactions(full_file_path, bank_name, file_type, number, account_id):
+    from bankaccounts.bank_account_helper import upload_transactions
+    upload_transactions(full_file_path, bank_name, file_type, number, account_id)
+    update_bank_acc_bal(account_id)
+
 
 '''
 #  example code below

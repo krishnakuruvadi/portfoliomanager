@@ -11,6 +11,7 @@ from rsu.models import RSUAward
 from retirement_401k.models import Account401K
 from insurance.models import InsurancePolicy
 from gold.models import Gold
+from bankaccounts.models import BankAccount
 
 def delete_user(id):
     try:
@@ -28,6 +29,7 @@ def delete_user(id):
         Account401K.objects.filter(user=id).delete()
         InsurancePolicy.objects.filter(user=id).delete()
         Gold.objects.filter(user=id).delete()
+        BankAccount.objects.filter(user=id).delete()
     except User.DoesNotExist:
         print("No user with that id found")
         pass
@@ -81,6 +83,10 @@ def delete_goal(id):
         for gt in gtrans:
             gt.goal = None
             gt.save()
+        accounts = BankAccount.objects.filter(goal=id)
+        for acc in accounts:
+            acc.goal = None
+            acc.save()
 
     except Goal.DoesNotExist:
         print(f'Exception during delete goal - doesnt exist')

@@ -29,6 +29,7 @@ from retirement_401k.r401k_interface import R401KInterface
 from rsu.rsu_interface import RsuInterface
 from insurance.insurance_interface import InsuranceInterface
 from gold.gold_interface import GoldInterface
+from bankaccounts.bank_account_interface import BankAccountInterface
 from shared.handle_get import get_goal_name_from_id
 
 
@@ -159,7 +160,14 @@ def get_goal_contributions(goal_id):
         contrib['distrib_labels'].append('Gold')
         contrib['distrib_vals'].append(contrib['gold'])
         contrib['distrib_colors'].append('#ffd700')
-    contrib['total'] = contrib['equity'] + contrib['debt'] + contrib['gold']
+    
+    contrib['cash'] = int(BankAccountInterface.get_amount_for_goal(goal_id))
+    if contrib['cash'] > 0:
+        contrib['distrib_labels'].append('Cash')
+        contrib['distrib_vals'].append(contrib['cash'])
+        contrib['distrib_colors'].append(BankAccountInterface.get_chart_color())
+
+    contrib['total'] = contrib['equity'] + contrib['debt'] + contrib['gold'] + contrib['cash']
 
     print("contrib:", contrib)
     return contrib
@@ -193,6 +201,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
     start_day = get_min(RsuInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(InsuranceInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(GoldInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(BankAccountInterface.get_start_day_for_goal(goal_id), start_day)
 
     new_start_day = datetime.date(start_day.year, start_day.month, 1)
     
@@ -319,6 +328,16 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         total_deduct += float(d)
         if yr == curr_yr:
             print(f'after adding gold {t} latest_value is {latest_value}')
+
+        cf, c, d, t = BankAccountInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'Cash', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding cash {t} latest_value is {latest_value}')
 
     print(f'total_contrib {total_contrib}  total_deduct {total_deduct}  latest_value {latest_value}')
     if len(cash_flows) > 0  and latest_value != 0:
@@ -572,7 +591,21 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
     print('contrib', contrib)
     print('deduct', deduct)
     print('total', total)
-    colormap = {'401K': '#617688', 'EPF':'#f15664','ESPP':'#DC7633','FD':'#006f75','PPF':'#92993c','SSY':'#f9c5c6','RSU':'#AA12E8','Shares':'#e31219', 'MutualFunds':'#bfff00', 'Insurance':'#ede76d', 'Projected':'#cbcdd1', 'Gold':'#ffd700'}
+    colormap = {
+                '401K': '#617688', 
+                'EPF':'#f15664',
+                'ESPP':'#DC7633',
+                'FD':'#006f75',
+                'PPF':'#92993c',
+                'SSY':'#f9c5c6',
+                'RSU':'#AA12E8',
+                'Shares':'#e31219',
+                'MutualFunds':'#bfff00',
+                'Insurance':'#ede76d',
+                'Projected':'#cbcdd1',
+                'Gold':'#ffd700',
+                'Cash':BankAccountInterface.get_chart_color()
+                }
     data = dict()
     data['labels'] = list()
     data['datasets'] = list()
@@ -759,6 +792,7 @@ def get_user_contributions(user_id):
         contrib['MutualFunds'] = int(get_mf_amount_for_user(user_id))
         contrib['401K'] = int(get_401k_amount_for_user(user_id))
         contrib['Gold'] = int(GoldInterface.get_amount_for_user(user_id))
+        contrib['Cash'] = int(BankAccountInterface.get_amount_for_user(user_id))
         contrib['equity'] = contrib['ESPP']+contrib['RSU']+contrib['Shares']+contrib['MutualFunds']+contrib['401K']+contrib['Insurance']
         contrib['debt'] = contrib['EPF'] + contrib['FD'] + contrib['PPF'] + contrib['SSY']
         contrib['total'] = contrib['equity'] + contrib['debt'] + contrib['Gold']
@@ -774,7 +808,8 @@ def get_user_contributions(user_id):
             'MutualFunds': '#bfff00',
             '401K': '#617688',
             'Insurance': '#ede76d',
-            'Gold': '#ffd700'
+            'Gold': '#ffd700',
+            'Cash': BankAccountInterface.get_chart_color()
         }
         for k,v in item_color_mapping.items():
             if contrib[k] > 0:
@@ -805,6 +840,7 @@ def get_investment_data(start_date):
     r401k_data = list()
     insurance_data = list()
     gold_data = list()
+    cash_data = list()
     total_data = list()
 
     total_epf = 0
@@ -822,6 +858,7 @@ def get_investment_data(start_date):
     mf_reset_on_zero = False
     insurance_reset_on_zero = False
     gold_reset_on_zero = False
+    cash_reset_on_zero = False
     total_reset_on_zero = False
 
     share_qty = dict()
@@ -931,6 +968,21 @@ def get_investment_data(start_date):
                 gold_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
         except Exception as ex:
             print(f'exception {ex} when getting values for gold as on {data_end_date}')
+        
+        try:
+            cash_val = BankAccountInterface.get_value_as_on(data_end_date)
+            if cash_val != 0:
+                if not cash_reset_on_zero:
+                    cash_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
+                cash_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':cash_val})
+                print(f'type of data: {type(total)} {type(cash_val)}')
+                total += cash_val
+                cash_reset_on_zero = True
+            elif cash_reset_on_zero:
+                cash_reset_on_zero = False
+                cash_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+        except Exception as ex:
+            print(f'exception {ex} when getting values for cash as on {data_end_date}')
 
         espp_entries = Espp.objects.filter(purchase_date__lte=data_end_date)
         espp_val = 0
@@ -1070,8 +1122,6 @@ def get_investment_data(start_date):
             else:
                 mf_qty[uni_name] -= trans.units
         mf_val = 0
-        if data_start_date.year == 2020:
-            print(mf_qty)
         for s,q in mf_qty.items():
             fund_obj = MutualFund.objects.get(code=s)
             if fund_obj:
@@ -1106,7 +1156,21 @@ def get_investment_data(start_date):
         data_start_date  = data_start_date+relativedelta(months=+1)
     print('shares data is:',shares_data)
 
-    rv = {'gold':gold_data, 'ppf':ppf_data, 'insurance':insurance_data, '401K': r401k_data, 'epf':epf_data, 'ssy':ssy_data, 'fd': fd_data, 'espp': espp_data, 'rsu':rsu_data, 'shares':shares_data, 'mf':mf_data, 'total':total_data}
+    rv = {
+        'gold':gold_data, 
+        'ppf':ppf_data, 
+        'insurance':insurance_data, 
+        '401K': r401k_data, 
+        'epf':epf_data, 
+        'ssy':ssy_data, 
+        'fd': fd_data, 
+        'espp': espp_data, 
+        'rsu':rsu_data, 
+        'shares':shares_data, 
+        'mf':mf_data,
+        'cash': cash_data,
+        'total':total_data
+        }
         
     print(f'returning {rv}')
     return rv

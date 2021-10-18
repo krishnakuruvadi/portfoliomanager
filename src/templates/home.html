@@ -105,8 +105,8 @@
     var investmentdata = {{investment_data|safe}}
     var users = {{users|safe}}
     var all = {{all|safe}}
-    var debt_equity_labels = ['Debt' + ' (' + all.debt_per + '%)', 'Equity'+ ' (' + all.equity_per + '%)', 'Gold'+' (' + all.gold_per + '%)']
-    var debt_equity = [all.debt, all.equity, all.gold]
+    var debt_equity_labels = ['Debt' + ' (' + all.debt_per + '%)', 'Equity'+ ' (' + all.equity_per + '%)', 'Gold'+' (' + all.gold_per + '%)', 'Cash'+' (' + all.cash_per + '%)']
+    var debt_equity = [all.debt, all.equity, all.gold, all.cash]
     var distribution_vals = all.distrib_vals
     var status_vals = [all.achieved, all.remaining]
     var distribution_labels = all.distrib_labels
@@ -128,8 +128,8 @@
         console.log(user)
         data = user['data']
         console.log(data)
-        debt_equity = [data.debt, data.equity, data.gold]
-        debt_equity_labels = ['Debt' + ' (' + data.debt_per + '%)', 'Equity'+ ' (' + data.equity_per + '%)', 'Gold'+' (' + data.gold_per + '%)']
+        debt_equity = [data.debt, data.equity, data.gold, data.cash]
+        debt_equity_labels = ['Debt' + ' (' + data.debt_per + '%)', 'Equity'+ ' (' + data.equity_per + '%)', 'Gold'+' (' + data.gold_per + '%)', 'Cash'+' (' + data.cash_per + '%)']
         distribution_vals = data.distrib_vals
         distribution_labels = data.distrib_labels
         distribution_colors = data.distrib_colors
@@ -306,6 +306,12 @@
               borderColor: '#ffd700'
             },
             {
+              label: "Cash",
+              data: investment_data.cash,
+              fill:  false,
+              borderColor: '#E3CA95'
+            },
+            {
               label: "Total",
               data: investment_data.total,
               fill:  false,
@@ -358,7 +364,7 @@
           datasets: [{
             data: debt_equity,
             backgroundColor: [
-              '#519463', '#a85b6a', '#ffd700'
+              '#519463', '#a85b6a', '#ffd700', '#E3CA95'
             ],
             label: 'Classification'
           }],

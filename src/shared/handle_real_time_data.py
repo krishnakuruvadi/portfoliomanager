@@ -108,9 +108,13 @@ def get_forex_rate(date, from_cur, to_cur):
             print(response) 
             # print json content 
             print(response.json())
-            return response.json().get('rates').get(to_cur)
+            ret = response.json().get('rates').get(to_cur)
+            if not ret:
+                print(f'no result for {date} {from_cur} {to_cur} using {url}')
+            else:
+                return ret
         except Exception as ex:
-            print(f'exception while getting forex rate for: date {date}, from_cur {from_cur}, to_cur {to_cur}')
+            print(f'exception while getting forex rate for: date {date}, from_cur {from_cur}, to_cur {to_cur} using {url}')
             time.sleep(5)
     if date == datetime.date.today():
         r = get_forex_goog(from_cur, to_cur)
@@ -149,11 +153,33 @@ def get_forex_xe(date, from_cur, to_cur):
                 if entry['currency'] == to_cur:
                     return entry['rate'] 
         except Exception as ex:
-            print(f'xe exception while getting forex rate for: date {date}, from_cur {from_cur}, to_cur {to_cur} {ex}')
+            print(f'xe: exception while getting forex rate for: date {date}, from_cur {from_cur}, to_cur {to_cur} {ex}')
             time.sleep(5)
     return None
 
+def get_preferred_currency():
+    from common.helper import get_preferences
+
+    preferred_currency = get_preferences('currency')
+    if not preferred_currency:
+        preferred_currency = 'INR'
+    return preferred_currency
+
+def get_in_preferred_currency(amount, from_curr, dt, precision=2):
+    if amount == 0:
+        return 0
+    preferred_currency = get_preferred_currency()
+    if from_curr == preferred_currency:
+        return amount
+    conv_rate = get_conversion_rate(from_curr, preferred_currency, dt)
+    if not conv_rate:
+        print(f'failed to get conversion rate between {from_curr} and {preferred_currency} for {dt}')
+        conv_rate = 0
+    return round(amount * conv_rate, precision)
+
 def get_conversion_rate(from_cur, to_cur, date):
+    if from_cur == to_cur:
+        return 1
     try:
         forex_rate = HistoricalForexRates.objects.get(from_cur=from_cur, to_cur=to_cur, date=date)
         return float(forex_rate.rate)

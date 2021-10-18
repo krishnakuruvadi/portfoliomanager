@@ -1,0 +1,100 @@
+{% extends 'base.html' %} 
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'bankaccounts:account-list' %}">Bank Accounts</a></li>
+    <li><a href="{% url 'bankaccounts:account-detail' account_id %}">{{number}}</a></li>
+    <li><a href="#">Transactions</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <!--a style="padding-left:25px;" href="transactions"><i class="far fa-file-alt" aria-hidden="true" title="All Transactions" style="font-size: 1.2em;"></i></a-->
+    <a style="padding-left:25px;" href="upload_transactions"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="add_transaction"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;padding-right:25px;" href="delete_transactions" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Transactions" style="font-size: 1.2em;"></i></a>
+
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  {% if message_color == 'green' %}
+  <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true" style="font-size:20px">×</span>
+    </button>    <strong>Success!</strong> {{message}}
+  </div>
+  {% elif message_color == 'red' %}
+  <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true" style="font-size:20px">×</span>
+    </button>    <strong>Error!</strong> {{message}}
+  </div>
+  {% endif %}
+  <table class="table table-hover dt-responsive" id="transactions-table" style="width:100%">
+    <thead class="thead-dark">
+      <tr>
+        <th>Date</th>
+        <th>Transaction Type</th>
+        <th>Category</th>
+        <th>Amount</th>
+        <th>Description</th>
+        <th>Notes</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <td>{{ instance.trans_date }}</td>
+        <td>{{ instance.trans_type }}</td>
+        <td>{{ instance.category }}</td>
+        <td>{{ instance.amount }}</td>
+        <td>{{ instance.description }}</td>
+        <td>{{ instance.notes }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}/delete" class="confirm-delete-trans"><i class="fa fa-trash" title="Delete Transaction" aria-hidden="true"></i> </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock content %}
+
+<script>
+  {% block jquery %}
+    $('#transactions-table').DataTable({
+      "columnDefs": [
+        { "type": "num", "targets": [1,2,3] },
+        {"type":"date", "targets":[0]}
+      ],
+      "order": [[ 0, "desc" ]]
+    });
+  {% endblock jquery %}
+</script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all transactions?');
+    })
+    $(document).on('click', '.confirm-delete-trans', function(){
+      return confirm('Are you sure you want to delete this transaction?');
+    })
+    /*
+    set_user_list({{users|safe}}, '{{user|safe}}');
+    e = document.getElementById('show_zero_val');
+    var show = "{{show_zero_val|safe}}"
+    console.log(e.checked);
+    console.log(show);
+    if (show == "True") {
+      e.checked = true;
+    } else {
+      e.checked = false;
+    }
+    */
+
+</script>
+{% endblock javascript %}

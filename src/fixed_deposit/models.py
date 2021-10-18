@@ -5,6 +5,8 @@ from django.urls import reverse
 # Create your models here.
 
 class FixedDeposit(models.Model):
+    class Meta:
+        unique_together = (('number', 'bank_name'),)
     number = models.CharField(max_length=60, null=False)
     bank_name = models.CharField(max_length=60, null=False)
     start_date = models.DateField(null=False)

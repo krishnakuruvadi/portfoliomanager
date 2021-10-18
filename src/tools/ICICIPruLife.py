@@ -1,5 +1,3 @@
-from pdfminer.high_level import extract_text
-import pandas as pd
 from tika import parser
 import datetime
 import requests

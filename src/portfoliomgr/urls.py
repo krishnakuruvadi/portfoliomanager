@@ -43,7 +43,8 @@ urlpatterns = [
     path('retirement_401k/', include('retirement_401k.urls')),
     path('tax/', include('tax.urls')),
     path('insurance/', include('insurance.urls')),
-    path('gold/', include('gold.urls'))
+    path('gold/', include('gold.urls')),
+    path('bankaccounts/', include('bankaccounts.urls'))
 ]
 
 if settings.DEBUG:

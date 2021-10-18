@@ -1,0 +1,187 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'bankaccounts:account-list' %}">Bank Accounts</a></li>
+    <li><a href="{% url 'bankaccounts:account-detail' account_id %}">{{number}}</a></li>
+    <li><a href="#">Upload Transactions</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+<table class="table table-bordered">
+  <tr>
+    <td>
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %} 
+        <div class="row">
+          <div class='col-sm-12 col-md-6 col-lg-6'>
+            {% if message_color == 'green' %}
+            <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                 <span aria-hidden="true" style="font-size:20px">×</span>
+               </button>    <strong>Success!</strong> {{message}}
+            </div>
+            {% elif message_color == 'red' %}
+            <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                 <span aria-hidden="true" style="font-size:20px">×</span>
+               </button>    <strong>Error!</strong> {{message}}
+             </div>
+            {% endif %}
+             
+            <div class="form-group row">
+              <label for="number" class="col-sm-3 col-form-label">Account Number</label>
+              <div class="col-sm-3">
+                <div class="md-form mt-0">
+                  <label>{{number}}</label>
+                </div>
+              </div>
+            </div>
+    
+            <div class="form-group row">
+              <label for="bank_name" class="col-sm-3 col-form-label">Bank Name</label>
+              <div class="col-sm-3">
+                <div class="md-form mt-0">
+                  <label>{{bank_name}}</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="brokerFormControlSelect" class="col-sm-3 col-form-label">File Type</label>
+              <div class="col-sm-9">
+                <div class="md-form mt-0">
+                  <select class="form-control" id="file_format" name="file_format" required="true">
+                    <option>QUICKEN</option>
+                    <!--option>COIN ZERODHA</option>
+                    <option>CAS</option-->
+                  </select>
+                </div>
+              </div>
+            </div>
+          
+            <!--div class="form-group row" id="div_cas_pass">
+              <label for="cas_pass" id="label-cas-pass" class="col-sm-3 col-form-label">Password</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <input type="text" id="id_cas_pass" name="cas-pass">
+                </div>
+              </div>
+            </div-->
+
+            <div class="form-group row">
+              <label for="file" class="col-sm-3 col-form-label">File</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <input type="file" name="document" id="document" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-sm-9">
+                <div class="md-form mt-0">
+                  <button type="submit" class="btn btn-primary" id="submit" name="submit">Submit</button>
+                  <a href="../" class="btn btn-danger" role="button">Cancel</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </td>
+    <!--td>
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %} 
+        <div class="row">
+          <div class='col-sm-12'>
+            <div class="form-group row">
+              <label for="user" class="col-sm-3 col-form-label">User</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <select id="id_pull_user" name="pull-user" class="form-control"></select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="pullBrokerFormControlSelect" class="col-sm-3 col-form-label">Broker</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <select class="form-control" id="pullBrokerControlSelect" name="pullBrokerControlSelect">
+                    <option>KUVERA</option>
+                    <option>COIN ZERODHA</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          
+            <div class="form-group row">
+              <label for="pull-emailid" id="label-pull-emailid" class="col-sm-3 col-form-label">E-Mail</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <input type="text" id="id_pull_email_id" name="pull-email-id" size="50">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="pull-passwd" class="col-sm-3 col-form-label">Password</label>
+              <div class="col-sm-6">
+                <input type="password" id="id_pull_passwd" name="pull-passwd" placeholder="Broker Password">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="pull-kuvera-name" class="col-sm-3 col-form-label" id="label-pull-kuvera-name">Kuvera User Account Name</label>
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <input type="text" id="id_pull_kuvera_acc_name" name="pull_kuvera_acc_name"  size="50">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-sm-6">
+                <div class="md-form mt-0">
+                  <button type="submit" class="btn btn-primary" id="pull-submit" name="pull-submit">Submit</button>
+                <a href="../" class="btn btn-danger" role="button">Cancel</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+    </td-->
+  </tr>
+</table>
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+
+    updateFileUploadSegment();
+
+    $("#document").change(function () {
+      updateFileUploadSegment();
+    });
+    $("#file_format").change(function () {
+      updateFileUploadSegment();
+    });
+    function updateFileUploadSegment() {
+      var doc = document.getElementById('document').value;
+      var format = document.getElementById('file_format').value;
+      document.getElementById('submit').disabled=true;
+      if ((doc!='')) {
+        if (format == 'QUICKEN') {
+          document.getElementById('submit').disabled=false;
+        }
+      }
+    }
+  </script>
+{% endblock %}

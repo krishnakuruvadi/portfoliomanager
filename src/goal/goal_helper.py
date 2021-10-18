@@ -95,6 +95,7 @@ def update_goal_contributions(id):
         goal_obj.mf_conitrib = contrib['mf']
         goal_obj.r_401k_contribution = contrib.get('401k', 0)
         goal_obj.gold_contribution = contrib.get('gold', 0)
+        goal_obj.cash_contribution = contrib.get('cash', 0)
         goal_obj.save()
     except Exception as e:
         print(e)
@@ -125,6 +126,7 @@ def get_unallocated_amount():
     from rsu.rsu_interface import RsuInterface
     from insurance.insurance_interface import InsuranceInterface
     from gold.gold_interface import GoldInterface
+    from bankaccounts.bank_account_interface import BankAccountInterface
 
     amt = 0
     amt += SsyInterface.get_no_goal_amount()
@@ -139,5 +141,6 @@ def get_unallocated_amount():
     amt += RsuInterface.get_no_goal_amount()
     amt += InsuranceInterface.get_no_goal_amount()
     amt += GoldInterface.get_no_goal_amount()
+    amt += BankAccountInterface.get_no_goal_amount()
 
     return round(amt, 2)

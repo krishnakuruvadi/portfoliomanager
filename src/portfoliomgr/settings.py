@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     'retirement_401k',
     'tax',
     'insurance',
-    'gold'
+    'gold',
+    'bankaccounts',
 ]
 
 MIDDLEWARE = [
@@ -98,6 +99,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "tax"),
     os.path.join(BASE_DIR, "insurance"),
     os.path.join(BASE_DIR, "gold"),
+    os.path.join(BASE_DIR, "bankaccounts"),
     os.path.join(BASE_DIR, "static"),
 ]
 

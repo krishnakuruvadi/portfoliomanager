@@ -1,0 +1,57 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'bankaccounts:account-list' %}">Bank Accounts</a></li>
+    <li><a href="#">{{number}}</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+<div class="card-deck">
+  <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+    <table class="table table-hover">
+      <tr>
+        <th scope="col">Number</th>
+        <td>{{number}}</td>
+      </tr>
+      <tr>
+        <th scope="col">Bank Name</th>
+        <td>{{bank_name}}</td>
+      </tr>
+      <tr>
+        <th scope="col">Balance</th>
+        <td>{{balance}}</td>
+      </tr>
+        <tr>
+          <th scope="col">As On</th>
+          <td>{{ as_on_date }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Currency</th>
+          <td>{{ currency }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Balance in {{preferred_currency}}</th>
+          <td>{{ balance_preferred_currency }}</td>
+        </tr>
+        <tr>
+          <th scope="col">User</th>
+          <td>{{ user }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Goal</th>
+          <td>{{ goal }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Notes</th>
+          <td>{{ notes }}</td>
+        </tr>
+    </table>
+  </div>
+</div>
+  {% endblock content %}

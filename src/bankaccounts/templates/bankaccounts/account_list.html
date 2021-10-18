@@ -1,0 +1,168 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Bank Accounts</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+  <a href="add"><i class="fa fa-plus" aria-hidden="true" title="Add Bank Account" style="font-size: 1.2em;"></i></a>
+  <a style="padding-left:25px;padding-right:25px;" href="delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Accounts" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+<table class="table table-borderless">
+  <tr>
+    <td><ul class="nav nav-pills">
+      <li class="nav-item">
+        <a class="nav-link active" href="#">Bank Accounts</a>
+      </li>
+      <!--li class="nav-item">
+        <a class="nav-link" href="returns">Funds & Returns</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="insights">Insights</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="sip">SIP</a>
+      </li-->
+    </ul></td>
+  </tr>
+  <tr></tr>
+  <!--tr>
+    <td>
+      <form method="POST">
+        {% csrf_token %}
+          <div class="row">
+
+            <div class="col-sm-1">
+              <label for="user" class="col-sm-3 col-form-label">User</label>
+            </div>
+
+            <div class="col-sm-2">
+              <div class="md-form mt-0">
+                <select id="id_user" name="user" class="form-control"></select>
+              </div>
+            </div>
+
+            <div class="col-sm-3">
+              <label for="zero_val" class="col-form-label">Show zero balance Folios?</label>
+            </div>
+            
+            <div class="col-sm-1">
+              <input type="checkbox" name="show_zero_val" id="show_zero_val" value="{{show_zero_val}}">
+            </div>
+            
+
+            <div class="col-sm-1">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+            </div>
+
+          </div>
+      </form>
+    </td>
+  </tr-->
+  <tr>
+    <td style="text-align:right">
+      <div class="row">
+        <div class="col-sm-6 col-lg-2 col-md-3">
+          <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title">Balance</h5>
+                <p class="card-text">{{preferred_currency_bal}} {{preferred_currency}}</p>
+            </div>
+          </div>
+        </div>
+
+        <!--div class="col-sm-6 col-lg-2 col-md-3">
+          <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title">Current XIRR</h5>
+                <p class="card-text">{{curr_ret}}% </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-2 col-md-3">
+          <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title">All time XIRR</h5>
+                <p class="card-text">{{all_ret}}% </p>
+            </div>
+          </div>
+        </div-->
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align:right"><small class="text-muted">Last updated  {{as_on_date}}</small></td>
+  </tr>
+</table>
+  <table class="table table-hover dt-responsive" id="bank_accounts" style="width:100%">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Number</th>
+        <th scope="col">Bank Name</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">Balance</th>
+        <th scope="col">Currency</th>
+        <th scope="col">Balance in {{preferred_currency}}</th>
+        <th scope="col">As On</th>
+        <th scope="col">Goal</th>
+        <th scope="col">User</th>
+        <th scope="col">First Transaction</th>
+        <th scope="col">Last Transaction</th>
+        <th scope="col">Notes</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+        <td>
+          <a href="{{ instance.get_absolute_url }}">{{ instance.number }}</a>
+        </td>
+        <td>{{ instance.bank_name }}</td>
+        <td>{{ instance.start_date }}</td>
+        <td>{{ instance.balance }}</td>
+        <td>{{ instance.currency }}</td>
+        <td>{{ instance.preferred_currency_bal }}</td>
+        <td>{{ instance.as_on_date }}</td>
+        <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
+        <td>{{ user_name_mapping|lookup:instance.user }}</td>
+        <td>{{ instance.first_trans_dt }}</td>
+        <td>{{ instance.last_trans_dt }}</td>
+        <td>{{ instance.notes }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-account"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}transactions" style="padding-left:10px;" ><i class="far fa-file-alt" aria-hidden="true"></i> </a>
+        </td> 
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+<script>
+  {% block jquery %}
+  $('#bank_accounts').DataTable();
+  {% endblock jquery %}
+</script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all accounts?');
+    })
+    $(document).on('click', '.confirm-delete-account', function(){
+      return confirm('Are you sure you want to delete the account?');
+    })
+  </script>
+{% endblock javascript %}

@@ -23,6 +23,8 @@ from shared.financial import *
 import colorsys
 from shared.utils import get_int_or_none_from_string
 
+from bankaccounts.bank_account_interface import BankAccountInterface
+
 # Create your views here.
 
 def goal_list(request):
@@ -421,6 +423,11 @@ class GoalDetailView(DetailView):
             data['distribution']['vals'].append(float(data['object'].gold_contribution))
             data['distribution']['colors'].append("#ffd700")
             has_data = True
+        if data['object'].cash_contribution > 0:
+            data['distribution']['labels'].append('Cash')
+            data['distribution']['vals'].append(float(data['object'].cash_contribution))
+            data['distribution']['colors'].append(BankAccountInterface.get_chart_color())
+            has_data = True
         if has_data:
             print(data['distribution'])
 
@@ -703,6 +710,7 @@ class ChartData(APIView):
             debt = contrib['debt']
             equity = contrib['equity']
             gold = contrib['gold']
+            cash = contrib['cash']
             achieved = contrib['total']
             target = goal_obj.final_val
             if target < 1:
@@ -717,6 +725,7 @@ class ChartData(APIView):
                 "debt": debt,
                 "equity": equity,
                 "gold": gold,
+                "cash":cash,
                 "distrib_labels": contrib['distrib_labels'],
                 "distrib_vals": contrib['distrib_vals'],
                 "distrib_colors": contrib['distrib_colors'],
@@ -754,6 +763,7 @@ class CurrentGoals(APIView):
             data['debt'] = contrib['debt']
             data['equity'] = contrib['equity']
             data['gold'] = contrib['gold']
+            data['cash'] = contrib['cash']
             data['achieved'] = contrib['total']
             target = goal_obj.final_val
             if target < 1:
