@@ -105,6 +105,7 @@
       <tr>
         <th scope="col">#</th>
         <th scope="col">Number</th>
+        <th scope="col">Account Type</th>
         <th scope="col">Bank Name</th>
         <th scope="col">Start Date</th>
         <th scope="col">Balance</th>
@@ -126,6 +127,7 @@
         <td>
           <a href="{{ instance.get_absolute_url }}">{{ instance.number }}</a>
         </td>
+        <td>{{ instance.acc_type }}</td>
         <td>{{ instance.bank_name }}</td>
         <td>{{ instance.start_date }}</td>
         <td>{{ instance.balance }}</td>

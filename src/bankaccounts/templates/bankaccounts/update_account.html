@@ -50,6 +50,21 @@
         </div>
 
         <div class="form-group row">
+          <label for="acc_type" class="col-sm-3 col-form-label">Account Type <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="acc_type" required="true" id="id_acc_type">
+                <option value="">---------</option>
+                <option value="Savings">Savings</option>
+                <option value="Checking">Checking</option>
+                <option value="Current">Current</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
           <label for="bank_name" class="col-sm-3 col-form-label">Bank Name <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
@@ -116,6 +131,7 @@
       var resp = {"goal_list":{{goals|safe}}};
       get_goals_and_set_goal(resp)
     {% endif %}
+    set_acc_type('{{acc_type}}')
     function get_goals_and_set_goal(response) {
       set_goals(response, '{{goal|safe}}');
     }
@@ -139,6 +155,20 @@
         // add opt to end of select box (sel)
         dropdown.appendChild(opt);
       }
+    }
+    function set_acc_type(acc_type) {
+      var accTypes = document.getElementById('id_acc_type');
+      Array.from(document.querySelector("#id_acc_type").options).forEach(function(option_element) {
+        let option_text = option_element.text;
+        let option_value = option_element.value;
+        let is_option_selected = option_element.selected;
+        if (acc_type == option_value) {
+          option_element.selected = true;
+        } else {
+          console.log(option_value)
+          console.log(acc_type)
+        }
+      });
     }
   </script>
 {% endblock %}

@@ -27,6 +27,13 @@ CATEGORY_CHOICES = [
     ('Salary/Payment', 'Salary/Payment'),
 ]
 
+ACCOUNT_TYPE_CHOICES = [
+    ('Savings', 'Savings'),
+    ('Checking', 'Checking'),
+    ('Current', 'Current'),
+    ('Other', 'Other')
+]
+
 # Create your models here.
 class BankAccount(models.Model):
     class Meta:
@@ -41,6 +48,8 @@ class BankAccount(models.Model):
     balance = models.DecimalField(max_digits=20, decimal_places=2, null=False)
     as_on_date = models.DateField(_('As On Date'), blank=True, null=True)
     start_date = models.DateField(_('Start Date'), blank=True, null=True)
+    acc_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default='Other')
+
     def get_absolute_url(self):
         return reverse("bankaccounts:account-detail", kwargs={'id': self.id})
 

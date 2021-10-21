@@ -48,7 +48,12 @@ def get_accounts(request):
             as_on = acc.as_on_date
         elif acc.as_on_date:
             as_on = acc.as_on_date if as_on > acc.as_on_date else as_on
-    context['as_on_date'] = as_on
+
+    if as_on:
+        #context['as_on_date'] = get_preferred_tz(as_on)
+        context['as_on_date'] = as_on
+    else:
+        context['as_on_date'] = 'None'
     context['curr_module_id'] = 'id_bank_acc_module'
     context['preferred_currency_bal'] = round(balance, 2)
     context['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
@@ -135,6 +140,7 @@ def add_account(request):
             notes = request.POST['notes']
             currency = request.POST['currency']
             goal = request.POST.get('goal', '')
+            acc_type = request.POST['acc_type']
             if goal != '':
                 goal_id = Decimal(goal)
             else:
@@ -151,7 +157,8 @@ def add_account(request):
                 notes=notes,
                 goal=goal_id,
                 currency=currency,
-                balance=0
+                balance=0,
+                acc_type=acc_type
             )
             message = 'Account added successfully'
             message_color = 'green'
@@ -195,6 +202,7 @@ def update_account(request, id):
                 start_date = request.POST['start_date']
                 notes = request.POST['notes']
                 currency = request.POST['currency']
+                acc_type = request.POST['acc_type']
                 goal = request.POST.get('goal', '')
                 print(f'goal {goal}')
                 if goal != '':
@@ -211,6 +219,7 @@ def update_account(request, id):
                 ba.notes=notes
                 ba.goal=goal_id
                 ba.currency=currency
+                ba.acc_type = acc_type
                 ba.save()
                 message = 'Account updated successfully'
                 message_color = 'green'
@@ -241,6 +250,7 @@ def update_account(request, id):
         context['currency'] = ba.currency
         context['notes'] = ba.notes
         context['bank_name'] = ba.bank_name
+        context['acc_type'] = ba.acc_type
         context['goal'] = ba.goal if ba.goal else ''
         context['goals'] = get_goal_id_name_mapping_for_user(ba.user)
         
@@ -267,6 +277,7 @@ def account_detail(request, id):
         context['preferred_currency'] = get_preferred_currency()
         context['number'] = acc.number
         context['bank_name'] = acc.bank_name
+        context['acc_type'] = acc.acc_type
         context['currency'] = acc.currency
         context['as_on'] = acc.as_on_date
         context['start_date'] = acc.start_date

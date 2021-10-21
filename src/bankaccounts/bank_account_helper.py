@@ -26,7 +26,7 @@ def update_balance_for_account(id):
 def upload_transactions(full_file_path, bank_name, file_type, acc_number, account_id):
     try:
         ba = BankAccount.objects.get(id=account_id)
-        if file_type == 'QUICKEN':
+        if file_type == 'QUICKEN' and full_file_path.lower().endswith("qfx"):
             with open(full_file_path) as fileobj:
                 ofx = OfxParser.parse(fileobj)
                 account = ofx.account
@@ -38,20 +38,31 @@ def upload_transactions(full_file_path, bank_name, file_type, acc_number, accoun
                     #print(f'{transaction.payee}, {transaction.type}, {transaction.date}, {transaction.user_date}, {transaction.amount}, {transaction.id}, {transaction.memo}, {transaction.sic}, {transaction.mcc}, {transaction.checknum}')
                     trans_type = 'Credit'
                     amount = transaction.amount
-                    print(f'type of amount in {type(amount)}')
                     if 'withdrawal' in transaction.memo.lower():
                         trans_type = 'Debit'
-                        if amount < 0:
-                            amount = -1*amount
+                        
                     category = None
-                    if transaction.type == 'int':
+                    if transaction.type.lower() == 'debit':
+                        trans_type = 'Debit'
+                    elif transaction.type.lower() == 'credit':
+                        trans_type = 'Credit'
+                    
+                    if transaction.type.lower() == 'int':
                         category = 'Interest'
-                    elif transaction.type == 'directdep':
+                    elif transaction.type.lower() == 'directdep':
                         category = 'Salary/Payment'
-                    elif 'safeway fuel' in transaction.payee:
+                    if 'safeway fuel' in transaction.payee.lower():
                         category = 'Fuel'
-                    elif 'target' in transaction.payee or 'walmart' in transaction.payee:
+                    elif 'etsy' in transaction.payee.lower() or 'target' in transaction.payee.lower() or 'walmart' in transaction.payee.lower() or 'costco' in transaction.payee.lower() or 'amazon' in transaction.payee.lower():
+                        category = 'Shopping'
+                    elif 'wholefds' in transaction.payee.lower():
                         category = 'Groceries'
+                    elif 'robinhood' in transaction.payee.lower():
+                        category = 'Investment'
+                    if not category:
+                        print(f'unknown category {transaction.payee.lower()}')
+                    if trans_type == 'Debit' and amount < 0:
+                        amount = -1*amount
                     try:
                         Transaction.objects.create(
                             account=ba,
