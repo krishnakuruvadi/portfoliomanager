@@ -57,5 +57,50 @@
         </tr>
     </table>
   </div>
+  <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class="col-sm-12 col-md-6 col-lg-4">
+    <canvas id="balance-progress"></canvas>
+  </div>
 </div>
-  {% endblock content %}
+{% endblock content %}
+
+<script>
+  {% block jquery %}
+    {%if bal_vals %}
+      set_bal_chart({{bal_vals|safe}}, {{chart_labels|safe}})
+    {% endif %}
+
+    function set_bal_chart(bal_vals, chart_labels) {
+      var canvas = document.getElementById('balance-progress');
+      new Chart(canvas, {
+        type: 'line',
+        data: {
+          //labels: ['1', '2', '3', '4', '5'],
+          labels: chart_labels,
+          datasets: [{
+            label: 'Balance',
+            yAxisID: 'Balance',
+            //data: [100, 96, 84, 76, 69],
+            data: bal_vals,
+            borderColor: "#3e95cd",
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title: {
+            display: true,
+            text: 'Account Balance'
+          },
+          scales: {
+            yAxes: [{
+              id: 'Balance',
+              type: 'linear',
+              position: 'left',
+            }]
+          }
+        }
+      });
+    }
+  {% endblock jquery %}
+</script>

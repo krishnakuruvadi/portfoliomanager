@@ -279,9 +279,33 @@ def account_detail(request, id):
         context['bank_name'] = acc.bank_name
         context['acc_type'] = acc.acc_type
         context['currency'] = acc.currency
-        context['as_on'] = acc.as_on_date
+        context['as_on_date'] = acc.as_on_date
         context['start_date'] = acc.start_date
         context['balance'] = acc.balance
+        bal_vals = list()
+        chart_labels = list()
+        balance = 0
+        
+        prev_trans = None
+        for trans in Transaction.objects.filter(account=acc).order_by('trans_date'):
+            if trans.trans_type == 'Credit':
+                balance += float(trans.amount)
+            else:
+                balance -= float(trans.amount)
+            balance = round(balance, 2)
+            if len(bal_vals) == 0:
+                bal_vals.append(balance)
+                chart_labels.append(trans.trans_date.strftime('%Y-%m-%d'))
+            else:
+                if float(trans.amount) > balance/10 or prev_trans.month != trans.trans_date.month or prev_trans.year != trans.trans_date.year:
+                    bal_vals.append(balance)
+                    chart_labels.append(trans.trans_date.strftime('%Y-%m-%d'))
+            prev_trans = trans.trans_date
+        if len(bal_vals) > 0:
+            bal_vals.append(balance)
+            chart_labels.append(datetime.date.today().strftime('%Y-%m-%d'))
+        context['bal_vals'] = bal_vals
+        context['chart_labels'] = chart_labels
         return render(request, template, context)
     except BankAccount.DoesNotExist:
         return HttpResponseRedirect(reverse('bankaccounts:account-list'))
