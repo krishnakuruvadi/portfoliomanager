@@ -13,6 +13,7 @@ from django.conf import settings
 from tools.ICICIPruLife import ICICIPruLife
 from tasks.tasks import update_insurance_policy_vals
 from markets.models import IndexRollingReturns
+import requests
 
 def add_fund(request, id):
     template_name = 'insurance/add_fund.html'
@@ -289,6 +290,8 @@ def add_policy(request):
         name = request.POST['name']
         policy_type = request.POST['policy_type']
         company = request.POST['company']
+        if company == 'Other':
+            company = request.POST['company_other']
         start_date = get_date_or_none_from_string(request.POST['start_date'])
         end_date = get_date_or_none_from_string(request.POST['end_date'])
         user = request.POST['user']
@@ -324,7 +327,14 @@ def add_policy(request):
         context['curr_module_id'] = 'id_insurance_module'
     else:
         context['curr_module_id'] = 'id_insurance_module'
-
+    url = 'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager-data/main/India/insurance.json'
+    print(f'fetching from url {url}')
+    r = requests.get(url)
+    context['companies'] = list()
+    if r.status_code == 200:
+        for entry in r.json()['life_insurance_companies']:
+            context['companies'].append(entry['name'])
+    context['companies'].append('Other')
     context['users'] = get_all_users()
     context['message'] = message
     context['message_color'] = message_color
@@ -348,7 +358,7 @@ def get_insurance(request):
         if not as_on_date:
             as_on_date = ip.as_on_date
         else:
-            if as_on_date < ip.as_on_date:
+            if ip.as_on_date and as_on_date < ip.as_on_date:
                 as_on_date = ip.as_on_date
         if not ip.end_date or ip.end_date > datetime.date.today():
             total_sum_assured += ip.sum_assured
@@ -371,6 +381,13 @@ def get_insurance(request):
 def delete_policies(request):
     InsurancePolicy.objects.all().delete()
     return HttpResponseRedirect('../')
+
+def delete_policy(request, id):
+    try:
+        InsurancePolicy.objects.get(id=id).delete()
+    except Exception as ex:
+        print(f'exception deleting policy with id {id}: ex')
+    return HttpResponseRedirect(reverse('insurance:policy-list'))
 
 def policy_detail(request, id):
     template = 'insurance/policy_detail.html'

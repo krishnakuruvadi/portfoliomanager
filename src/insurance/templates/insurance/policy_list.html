@@ -160,7 +160,7 @@
         <td>{{ instance.as_on_date }}</td>
         <!--td>{{ instance.gain }}{% if instance.gain > 0 %}<i class="fa fa-caret-up" aria-hidden="true" style="color:green"></i>{% else %}<i class="fa fa-caret-down" aria-hidden="true" style="color:red"></i>{% endif %}></td!-->
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-policy"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
           <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
           <a href="{{ instance.get_absolute_url }}transactions" style="padding-left:10px;"><i class="far fa-file-alt" aria-hidden="true"></i> </a>
         </td>
@@ -186,6 +186,9 @@
   <script>
     $(document).on('click', '.confirm-delete', function(){
       return confirm('Are you sure you want to delete all policies?');
+    })
+    $(document).on('click', '.confirm-delete-policy', function(){
+      return confirm('Are you sure you want to delete the policy?');
     })
     /*
     set_user_list({{users|safe}}, '{{user|safe}}');

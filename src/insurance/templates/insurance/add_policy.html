@@ -6,7 +6,7 @@
 
 {% block viewname %} 
   <ul class="breadcrumb">
-    <li><a href="{% url 'insurance:insurance-list' %}">Insurance</a></li>
+    <li><a href="{% url 'insurance:policy-list' %}">Insurance</a></li>
     <li><a href="#">Create</a></li>
   </ul>
 {% endblock viewname %}
@@ -42,24 +42,6 @@
         </div>
 
         <div class="form-group row">
-          <label for="company" class="col-sm-3 col-form-label">Company <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="text" id="id_company" name="company" value="{{company}}" required="true">
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="fund" class="col-sm-3 col-form-label">Policy Name <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input  type="text" id="id_name" name="name" value="{{name}}" required="true">
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">   
           <label class="control-label col-sm-3 col-form-label" for="id_policy_type">Policy Type</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
@@ -68,9 +50,50 @@
                 <option value="Traditional">Traditional</option>
                 <option value="Term">Term</option>
                 <option value="ULIP">ULIP</option>
+                <option value="Health">Health</option>
               </select>
             </div>
           </div> 
+        </div>
+        
+        <!--div class="form-group row">
+          <label for="fund" class="col-sm-3 col-form-label">Country<span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="country" required="" id="id_country">
+                <option value="India">India</option>
+                <option value="USA">USA</option>
+              </select>
+            </div>
+          </div>
+        </div-->
+
+        <div class="form-group row">
+          <label for="company" class="col-sm-3 col-form-label">Company <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="company" required="" id="id_company">
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row" class="col-sm-6 col-md-6 col-lg-6" id="id_div_company_other">
+          <label for="company_other" class="col-sm-3 col-form-label">Enter company name  <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="id_company_other" name="company_other" value="{{company_other}}">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="name" class="col-sm-3 col-form-label">Policy Name <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="id_name" name="name" value="{{name}}" required="true">
+            </div>
+          </div>
         </div>
 
         <div class="form-group row">
@@ -156,77 +179,38 @@
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script>
     set_user_list({{users|safe}}, '{{user|safe}}');
-    set_fund_house({{fund_houses|safe}});
-    set_fund_select_status();
-
-    $("#id_fund_house").change(function () {
-      set_fund_select_status();
+    set_company({{companies|safe}});
+    set_other_company_div();
+    $("#id_company").change(function () {
+      set_other_company_div();
     });
-
-    function set_fund_house(fund_houses) {
-      $('#id_fund_house').empty();
-      $('#id_fund_house')
+    function set_other_company_div() {
+      var sel = document.getElementById('id_company').value;
+      if (sel == 'Other') {
+        document.getElementById("id_div_company_other").style.display=null;
+        document.getElementById("id_company_other").required = true;
+      } else {
+        document.getElementById("id_div_company_other").style.display="none";
+        document.getElementById("id_company_other").required = false;
+      }
+    }
+    function set_company(companies) {
+      $('#id_company').empty();
+      $('#id_company')
           .append($('<option>', { value : '' })
           .text(''));
-      var dropdown = document.getElementById('id_fund_house');
-      for (x in fund_houses) {
-          fundhouse = fund_houses[x]
+      var dropdown = document.getElementById('id_company');
+      for (x in companies) {
+          company = companies[x]
           // create new option element
           var opt = document.createElement('option');
           // create text node to add to option element (opt)
-          opt.appendChild( document.createTextNode(fundhouse) );
+          opt.appendChild( document.createTextNode(company) );
           // set value property of opt
-          opt.value = x;
+          opt.value = company;
           // add opt to end of select box (sel)
           dropdown.appendChild(opt);
       }
     }
-
-    function set_fund_select_status() {
-      v = document.getElementById('id_fund_house').value;
-      document.getElementById('id_fund').value='';
-      if (v != '') {
-        document.getElementById('id_fund').disabled = false;
-      } else {
-        document.getElementById('id_fund').disabled = true;
-      }
-    }
-
-    $(function() {
-      function log( message ) {
-        $( "<div>" ).text( message ).prependTo( "#log" );
-        $( "#log" ).scrollTop( 0 );
-      }
-
-      $( "#id_fund" ).autocomplete({
-        source: function( request, response ) {
-          $.ajax({
-            url: "/common/mf/avail_funds",
-            dataType: "json",
-            data: {
-              q: request.term,
-              fund_house: $("#id_fund_house").val()
-            },
-            success: function( data ) {
-              response( data );
-            }
-          });
-        },
-        minLength: 3,
-        select: function( event, ui ) {
-          log( ui.item ?
-            "Selected: " + ui.item.label :
-            "Nothing selected, input was " + this.value);
-        },
-        open: function() {
-          $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
-        },
-        close: function() {
-          $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
-        }
-      });
-    });
-
-
   </script>
 {% endblock %}

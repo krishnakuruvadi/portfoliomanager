@@ -16,16 +16,18 @@ from .views import (
     delete_all_nav,
     delete_nav,
     fund_detail,
-    update_policy
+    update_policy,
+    delete_policy
 )
 
 app_name = 'insurance'
 urlpatterns = [
-    path('', get_insurance, name='insurance-list'),
+    path('', get_insurance, name='policy-list'),
     path('add/', add_policy, name='add-policy'),
     path('delete/', delete_policies, name='delete-all-policies'),
     path('<id>/', policy_detail, name='policy-detail'),
     path('<id>/update', update_policy, name='update-policy'),
+    path('<id>/delete', delete_policy, name='delete-policy'),
     path('<id>/add_transaction', add_transaction, name='add-transaction'),
     path('<id>/upload_transactions', upload_transactions, name='upload-transactions'),
     path('<id>/add_fund', add_fund, name='add-fund'),
