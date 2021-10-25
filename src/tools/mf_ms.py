@@ -71,7 +71,7 @@ def get_funds_details(csv_file):
                         '%7CMorningstarRiskM255%7CAlphaM36%7CBetaM36%7CR2M36%7CStandardDeviationM36%7CSharpeM36%7CTrackRecordExtension%7CISIN'+ \
                         '&filters=CategoryId%3AIN%3A' + cat + '&term=&subUniverseId='
             
-            page_list_funds = requests.get(funds_url)
+            page_list_funds = requests.get(funds_url, timeout=15)
             page_list_funds_json = page_list_funds.json()
             if not number_of_loops:
                 number_of_loops = page_list_funds_json['total'] // page_list_funds_json['pageSize'] + 1

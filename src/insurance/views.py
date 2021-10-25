@@ -329,7 +329,7 @@ def add_policy(request):
         context['curr_module_id'] = 'id_insurance_module'
     url = 'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager-data/main/India/insurance.json'
     print(f'fetching from url {url}')
-    r = requests.get(url)
+    r = requests.get(url, timeout=15)
     context['companies'] = list()
     if r.status_code == 200:
         for entry in r.json()['life_insurance_companies']:

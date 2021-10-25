@@ -172,7 +172,7 @@ def add_account(request):
         message_color = 'red'
     url = f'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager-data/main/currencies.json'
     print(f'fetching from url {url}')
-    r = requests.get(url)
+    r = requests.get(url, timeout=15)
     context['currencies'] = list()
     if r.status_code == 200:
         for entry in r.json()['currencies']:
@@ -234,7 +234,7 @@ def update_account(request, id):
                 message_color = 'red'
         url = f'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager-data/main/currencies.json'
         print(f'fetching from url {url}')
-        r = requests.get(url)
+        r = requests.get(url, timeout=15)
         context['currencies'] = list()
         if r.status_code == 200:
             for entry in r.json()['currencies']:

@@ -5,6 +5,11 @@ from shared.utils import get_float_or_zero_from_string, convert_date_to_string
 from newspaper import Article
 import requests
 from functools import cmp_to_key
+from shared.yahoo_finance_2 import YahooFinance2
+import datetime
+from dateutil.relativedelta import relativedelta
+import yfinance as yf
+
 # Create your views here.
 
 def markets_home(request):
@@ -14,7 +19,7 @@ def markets_home(request):
                             'like Gecko) '
                             'Chrome/80.0.3987.149 Safari/537.36',
             'accept-language': 'en,gu;q=0.9,hi;q=0.8', 'accept-encoding': 'gzip, deflate, br'}
-    r = requests.get(headers=headers,
+    r = requests.get(headers=headers, timeout=15,
         url='https://www.wsj.com/market-data/stocks/asia/indexes?id=%7B%22application%22%3A%22WSJ%22%2C%22instruments%22%3A%5B%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FGDOW%22%2C%22name%22%3A%22The%20Global%20Dow%20(World)%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FXX%2F%2FDGW2DOWA%22%2C%22name%22%3A%22DJ%20Global%20ex%20U.S.%20(World)%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FXX%2F%2FADOW%22%2C%22name%22%3A%22Asia%20Dow%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FAU%2F%2FXAO%22%2C%22name%22%3A%22Australia%3A%20All%20Ordinaries%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FAU%2F%2FXJO%22%2C%22name%22%3A%22Australia%3A%20S%26P%2FASX%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FCN%2F%2FHSCEI%22%2C%22name%22%3A%22China%3A%20H-Share%20Index%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FCN%2F%2FSHCOMP%22%2C%22name%22%3A%22China%3A%20Shanghai%20Composite%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FCN%2F%2F399106%22%2C%22name%22%3A%22China%3A%20Shenzhen%20Composite%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FHK%2F%2FHSI%22%2C%22name%22%3A%22Hong%20Kong%3A%20Hang%20Seng%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FIN%2F%2F1%22%2C%22name%22%3A%22India%3A%20S%26P%20BSE%20Sensex%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FIN%2F%2FNIFTY50%22%2C%22name%22%3A%22India%3A%20S%26P%20CNX%20Nifty%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FID%2F%2FJAKIDX%22%2C%22name%22%3A%22Indonesia%3A%20JSX%20Index%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FJP%2F%2FNIK%22%2C%22name%22%3A%22Japan%3A%20Nikkei%20225%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FMY%2F%2FFBMKLCI%22%2C%22name%22%3A%22Malaysia%3A%20FTSE%20Bursa%20Malaysia%20KLCI%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FNZ%2F%2FNZ50GR%22%2C%22name%22%3A%22New%20Zealand%3A%20S%26P%2FNZX%2050%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FPH%2F%2FPSEI%22%2C%22name%22%3A%22Philippines%3A%20PSEi%20Index%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FKR%2F%2FSEU%22%2C%22name%22%3A%22S.%20Korea%3A%20KOSPI%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FSG%2F%2FSTI%22%2C%22name%22%3A%22Singapore%3A%20Straits%20Times%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FXX%2F%2FY9999%22%2C%22name%22%3A%22Taiwan%3A%20TAIEX%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FTH%2F%2FSET%22%2C%22name%22%3A%22Thailand%3A%20SET%22%7D%5D%2C%22expanded%22%3Atrue%2C%22refreshInterval%22%3A60000%2C%22serverSideType%22%3A%22mdc_quotes%22%7D&type=mdc_quotes', timeout=15)
     context['instruments'] = list()
     if r.status_code==200:
@@ -39,9 +44,89 @@ def markets_home(request):
             context['instruments'].append(inst)
     else:
         print(f'failed to get response {r.status_code}')
+    
+    r = requests.get(headers=headers, timeout=15,
+        url='https://www.wsj.com/market-data/stocks/us/indexes?id=%7B%22application%22%3A%22WSJ%22%2C%22instruments%22%3A%5B%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FDJIA%22%2C%22name%22%3A%22Industrial%20Average%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FDJT%22%2C%22name%22%3A%22Transportation%20Average%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FDJU%22%2C%22name%22%3A%22Utility%20Average%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FDJC%22%2C%22name%22%3A%2265%20Composite%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FDWCF%22%2C%22name%22%3A%22Total%20Stock%20Market%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FB400%22%2C%22name%22%3A%22Barron%27s%20400%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FSPX%22%2C%22name%22%3A%22500%20Index%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FSP100%22%2C%22name%22%3A%22100%20Index%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FMID%22%2C%22name%22%3A%22MidCap%20400%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FSML%22%2C%22name%22%3A%22SmallCap%20600%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FXX%2F%2FSP1500%22%2C%22name%22%3A%22SuperComp%201500%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FCOMP%22%2C%22name%22%3A%22Composite%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FNDX%22%2C%22name%22%3A%22Nasdaq%20100%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FNBI%22%2C%22name%22%3A%22Biotech%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FNYA%22%2C%22name%22%3A%22NYSE%20Composite%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FRUI%22%2C%22name%22%3A%22Russell%201000%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FRUT%22%2C%22name%22%3A%22Russell%202000%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FRUA%22%2C%22name%22%3A%22Russell%203000%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FXAU%22%2C%22name%22%3A%22PHLX%20Gold%2FSilver%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FOSX%22%2C%22name%22%3A%22PHLX%20Oil%20Service%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FSOX%22%2C%22name%22%3A%22PHLX%20Semiconductor%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FVIX%22%2C%22name%22%3A%22CBOE%20Volatility%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FBKX%22%2C%22name%22%3A%22KBW%20Bank%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FVALUG%22%2C%22name%22%3A%22Value%20Line%20(Geometric)%22%7D%2C%7B%22symbol%22%3A%22INDEX%2FUS%2F%2FAMZ%22%2C%22name%22%3A%22Alerian%20MLP%22%7D%5D%2C%22headers%22%3A%5B%7B%22label%22%3A%22Dow%20Jones%22%2C%22length%22%3A6%7D%2C%7B%22label%22%3A%22S%26P%22%2C%22length%22%3A5%7D%2C%7B%22label%22%3A%22Nasdaq%20Stock%20Market%22%2C%22length%22%3A3%7D%2C%7B%22label%22%3A%22Other%20U.S.%20Indexes%22%2C%22length%22%3A11%7D%5D%2C%22expanded%22%3Atrue%2C%22refreshInterval%22%3A60000%2C%22serverSideType%22%3A%22mdc_quotes%22%7D&type=mdc_quotes')
+    if r.status_code==200:
+        #print(r)
+        #print(r.json())
+        for k,v in r.json().items():
+            print(k)
+        json_data = r.json()
+        print(json_data)
+        for ins in json_data['data']['instrumentSets']:
+            for item in ins['instruments']:
+                if item['ticker'] in ['DJIA','SPX','COMP']:
+                    inst = dict()
+                    inst['country'] = item['country']
+                    inst['name'] = item['name']
+                    inst['timestamp'] = item['timestamp']
+                    inst['oneYearHigh'] = item['oneYearHigh']
+                    inst['oneYearLow'] = item['oneYearLow']
+                    inst['1yearPercentChange'] = item['yearAgoPercentChange']
+                    inst['ytdPercentageChange'] = item['yearToDatePercentChange']
+                    inst['1dPriceChange'] = item['priceChange']
+                    inst['1dPercentChange'] = item['percentChange']
+                    inst['1wPriceChange'] = item['weekAgoChange']
+                    inst['1wPercentChange'] = item['weekAgoPercentChange']
+                    context['instruments'].append(inst)
+    else:
+        today = datetime.date.today()
+        vals = list()
+        for index in ['^GSPC', '^DJI', '^IXIC']:
+            inst = dict()
+            
+            last_trade_dt, last_trade_val = get_index_on(index, today)
+            if last_trade_dt:
+                inst['country'] = 'US'
+                tickers = yf.Tickers(index)
+                print(tickers.tickers[index].info)
+                inst['timestamp'] = last_trade_dt.strftime("%Y-%m-%d")
+                inst['name'] = tickers.tickers[index].info.get('longName', None)
+                if not inst['name']:
+                    inst['name'] = tickers.tickers[index].info.get('shortName', index)
+                inst['oneYearHigh'] = tickers.tickers[index].info['fiftyTwoWeekHigh']
+                inst['oneYearLow'] = tickers.tickers[index].info['fiftyTwoWeekLow']
+                
+                oneday_dt, oneday_val = get_index_on(index, last_trade_dt+relativedelta(days=-1))
+                inst['1dPriceChange'] = round(last_trade_val-oneday_val, 2)
+                inst['1dPercentChange'] = round((last_trade_val-oneday_val)*100/oneday_val, 2)
+
+                onewk_dt, onewk_val = get_index_on(index, last_trade_dt+relativedelta(days=-7))
+                inst['1wPriceChange'] = round(last_trade_val-onewk_val, 2)
+                inst['1wPercentChange'] = round((last_trade_val-onewk_val)*100/onewk_val, 2)
+
+                oneyr_dt, oneyr_val = get_index_on(index, last_trade_dt+relativedelta(years=-1))
+                inst['1yearPriceChange'] = round(last_trade_val-oneyr_val, 2)
+                inst['1yearPercentChange'] = round((last_trade_val-oneyr_val)*100/oneyr_val, 2)
+
+                ytd_dt, ytd_val = get_index_on(index, datetime.date(year=today.year, month=1, day=1))
+                inst['1dPriceChange'] = last_trade_val-ytd_val
+                inst['ytdPercentageChange'] = round((last_trade_val-ytd_val)*100/ytd_val, 2)
+
+                context['instruments'].append(inst)
+    
+        print(vals)
     context['curr_module_id'] = 'id_markets_module'
     print(context)
     return render(request, template, context)
+
+def get_index_on(index, date):
+    response = YahooFinance2(index).get_historical_value(date+relativedelta(days=-5), date)
+    if response:
+        val_date = None
+        val = None
+        for k,v in response.items():
+            if not val:
+                val = v
+                val_date = k
+            else:
+                if val_date > k:
+                    val_date = k
+                    val = v
+        if val:
+            return val_date, val
+    return None, None
 
 def news_view(request):
     template = 'markets/news.html'

@@ -19,7 +19,7 @@ def get_historical_price(dt, buy_type, purity):
 
     url = f'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager-data/main/India/gold/{dt.year}.json'
     print(f'fetching from url {url}')
-    r = requests.get(url)
+    r = requests.get(url, timeout=15)
     val = None
     if r.status_code == 200:
         print(r.text)
