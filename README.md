@@ -21,6 +21,9 @@ To build a portfolio manager which can track and provide insights into a individ
 * RSU (Restricted Stock Units)
 * Shares
 * Mutual Funds
+* Bank Accounts
+* Gold
+* 401K
 
 
 ## How to start
