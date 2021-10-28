@@ -106,6 +106,8 @@ class MfInterface:
                 print('historical_mf_prices',historical_mf_prices)
                 for k,v in historical_mf_prices[0].items():
                     total += v*qty
+            else:
+                print(f'failed to get year end vals for mutual fund {code} goal {goal_id} year {yr}')
         return cash_flows, contrib, deduct, total
     
     @classmethod

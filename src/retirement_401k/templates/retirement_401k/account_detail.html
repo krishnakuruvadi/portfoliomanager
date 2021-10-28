@@ -75,7 +75,7 @@
   <div class="row">
     <div class="col-sm-8">
       <div class="row">
-        <div class="col-sm-8"><h5>NAV History</h5><small>(Add new NAV at {{nav_file_locn}})</small></div>
+        <div class="col-sm-8"><h5>NAV History <small><a style="padding-left:25px;" href="{% url 'retirement_401k:nav-add' id %}"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a></small></h5></div>
       </div>
       <div class="row">
         <div class="col-sm-8">
@@ -85,6 +85,7 @@
               <tr>
                 <th scope="col">Date</th>
                 <th scope="col">Value</th>
+                <th scope="col"></th>
               </tr>
             </thead>
             <tbody>
@@ -92,6 +93,8 @@
               <tr>
                 <td>{{instance.nav_date}}</td>
                 <td>{{instance.nav_value}}</td>
+                <td><a href="{% url 'retirement_401k:nav-delete' id instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -99,11 +102,19 @@
         </div>
       </div>
     </div>
-        <div class="col-sm-12 col-md-6 col-lg-4" style="width:75%;height:40vh">
-          <canvas id="fund-compare"></canvas>
-        </div>
+    <div class="col-sm-12 col-md-6 col-lg-4" style="width:75%;height:40vh">
+      <canvas id="fund-compare"></canvas>
+    </div>
   </div>
 {% endblock content %}
+
+{% block javascript %}
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete this NAV?');
+    })
+</script>
+{% endblock javascript %}
 
 <script>
   {% block jquery %}

@@ -14,6 +14,43 @@ from django.db import IntegrityError
 # Create your views here.
 
 
+def delete_nav(request, id, nav_id):
+    try:
+        account = Account401K.objects.get(id=id)
+        NAVHistory.objects.get(account=account,id=nav_id).delete()
+        return HttpResponseRedirect(reverse('retirement_401k:account-detail',kwargs={'id':id}))
+    except Account401K.DoesNotExist:
+        return HttpResponseRedirect(reverse('retirement_401k:account-list'))
+        
+def add_nav(request, id):
+    template_name = 'retirement_401k/add_nav.html'
+    try:
+        account = Account401K.objects.get(id=id)
+        message = ''
+        message_color = 'ignore'
+        if request.method == 'POST':
+            message_color = 'green'
+            print(request.POST)
+            date = get_date_or_none_from_string(request.POST['date'])
+            nav_value = get_float_or_none_from_string(request.POST['nav'])
+            try:
+                NAVHistory.objects.create(account=account, nav_date=date, nav_value=nav_value)
+
+                message = 'NAV addition successful'
+            except IntegrityError:
+                message = f'NAV entry for {date} exists'
+                message_color = 'red'
+            except Exception as ex:
+                message = 'NAV add failed'
+                message_color = 'red'
+                print(f'Exception {ex} encountered during NAV add')
+
+        context = {'company':account.company, 'id':account.id, 'message':message, 'message_color':message_color}
+        context['curr_module_id'] = 'id_401k_module'
+        return render(request, template_name, context)
+    except Account401K.DoesNotExist:
+        return HttpResponseRedirect(reverse('retirement_401k:account-list'))
+
 def add_account(request):
     template_name = 'retirement_401k/account_create.html'
     if request.method == 'POST':
@@ -187,58 +224,64 @@ def account_detail(request, id):
 
 def get_transactions(request, id):
     template_name = 'retirement_401k/transactions_list.html'
-    account = Account401K.objects.get(id=id)
-    context = dict()
-    context['id'] = id
-    context['company'] = account.company
-    context['trans_list'] = list()
-    for transaction in Transaction401K.objects.filter(account=account):
-        trans = dict()
-        trans['id'] = transaction.id
-        trans['trans_date'] = transaction.trans_date
-        trans['employee_contribution'] = transaction.employee_contribution
-        trans['employer_contribution'] = transaction.employer_contribution
-        trans['notes'] = transaction.notes
-        trans['units'] = transaction.units
-        context['trans_list'].append(trans)
-    context['curr_module_id'] = 'id_401k_module'
-    return render(request, template_name, context)
+    try:
+        account = Account401K.objects.get(id=id)
+        context = dict()
+        context['id'] = id
+        context['company'] = account.company
+        context['trans_list'] = list()
+        for transaction in Transaction401K.objects.filter(account=account):
+            trans = dict()
+            trans['id'] = transaction.id
+            trans['trans_date'] = transaction.trans_date
+            trans['employee_contribution'] = transaction.employee_contribution
+            trans['employer_contribution'] = transaction.employer_contribution
+            trans['notes'] = transaction.notes
+            trans['units'] = transaction.units
+            context['trans_list'].append(trans)
+        context['curr_module_id'] = 'id_401k_module'
+        return render(request, template_name, context)
+    except Account401K.DoesNotExist:
+        return HttpResponseRedirect(reverse('retirement_401k:account-list'))
 
 def add_transaction(request, id):
     template_name = 'retirement_401k/add_transaction.html'
-    account = Account401K.objects.get(id=id)
-    message = ''
-    message_color = 'ignore'
-    if request.method == 'POST':
-        message_color = 'green'
-        print(request.POST)
-        trans_date = get_date_or_none_from_string(request.POST['trans_date'])
-        employee_contribution = get_float_or_none_from_string(request.POST['employee_contribution'])
-        employer_contribution = get_float_or_none_from_string(request.POST['employee_contribution'])
-        notes = request.POST['notes']
-        units = get_float_or_none_from_string(request.POST['units'])
-        try:
-            Transaction401K.objects.create(
-                account=account,
-                trans_date=trans_date,
-                employee_contribution=employee_contribution,
-                employer_contribution=employer_contribution,
-                units=units,
-                notes=notes
-            )
-            message = 'Transaction addition successful'
-        except IntegrityError:
-            message = 'Transaction already being tracked'
-            message_color = 'red'
-        except Exception as ex:
-            message = 'Transaction add failed'
-            message_color = 'red'
-            print(f'Exception {ex} encountered during transaction add')
-        reconcile_401k()
+    try:
+        account = Account401K.objects.get(id=id)
+        message = ''
+        message_color = 'ignore'
+        if request.method == 'POST':
+            message_color = 'green'
+            print(request.POST)
+            trans_date = get_date_or_none_from_string(request.POST['trans_date'])
+            employee_contribution = get_float_or_none_from_string(request.POST['employee_contribution'])
+            employer_contribution = get_float_or_none_from_string(request.POST['employee_contribution'])
+            notes = request.POST['notes']
+            units = get_float_or_none_from_string(request.POST['units'])
+            try:
+                Transaction401K.objects.create(
+                    account=account,
+                    trans_date=trans_date,
+                    employee_contribution=employee_contribution,
+                    employer_contribution=employer_contribution,
+                    units=units,
+                    notes=notes
+                )
+                message = 'Transaction addition successful'
+            except IntegrityError:
+                message = 'Transaction already being tracked'
+                message_color = 'red'
+            except Exception as ex:
+                message = 'Transaction add failed'
+                message_color = 'red'
+                print(f'Exception {ex} encountered during transaction add')
+            reconcile_401k()
 
-    context = {'company':account.company, 'id':account.id, 'operation':'Add', 'message':message, 'message_color':message_color}
-    context['curr_module_id'] = 'id_401k_module'
-    return render(request, template_name, context)
+        context = {'company':account.company, 'id':account.id, 'operation':'Add', 'message':message, 'message_color':message_color}
+        context['curr_module_id'] = 'id_401k_module'
+        return render(request, template_name, context)
+    except Account401K.DoesNotExist:
+        return HttpResponseRedirect(reverse('retirement_401k:account-list'))
 
 def edit_transaction(request, id):
     template_name = 'retirement_401k/add_transaction.html'

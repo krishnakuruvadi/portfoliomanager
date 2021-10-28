@@ -94,7 +94,7 @@ def get_historical_year_mf_vals(amfi_code, year):
                             pass
                 break
         except Exception as ex:
-            print("exception in getting historial mf vals for year", year, ex)
+            print(f"exception in getting historial mf vals for {amfi_code} for year {year} {ex}")
             pass
 
 def get_forex_rate(date, from_cur, to_cur):

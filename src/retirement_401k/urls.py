@@ -10,7 +10,9 @@ from .views import (
     add_transaction,
     edit_transaction,
     TransactionDeleteView,
-    links
+    links,
+    add_nav,
+    delete_nav
 )
 
 app_name = 'retirement_401k'
@@ -23,6 +25,8 @@ urlpatterns = [
     path('<id>/delete/', AccountDeleteView.as_view(), name='account-delete'),
     path('<id>/transactions/', get_transactions, name='transaction-list'),
     path('<id>/add-transaction/', add_transaction, name='transaction-add'),
+    path('<id>/add-nav/', add_nav, name='nav-add'),
+    path('<id>/delete-nav/<nav_id>', delete_nav, name='nav-delete'),
     path('<id>/edit-transaction/', edit_transaction, name='transaction-edit'),
     path('<id>/delete-transaction/', TransactionDeleteView.as_view(), name='transaction-delete')
 ]
