@@ -13,6 +13,11 @@ EXCHANGE_CHOICES = [
     ('NSE/BSE', 'NSE/BSE'),
 ]
 
+TRADING_STATUS_CHOICES = [
+    ('Listed', 'Listed'),
+    ('Delisted', 'Delisted')
+]
+
 CAPITALISATION_CHOICES = [
     ('Large-Cap','Large-Cap'),
     ('Mid-Cap','Mid-Cap'),
@@ -76,6 +81,9 @@ class Stock(models.Model):
     capitalisation = models.CharField(max_length=15, choices=CAPITALISATION_CHOICES, null=True, blank=True)
     industry = models.CharField(max_length=50, null=True, blank=True)
     etf = models.BooleanField(default=False)
+    trading_status = models.CharField(max_length=25,choices=TRADING_STATUS_CHOICES, default='Listed')
+    delisting_date = models.DateField(_('Delisting Date'), null=True, blank=True)
+    listing_date = models.DateField(_('Listing Date'), null=True, blank=True)
     
     def get_absolute_url(self):
         return reverse("common:stock-detail", kwargs={'id': self.id})

@@ -215,10 +215,12 @@ def get_historical_stock_price(stock, start, end):
             pass
         start_date = start_date+relativedelta(days=-1)
     if len(ret_vals) == 0:
-        get_vals = get_historic_vals(stock.symbol, stock.exchange, end+relativedelta(days=-5), datetime.date.today())
+        begin_dt = end+relativedelta(days=-5)
+        get_vals = get_historic_vals(stock.symbol, stock.exchange, begin_dt, datetime.date.today())
         if not get_vals:
             from tasks.tasks import pull_and_store_stock_historical_vals
-            pull_and_store_stock_historical_vals(stock.exchange, stock.symbol, start)
+            if stock.trading_status != 'Delisted' or stock.delisting_date == None or stock.delisting_date > begin_dt:
+                pull_and_store_stock_historical_vals(stock.exchange, stock.symbol, start)
             return ret_vals
         for k,v in get_vals.items():
             new_date = k

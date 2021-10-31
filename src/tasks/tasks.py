@@ -1004,6 +1004,10 @@ def upload_bank_account_transactions(full_file_path, bank_name, file_type, numbe
     upload_transactions(full_file_path, bank_name, file_type, number, account_id)
     update_bank_acc_bal(account_id)
 
+@db_periodic_task(crontab(minute='30', hour='*/12'))
+def update_shares_status():
+    from common.shares_helper import update_stock_status
+    update_stock_status()
 
 '''
 #  example code below

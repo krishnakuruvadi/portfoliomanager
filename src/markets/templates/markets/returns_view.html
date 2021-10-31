@@ -52,7 +52,7 @@
                 {% for yr in years %}
                 <th>{{yr}}</th>
                 {% endfor %}
-                <th>As On</th>
+                <!--th>As On</th-->
             </tr>
         </thead>
         <tbody>
@@ -63,7 +63,7 @@
                 {% for yr in years %}
                     <td>{{entry|lookup:yr}}</td>
                 {% endfor %}
-                <td><small>{{entry.as_on_date}}</small></td>
+                <!--td><small>{{entry.as_on_date}}</small></td-->
             </tr>
             {% endfor %}
         </tbody>
@@ -77,7 +77,7 @@
                 {% for month in months %}
                 <th>{{month}}</th>
                 {% endfor %}
-                <th>As On</th>
+                <!--th>As On</th-->
             </tr>
         </thead>
         <tbody>
@@ -88,7 +88,7 @@
                 {% for month in months %}
                     <td>{{entry|lookup:month}}</td>
                 {% endfor %}
-                <td><small>{{entry.as_on_date}}</small></td>
+                <!--td><small>{{entry.as_on_date}}</small></td-->
             </tr>
             {% endfor %}
         </tbody>
@@ -102,7 +102,7 @@
                 {% for qtr in quarters %}
                 <th>{{qtr}}</th>
                 {% endfor %}
-                <th>As On</th>
+                <!--th>As On</th-->
             </tr>
         </thead>
         <tbody>
@@ -113,7 +113,7 @@
                 {% for qtr in quarters %}
                     <td>{{entry|lookup:qtr}}</td>
                 {% endfor %}
-                <td><small>{{entry.as_on_date}}</small></td>
+                <!--td><small>{{entry.as_on_date}}</small></td-->
             </tr>
             {% endfor %}
         </tbody>

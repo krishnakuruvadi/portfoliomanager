@@ -1079,26 +1079,31 @@ def get_investment_data(start_date):
             print(f'no transactions in shares in date range {data_start_date} and {data_end_date}')
         share_val = 0
         for s,q in share_qty.items():
-            stock_obj = add_common_stock(exchange=s[0:s.find('-')], symbol=s[s.find('-')+1:], start_date=data_end_date)
+            exchange = s[0:s.find('-')]
+            symbol = s[s.find('-')+1:]
+            stock_obj = add_common_stock(exchange=exchange, symbol=symbol, start_date=data_end_date)
             if stock_obj:
-                historical_stock_prices = get_historical_stock_price(stock_obj, data_end_date+relativedelta(days=-5), data_end_date)
-                for val in historical_stock_prices:
-                    found = False
-                    #print(val)
-                    for k,v in val.items():
-                        if stock_obj.exchange == 'NYSE' or stock_obj.exchange == 'NASDAQ':
-                            conv_val = get_conversion_rate('USD', 'INR', data_end_date)
-                            #print('conversion value', conv_val)
-                            if conv_val:
-                                share_val += float(conv_val)*float(v)*float(q)
+                if float(q) > 0:
+                    historical_stock_prices = get_historical_stock_price(stock_obj, data_end_date+relativedelta(days=-5), data_end_date)
+                    for val in historical_stock_prices:
+                        found = False
+                        #print(val)
+                        for k,v in val.items():
+                            if stock_obj.exchange == 'NYSE' or stock_obj.exchange == 'NASDAQ':
+                                conv_val = get_conversion_rate('USD', 'INR', data_end_date)
+                                #print('conversion value', conv_val)
+                                if conv_val:
+                                    share_val += float(conv_val)*float(v)*float(q)
+                                    found = True
+                                    break
+                            else:
+                                share_val += float(v)*float(q)
                                 found = True
                                 break
-                        else:
-                            share_val += float(v)*float(q)
-                            found = True
+                        if found:
                             break
-                    if found:
-                        break
+                else:
+                    print(f'{exchange} {symbol} quantity 0 by {data_end_date}')
             else:
                 print(f'couldnt create stock object {s}')
         if share_val != 0:
@@ -1125,15 +1130,18 @@ def get_investment_data(start_date):
         for s,q in mf_qty.items():
             fund_obj = MutualFund.objects.get(code=s)
             if fund_obj:
-                historical_mf_prices = get_historical_mf_nav(s, data_end_date+relativedelta(days=-5), data_end_date)
-                for val in historical_mf_prices:
-                    found = False
-                    for k,v in val.items():
-                        mf_val += float(v)*int(q)
-                        found = True
-                        break
-                    if found:
-                        break
+                if float(q) > 0:
+                    historical_mf_prices = get_historical_mf_nav(s, data_end_date+relativedelta(days=-5), data_end_date)
+                    for val in historical_mf_prices:
+                        found = False
+                        for k,v in val.items():
+                            mf_val += float(v)*float(q)
+                            found = True
+                            break
+                        if found:
+                            break
+                else:
+                    print(f'{s} quantity 0 by {data_end_date}')
         if mf_val != 0:
             if not mf_reset_on_zero:
                 mf_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})

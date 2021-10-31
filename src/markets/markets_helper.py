@@ -40,23 +40,27 @@ def get_news():
                 print(f"Exception {ex} while getting news from MC for {ish['exchange']} {ish['symbol']}")
 
 def update_india_market_returns(input):
+    if 'as_on' in input:
+        if type(input['as_on']) == datetime.datetime:
+            input['as_on'] = input['as_on'].date()
     if 'trailing_ret' in input:
         for ret in input['trailing_ret']:
             try:
                 r = IndexRollingReturns.objects.get(country='India', name=ret['name'])
-                r.return_1d=ret['1D'],
-                r.return_1w=ret['1W'],
-                r.return_1m=ret['1M'],
-                r.return_3m=ret['3M'],
-                r.return_6m=ret['6M'],
-                r.return_1y=ret['1Y'],
-                r.return_3y=ret['3Y'],
-                r.return_5y=ret['5Y'],
-                r.return_10y=ret['10Y'],
-                r.return_15y=ret['15Y'],
-                r.return_incep=ret['inception'],
-                r.return_ytd=ret['YTD'],
+                r.return_1d=ret['1D']
+                r.return_1w=ret['1W']
+                r.return_1m=ret['1M']
+                r.return_3m=ret['3M']
+                r.return_6m=ret['6M']
+                r.return_1y=ret['1Y']
+                r.return_3y=ret['3Y']
+                r.return_5y=ret['5Y']
+                r.return_10y=ret['10Y']
+                r.return_15y=ret['15Y']
+                r.return_incep=ret['inception']
+                r.return_ytd=ret['YTD']
                 r.as_on_date=input['as_on']
+                r.save()
             
             except IndexRollingReturns.DoesNotExist:
                 IndexRollingReturns.objects.create(
@@ -76,6 +80,8 @@ def update_india_market_returns(input):
                     return_ytd=ret['YTD'],
                     as_on_date=input['as_on']
                 )
+            except Exception as ex:
+                print(f'Exception when updating trailing_ret: {ex}')
     if 'yearly_ret' in input:
         for yr in input['yearly_ret']:
             for k,v in yr.items():
@@ -91,6 +97,8 @@ def update_india_market_returns(input):
                     )
                 except IntegrityError:
                     pass
+                except Exception as ex:
+                    print(f'Exception when updating yearly_ret: {ex}')
 
     if 'quarterly_ret' in input:
         for qtr in input['quarterly_ret']:
@@ -107,6 +115,8 @@ def update_india_market_returns(input):
                     )
                 except IntegrityError:
                     pass
+                except Exception as ex:
+                    print(f'Exception when updating quarterly_ret: {ex}')
 
     if 'monthly_ret' in input:
         for month in input['monthly_ret']:
@@ -123,3 +133,5 @@ def update_india_market_returns(input):
                     )
                 except IntegrityError:
                     pass
+                except Exception as ex:
+                    print(f'Exception when updating monthly_ret: {ex}')

@@ -508,3 +508,39 @@ def update_tracked_stocks():
             st.delete()
             removed += 1
     print(f'summary: added {added} removed {removed}')
+
+
+def update_stock_status():
+    from operator import or_
+    from functools import reduce
+    from django.db.models import Q
+    url = 'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager-data/main/India/nse_bse_eq.json'
+    print(f'fetching from url {url}')
+    r = requests.get(url, timeout=15)
+    if r.status_code == 200:
+        li = ['NSE', 'BSE', 'NSE/BSE']
+        for stock in Stock.objects.filter(reduce(or_, [Q(exchange__icontains=q) for q in li])):
+            for entry, val in r.json().items():
+                #print(f'{entry}: {val}')
+                if stock.isin != '' and stock.isin == entry:
+                    try:
+                        if 'delisting_date' in val and val['delisting_date'] != '':
+                            stock.delisting_date = get_date_or_none_from_string(val['delisting_date'], '%d-%b-%Y')
+                            stock.trading_status = 'Delisted'
+                        if 'listing_date' in val and val['listing_date'] != '':
+                            stock.listing_date = get_date_or_none_from_string(val['listing_date'], '%d-%b-%Y')
+                        stock.save()
+                    except Exception as ex:
+                        print(f'exception {ex} when updating status for {stock.symbol} {stock.exchange}')  
+                else:
+                    if val['bse_security_id'] == stock.symbol or val['nse_symbol'] == stock.symbol:
+                        try:
+                            if 'delisting_date' in val and val['delisting_date'] != '':
+                                stock.delisting_date = get_date_or_none_from_string(val['delisting_date'], '%d-%b-%Y')
+                                stock.trading_status = 'Delisted'
+                            if 'listing_date' in val and val['listing_date'] != '':
+                                stock.listing_date = get_date_or_none_from_string(val['listing_date'], '%d-%b-%Y')
+                            stock.isin = entry
+                            stock.save()
+                        except Exception as ex:
+                            print(f'exception {ex} when updating status for {stock.symbol} {stock.exchange}')  
