@@ -12,7 +12,8 @@ from .views import (
     delete_transactions,
     delete_transaction,
     update_account,
-    upload_transactions
+    upload_transactions,
+    update_transaction
 )
 
 app_name = 'bankaccounts'
@@ -30,4 +31,5 @@ urlpatterns = [
     path('<id>/transaction/<trans_id>', transaction_detail, name='transaction-detail'),
     path('<id>/delete_transactions', delete_transactions, name='delete-transactions'),
     path('<id>/transaction/<trans_id>/delete', delete_transaction, name='delete-transaction'),
+    path('<id>/transaction/<trans_id>/update', update_transaction, name='update-transaction')
 ]

@@ -61,6 +61,7 @@ def upload_transactions(full_file_path, bank_name, file_type, acc_number, accoun
                         category = 'Investment'
                     if not category:
                         print(f'unknown category {transaction.payee.lower()}')
+                        category = 'Other'
                     if trans_type == 'Debit' and amount < 0:
                         amount = -1*amount
                     try:

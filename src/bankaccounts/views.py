@@ -125,6 +125,45 @@ def add_transaction(request,id):
     except BankAccount.DoesNotExist:
         return HttpResponseRedirect(reverse('bankaccounts:account-list'))
 
+def update_transaction(request, id, trans_id):
+    template = 'bankaccounts/edit_transaction.html'
+    context = dict()
+    message = ''
+    message_color = 'ignore'
+    try:
+        acc = BankAccount.objects.get(id=id)
+        try:
+            trans = Transaction.objects.get(account=acc, id=trans_id)
+            if request.method == 'POST':
+                try:
+                    message = 'Transaction updated successfully'
+                    message_color = 'green'
+                    trans.notes = request.POST['notes']
+                    trans.category = request.POST['tran_sub_type']
+                    trans.save()
+                except Exception as ex:
+                    print(f'failed to add transaction {ex}')
+                    message = 'Failed to add transaction'
+                    message_color = 'red'
+            context['trans_date'] = trans.trans_date
+            context['tran_type'] = trans.trans_type
+            context['trans_amount'] = trans.amount
+            context['description'] = trans.description
+            context['message'] = message
+            context['message_color'] = message_color
+            user_name_mapping = get_all_users()
+            context['user'] = user_name_mapping[acc.user]
+            context['curr_module_id'] = 'id_bank_acc_module'
+            context['account_id'] = acc.id
+            context['number'] = acc.number
+            context['bank_name'] = acc.bank_name
+            context['category'] = trans.category
+            context['notes'] = trans.notes
+            return render(request, template, context)
+        except Transaction.DoesNotExist:
+            return HttpResponseRedirect(reverse('bankaccounts:get-transactions', args=[str(id)]))
+    except BankAccount.DoesNotExist:
+        return HttpResponseRedirect(reverse('bankaccounts:account-list'))
 
 def add_account(request):
     template = 'bankaccounts/add_account.html'

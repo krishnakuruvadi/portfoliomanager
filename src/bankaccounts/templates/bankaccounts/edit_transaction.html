@@ -52,32 +52,37 @@
         </div>
 
         <div class="form-group row">
-          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date <span style="color:red;">*</span></label>
+          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date</label>
           <div class="col-sm-3">
               <div class="md-form mt-0">
-                  <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}" required="true">
+                  <label>{{trans_date}}</label>
               </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="nav" class="col-sm-3 col-form-label">Transaction Type <span style="color:red;">*</span></label>
+          <label for="nav" class="col-sm-3 col-form-label">Transaction Type</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <select name="tran_type" required="true" id="id_tran_type">
-                <option value="">---------</option>
-                <option value="Credit">Credit</option>
-                <option value="Debit">Debit</option>
-              </select>
+              <label>{{tran_type}}</label>
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="trans_amount" class="col-sm-3 col-form-label">Transaction Amount <span style="color:red;">*</span></label>
+          <label for="trans_amount" class="col-sm-3 col-form-label">Transaction Amount</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" step="0.01" id="trans_amount" name="trans_amount" value="{{trans_amount}}" required="true">
+              <label>{{trans_amount}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="description" class="col-sm-3 col-form-label">Description</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{description}}</label>
             </div>
           </div>
         </div>
@@ -104,17 +109,9 @@
                 <option value="Entertainment">Entertainment</option>
                 <option value="Utility">Utility</option>
                 <option value="Gift">Gift</option>
+                <option value="Salary/Payment">Salary/Payment</option>
                 <option value="Insurance">Insurance</option>
               </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="description" class="col-sm-3 col-form-label">Description <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <textarea name="description" rows="5" cols="20" required="true">{{description}}</textarea>
             </div>
           </div>
         </div>
@@ -123,7 +120,7 @@
           <label for="notes" class="col-sm-3 col-form-label">Notes</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
+              <textarea name="notes" rows="5" cols="20">{{notes|safe}}</textarea>
             </div>
           </div>
         </div>
@@ -145,6 +142,20 @@
 
 {% block javascript %}
   <script>
-
+    set_category('{{category|safe}}')
+    function set_category(cat) {
+      var categories = document.getElementById('id_tran_sub_type');
+      Array.from(document.querySelector("#id_tran_sub_type").options).forEach(function(option_element) {
+        let option_text = option_element.text;
+        let option_value = option_element.value;
+        let is_option_selected = option_element.selected;
+        if (cat == option_value) {
+          option_element.selected = true;
+        } else {
+          console.log(option_value)
+          console.log(cat)
+        }
+      });
+    }
   </script>
 {% endblock %}

@@ -9,6 +9,7 @@ TRANSACTION_TYPE_CHOICES = [
 ]
 
 CATEGORY_CHOICES = [
+    ('Card Payment', 'Card Payment'),
     ('Interest', 'Interest'),
     ('Shopping', 'Shopping'),
     ('EMI/Loan Payment', 'EMI/Loan Payment'),
@@ -25,6 +26,7 @@ CATEGORY_CHOICES = [
     ('Utility', 'Utility'),
     ('Gift', 'Gift'),
     ('Salary/Payment', 'Salary/Payment'),
+    ('Insurance', 'Insurance')
 ]
 
 ACCOUNT_TYPE_CHOICES = [
