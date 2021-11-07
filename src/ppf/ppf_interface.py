@@ -3,6 +3,10 @@ import datetime
 
 class PpfInterface:
     @classmethod
+    def get_chart_name(self):
+        return 'PPF'
+
+    @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
         try:
@@ -100,4 +104,18 @@ class PpfInterface:
                     contrib += float(ppf_trans.amount)
                 else:
                     deduct += -1*float(ppf_trans.amount)
+        return contrib, deduct
+
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        contrib = [0]*12
+        deduct = [0]*12
+        for ppf_obj in Ppf.objects.filter(user=user_id):
+            for ppf_trans in PpfEntry.objects.filter(number=ppf_obj, trans_date__gte=st_date, trans_date__lte=end_date):
+                if ppf_trans.entry_type == 'CR':
+                    contrib[ppf_trans.trans_date.month-1] += float(ppf_trans.amount)
+                else:
+                    deduct[ppf_trans.trans_date.month-1] += -1*float(ppf_trans.amount)
         return contrib, deduct

@@ -7,6 +7,11 @@ from dateutil.relativedelta import relativedelta
 
 
 class ShareInterface:
+
+    @classmethod
+    def get_chart_name(self):
+        return 'Shares'
+
     @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
@@ -125,4 +130,22 @@ class ShareInterface:
                     contrib += float(t.trans_price)
                 else:
                     deduct += -1*float(t.trans_price)
+        return contrib, deduct
+
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
+        contrib = [0]*12
+        deduct = [0]*12
+        for share_obj in Share.objects.filter(user=user_id):
+            transactions = Transactions.objects.filter(share=share_obj, trans_date__gte=st_date, trans_date__lte=end_date)
+            for t in transactions:
+                if t.trans_type == 'Buy':
+                    contrib[t.trans_date.month-1] += float(t.trans_price)
+                else:
+                    deduct[t.trans_date.month-1] += -1*float(t.trans_price)
         return contrib, deduct

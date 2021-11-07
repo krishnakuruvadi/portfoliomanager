@@ -339,8 +339,12 @@ def add_transaction(request):
             if exchange == 'NASDAQ' or exchange == 'NYSE':
                 exchange_rate = get_conversion_rate('USD', 'INR', trans_date)
             users = get_all_users()
+            trans_type = request.POST['trans_type']
+            price = get_float_or_none_from_string(request.POST['price'])
+            quantity = get_float_or_none_from_string(request.POST['quantity'])
             context = {'users':users, 'operation': 'Add Transaction', 'conversion_rate':exchange_rate, 'curr_module_id': 'id_shares_module',
-                        'trans_date':trans_date.strftime("%Y-%m-%d"), 'user':user, 'exchange':exchange, 'symbol':symbol}
+                        'trans_date':trans_date.strftime("%Y-%m-%d"), 'user':user, 'exchange':exchange, 'symbol':symbol, 'trans_type':trans_type,
+                        'price':price, 'quantity':quantity}
             return render(request, template, context)
 
     users = get_all_users()

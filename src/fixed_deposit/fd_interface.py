@@ -4,6 +4,10 @@ from .fixed_deposit_helper import get_maturity_value
 
 class FdInterface:
     @classmethod
+    def get_chart_name(self):
+        return 'FD'
+
+    @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
         try:
@@ -95,4 +99,20 @@ class FdInterface:
                 contrib += float(obj.principal)
             if obj.mat_date.year == yr:
                 deduct += -1*float(obj.final_val)
+        return contrib, deduct
+    
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
+        contrib = [0]*12
+        deduct = [0]*12
+        for obj in FixedDeposit.objects.filter(user=user_id, start_date__lte=end_date):
+            if obj.start_date.year == yr:
+                contrib[obj.start_date.month-1] += float(obj.principal)
+            if obj.mat_date.year == yr:
+                deduct[obj.start_date.month-1] += -1*float(obj.final_val)
         return contrib, deduct

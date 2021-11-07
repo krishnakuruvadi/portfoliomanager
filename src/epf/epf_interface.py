@@ -4,6 +4,10 @@ from dateutil.relativedelta import relativedelta
 
 class EpfInterface:
     @classmethod
+    def get_chart_name(self):
+        return 'EPF'
+
+    @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
         try:
@@ -91,4 +95,17 @@ class EpfInterface:
             for epf_trans in EpfEntry.objects.filter(epf_id=epf_obj, trans_date__gte=st_date, trans_date__lte=end_date):
                 contrib += float(epf_trans.employer_contribution + epf_trans.employee_contribution)
                 deduct += -1*float(epf_trans.withdrawl)
+        return contrib, deduct
+    
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        contrib = [0]*12
+        deduct = [0]*12
+        for epf_obj in Epf.objects.filter(user=user_id):
+            for epf_trans in EpfEntry.objects.filter(epf_id=epf_obj, trans_date__gte=st_date, trans_date__lte=end_date):
+                contrib[epf_trans.trans_date.month-1] += float(epf_trans.employer_contribution + epf_trans.employee_contribution)
+                deduct[epf_trans.trans_date.month-1] += -1*float(epf_trans.withdrawl)
+        print(f'returning {contrib} {deduct}')
         return contrib, deduct

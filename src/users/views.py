@@ -57,6 +57,7 @@ class UserDetailView(DetailView):
         data = super().get_context_data(**kwargs)
 
         start_day = datetime.date.today()
+
         start_day = get_min(EpfInterface.get_start_day_for_user(id_), start_day)
         start_day = get_min(EsppInterface.get_start_day_for_user(id_), start_day)
         start_day = get_min(FdInterface.get_start_day_for_user(id_), start_day)
@@ -286,3 +287,37 @@ class Users(APIView):
             obj['name'] = user_obj.name
             data['user_list'].append(obj)
         return Response(data)
+
+class UserMonthlyContribDeduct(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, id=None, year=None):
+        data = dict()
+        try:
+            print(f'id {id} year {year}')
+            id_int = int(id)
+            yr = int(year)
+            user_obj = User.objects.get(id=id_int)
+            data['vals'] = dict()
+            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            for month in range(0,12):
+                data['vals'][months[month]] = list()
+            data['headers'] = list()
+            totalc = [0]*12
+            totald = [0]*12
+            for intf in [EpfInterface, EsppInterface, FdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface]:
+                data['headers'].append(intf.get_chart_name())
+                c,d = intf.get_user_monthly_contrib(id_int, yr)
+                for month in range(0,12):
+                    data['vals'][months[month]].append(contrib_deduct_str(c[month],d[month]))
+                    totalc[month] += c[month]
+                    totald[month] += d[month]
+            for month in range(0,12):
+                data['vals'][months[month]].append(contrib_deduct_str(totalc[month],totald[month]))
+            data['headers'].append('Total')
+        except Exception as e:
+            print(e)
+        finally:
+            print(data)
+            return Response(data)

@@ -3,6 +3,11 @@ import datetime
 from .gold_helper import get_historical_price
 
 class GoldInterface:
+    
+    @classmethod
+    def get_chart_name(self):
+        return 'Gold'
+
     @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
@@ -71,9 +76,25 @@ class GoldInterface:
             if trans.buy_date.year == yr:
                 contrib += float(trans.buy_value)
             for st in SellTransaction.objects.filter(buy_trans=trans, trans_date__gte=st_date, trans_date__lte=end_date):
-                deduct += st.trans_amount
+                deduct += float(st.trans_amount)
         return contrib, deduct
     
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
+        contrib = [0]*12
+        deduct = [0]*12
+        for trans in Gold.objects.filter(user=user_id):
+            if trans.buy_date.year == yr:
+                contrib[trans.buy_date.month-1] += float(trans.buy_value)
+            for st in SellTransaction.objects.filter(buy_trans=trans, trans_date__gte=st_date, trans_date__lte=end_date):
+                deduct[trans.buy_date.month-1] += float(st.trans_amount)
+        return contrib, deduct
+
     @classmethod
     def get_goal_yearly_contrib(self, goal_id, yr):
         st_date = datetime.date(year=yr, day=1, month=1)

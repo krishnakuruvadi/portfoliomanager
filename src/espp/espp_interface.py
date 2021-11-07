@@ -5,6 +5,10 @@ from dateutil.relativedelta import relativedelta
 
 class EsppInterface:
     @classmethod
+    def get_chart_name(self):
+        return 'ESPP'
+
+    @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
         try:
@@ -111,4 +115,21 @@ class EsppInterface:
             for st in EsppSellTransactions.objects.filter(espp=espp_obj, trans_date__lte=end_date):
                 if st.trans_date >= st_date:
                     deduct += -1*float(st.trans_price)
+        return contrib, deduct
+    
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
+        contrib = [0]*12
+        deduct = [0]*12
+        for espp_obj in Espp.objects.filter(user=user_id, purchase_date__lte=end_date):
+            if espp_obj.purchase_date >= st_date:
+                contrib[espp_obj.purchase_date.month-1] += float(espp_obj.total_purchase_price)
+            for st in EsppSellTransactions.objects.filter(espp=espp_obj, trans_date__lte=end_date):
+                if st.trans_date >= st_date:
+                    deduct[espp_obj.purchase_date.month-1] += -1*float(st.trans_price)
         return contrib, deduct

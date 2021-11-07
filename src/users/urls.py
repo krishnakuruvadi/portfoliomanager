@@ -7,7 +7,8 @@ from .views import (
     add_user,
     update_user,
     ChartData,
-    Users
+    Users,
+    UserMonthlyContribDeduct
 )
 
 app_name = 'users'
@@ -19,6 +20,7 @@ urlpatterns = [
     path('<id>/delete/', UserDeleteView.as_view(), name='user-delete'),
     path('<id>/update', update_user, name='user-update'),
     path('api/chart/data/<id>', ChartData.as_view()),
-    path('api/get/users', Users.as_view())
+    path('api/get/users', Users.as_view()),
+    path('api/get/users_contrib/<id>/<year>', UserMonthlyContribDeduct.as_view())
 
 ]

@@ -3,6 +3,11 @@ import datetime
 from shared.handle_real_time_data import get_conversion_rate
 
 class R401KInterface:
+
+    @classmethod
+    def get_chart_name(self):
+        return '401K'
+
     @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
@@ -118,4 +123,24 @@ class R401KInterface:
                 else:
                     print(f'failed to get conversion rate from USD to INR for date {trans.trans_date}')
                 contrib += float(trans.employee_contribution + trans.employer_contribution) * float(conv_rate)
+        return contrib, deduct
+
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
+        contrib = [0]*12
+        deduct = [0]*12
+        for obj in Account401K.objects.filter(user=user_id):
+            for trans in Transaction401K.objects.filter(account=obj, trans_date__gte=st_date, trans_date__lte=end_date):
+                conv_rate = 1
+                conv_val = get_conversion_rate('USD', 'INR', trans.trans_date)
+                if conv_val:
+                    conv_rate = conv_val
+                else:
+                    print(f'failed to get conversion rate from USD to INR for date {trans.trans_date}')
+                contrib[trans.trans_date.month-1] += float(trans.employee_contribution + trans.employer_contribution) * float(conv_rate)
         return contrib, deduct

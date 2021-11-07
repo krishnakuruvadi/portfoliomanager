@@ -9,6 +9,10 @@ class BankAccountInterface:
         return '#E3CA95'
 
     @classmethod
+    def get_chart_name(self):
+        return 'Cash'
+
+    @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
         try:
@@ -72,6 +76,28 @@ class BankAccountInterface:
                 amt += 0 if not obj.balance else get_in_preferred_currency(float(obj.balance), obj.currency, datetime.date.today())
         return Decimal(amt)
     
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
+        contrib = [0]*12
+        deduct = [0]*12
+        for acc in BankAccount.objects.filter(user=user_id):
+            c = [0]*12
+            d = [0]*12
+            for trans in Transaction.objects.filter(account=acc, trans_date__lte=end_date, trans_date__gte=st_date):
+                if trans.trans_type == 'Credit':
+                    c[trans.trans_date.month-1] += float(trans.amount)
+                else:
+                    d[trans.trans_date.month-1] += float(trans.amount)
+            for i in range(0,12):
+                contrib[i] += get_in_preferred_currency(c[i], acc.currency, end_date)
+                deduct[i] += -1*get_in_preferred_currency(d[i], acc.currency, end_date)
+        return contrib, deduct
+
     @classmethod
     def get_user_yearly_contrib(self, user_id, yr):
         st_date = datetime.date(year=yr, day=1, month=1)

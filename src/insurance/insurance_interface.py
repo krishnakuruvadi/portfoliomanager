@@ -4,6 +4,11 @@ import datetime
 from .insurance_helper import get_historical_nav
 
 class InsuranceInterface:
+
+    @classmethod
+    def get_chart_name(self):
+        return 'Insurance'
+
     @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
@@ -73,6 +78,20 @@ class InsuranceInterface:
                 contrib += float(tran_obj.trans_amount)
         return contrib, deduct
     
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
+        contrib = [0]*12
+        deduct = [0]*12
+        for ip_obj in InsurancePolicy.objects.filter(user=user_id, policy_type='ULIP'):
+            for tran_obj in Transaction.objects.filter(policy=ip_obj, trans_date__gte=st_date, trans_date__lte=end_date, trans_type='Premium'):
+                contrib[tran_obj.trans_date.month-1] += float(tran_obj.trans_amount)
+        return contrib, deduct
+
     @classmethod
     def get_goal_yearly_contrib(self, goal_id, yr):
         st_date = datetime.date(year=yr, day=1, month=1)

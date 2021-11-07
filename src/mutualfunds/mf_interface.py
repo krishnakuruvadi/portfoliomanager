@@ -4,6 +4,11 @@ from dateutil.relativedelta import relativedelta
 from shared.handle_real_time_data import get_historical_mf_nav
 
 class MfInterface:
+
+    @classmethod
+    def get_chart_name(self):
+        return 'MF'
+
     @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
@@ -118,9 +123,27 @@ class MfInterface:
         deduct = 0
         for folio_obj in Folio.objects.filter(user=user_id):
             for trans in MutualFundTransaction.objects.filter(folio=folio_obj, trans_date__lte=end_date):
-                    if trans.trans_date.year == yr:
-                        if trans.trans_type == 'Buy' and not trans.switch_trans:
-                            contrib += trans.trans_price
-                        elif trans.trans_type == 'Sell' and not trans.switch_trans:
-                            deduct += -1*trans.trans_price
+                if trans.trans_date.year == yr:
+                    if trans.trans_type == 'Buy' and not trans.switch_trans:
+                        contrib += trans.trans_price
+                    elif trans.trans_type == 'Sell' and not trans.switch_trans:
+                        deduct += -1*trans.trans_price
+        return contrib, deduct
+
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
+        contrib = [0]*12
+        deduct = [0]*12
+        for folio_obj in Folio.objects.filter(user=user_id):
+            for trans in MutualFundTransaction.objects.filter(folio=folio_obj, trans_date__lte=end_date):
+                if trans.trans_date.year == yr:
+                    if trans.trans_type == 'Buy' and not trans.switch_trans:
+                        contrib[trans.trans_date.month-1] += float(trans.trans_price)
+                    elif trans.trans_type == 'Sell' and not trans.switch_trans:
+                        deduct[trans.trans_date.month-1] += -1*float(trans.trans_price)
         return contrib, deduct

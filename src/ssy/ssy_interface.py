@@ -2,6 +2,11 @@ from .models import Ssy, SsyEntry
 import datetime
 
 class SsyInterface:
+
+    @classmethod
+    def get_chart_name(self):
+        return 'SSY'
+
     @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
@@ -99,4 +104,21 @@ class SsyInterface:
                     contrib += float(ssy_trans.amount)
                 else:
                     deduct += -1*float(ssy_trans.amount)
+        return contrib, deduct
+
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
+        contrib = [0]*12
+        deduct = [0]*12
+        for ssy_obj in Ssy.objects.filter(user=user_id):
+            for ssy_trans in SsyEntry.objects.filter(number=ssy_obj, trans_date__gte=st_date, trans_date__lte=end_date):
+                if ssy_trans.entry_type == 'CR':
+                    contrib[ssy_trans.trans_date.month-1] += float(ssy_trans.amount)
+                else:
+                    deduct[ssy_trans.trans_date.month-1] += -1*float(ssy_trans.amount)
         return contrib, deduct

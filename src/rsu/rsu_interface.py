@@ -5,6 +5,10 @@ from dateutil.relativedelta import relativedelta
 
 class RsuInterface:
     @classmethod
+    def get_chart_name(self):
+        return 'RSU'
+
+    @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
         try:
@@ -120,4 +124,21 @@ class RsuInterface:
                     contrib += float(rsu_obj.total_aquisition_price)
                 for st in RSUSellTransactions.objects.filter(rsu_vest=rsu_obj, trans_date__gte=st_date, trans_date__lte=end_date):
                     deduct += -1*float(st.trans_price)
+        return contrib, deduct
+
+    @classmethod
+    def get_user_monthly_contrib(self, user_id, yr):
+        st_date = datetime.date(year=yr, day=1, month=1)
+        end_date = datetime.date(year=yr, day=31, month=12)
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
+        contrib = [0]*12
+        deduct = [0]*12
+        for aw_obj in RSUAward.objects.filter(user=user_id):
+            for rsu_obj in RestrictedStockUnits.objects.filter(award=aw_obj, vest_date__lte=end_date):
+                if rsu_obj.vest_date >= st_date:
+                    contrib[rsu_obj.vest_date.month-1] += float(rsu_obj.total_aquisition_price)
+                for st in RSUSellTransactions.objects.filter(rsu_vest=rsu_obj, trans_date__gte=st_date, trans_date__lte=end_date):
+                    deduct[rsu_obj.vest_date.month-1] += -1*float(st.trans_price)
         return contrib, deduct

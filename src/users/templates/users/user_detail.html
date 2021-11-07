@@ -64,7 +64,7 @@
   <tbody>
     {% for key,value in  yrly_investment.items %}
       <tr>
-        <td>{{key}}</td>
+        <td><a href="#" onclick="get_monthly_contrib({{key}});return false;">{{key}}</a></td>
         {% for inv_type in investment_types %}
         <td>
           {{value|lookup:inv_type}}
@@ -74,6 +74,21 @@
     {% endfor %}
   </tbody>
 </table>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Contributions by month</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="divtoaddresult"></div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endif %}
   <div>&nbsp;</div>
 {% endblock content %}
@@ -94,6 +109,49 @@
 
 {% block javascript %}
   <script>
+
+    function get_monthly_contrib(year) {
+      console.log(year)
+      cgElem = document.getElementById("custom_growth")
+      var ep = '/user/api/get/users_contrib/{{object.id}}/' + year
+      data = {}
+      $.ajax({
+        method:"GET",
+        url:ep,
+        beforeSend: function () {
+          $("exampleModalLabel").html(year);
+          $("#divtoaddresult").html("Processing, please wait...");
+        },
+        success: function(data){
+          console.log(data)
+          $('#exampleModal').modal('show')
+          html_data = "<table class='table table-hover dt-responsive'><tr><th></th>"
+          for (i=0;i<data.headers.length;i++) {
+            html_data += "<th>"+data.headers[i]+"</th>"
+          }
+          html_data += "</tr>"
+          for(var key in data.vals) {
+            value = data.vals[key]
+	          console.log(key + " = " + value);
+            html_data += "<tr><th>" + key + "</th>"
+            for (i=0;i<value.length;i++) {
+              html_data += "<td>" + value[i] + "</td>"
+            }
+            html_data += "</tr>"
+
+          }
+          html_data += "</table>"
+          $("#divtoaddresult").html(html_data);
+          $('#exampleModal').modal('handleUpdate')
+          $("exampleModalLabel").text(year);
+        },
+        error: function(error_data){
+          console.log("error")
+          console.log(error_data)
+        }
+      })
+    }
+
     function get_vals_and_set_chart(data) {
       var debt_equity = [0, 0, 0]
       var done_pending = [0, 0]
