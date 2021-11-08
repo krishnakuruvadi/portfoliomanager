@@ -250,12 +250,12 @@ def get_historical_stock_price(stock, start, end):
     return ret_vals
 
 def get_historical_mf_nav(amfi_code, start, end, fetch=False):
-    #print("getting historical mf nav for code ", amfi_code)
+    #print(f"getting historical mf nav for code {amfi_code} between {start} and {end}")
     ret_vals = list()
     start_date = end
     try:
         code = MutualFund.objects.get(code=amfi_code)
-        while(start_date>start):
+        while(start_date>=start):
             try:
                 hmfp = HistoricalMFPrice.objects.get(code=code, date=start_date)
                 ret_vals.append({hmfp.date:hmfp.nav})
@@ -267,7 +267,7 @@ def get_historical_mf_nav(amfi_code, start, end, fetch=False):
             get_historical_year_mf_vals(amfi_code=amfi_code, year=poll_date.year)
             
             start_date = end
-            while(start_date>start):
+            while(start_date>=start):
                 try:
                     hmfp = HistoricalMFPrice.objects.get(code=code, date=start_date)
                     ret_vals.append({hmfp.date:hmfp.nav})

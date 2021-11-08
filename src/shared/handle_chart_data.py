@@ -500,6 +500,11 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                     total_contribution += amt
                     if yr == datetime.date.today().year -1:
                         last_yr_contrib += amt
+            if yr in deduct:
+                for _,amt in deduct[yr].items():
+                    total_contribution += amt
+                    if yr == datetime.date.today().year -1:
+                        last_yr_contrib += amt
     
     '''
     if len(contrib.keys()):

@@ -130,17 +130,24 @@ class BankAccountInterface:
         total = 0
         cash_flows = list()
         for obj in BankAccount.objects.filter(goal=goal_id):
+            c = 0
+            d = 0
+            tot = 0
             for t in Transaction.objects.filter(account=obj, trans_date__lte=end_date):
                 if t.trans_type == 'Credit':
                     if t.trans_date >= st_date:
-                        contrib += float(t.amount)
-                        cash_flows.append((t.trans_date, -1*float(t.amount)))
-                    total += float(t.amount)
+                        c += float(t.amount)
+                        #cash_flows.append((t.trans_date, -1*float(t.amount)))
+                    tot += float(t.amount)
                 else:
                     if t.trans_date >= st_date:
-                        deduct += -1 * float(t.amount)
-                        cash_flows.append((t.trans_date, float(t.amount)))
-                    total -= float(t.amount)
+                        d += -1 * float(t.amount)
+                        #cash_flows.append((t.trans_date, float(t.amount)))
+                    tot -= float(t.amount)
+            contrib +=  get_in_preferred_currency(c, obj.currency, end_date)
+            deduct += get_in_preferred_currency(d, obj.currency, end_date)
+            total += get_in_preferred_currency(tot, obj.currency, end_date)
+            cash_flows.append((end_date, -1*get_in_preferred_currency(tot, obj.currency, end_date)))
         return cash_flows, contrib, deduct, total
     
     @classmethod
