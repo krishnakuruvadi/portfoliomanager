@@ -83,7 +83,7 @@ def get_monthly_projected_vals_and_dates(start_date, start_amount, period, infla
             dates.append(new_date.strftime(format))
     return vals, dates
 
-def get_preferred_tz(utc_date_time):
+def get_in_preferred_tz(utc_date_time):
     from common.helper import get_preferences
 
     from_zone = tz.tzutc()
@@ -92,7 +92,7 @@ def get_preferred_tz(utc_date_time):
     if not preferred_tz:
         preferred_tz = 'Asia/Kolkata'
     return utc_date_time.astimezone(timezone(preferred_tz)).strftime("%Y-%m-%d %H:%M:%S")
-
+    
 def k_obfuscate(byt):
     # Use same function in both directions.  Input and output are bytes
     # objects.

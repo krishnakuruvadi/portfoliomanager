@@ -12,7 +12,7 @@ from django.template import Context
 from shared.handle_delete import delete_user
 from shared.handle_chart_data import get_user_contributions
 from .models import User
-from shared.utils import get_date_or_none_from_string
+from shared.utils import get_date_or_none_from_string, get_in_preferred_tz
 from epf.epf_interface import EpfInterface
 from espp.espp_interface import EsppInterface
 from fixed_deposit.fd_interface import FdInterface
@@ -30,6 +30,11 @@ from shared.utils import get_min
 from dateutil import tz
 from pytz import timezone
 from common.helper import get_preferences
+from shared.handle_get import *
+from dateutil.relativedelta import relativedelta
+from pages.models import InvestmentData
+import json
+
 
 # Create your views here.
 class UserListView(ListView):
@@ -39,11 +44,26 @@ class UserListView(ListView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['curr_module_id'] = 'id_user_module'
+        data['current_networth'] = 0
+        for user in data['user_list']:
+            data['current_networth'] += float(user.total_networth)
+            if user.as_on:
+                data['as_on'] = user.as_on
+        preferred_currency = get_preferences('currency')
+        data['preferred_currency'] = preferred_currency if preferred_currency else 'INR'
+        data['as_on'] = get_in_preferred_tz(data['as_on'])
         print(data)
         return data
 
 def contrib_deduct_str(c, d):
     return str(int(c)) + ' / ' + str(int(d))
+
+
+def get_start_day_for_user(id_):
+    start_day = datetime.date.today()
+    for intf in [EpfInterface, EsppInterface, FdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface]:
+        start_day = get_min(intf.get_start_day_for_user(id_), start_day)
+    return start_day
 
 class UserDetailView(DetailView):
     template_name = 'users/user_detail.html'
@@ -56,22 +76,9 @@ class UserDetailView(DetailView):
         id_ = self.kwargs.get("id")
         data = super().get_context_data(**kwargs)
 
-        start_day = datetime.date.today()
+        start_day = get_start_day_for_user(id_)
 
-        start_day = get_min(EpfInterface.get_start_day_for_user(id_), start_day)
-        start_day = get_min(EsppInterface.get_start_day_for_user(id_), start_day)
-        start_day = get_min(FdInterface.get_start_day_for_user(id_), start_day)
-        start_day = get_min(MfInterface.get_start_day_for_user(id_), start_day)
-        start_day = get_min(PpfInterface.get_start_day_for_user(id_), start_day)
-        start_day = get_min(SsyInterface.get_start_day_for_user(id_), start_day)
-        start_day = get_min(ShareInterface.get_start_day_for_user(id_), start_day)
-        start_day = get_min(R401KInterface.get_start_day_for_user(id_), start_day)
-        start_day = get_min(RsuInterface.get_start_day_for_user(id_), start_day)
-        start_day = get_min(InsuranceInterface.get_start_day_for_user(id_), start_day)
-        start_day = get_min(GoldInterface.get_start_day_for_user(id_), start_day)
-        start_day = get_min(BankAccountInterface.get_start_day_for_user(id_), start_day)
-
-        new_start_day = datetime.date(start_day.year, start_day.month, 1)
+        #new_start_day = datetime.date(start_day.year, start_day.month, 1)
         
         curr_yr = datetime.date.today().year
         investment_types = list()
@@ -321,3 +328,67 @@ class UserMonthlyContribDeduct(APIView):
         finally:
             print(data)
             return Response(data)
+
+def insights_view(request):
+    template = 'users/insights.html'
+    try:
+        context =dict()
+        users = get_all_users_names_as_list()
+        context = dict()
+        context['all'] = dict()
+        context['users'] = dict()
+
+        i = 1
+        today = datetime.date.today()
+        start_day_for_family = today
+        for user in users:
+            context['users'][str(i)] = {'name':user}
+            id = get_user_id_from_name(user)
+            contribs = list()
+            contrib = 0
+            #contrib = get_user_contributions(id)
+            start_day = get_start_day_for_user(id)
+            #start_day = datetime.date(day=1,month=1,year=2009)
+            end_year = today.year+1
+            start_day_for_family = get_min(start_day_for_family, start_day)
+            for yr in range(start_day.year, end_year):
+                contrib_totals = [0]*12
+                for intf in [EpfInterface, EsppInterface, FdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface]:
+                    c,d = intf.get_user_monthly_contrib(id, yr)
+                    for month in range(0,12):
+                        contrib_totals[month] += c[month] + d[month]
+                for month in range(0,12):
+                    dt = datetime.date(day=1, month=month+1, year=yr)+relativedelta(months=1)+relativedelta(days=-1)
+                    if dt <= today:
+                        contribs.append({'x':dt.strftime('%Y-%m-%d'), 'y':round(contrib_totals[month]+contrib,2)})
+                        contrib += contrib_totals[month]
+            context['users'][str(i)]['contribs'] = contribs
+            context['users'][str(i)]['totals'] = list()
+            i = i + 1
+        context['users'][str(i)] = {'name':'All'}
+        max_vals = 0
+        for j in range(1,i):
+            max_vals = max_vals if max_vals > len(context['users'][str(j)]['contribs']) else len(context['users'][str(j)]['contribs'])
+        context['users'][str(i)]['contribs'] = list()
+        print(f"start: {context['users'][str(i)]['contribs']}")
+        for k in range(max_vals-1,-1,-1):
+            tt = 0
+            tt_d = None
+            for j in range(1,i):
+                ul = len(context['users'][str(i)]['contribs'])
+                jl = len(context['users'][str(j)]['contribs'])
+                if  ul< jl:
+                    #context['users'][str(i)]['contribs'][k]['y'] += context['users'][str(j)]['contribs'][k]['y']
+                    #context['users'][str(i)]['contribs'][k]['x'] = context['users'][str(j)]['contribs'][k]['x']
+                    tt += context['users'][str(j)]['contribs'][jl-ul-1]['y']
+                    tt_d = context['users'][str(j)]['contribs'][jl-ul-1]['x']
+            context['users'][str(i)]['contribs'].insert(0,{'x':tt_d, 'y':round(tt,2)})
+        try:
+            investment_data = InvestmentData.objects.get(user='all')
+            context['users'][str(i)]['totals'] = json.loads(investment_data.total_data.replace("\'", "\""))
+        except InvestmentData.DoesNotExist:
+            context['users'][str(i)]['totals'] = list()
+        print(context)
+        return render(request, template, context=context)
+    except User.DoesNotExist:
+        return HttpResponseRedirect("../")

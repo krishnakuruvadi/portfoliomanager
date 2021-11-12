@@ -12,6 +12,43 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
+  <table class="table table-borderless">
+    <tr>
+      <td><ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Users List</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="insights">Insights</a>
+        </li>
+      </ul></td>
+    </tr>
+    <tr>
+      <td style="text-align:right">
+        <div class="row">
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Current Networth</h5>
+                  <p class="card-text">{{preferred_currency}} {{current_networth}}</p>
+              </div>
+            </div>
+          </div>
+          <!--div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Current Investment</h5>
+                  <p class="card-text">{{current_investment}}</p>
+              </div>
+            </div>
+          </div-->
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:right"><small class="text-muted">Last updated {{as_on}}</small></td>
+    </tr>
+  </table>
   <table class="table table-hover dt-responsive" id="user-table" style="width:100%">
     <thead class="thead-dark">
       <tr>

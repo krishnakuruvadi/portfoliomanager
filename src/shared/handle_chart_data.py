@@ -800,7 +800,7 @@ def get_user_contributions(user_id):
         contrib['Cash'] = int(BankAccountInterface.get_amount_for_user(user_id))
         contrib['equity'] = contrib['ESPP']+contrib['RSU']+contrib['Shares']+contrib['MutualFunds']+contrib['401K']+contrib['Insurance']
         contrib['debt'] = contrib['EPF'] + contrib['FD'] + contrib['PPF'] + contrib['SSY']
-        contrib['total'] = contrib['equity'] + contrib['debt'] + contrib['Gold']
+        contrib['total'] = contrib['equity'] + contrib['debt'] + contrib['Gold'] + contrib['Cash']
         
         item_color_mapping = {
             'EPF': '#f15664',
