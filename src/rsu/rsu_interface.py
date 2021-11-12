@@ -71,7 +71,7 @@ class RsuInterface:
             if not obj.goal:
                 trans = RestrictedStockUnits.objects.filter(award=obj)
                 for t in trans:
-                    amt += 0 if not obj.latest_value else obj.latest_value
+                    amt += 0 if not t.latest_value else t.latest_value
         return amt
 
     @classmethod
