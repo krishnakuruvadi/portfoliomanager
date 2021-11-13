@@ -144,3 +144,54 @@ class R401KInterface:
                     print(f'failed to get conversion rate from USD to INR for date {trans.trans_date}')
                 contrib[trans.trans_date.month-1] += float(trans.employee_contribution + trans.employer_contribution) * float(conv_rate)
         return contrib, deduct
+    
+    @classmethod
+    def get_export_name(self):
+        return 'r_401k'
+    
+    @classmethod
+    def get_current_version(self):
+        return 'v1'
+
+    @classmethod
+    def export(self, user_id):
+        from shared.handle_get import get_goal_name_from_id
+
+        ret = {
+            self.get_export_name(): {
+                'version':self.get_current_version()
+            }
+        }
+        data = list()
+        for so in Account401K.objects.filter(user=user_id):
+            eod = {
+                'company': so.company,
+                'start_date':so.start_date,
+                'end_date':so.end_date,
+                'notes':so.notes,
+                'goal_name':''
+            }
+            if so.goal:
+                eod['goal_name'] = get_goal_name_from_id(so.goal)
+            t = list()
+            for trans in Transaction401K.objects.filter(account=so):
+                t.append({
+                    'trans_date':trans.trans_date,
+                    'employee_contribution': trans.employee_contribution,
+                    'employer_contribution': trans.employer_contribution,
+                    'units': trans.units,
+                    'notes':trans.notes
+                })
+            eod['transactions'] = t
+            nht = list()
+            for nh in NAVHistory.objects.filter(account=so):
+                nht.append({
+                   'nav_value': nh.nav_value,
+                   'nav_date':nh.nav_date,
+                   'comparision_nav_value':nh.comparision_nav_value
+                })
+            data.append(eod)
+        
+        ret[self.get_export_name()]['data'] = data
+        print(ret)
+        return ret

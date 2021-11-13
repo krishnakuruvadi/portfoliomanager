@@ -109,3 +109,52 @@ class EpfInterface:
                 deduct[epf_trans.trans_date.month-1] += -1*float(epf_trans.withdrawl)
         print(f'returning {contrib} {deduct}')
         return contrib, deduct
+
+    @classmethod
+    def get_export_name(self):
+        return 'epf'
+    
+    @classmethod
+    def get_current_version(self):
+        return 'v1'
+
+    @classmethod
+    def export(self, user_id):
+        from shared.handle_get import get_goal_name_from_id
+
+        ret = {
+            self.get_export_name(): {
+                'version':self.get_current_version()
+            }
+        }
+        data = list()
+        for eo in Epf.objects.filter(user=user_id):
+            eod = {
+                'number': eo.number,
+                'company': eo.company,
+                'start_date': eo.start_date,
+                'end_date': eo.end_date, 
+                'notes':eo.notes,
+                'uan':eo.uan,
+                'eps':eo.eps,
+                'goal_name':''
+            }
+            if eo.goal:
+                eod['goal_name'] = get_goal_name_from_id(eo.goal)
+            t = list()
+            for trans in EpfEntry.objects.filter(epf_id=eo):
+                t.append({
+                    'trans_date':trans.trans_date,
+                    'withdrawl':trans.withdrawl,
+                    'reference': trans.reference,
+                    'employee_contribution':trans.employee_contribution,
+                    'employer_contribution':trans.employer_contribution,
+                    'interest_contribution':trans.interest_contribution,
+                    'notes':trans.notes
+                })
+            eod['transactions'] = t
+            data.append(eod)
+        
+        ret[self.get_export_name()]['data'] = data
+        print(ret)
+        return ret

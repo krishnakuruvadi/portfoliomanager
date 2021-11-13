@@ -149,3 +149,51 @@ class ShareInterface:
                 else:
                     deduct[t.trans_date.month-1] += -1*float(t.trans_price)
         return contrib, deduct
+    
+    @classmethod
+    def get_export_name(self):
+        return 'shares'
+    
+    @classmethod
+    def get_current_version(self):
+        return 'v1'
+
+    @classmethod
+    def export(self, user_id):
+        from shared.handle_get import get_goal_name_from_id
+
+        ret = {
+            self.get_export_name(): {
+                'version':self.get_current_version()
+            }
+        }
+        data = list()
+        for so in Share.objects.filter(user=user_id):
+            eod = {
+                'exchange': so.exchange,
+                'symbol': so.symbol,
+                'notes':so.notes,
+                'etf':so.etf,
+                'goal_name':''
+            }
+            if so.goal:
+                eod['goal_name'] = get_goal_name_from_id(so.goal)
+            t = list()
+            for trans in Transactions.objects.filter(share=so):
+                t.append({
+                    'trans_date':trans.trans_date,
+                    'trans_type': trans.trans_type,
+                    'price': trans.price,
+                    'quantity': trans.quantity,
+                    'conversion_rate': trans.conversion_rate,
+                    'trans_price':trans.trans_price,
+                    'broker':trans.broker,
+                    'div_reinv':trans.div_reinv,
+                    'notes':trans.notes
+                })
+            eod['transactions'] = t
+            data.append(eod)
+        
+        ret[self.get_export_name()]['data'] = data
+        print(ret)
+        return ret

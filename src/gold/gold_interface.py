@@ -192,3 +192,50 @@ class GoldInterface:
             else:
                 print(f'failed to get total value for physical 22K for {end_date}')
         return round(amt, 2)
+
+    @classmethod
+    def get_export_name(self):
+        return 'gold'
+    
+    @classmethod
+    def get_current_version(self):
+        return 'v1'
+
+    @classmethod
+    def export(self, user_id):
+        from shared.handle_get import get_goal_name_from_id
+
+        ret = {
+            self.get_export_name(): {
+                'version':self.get_current_version()
+            }
+        }
+        data = list()
+        for go in Gold.objects.filter(user=user_id):
+            eod = {
+                'weight': go.weight,
+                'per_gm': go.per_gm,
+                'buy_value': go.buy_value,
+                'buy_date': go.buy_date, 
+                'notes':go.notes,
+                'purity':go.purity,
+                'buy_type':go.buy_type,
+                'goal_name':''
+            }
+            if go.goal:
+                eod['goal_name'] = get_goal_name_from_id(go.goal)
+            t = list()
+            for trans in SellTransaction.objects.filter(buy_trans=go):
+                t.append({
+                    'trans_date':trans.trans_date,
+                    'weight':trans.weight,
+                    'per_gm': trans.per_gm,
+                    'trans_amount':trans.trans_amount,
+                    'notes':trans.notes
+                })
+            eod['transactions'] = t
+            data.append(eod)
+        
+        ret[self.get_export_name()]['data'] = data
+        print(ret)
+        return ret

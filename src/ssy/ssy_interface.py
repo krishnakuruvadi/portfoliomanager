@@ -122,3 +122,47 @@ class SsyInterface:
                 else:
                     deduct[ssy_trans.trans_date.month-1] += -1*float(ssy_trans.amount)
         return contrib, deduct
+    
+    @classmethod
+    def get_export_name(self):
+        return 'ssy'
+    
+    @classmethod
+    def get_current_version(self):
+        return 'v1'
+
+    @classmethod
+    def export(self, user_id):
+        from shared.handle_get import get_goal_name_from_id
+
+        ret = {
+            self.get_export_name(): {
+                'version':self.get_current_version()
+            }
+        }
+        data = list()
+        for so in Ssy.objects.filter(user=user_id):
+            eod = {
+                'number': so.number,
+                'start_date': so.start_date,
+                'notes':so.notes,
+                'goal_name':''
+            }
+            if so.goal:
+                eod['goal_name'] = get_goal_name_from_id(so.goal)
+            t = list()
+            for trans in SsyEntry.objects.filter(number=so):
+                t.append({
+                    'trans_date':trans.trans_date,
+                    'reference': trans.reference,
+                    'amount':trans.amount,
+                    'entry_type':trans.entry_type,
+                    'interest_component':trans.interest_component,
+                    'notes':trans.notes
+                })
+            eod['transactions'] = t
+            data.append(eod)
+        
+        ret[self.get_export_name()]['data'] = data
+        print(ret)
+        return ret

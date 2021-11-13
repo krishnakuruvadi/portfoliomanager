@@ -147,3 +147,57 @@ class MfInterface:
                     elif trans.trans_type == 'Sell' and not trans.switch_trans:
                         deduct[trans.trans_date.month-1] += -1*float(trans.trans_price)
         return contrib, deduct
+
+    @classmethod
+    def get_export_name(self):
+        return 'mf'
+    
+    @classmethod
+    def get_current_version(self):
+        return 'v1'
+
+    @classmethod
+    def export(self, user_id):
+        from shared.handle_get import get_goal_name_from_id
+
+        ret = {
+            self.get_export_name(): {
+                'version':self.get_current_version()
+            }
+        }
+        data = list()
+        for fo in Folio.objects.filter(user=user_id):
+            eod = {
+                'country': fo.country,
+                'folio': fo.folio,
+                'fund': {
+                    'code':fo.fund.code,
+                    'name':fo.fund.name,
+                    'fund_house':fo.fund.fund_house,
+                    'isin':fo.fund.isin,
+                    'isin2':fo.fund.isin2
+                },
+                'notes':fo.notes,
+                'goal_name':''
+            }
+            if fo.goal:
+                eod['goal_name'] = get_goal_name_from_id(fo.goal)
+            t = list()
+            for trans in MutualFundTransaction.objects.filter(folio=fo):
+                t.append({
+                    'trans_date':trans.trans_date,
+                    'price':trans.price,
+                    'units': trans.units,
+                    'conversion_rate':trans.conversion_rate,
+                    'trans_price':trans.trans_price,
+                    'broker':trans.broker,
+                    'notes':trans.notes,
+                    'trans_type':trans.trans_type,
+                    'switch_trans':trans.switch_trans
+                })
+            eod['transactions'] = t
+            data.append(eod)
+        
+        ret[self.get_export_name()]['data'] = data
+        print(ret)
+        return ret

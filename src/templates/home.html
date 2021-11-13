@@ -35,7 +35,7 @@
   <div class="btn-toolbar mb-2 mb-md-0">
     <div class="btn-group mr-2">
       <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
-      <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="export">Export</button>
     </div>
     <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       <span data-feather="calendar"></span>
@@ -231,6 +231,63 @@
         }
       });
       return false;
+    }
+
+    document.getElementById("export").addEventListener ("click", function(){exportData()}, false);
+    function exportData() {
+      export_ep = '/api/export/';
+      console.log('getting export data')
+      $.ajax({
+          method:"GET",
+          url:export_ep,
+          async: false,
+          success: function(data){
+            console.log(data)
+            for (val in data) {
+              console.log('returning ', data[val]);
+              ret = data[val];
+            }
+            let blobData = new Blob([JSON.stringify(data)], {
+              type: "text/plain"
+            });
+            let url = window.URL.createObjectURL(blobData);
+            //let url = "pathExample/localFile.png"; // LocalFileDownload
+            saveFile("portfolio_manager_data.json", url);
+            //saveAs( data2blob(ret), "portfolio_manager_data.json" );
+          },
+          error: function(error_data){
+            console.log("error")
+            console.log(error_data)
+          }
+      })
+    }
+
+    function saveFile(fileName, urlFile) {
+      let a = document.createElement("a");
+      a.style = "display: none";
+      document.body.appendChild(a);
+      a.href = urlFile;
+      a.download = fileName;
+      a.click();
+      window.URL.revokeObjectURL(urlFile);
+      a.remove();
+    }
+
+    function data2blob(data, isBase64) {
+      var chars = "";
+
+      if (isBase64)
+        chars = atob(data);
+      else
+        chars = data;
+
+      var bytes = new Array(chars.length);
+      for (var i = 0; i < chars.length; i++) {
+        bytes[i] = chars.charCodeAt(i);
+      }
+
+      var blob = new Blob([new Uint8Array(bytes)]);
+      return blob;
     }
 
     function setInvestmentChart(investment_data) {

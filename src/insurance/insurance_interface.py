@@ -1,5 +1,5 @@
 from types import ClassMethodDescriptorType
-from .models import InsurancePolicy, Transaction, Fund
+from .models import InsurancePolicy, Transaction, Fund, NAVHistory
 import datetime
 from .insurance_helper import get_historical_nav
 
@@ -155,3 +155,70 @@ class InsuranceInterface:
                 else:
                     print(f'failed to get final value as on {end_date} fund code {f}')
         return round(amt, 2)
+
+    @classmethod
+    def get_export_name(self):
+        return 'insurance'
+    
+    @classmethod
+    def get_current_version(self):
+        return 'v1'
+
+    @classmethod
+    def export(self, user_id):
+        from shared.handle_get import get_goal_name_from_id
+
+        ret = {
+            self.get_export_name(): {
+                'version':self.get_current_version()
+            }
+        }
+        data = list()
+        for ipo in InsurancePolicy.objects.filter(user=user_id):
+            ipd = {
+                'policy': ipo.policy,
+                'name':ipo.name,
+                'company':ipo.company,
+                'start_date': ipo.start_date,
+                'goal_name':'',
+                'notes':ipo.notes,
+                'end_date':ipo.end_date,
+                'policy_type':ipo.policy_type,
+                'sum_assured':ipo.sum_assured
+            }
+            if ipo.goal:
+                ipd['goal_name'] = get_goal_name_from_id(ipo.goal)
+            f = list()
+            for fo in Fund.objects.filter(policy=ipo):
+                fod = {
+                    'name':fo.name,
+                    'code': fo.code,
+                    'fund_type': fo.fund_type,
+                    'notes':fo.notes
+                }
+                t = list()
+                for trans in Transaction.objects.filter(fund=fo):
+                    t.append({
+                        'trans_date':trans.trans_date,
+                        'nav': trans.nav,
+                        'units': trans.units,
+                        'trans_amount': trans.trans_amount,
+                        'notes':trans.notes,
+                        'description':trans.description,
+                        'trans_type':trans.trans_type
+                    })
+                fod['transactions'] = t
+                nhd = list()
+                for nho in NAVHistory.objects.filter(fund=fo):
+                    nhd.append({
+                        'nav_value':nho.nav_value,
+                        'nav_date':nho.nav_date
+                    })
+                fod['nav_history'] = nhd
+                f.append(fod)
+            
+            ipd['funds'] = f
+            data.append(ipd)
+        ret[self.get_export_name()]['data'] = data
+        print(ret)
+        return ret

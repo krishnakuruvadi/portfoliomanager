@@ -182,3 +182,50 @@ class BankAccountInterface:
             if b_amt > 0:
                 amt += get_in_preferred_currency(b_amt, acc.currency, end_date)
         return round(amt, 2)
+
+    @classmethod
+    def get_export_name(self):
+        return 'bank_accounts'
+    
+    @classmethod
+    def get_current_version(self):
+        return 'v1'
+
+    @classmethod
+    def export(self, user_id):
+        from shared.handle_get import get_goal_name_from_id
+
+        ret = {
+            self.get_export_name(): {
+                'version':self.get_current_version()
+            }
+        }
+        data = list()
+        for ba in BankAccount.objects.filter(user=user_id):
+            bad = {
+                'number': ba.number,
+                'bank_name': ba.bank_name,
+                'currency': ba.currency,
+                'notes':ba.notes,
+                'start_date': ba.start_date,
+                'acc_type':ba.acc_type,
+                'goal_name':''
+            }
+            if ba.goal:
+                bad['goal_name'] = get_goal_name_from_id(ba.goal)
+            t = list()
+            for trans in Transaction.objects.filter(account=ba):
+                t.append({
+                    'trans_date':trans.trans_date,
+                    'trans_type':trans.trans_type,
+                    'category': trans.category,
+                    'amount':trans.amount,
+                    'notes':trans.notes,
+                    'description':trans.description
+                })
+            bad['transactions'] = t
+            data.append(bad)
+        
+        ret[self.get_export_name()]['data'] = data
+        print(ret)
+        return ret

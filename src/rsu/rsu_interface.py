@@ -142,3 +142,62 @@ class RsuInterface:
                 for st in RSUSellTransactions.objects.filter(rsu_vest=rsu_obj, trans_date__gte=st_date, trans_date__lte=end_date):
                     deduct[rsu_obj.vest_date.month-1] += -1*float(st.trans_price)
         return contrib, deduct
+    
+    @classmethod
+    def get_export_name(self):
+        return 'rsu'
+    
+    @classmethod
+    def get_current_version(self):
+        return 'v1'
+
+    @classmethod
+    def export(self, user_id):
+        from shared.handle_get import get_goal_name_from_id
+
+        ret = {
+            self.get_export_name(): {
+                'version':self.get_current_version()
+            }
+        }
+        data = list()
+        for rao in RSUAward.objects.filter(user=user_id):
+            rad = {
+                'exchange': rao.exchange,
+                'symbol':rao.symbol,
+                'award_date':rao.award_date,
+                'award_id': rao.award_id,
+                'shares_awarded':rao.shares_awarded,
+                'goal_name':''
+            }
+            if rao.goal:
+                rad['goal_name'] = get_goal_name_from_id(rao.goal)
+            t = list()
+            for trans in RestrictedStockUnits.objects.filter(award=rao):
+                rsu = {
+                    'vest_date':trans.vest_date,
+                    'fmv': trans.fmv,
+                    'aquisition_price': trans.aquisition_price,
+                    'shares_vested': trans.shares_vested,
+                    'shares_for_sale': trans.shares_for_sale,
+                    'conversion_rate': trans.conversion_rate,
+                    'total_aquisition_price': trans.total_aquisition_price,
+                    'notes':trans.notes
+                }
+                st = list()
+                for trans in RSUSellTransactions.objects.filter(rsu_vest=trans):
+                    t.append({
+                        'trans_date':trans.trans_date,
+                        'price': trans.price,
+                        'units': trans.units,
+                        'conversion_rate': trans.conversion_rate,
+                        'trans_price': trans.trans_price,
+                        'notes':trans.notes
+                    })
+                rsu['sell_transactions'] = st
+                t.append(rsu)
+            rad['transactions'] = t
+            data.append(rad)
+        ret[self.get_export_name()]['data'] = data
+        print(ret)
+        return ret

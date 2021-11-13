@@ -116,3 +116,43 @@ class FdInterface:
             if obj.mat_date.year == yr:
                 deduct[obj.start_date.month-1] += -1*float(obj.final_val)
         return contrib, deduct
+
+    @classmethod
+    def get_export_name(self):
+        return 'fd'
+    
+    @classmethod
+    def get_current_version(self):
+        return 'v1'
+
+    @classmethod
+    def export(self, user_id):
+        from shared.handle_get import get_goal_name_from_id
+
+        ret = {
+            self.get_export_name(): {
+                'version':self.get_current_version()
+            }
+        }
+        data = list()
+        for eo in FixedDeposit.objects.filter(user=user_id):
+            eod = {
+                'number': eo.number,
+                'bank_name': eo.bank_name,
+                'start_date': eo.start_date,
+                'mat_date': eo.mat_date, 
+                'notes':eo.notes,
+                'principal': eo.principal,
+                'roi':eo.roi,
+                'time_period':eo.time_period,
+                'final_val':eo.final_val,
+                'goal_name':''
+            }
+            if eo.goal:
+                eod['goal_name'] = get_goal_name_from_id(eo.goal)
+
+            data.append(eod)
+        
+        ret[self.get_export_name()]['data'] = data
+        print(ret)
+        return ret

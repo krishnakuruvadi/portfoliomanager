@@ -133,3 +133,57 @@ class EsppInterface:
                 if st.trans_date >= st_date:
                     deduct[espp_obj.purchase_date.month-1] += -1*float(st.trans_price)
         return contrib, deduct
+
+    @classmethod
+    def get_export_name(self):
+        return 'espp'
+    
+    @classmethod
+    def get_current_version(self):
+        return 'v1'
+
+    @classmethod
+    def export(self, user_id):
+        from shared.handle_get import get_goal_name_from_id
+
+        ret = {
+            self.get_export_name(): {
+                'version':self.get_current_version()
+            }
+        }
+        data = list()
+        for eo in Espp.objects.filter(user=user_id):
+            eod = {
+                'exchange': eo.exchange,
+                'symbol': eo.symbol,
+                'purchase_date': eo.purchase_date,
+                'subscription_fmv': eo.subscription_fmv, 
+                'purchase_fmv':eo.purchase_fmv,
+                'purchase_price': eo.purchase_price,
+                'shares_purchased':eo.shares_purchased,
+                'purchase_conversion_rate':eo.purchase_conversion_rate,
+                'total_purchase_price':eo.total_purchase_price,
+                'shares_avail_for_sale':eo.shares_avail_for_sale,
+                'purchase_conversion_rate':eo.purchase_conversion_rate,
+                'purchase_conversion_rate':eo.purchase_conversion_rate,
+                'goal_name':''
+            }
+            if eo.goal:
+                eod['goal_name'] = get_goal_name_from_id(eo.goal)
+            t = list()
+            for trans in EsppSellTransactions.objects.filter(espp=eo):
+                t.append({
+                    'trans_date':trans.trans_date,
+                    'price':trans.price,
+                    'units': trans.units,
+                    'conversion_rate':trans.conversion_rate,
+                    'trans_price':trans.trans_price,
+                    'realised_gain':trans.realised_gain,
+                    'notes':trans.notes
+                })
+            eod['transactions'] = t
+            data.append(eod)
+        
+        ret[self.get_export_name()]['data'] = data
+        print(ret)
+        return ret
