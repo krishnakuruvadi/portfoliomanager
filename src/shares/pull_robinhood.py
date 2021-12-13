@@ -131,7 +131,9 @@ class Robinhood:
                         o['type'] = order['side']
                         o['date'] = self.get_date_from_string(order['last_transaction_at'])
                         o['quantity'] = get_float_or_none_from_string(order['cumulative_quantity'])
-                        o['div_reinv'] = True if order['drip_dividend_id'] else False
+                        o['div_reinv'] = False
+                        if 'drip_dividend_id' in order:
+                            o['div_reinv'] = True if order['drip_dividend_id'] else False
                         o['price'] = get_float_or_none_from_string(order['average_price'])
                         o['conv_price'] = get_conversion_rate('USD', 'INR', o['date'])
                         o['trans_price'] = o['quantity'] * o['price'] * o['conv_price']
