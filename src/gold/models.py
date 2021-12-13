@@ -15,7 +15,7 @@ GOLD_PURITY_CHOICES = [
 ]
 
 class Gold(models.Model):
-    weight = models.DecimalField(max_digits=20, decimal_places=2, null=False)
+    weight = models.DecimalField(max_digits=20, decimal_places=6, null=False)
     per_gm = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     buy_value = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     latest_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)

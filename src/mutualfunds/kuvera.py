@@ -30,17 +30,17 @@ class Kuvera:
                     for k,v in row.items():
                         if 'Folio Number'in k:
                             folio = v.strip()
-                        elif 'Date'in k:
+                        elif 'Date' in k:
                             trans_date = get_datetime_or_none_from_string(v.strip()) #2020-03-19
                         elif 'Name of the Fund'in k:
                             fund_name = v.strip()
-                        elif 'Order'in k:
+                        elif 'Order' in k:
                             trans_type = 'Buy' if 'buy' in v else 'Sell'
-                        elif 'Units'in k:
+                        elif 'Units' in k:
                             units = get_float_or_none_from_string(v.strip())
-                        elif 'NAV'in k:
+                        elif 'NAV' in k:
                             nav = get_float_or_none_from_string(v.strip())
-                        elif 'Amount (INR)'in k:
+                        elif 'Amount (INR)' in k:
                             trans_value = get_float_or_none_from_string(v.strip())
                     fund = self._get_fund(fund_name)
                     if fund:
@@ -51,6 +51,7 @@ class Kuvera:
                             'units':units,
                             'nav':nav,
                             'trans_value':trans_value}
+                    '''
                     else:
                         fund = self._get_match_from_fund_nav(folio, fund_name, trans_date, nav)
                         if fund:
@@ -61,13 +62,14 @@ class Kuvera:
                                 'units':units,
                                 'nav':nav,
                                 'trans_value':trans_value}
+                    '''
+                    if not fund:
+                        if not folio in ignored_folios:
+                            ignored_folios[folio] = list()
+                            ignored_folios[folio].append(fund_name)
                         else:
-                            if not folio in ignored_folios:
-                                ignored_folios[folio] = list()
+                            if fund_name not in ignored_folios[folio]:
                                 ignored_folios[folio].append(fund_name)
-                            else:
-                                if fund_name not in ignored_folios[folio]:
-                                    ignored_folios[folio].append(fund_name)
             for fol, fund_names in ignored_folios.items():
                 names = None
                 for fund_name in fund_names:
@@ -77,7 +79,7 @@ class Kuvera:
                         names += ";" + fund_name
                 create_alert(
                     summary='Folio:' + fol + ' Failure to add transactions',
-                    content= f'Not able to find a matching entry between Kuvera names {names} and BSE STaR names. Edit the mf_mapping.json to process this folio',
+                    content= f'Not able to find a matching entry between Kuvera names {names} and AMFII names.',
                     severity=Severity.error
                 )
 
@@ -86,7 +88,7 @@ class Kuvera:
             fund = MutualFund.objects.get(kuvera_name__contains=fund_name)
             return fund.code
         except MutualFund.DoesNotExist:
-            code = self.get_code_from_kuv_gist(fund_name)
+            code = self.get_code_from_gist(fund_name)
             if code:
                 mf_obj = get_or_add_mf_obj(code)
                 if mf_obj:
@@ -97,19 +99,18 @@ class Kuvera:
                     print(f'couldnt find mf object for {code}')
             else:
                 print('couldnt get mf code from gist')
-            
+            '''
             for mf_obj in MutualFund.objects.all():
                 if mf_obj.bse_star_name and self._matches_bsestar(fund_name, mf_obj.bse_star_name):
                     mf_obj.kuvera_name = fund_name
                     mf_obj.save()
                     return mf_obj.code
+            '''
         print('couldnt find match with bse star name for fund:', fund_name)
         return None
 
-    def get_code_from_kuv_gist(self, kuv_name):
-        url = b'\x03\x11\r\x07\x1cHKD\x02\x10\x04\x1b\\\x03\x02\x11\x11\x02\r\\\x07\x04\x08V\x1c\x1d\x1b\x17\x03\x0b\x18\x1c\x1a\x00\x11\x1d\x04\x1d\x1e@\x17SYRHG[A\x01Y\\\x1bC\x0bKTSVIN[\x14\x06X\x04\x1c\x11\nK\x01]VV\x05\x0e\x05K\t\x00A\x14ZG\x00\\T\x1aB_KPZ\x06MB\rBQYRH\x14\\\x10QS\\I\x13WJ\x00\tWO\x12Z]\x0f\x1e\x13\x1c\x05\x0e\\\x07\x18\x13'
-        url = k_decode(url)
-            
+    def get_code_from_gist(self, kuv_name):
+        url = 'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager-data/main/India/mf.csv'            
         r = requests.get(url, timeout=15)
         if r.status_code==200:
             decoded_content = r.content.decode('utf-8')
@@ -121,7 +122,7 @@ class Kuvera:
         else:
             print(f'failed to get mf from gist for kuvera {r.status_code}')
             return None
-
+    '''
     # compare DSP Equal Nifty 50 Growth Direct Plan with DSP EQUAL NIFTY 50 FUND - DIR - GROWTH
     def _matches_bsestar(self, fund_name, bse_star_name):
         k_fund_name_lower = fund_name.lower().replace(' plan','')
@@ -230,3 +231,4 @@ class Kuvera:
                                     return mf_obj.code
         print(f'no match found. returning none')
         return None
+    '''

@@ -6,7 +6,7 @@ from django.views.generic import (
     DetailView
 )
 from .tasks import *
-from shared.utils import get_preferred_tz
+from shared.utils import get_in_preferred_tz
 
 # Create your views here.
 def get_tasks(request):
@@ -76,10 +76,10 @@ def get_tasks(request):
         task['description'] = task_obj.description
         task['current_state'] = Task.TASK_STATE_CHOICES[task_obj.current_state][1]
         if task_obj.last_run:
-            task['last_run'] = get_preferred_tz(task_obj.last_run)
+            task['last_run'] = get_in_preferred_tz(task_obj.last_run)
         task['last_run_status'] = Task.TASK_STATE_CHOICES[task_obj.last_run_status][1]
         task_list.append(task)
-    context = {'task_list':task_list}
+    context = {'task_list':task_list, 'curr_module_id': 'id_internals_module'}
     return render(request, template_name, context)
 
 def get_task_state_to_name_mapping():

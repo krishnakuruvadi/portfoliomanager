@@ -10,6 +10,7 @@ import json
 from dateutil import tz
 from pytz import timezone
 from common.helper import get_preferences
+from users.user_interface import UserInterface
 
 # Create your views here.
 def home_view(request, *args, **kwargs): # *args, **kwargs
@@ -177,3 +178,15 @@ class GetInvestmentData(APIView):
             investment_data['as_on_date_time'] = datetime.datetime.now()
 
         return Response(investment_data)
+
+class Export(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None, id=None):
+        ret = dict()
+        try:
+            ret = UserInterface.export()
+        except Exception as ex:
+            print(f'exception when getting export data {ex}')
+        return Response(ret)
