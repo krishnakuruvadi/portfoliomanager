@@ -58,48 +58,7 @@ def reconcile_401k():
             account.nav_date = None
         account.save()
 
-def get_nav_file_locn(id):
-    location = os.path.join(settings.MEDIA_ROOT, '401k')
-    nav_file = os.path.join(location, str(id)+'.csv')
-    return nav_file
-
-def upload_nav(id):
-    nav_file = get_nav_file_locn(id)
-    if os.path.exists(nav_file):
-        with open(nav_file, mode='r') as csv_file:
-            print("opened file as csv:", nav_file)
-            csv_reader = csv.DictReader(csv_file, delimiter=",")
-            account = Account401K.objects.get(id=id)
-            for row in csv_reader:
-                print(row)
-                try:
-                    date = get_date_or_none_from_string(row['Date'], format='%m/%d/%Y')
-                    nav_value = get_float_or_none_from_string(row['NAV'])
-                    NAVHistory.objects.create(account=account, nav_date=date, nav_value=nav_value)
-                except IntegrityError:
-                    print(f'NAV entry for {date} exists')
-    else:
-        print(f'couldnt find 401k nav file fo {id} at {nav_file}')
-
-def create_nav_file(id):
-    location = os.path.join(settings.MEDIA_ROOT, '401k')
-    if not os.path.exists(location):
-        os.makedirs(location)
-    nav_file = os.path.join(location, str(id)+'.csv')
-    if os.path.exists(nav_file):
-        os.remove(nav_file)
-    with open(nav_file, mode='w') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerow(["Date", "NAV"])
-
-def remove_nav_file(id):
-    location = os.path.join(settings.MEDIA_ROOT, '401k')
-    nav_file = os.path.join(location, str(id)+'.csv')
-    if os.path.exists(nav_file):
-        os.remove(nav_file)
-
 def get_latest_month_end_nav(id):
-    upload_nav(id)
     account = Account401K.objects.get(id=id)
     history = NAVHistory.objects.filter(account=account).order_by('-nav_date')
     if len(history) > 0:

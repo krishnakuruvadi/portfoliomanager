@@ -8,7 +8,7 @@ from shared.utils import *
 from goal.goal_helper import get_goal_id_name_mapping_for_user
 from django.http import HttpResponseRedirect
 from django.views.generic import DeleteView
-from .helper import reconcile_401k, create_nav_file, remove_nav_file, get_yearly_contribution, get_nav_file_locn
+from .helper import reconcile_401k, get_yearly_contribution
 from dateutil.relativedelta import relativedelta
 from django.db import IntegrityError
 # Create your views here.
@@ -73,7 +73,6 @@ def add_account(request):
                 goal=goal_id,
                 notes=notes
             )
-        create_nav_file(account.id)
 
     users = get_all_users()
     context = {'users':users, 'curr_module_id':'id_401k_module'}
@@ -186,7 +185,6 @@ def account_detail(request, id):
     acct['in_vals'] = chart_data['int']
     acct['total_vals'] = chart_data['total']
     acct['nav_history'] = NAVHistory.objects.filter(account=account)
-    acct['nav_file_locn'] = get_nav_file_locn(id)
     #{{fund_vals|safe}}, {{voo_vals|safe}}, {{chart_labels|safe}}
     fund_vals = list()
     spy_vals = list()
@@ -344,7 +342,6 @@ class AccountDeleteView(DeleteView):
 
     def delete(self, request, *args, **kwargs):
         id_ = self.kwargs.get("id")
-        remove_nav_file(id_)
         self.object = self.get_object()
         success_url = self.get_success_url()
         self.object.delete()
