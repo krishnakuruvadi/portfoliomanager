@@ -118,3 +118,51 @@ def update_latest_value(user):
                 g.roi = x        
         g.save()
 
+'''
+def add_broker_trans(broker, user, trans):
+    if broker == 'kuvera':
+        for tran in trans:
+            if tran['type'].lower() == 'buy':
+                try:
+                    weight = tran['units']
+                    Gold.objects.create(
+                        user=user,
+                        notes='KUVERA broker buy',
+                        weight=weight,
+                        per_gm=tran['NAV'],
+                        buy_value=tran['amount'],
+                        buy_date=tran['date'],
+                        buy_type='Other',
+                        unsold_weight=weight,
+                        purity='24K'
+                    )
+                except IntegrityError as ie:
+                    pass
+        update_latest_value(user)
+        notes = 'KUVERA broker sell'
+        for tran in trans:
+            if tran['type'].lower() != 'buy':
+                weight = tran['units']
+                per_gm = tran['NAV']
+                trans_date = get_date_or_none_from_string(tran['date'])
+
+                while weight > 0:
+                    objs = Gold.objects.filter(user=user)
+                    for g in objs:
+                        if g.unsold_weight == 0:
+                            continue
+                        part_wt = weight
+                        if weight > g.unsold_weight:
+                            part_wt = g.unsold_weight
+                        weight -= part_wt
+                        sell_value = part_wt * per_gm
+                        SellTransaction.objects.create(
+                            buy_trans=g,
+                            notes=notes,
+                            weight=part_wt,
+                            per_gm=per_gm,
+                            trans_amount=sell_value,
+                            trans_date=trans_date
+                        )
+                        update_latest_value(user)
+'''

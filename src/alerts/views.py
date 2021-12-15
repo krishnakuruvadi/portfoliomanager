@@ -9,7 +9,7 @@ from . import models
 from shared.handle_get import *
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from shared.utils import get_preferred_tz
+from shared.utils import get_in_preferred_tz
 
 
 # Create your views here.
@@ -23,7 +23,7 @@ def get_alerts(request):
         e = dict()
         e['seen'] = a.seen
         e['action_url'] = a.action_url
-        e['time'] = get_preferred_tz(a.time)
+        e['time'] = get_in_preferred_tz(a.time)
         e['content'] = a.content
         e['summary'] = a.summary
         e['severity'] = a.severity

@@ -505,6 +505,7 @@ def pull_share_trans_from_rh(user, broker, user_id, passwd, challenge_type, chal
         rh.logout()
         
         check_discrepancies()
+        #update_shares_latest_vals()
     else:
         print('Unsupported broker')
 
@@ -1008,6 +1009,13 @@ def upload_bank_account_transactions(full_file_path, bank_name, file_type, numbe
 def update_shares_status():
     from common.shares_helper import update_stock_status
     update_stock_status()
+
+'''
+@db_task()
+def add_gold_trans(broker, trans):
+    from gold.gold_helper import add_broker_trans
+    add_broker_trans(broker, trans)
+'''
 
 '''
 #  example code below

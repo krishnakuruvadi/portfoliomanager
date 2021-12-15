@@ -209,7 +209,7 @@ def update_share(request, id):
     share = Share.objects.get(id=id)
     if request.method == 'POST':
         goal = request.POST.get('goal', '')
-        share.user = int(request.POST['user'])
+        #share.user = int(request.POST['user'])
         print('user is:',share.user)
         if goal != '':
             share.goal = int(goal)
