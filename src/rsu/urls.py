@@ -16,7 +16,8 @@ from .views import (
     delete_vest_sell_trans,
     CurrentRsus,
     create_rsu,
-    view_update_rsu
+    view_update_rsu,
+    rsu_insights
 )
 
 app_name = 'rsus'
@@ -24,6 +25,7 @@ urlpatterns = [
     path('', RsuListView.as_view(), name='rsu-list'),
     path('create/', create_rsu, name='rsu-create'),
     path('refresh/', refresh_rsu_trans, name='rsu-refresh'),
+    path('insights/', rsu_insights, name='rsu-insights'),
     path('<id>/', RsuDetailView.as_view(), name='rsu-detail'),
     path('<id>/update/', view_update_rsu, name='rsu-update'),
     path('<id>/delete/', RsuDeleteView.as_view(), name='rsu-delete'),

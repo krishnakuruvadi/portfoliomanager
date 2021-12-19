@@ -15,23 +15,31 @@
 {% endblock %} 
 
 {% block content %}
-<table class="table" style="width:50%">
-    <tr><th scope="col">Vest Date</th><td>{{object.vest_date}} </td></tr>
-    <tr><th scope="col">FMV</th><td>{{object.fmv}}</td></tr>
-    <tr><th scope="col">Aquisition Price</th><td>{{object.aquisition_price}}</td></tr>
-    <tr><th scope="col">Shares Vested</th><td>{{object.shares_vested}}</td></tr>
-    <tr><th scope="col">Available For Sell At Vest</th><td>{{object.shares_for_sale}}</td></tr>
-    <tr><th scope="col">Conversion Price at Vest</th><td>{{object.conversion_rate}}</td></tr>
-    <tr><th scope="col">Total Aquisition Price</th><td>{{object.total_aquisition_price}}</td></tr>
-    <tr><th scope="col">Unsold Quantity</th><td>{{object.unsold_shares}}</td></tr>
-    <tr><th scope="col">Latest Conversion Price</th><td>{{object.latest_conversion_rate}}</td></tr>
-    <tr><th scope="col">Latest Price</th><td>{{object.latest_price}}</td></tr>
-    <tr><th scope="col">Latest Value</th><td>{{object.latest_value}}</td></tr>
-    <tr><th scope="col">As on Date</th><td>{{object.as_on_date}}</td></tr>
-    <tr><th scope="col">Realised Gain</th><td>{{object.realised_gain}}</td></tr>
-    <tr><th scope="col">Unrealised Gain</th><td>{{object.unrealised_gain}}</td></tr>
-    <tr><th scope="col">Tax at Vest</th><td>{{object.tax_at_vest}}</td></tr>
-</table>
+<div class="row">
+  <div id="tempChart" style="width:100%;height:80vh;box-shadow: 6px 6px 6px 6px #888888;" class='col-sm-4 col-md-3 col-lg-3'>
+    <table class="table">
+        <tr><th scope="col">Vest Date</th><td>{{object.vest_date}} </td></tr>
+        <tr><th scope="col">FMV</th><td>{{object.fmv}}</td></tr>
+        <tr><th scope="col">Aquisition Price</th><td>{{object.aquisition_price}}</td></tr>
+        <tr><th scope="col">Shares Vested</th><td>{{object.shares_vested}}</td></tr>
+        <tr><th scope="col">Available For Sell At Vest</th><td>{{object.shares_for_sale}}</td></tr>
+        <tr><th scope="col">Conversion Price at Vest</th><td>{{object.conversion_rate}}</td></tr>
+        <tr><th scope="col">Total Aquisition Price</th><td>{{object.total_aquisition_price}}</td></tr>
+        <tr><th scope="col">Unsold Quantity</th><td>{{object.unsold_shares}}</td></tr>
+        <tr><th scope="col">Latest Conversion Price</th><td>{{object.latest_conversion_rate}}</td></tr>
+        <tr><th scope="col">Latest Price</th><td>{{object.latest_price}}</td></tr>
+        <tr><th scope="col">Latest Value</th><td>{{object.latest_value}}</td></tr>
+        <tr><th scope="col">As on Date</th><td>{{object.as_on_date}}</td></tr>
+        <tr><th scope="col">Realised Gain</th><td>{{object.realised_gain}}</td></tr>
+        <tr><th scope="col">Unrealised Gain</th><td>{{object.unrealised_gain}}</td></tr>
+        <tr><th scope="col">Tax at Vest</th><td>{{object.tax_at_vest}}</td></tr>
+    </table>
+  </div>
+  <div class='col-sm-3 col-md-1 col-lg-1'></div>
+  <div id="tempChart" style="width:100%;height:46vh;box-shadow: 6px 6px 6px 6px #888888;" class='col-sm-4 col-md-6 col-lg-4'>
+    <canvas id="myChart"></canvas>
+  </div>
+</div>
 <br>
 <table class="table" style="width:50%">
     {% for instance in sell_trans %}
@@ -50,3 +58,50 @@
   <script>
   </script>
 {% endblock javascript %}
+
+
+<script>
+  {% block jquery %}
+  var progressdata = {{progress_data|safe}}
+  if (!jQuery.isEmptyObject(progressdata)) {
+      setProgressChart(progressdata)
+  }
+  function setProgressChart(progress_data) {
+    var ctx = document.getElementById("myChart");
+    var config = {
+      type:    'line',
+      data:    {
+        datasets: progress_data
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio:false,
+        title:      {
+          display: true,
+          text:    "Progress"
+        },
+        scales:     {
+          xAxes: [{
+            type:       "time",
+            time:       {
+              format: 'YYYY-MM-DD',
+              tooltipFormat: 'll'
+            },
+            scaleLabel: {
+              display:     true,
+              labelString: 'Date'
+            }
+          }],
+          yAxes: [{
+            scaleLabel: {
+              display:     true,
+              labelString: 'Amount'
+            }
+          }]
+        }
+      }
+    };
+    var myChart = new Chart(ctx,config);
+  }
+  {% endblock jquery %}
+</script>

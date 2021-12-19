@@ -20,6 +20,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from shared.financial import xirr
 from django.db import IntegrityError
+import random
+from tools.stock_reconcile import Trans, reconcile_event_based
+from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol
+from dateutil.relativedelta import relativedelta
+
 
 class EsppCreateView(CreateView):
     template_name = 'espps/espp_create.html'
@@ -121,6 +126,74 @@ class EsppDetailView(DetailView):
                 'realised_gain':st.realised_gain,
                 'notes':st.notes
             })
+        std = obj.purchase_date
+        today = datetime.date.today()
+        r = lambda: random.randint(0,255)
+        color = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
+        ret = list()
+        ret.append({
+            'label':'',
+            'data': list(),
+            'fill': 'false',
+            'borderColor':color
+        })
+        std = std+relativedelta(months=1)
+        if std > today:
+            std = today
+        else:
+            std = std.replace(day=1)
+        reset_to_zero = False
+        while True:
+            val = 0
+            trans = list()
+            trans.append(Trans(obj.shares_purchased, obj.purchase_date, 'buy', obj.total_purchase_price))
+            for st in EsppSellTransactions.objects.filter(espp=obj, trans_date__lte=std):
+                trans.append(Trans(st.units, st.trans_date, 'sell', st.trans_price))
+            q, _,_,_,_ = reconcile_event_based(trans, list(), list())
+            lv = get_historical_stock_price_based_on_symbol(obj.symbol, obj.exchange, std+relativedelta(days=-5), std)
+            if lv:
+                print(lv)
+                conv_rate = 1
+                if obj.exchange == 'NASDAQ' or obj.exchange == 'NYSE':
+                    conv_val = get_conversion_rate('USD', 'INR', std)
+                    if conv_val:
+                        conv_rate = conv_val
+                    for k,v in lv.items():
+                        val += float(v)*float(conv_rate)*float(q)
+                        break
+            else:
+                print(f'failed to get value of {obj.exchange}:{obj.symbol} on {std}')
+            if val > 0 or reset_to_zero:
+                x = std.strftime('%Y-%m-%d')
+                ret[0]['data'].append({'x': x, 'y':round(val,2)})
+                if val > 0:
+                    reset_to_zero = True
+                else:
+                    reset_to_zero = False
+            
+            if std == today:
+                break   
+            std = std+relativedelta(months=1)
+            if std > today:
+                std = today
+        data['progress_data'] = ret
+        '''
+        [{
+            label: 'Fund',
+            yAxisID: 'Fund',
+            //data: [100, 96, 84, 76, 69],
+            data: fund_vals,
+            borderColor: "#3e95cd",
+            fill: false
+          }, {
+            label: 'SPY',
+            yAxisID: 'SPY',
+            //data: [1, 1, 1, 1, 0],
+            data: spy_vals,
+            borderColor: "#bfff00",
+            fill: false
+          }]
+        '''
         return data
 
 class EsppUpdateView(UpdateView):
@@ -262,3 +335,81 @@ class CurrentEspps(APIView):
             data['entry'].append(v)
         data['total'] = total    
         return Response(data)
+
+
+def espp_insights(request):
+    template = 'espps/espp_insights.html'
+    ret = list()
+    today = datetime.date.today()
+    total = dict()
+    
+    for i, espp in enumerate(Espp.objects.all()):
+        std = espp.purchase_date
+        r = lambda: random.randint(0,255)
+        color = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
+        ret.append({
+            'label':espp.purchase_date.strftime('%Y-%m-%d'),
+            'data': list(),
+            'fill': 'false',
+            'borderColor':color
+        })
+        std = std+relativedelta(months=1)
+        if std > today:
+            std = today
+        else:
+            std = std.replace(day=1)
+        reset_to_zero = False
+
+        while True:
+            val = 0
+            trans = list()
+            trans.append(Trans(espp.shares_purchased, espp.purchase_date, 'buy', espp.total_purchase_price))
+            for st in EsppSellTransactions.objects.filter(espp=espp, trans_date__lte=std):
+                trans.append(Trans(st.units, st.trans_date, 'sell', st.trans_price))
+            q, _,_,_,_ = reconcile_event_based(trans, list(), list())
+            lv = get_historical_stock_price_based_on_symbol(espp.symbol, espp.exchange, std+relativedelta(days=-5), std)
+            if lv:
+                print(lv)
+                conv_rate = 1
+                if espp.exchange == 'NASDAQ' or espp.exchange == 'NYSE':
+                    conv_val = get_conversion_rate('USD', 'INR', std)
+                    if conv_val:
+                        conv_rate = conv_val
+                    for k,v in lv.items():
+                        val += float(v)*float(conv_rate)*float(q)
+                        break
+                    else:
+                        print(f'failed to get value of {espp.exchange}:{espp.symbol} on {std}')
+                if val > 0:
+                    x = std.strftime('%Y-%m-%d')
+                    ret[i]['data'].append({'x': x, 'y':round(val,2)})
+                    total[x] = total.get(x, 0) + round(val,2)
+                    reset_to_zero = True
+                elif reset_to_zero:
+                    x = std.strftime('%Y-%m-%d')
+                    ret[i]['data'].append({'x': x, 'y':0})
+                    reset_to_zero = False
+                    total[x] = total.get(x, 0)
+                if std == today:
+                    break
+                std = std+relativedelta(months=1)
+                if std > today:
+                    std = today
+    print(ret)
+    if len(ret) > 0:
+        d = list()
+        for k,v in sorted(total.items()):
+            d.append({'x':k, 'y':v})
+        r = lambda: random.randint(0,255)
+        color = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
+        ret.append({
+                    'label':'total',
+                    'data': d,
+                    'fill': 'false',
+                    'borderColor':color,
+                    'spanGaps': 'false'
+                })
+    context = dict()
+    context['progress_data'] = ret
+    print(context)
+    return render(request, template, context)

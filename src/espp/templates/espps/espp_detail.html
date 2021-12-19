@@ -14,7 +14,9 @@
 </ul>
 {% endblock viewname %}
 
-{% block content %} 
+{% block content %}
+<div class="row">
+  <div class='col-sm-12 col-md-6 col-lg-4' style="width:100%;height:50vh;box-shadow: 6px 6px 6px 6px #888888;">
   <table class="paddingBetweenCols">
     <tr>
       <td>#</td>
@@ -93,6 +95,12 @@
       <td>{{ roi }}%</td>
     </tr>
   </table>
+  </div>
+  <div class='col-sm-1 col-md-1 col-lg-1'></div>
+  <div id="tempChart" style="width:100%;height:50vh;box-shadow: 6px 6px 6px 6px #888888;" class='col-sm-12 col-md-9 col-lg-6'>
+    <canvas id="myChart"></canvas>
+  </div>
+</div>
   <br>
   <table class="table table-hover dt-responsive" id="espp-sell-table" style="width:100%">
     <thead class="thead-dark">
@@ -121,14 +129,52 @@
     </tbody>
   </table>
 
-  <div class='col-sm-6'>
-    <canvas id="myChart" width="400" height="400"></canvas>
-  </div>
 {% endblock content %}
 
 
 <script>
   {% block jquery %}
   $('#espp-sell-table').DataTable();
+  var progressdata = {{progress_data|safe}}
+    if (!jQuery.isEmptyObject(progressdata)) {
+        setProgressChart(progressdata, {{labels|safe}})
+    }
+    function setProgressChart(progress_data, labels) {
+      var ctx = document.getElementById("myChart");
+      var config = {
+        type:    'line',
+        data:    {
+          datasets: progress_data
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title:      {
+            display: true,
+            text:    "Progress"
+          },
+          scales:     {
+            xAxes: [{
+              type:       "time",
+              time:       {
+                format: 'YYYY-MM-DD',
+                tooltipFormat: 'll'
+              },
+              scaleLabel: {
+                display:     true,
+                labelString: 'Date'
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display:     true,
+                labelString: 'Amount'
+              }
+            }]
+          }
+        }
+      };
+      var myChart = new Chart(ctx,config);
+    }
   {% endblock jquery %}
 </script>

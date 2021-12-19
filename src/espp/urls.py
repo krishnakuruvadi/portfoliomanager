@@ -10,7 +10,8 @@ from .views import (
     CurrentEspps,
     get_sell_trans,
     add_sell_trans,
-    delete_sell_trans
+    delete_sell_trans,
+    espp_insights
 )
 
 app_name = 'espps'
@@ -18,6 +19,7 @@ urlpatterns = [
     path('', EsppListView.as_view(), name='espp-list'),
     path('create/', EsppCreateView.as_view(), name='espp-create'),
     path('refresh/', refresh_espp_trans, name='espp-refresh'),
+    path('insights/', espp_insights, name='espp-insights'),
     path('<id>/', EsppDetailView.as_view(), name='espp-detail'),
     path('<id>/update/', EsppUpdateView.as_view(), name='espp-update'),
     path('<id>/delete/', EsppDeleteView.as_view(), name='espp-delete'),

@@ -19,6 +19,9 @@ from shared.utils import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from tasks.tasks import update_rsu
+from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol
+import random
+from tools.stock_reconcile import Trans, reconcile_event_based
 
 
 def create_rsu(request):
@@ -127,8 +130,55 @@ class RsuVestDetailView(DetailView):
     
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
-        data['sell_trans'] = RSUSellTransactions.objects.filter(rsu_vest=data['object'])
+        rsu = data['object']
+        data['sell_trans'] = RSUSellTransactions.objects.filter(rsu_vest=rsu)
         data['curr_module_id'] = 'id_rsu_module'
+        std = rsu.vest_date
+        today = datetime.date.today()
+        r = lambda: random.randint(0,255)
+        color = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
+        ret = list()
+        ret.append({
+            'label':'',
+            'data': list(),
+            'fill': 'false',
+            'borderColor':color
+        })
+        std = std+relativedelta(months=1)
+        if std > today:
+            std = today
+        else:
+            std = std.replace(day=1)
+            
+        while True:
+            val = 0
+            trans = list()
+            trans.append(Trans(rsu.shares_for_sale, rsu.vest_date, 'buy', rsu.shares_for_sale*rsu.aquisition_price*rsu.conversion_rate))
+            for st in RSUSellTransactions.objects.filter(rsu_vest=rsu, trans_date__lte=std):
+                trans.append(Trans(st.units, st.trans_date, 'sell', st.trans_price))
+            q, _,_,_,_ = reconcile_event_based(trans, list(), list())
+            lv = get_historical_stock_price_based_on_symbol(rsu.award.symbol, rsu.award.exchange, std+relativedelta(days=-5), std)
+            if lv:
+                print(lv)
+                conv_rate = 1
+                if rsu.award.exchange == 'NASDAQ' or rsu.award.exchange == 'NYSE':
+                    conv_val = get_conversion_rate('USD', 'INR', std)
+                    if conv_val:
+                        conv_rate = conv_val
+                    for k,v in lv.items():
+                        val += float(v)*float(conv_rate)*float(q)
+                        break
+            else:
+                print(f'failed to get value of {rsu.award.exchange}:{rsu.award.symbol} on {std}')
+            if val > 0:
+                x = std.strftime('%Y-%m-%d')
+                ret[0]['data'].append({'x': x, 'y':round(val,2)})
+            if std == today:
+                break   
+            std = std+relativedelta(months=1)
+            if std > today:
+                std = today
+        data['progress_data'] = ret
         return data
 
 def refresh_rsu_trans(request):
@@ -367,3 +417,78 @@ class CurrentRsus(APIView):
             data['entry'].append(v)
         data['total'] = total    
         return Response(data)
+
+
+def rsu_insights(request):
+    template = 'rsus/rsu_insights.html'
+    ret = list()
+    today = datetime.date.today()
+    total = dict()
+    
+    for i, award in enumerate(RSUAward.objects.all()):
+        rsus = RestrictedStockUnits.objects.filter(award=award)
+        if len(rsus) > 0:
+            std = award.award_date
+            r = lambda: random.randint(0,255)
+            color = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
+            ret.append({
+                'label':str(award.award_id),
+                'data': list(),
+                'fill': 'false',
+                'borderColor':color
+            })
+            std = std.replace(day=1)
+            reset_to_zero = False
+            while True:
+                val = 0
+                for rsu in RestrictedStockUnits.objects.filter(award=award, vest_date__lte=std):
+                    trans = list()
+                    trans.append(Trans(rsu.shares_for_sale, rsu.vest_date, 'buy', rsu.shares_for_sale*rsu.aquisition_price))
+                    for st in RSUSellTransactions.objects.filter(rsu_vest=rsu, trans_date__lte=std):
+                        trans.append(Trans(st.units, st.trans_date, 'sell', st.trans_price))
+                    q, _,_,_,_ = reconcile_event_based(trans, list(), list())
+                    lv = get_historical_stock_price_based_on_symbol(award.symbol, award.exchange, std+relativedelta(days=-5), std)
+                    if lv:
+                        print(lv)
+                        conv_rate = 1
+                        if award.exchange == 'NASDAQ' or award.exchange == 'NYSE':
+                            conv_val = get_conversion_rate('USD', 'INR', std)
+                            if conv_val:
+                                conv_rate = conv_val
+                            for k,v in lv.items():
+                                val += float(v)*float(conv_rate)*float(q)
+                                break
+                    else:
+                        print(f'failed to get value of {award.award_id} {award.exchange}:{award.symbol} on {std}')
+                if val > 0:
+                    x = std.strftime('%Y-%m-%d')
+                    ret[i]['data'].append({'x': x, 'y':round(val,2)})
+                    total[x] = total.get(x, 0) + round(val,2)
+                    reset_to_zero = True
+                elif reset_to_zero:
+                    x = std.strftime('%Y-%m-%d')
+                    ret[i]['data'].append({'x': x, 'y':0})
+                    reset_to_zero = False
+                    total[x] = total.get(x, 0)
+                if std == today:
+                    break
+                std = std+relativedelta(months=1)
+                if std > today:
+                    std = today
+    print(ret)
+    if len(ret) > 0:
+        d = list()
+        for k,v in sorted(total.items()):
+            d.append({'x':k, 'y':v})
+        r = lambda: random.randint(0,255)
+        color = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
+        ret.append({
+                    'label':'total',
+                    'data': d,
+                    'fill': 'false',
+                    'borderColor':color
+                })
+    context = dict()
+    context['progress_data'] = ret
+    return render(request, template, context)
+

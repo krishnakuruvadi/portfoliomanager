@@ -13,6 +13,21 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
+
+  <table class="table table-borderless">
+    <tr>
+      <td>
+        <ul class="nav nav-pills">
+          <li class="nav-item">
+            <a class="nav-link active" href="#">Transactions</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " href="insights">Insights</a>
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </table>
   <table class="table table-borderless">
     <tr>
       <td style="text-align:right"><b>Total Investment:</b> {{total_investment}} &nbsp;&nbsp;&nbsp;<b>Current Investment:</b> {{current_investment}} &nbsp;&nbsp;&nbsp;<b>Current Value:</b> {{latest_value}} &nbsp;&nbsp;&nbsp;<b>Unrealised Gain:</b> {{unrealised_gain}} &nbsp;&nbsp;&nbsp;<b>Realised Gain:</b> {{realised_gain}}</td>

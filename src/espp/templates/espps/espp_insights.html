@@ -1,0 +1,81 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">ESPP </a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a style="padding-right:20px;" href="../create"><i class="fa fa-plus" aria-hidden="true" title="Add ESPP" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+
+{%block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-borderless">
+    <tr>
+      <td>
+        <ul class="nav nav-pills">
+          <li class="nav-item">
+            <a class="nav-link" href="../">Transactions</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#">Insights</a>
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <div id="tempChart" style="width:100%;height:56vh;box-shadow: 6px 6px 6px 6px #888888;" class='col-sm-12 col-md-9 col-lg-6'>
+    <canvas id="myChart"></canvas>
+  </div>
+  <p></p>
+{% endblock content %}
+
+<script>
+    {% block jquery %}
+    var progressdata = {{progress_data|safe}}
+    if (!jQuery.isEmptyObject(progressdata)) {
+        setProgressChart(progressdata)
+    }
+    function setProgressChart(progress_data) {
+      var ctx = document.getElementById("myChart");
+      var config = {
+        type:    'line',
+        data:    {
+          datasets: progress_data
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title:      {
+            display: true,
+            text:    "Progress"
+          },
+          scales:     {
+            xAxes: [{
+              type:       "time",
+              time:       {
+                format: 'YYYY-MM-DD',
+                tooltipFormat: 'll'
+              },
+              scaleLabel: {
+                display:     true,
+                labelString: 'Date'
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display:     true,
+                labelString: 'Amount'
+              }
+            }]
+          }
+        }
+      };
+      var myChart = new Chart(ctx,config);
+    }
+    {% endblock jquery %}
+  </script>

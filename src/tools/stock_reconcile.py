@@ -109,6 +109,12 @@ class Splitv():
         self.announcement_date = announcement_date
         self.ex_date = ex_date
 
+class Trans:
+    def __init__(self, quantity, trans_date, trans_type, price):
+        self.quantity = float(quantity)
+        self.trans_date = trans_date
+        self.trans_type = trans_type
+        self.price = float(price)
 
 def reconcile_event_based(transactions, bonuses, splits, round_qty_to_int=False, latest_price=None, latest_conversion_rate=1):
     event_list = list()
