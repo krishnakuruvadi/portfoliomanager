@@ -28,6 +28,8 @@ from tasks.tasks import pull_share_trans_from_broker, pull_share_trans_from_rh
 from django.conf import settings
 from django.db.models import Q
 import time
+from common.models import Preferences
+
 # Create your views here.
 
 class TransactionsListView(ListView):
@@ -47,7 +49,8 @@ def get_shares_list(request):
     context = dict()
     context['users'] = get_all_users()
     context['exchanges'] = ['NSE/BSE', 'NASDAQ', 'NYSE']
-    show_zero_val_shares = True
+    pref_obj = Preferences.get_solo()
+    show_zero_val_shares = pref_obj.show_zero_value_shares
     user = None
     exchange = None
     if request.method == 'POST':

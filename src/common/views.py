@@ -350,6 +350,9 @@ def preferences(request):
                 print(f'sel_index_str {sel_index_str}')
                 pref_obj.indexes_to_scroll = sel_index_str
         pref_obj.document_backup_locn = request.POST.get('timezone')
+        pref_obj.show_zero_value_mfs = 'show_zero_val_mfs' in request.POST
+        pref_obj.show_zero_value_shares = 'show_zero_val_shares' in request.POST
+
         pref_obj.save()
  
     tzs = list()
@@ -386,8 +389,11 @@ def preferences(request):
 
     context = {
         'tz': pref_obj.timezone, 
-        'tzs':tzs, 'indexes':avail_indexes, 
+        'tzs':tzs,
+        'indexes':avail_indexes, 
         'sel_indexes':sel_indexes, 
-        'document_backup_locn':'' if not pref_obj.document_backup_locn else pref_obj.document_backup_locn
+        'document_backup_locn':'' if not pref_obj.document_backup_locn else pref_obj.document_backup_locn,
+        'show_zero_val_mfs': pref_obj.show_zero_value_mfs,
+        'show_zero_val_shares': pref_obj.show_zero_value_shares,
     }
     return render(request, template, context)

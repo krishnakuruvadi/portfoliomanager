@@ -232,6 +232,8 @@ class Preferences(SingletonModel):
     indexes_to_scroll = models.CharField(max_length=20000, null=True, blank=True)
     document_backup_locn = models.CharField(max_length=20000, null=True, blank=True)
     currency = models.CharField(max_length=3, null=True, blank=True, default='INR')
+    show_zero_value_mfs = models.BooleanField(default=False)
+    show_zero_value_shares = models.BooleanField(default=False)
 
 
 class Passwords(models.Model):

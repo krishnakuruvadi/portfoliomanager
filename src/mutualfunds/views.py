@@ -31,6 +31,7 @@ from goal.goal_helper import get_goal_id_name_mapping_for_user
 from decimal import Decimal
 from common.helper import get_fund_houses, get_or_add_mf_obj
 from markets.models import IndexRollingReturns
+from common.models import Preferences
 
 # Create your views here.
 
@@ -38,7 +39,8 @@ def get_folios(request):
     template = 'mutualfunds/folio_list.html'
     context = dict()
     context['users'] = get_all_users()
-    show_zero_val_folio = True
+    pref_obj = Preferences.get_solo()
+    show_zero_val_folio = pref_obj.show_zero_value_mfs
     user = None
     if request.method == 'POST':
         print(request.POST)

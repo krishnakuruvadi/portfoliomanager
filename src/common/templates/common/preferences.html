@@ -50,6 +50,24 @@
                 </div>
 
                 <div class="form-group row">
+                    <label for="backup" class="col-sm-2 col-form-label">Show zero value shares</label>
+                    <div class="col-sm-8">
+                        <div class="md-form mt-1">
+                            <input type="checkbox" name="show_zero_val_shares" id="show_zero_val_shares" value="{{show_zero_val_shares}}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="backup" class="col-sm-2 col-form-label">Show zero value MFs</label>
+                    <div class="col-sm-8">
+                        <div class="md-form mt-1">
+                            <input type="checkbox" name="show_zero_val_mfs" id="show_zero_val_mfs" value="{{show_zero_val_mfs}}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row">
                     <div class="col-sm-6">
                         <div class="md-form mt-0">
                             <button type="submit" class="btn btn-primary" name="submit">Submit</button>
@@ -92,5 +110,25 @@
                 .text(index));
         }
       }
+
+    e = document.getElementById('show_zero_val_shares');
+    var show = "{{show_zero_val_shares|safe}}"
+    console.log(e.checked);
+    console.log(show);
+    if (show == "True") {
+      e.checked = true;
+    } else {
+      e.checked = false;
+    }
+
+    e = document.getElementById('show_zero_val_mfs');
+    var show = "{{show_zero_val_mfs|safe}}"
+    console.log(e.checked);
+    console.log(show);
+    if (show == "True") {
+      e.checked = true;
+    } else {
+      e.checked = false;
+    }
   </script>
 {% endblock javascript %}
