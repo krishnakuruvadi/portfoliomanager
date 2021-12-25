@@ -28,7 +28,9 @@ from tasks.tasks import pull_share_trans_from_broker, pull_share_trans_from_rh
 from django.conf import settings
 from django.db.models import Q
 import time
-from common.models import Preferences
+from common.models import Preferences, HistoricalStockPrice, HistoricalIndexPoints, Index
+from common.index_helpers import get_comp_index
+from tasks.tasks import update_index_points
 
 # Create your views here.
 
@@ -194,6 +196,58 @@ class ShareDetailView(DetailView):
                 bonuses.append({'announcement_date':bonus.announcement_date, 'record_date':bonus.record_date, 'ex_date':bonus.ex_date, 'ratio':str(bonus.ratio_num)+':'+str(bonus.ratio_denom)})
             if len(bonuses) > 0:
                 data['bonus'] = bonuses
+
+            data['my_name'] = stock.symbol
+            trans = Transactions.objects.filter(share=obj).order_by('trans_date')
+            start_date = trans[0].trans_date
+            last_date = datetime.date.today()
+            if obj.latest_value <= 0:
+                last_date = trans[-1].trans_date
+            start_date = start_date.replace(day=1)
+            symbol, country = get_comp_index(obj.exchange)
+            #comp_name, comp_vals = get_comp_index_vals(obj.exchange, start_date, last_date)
+            
+            if symbol:
+                try:
+                    index = Index.objects.get(country=country, yahoo_symbol=symbol)
+                    first_missing = None
+                    last_missing = None
+                    first_found = None
+                    last_found = None
+                    data['my_vals'] = list()
+                    data['comp_vals'] = list()
+                    data['comp_name'] = index.name
+                    data['chart_labels'] = list()
+                    for hsp in HistoricalStockPrice.objects.filter(symbol=stock, date__gte=start_date):
+                        try:
+                            t = HistoricalIndexPoints.objects.get(index=index, date=hsp.date)
+                            if not first_found:
+                                first_found = hsp.date
+                            last_found = hsp.date
+                            dt = hsp.date.strftime('%Y-%m-%d')
+                            data['comp_vals'].append({'x':dt, 'y':float(t.points)})
+                            data['my_vals'].append({'x':dt, 'y':float(hsp.price)})
+                            data['chart_labels'].append(dt)
+                        except HistoricalIndexPoints.DoesNotExist:
+                            if not first_missing:
+                                first_missing = hsp.date
+                            last_missing = hsp.date
+
+                    if first_missing and first_found and (first_found - first_missing).days > 15:
+                        update_index_points(obj.exchange, first_missing, first_found)
+                    
+                    if last_missing and last_found and (last_missing - last_found).days > 15:
+                        update_index_points(obj.exchange, last_missing, last_found)
+                    
+                    if not first_found and not last_found:
+                        update_index_points(obj.exchange, start_date, last_date)
+
+                    print(f'first_missing:{first_missing} first_found:{first_found} last_missing:{last_missing}  last_found:{last_found}')
+            
+                except Index.DoesNotExist:
+                
+                    update_index_points(obj.exchange, start_date, last_date)
+                
         except Stock.DoesNotExist:
             print(f'stock doesnt exist in db {obj.exchange} {obj.symbol}')
         data['curr_module_id'] = 'id_shares_module'

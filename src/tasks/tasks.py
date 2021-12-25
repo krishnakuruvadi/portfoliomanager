@@ -1010,6 +1010,13 @@ def update_shares_status():
     from common.shares_helper import update_stock_status
     update_stock_status()
 
+
+@db_task()
+def update_index_points(exchange, start_date, end_date):
+    from common.index_helpers import update_index
+    update_index(exchange, start_date, end_date)
+
+
 '''
 @db_task()
 def add_gold_trans(broker, trans):

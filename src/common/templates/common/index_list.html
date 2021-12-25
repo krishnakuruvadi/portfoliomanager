@@ -1,0 +1,48 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+    <li><a href="#">Indices Being Tracked </a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+{% endblock applicableactions %}
+
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover dt-responsive" id="indices-table" style="width:100%">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Country</th>
+        <th scope="col">Index</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in index_list %}
+      <tr>
+        <th scope="row">{{ instance.id }}</th>
+        <td>{{ instance.country }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}">{{ instance.name }}</a>
+        </td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}historical-points"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+<script>
+  {% block jquery %}
+  $('#indices-table').DataTable({
+        "order": [[ 0, "desc" ]]
+    } );
+  {% endblock jquery %}
+</script>

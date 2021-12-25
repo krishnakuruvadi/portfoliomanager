@@ -1,0 +1,48 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+    <li><a href="{% url 'common:index-list' %}">Indices Being Tracked</a></li>
+    <li><a href="#">Index Points - {{ page_obj.0.index.name }}</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} {% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+
+<table class="table table-striped">
+  <thead>
+      <tr>
+          <th>Date</td>
+          <th>Points</td>
+      </tr>
+  </thead>
+  <tbody>
+    {% for entry in page_obj %}
+      <tr>
+        <td>{{ entry.date }}</td>
+        <td>{{ entry.points }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="pagination d-flex justify-content-center align-items-center">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1"><i class="fa fa-fast-backward" aria-hidden="true" style="font-size: 1.3em;"></i></a>
+            <a href="?page={{ page_obj.previous_page_number }}"><i class="fa fa-step-backward" aria-hidden="true"  style="font-size: 1.3em;"></i></a>
+        {% endif %}
+
+          <button type="button" class="btn btn-outline-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</button>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}"><i class="fa fa-step-forward" aria-hidden="true" style="font-size: 1.3em;"></i></a>
+            <a href="?page={{ page_obj.paginator.num_pages }}"><i class="fa fa-fast-forward" aria-hidden="true" style="font-size: 1.3em;"></i>
+            </a>
+        {% endif %}
+    </span>
+  </div>
+{% endblock %}

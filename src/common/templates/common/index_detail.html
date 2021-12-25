@@ -1,0 +1,32 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+    <li><a href="{% url 'common:index-list' %}">Indices Being Tracked</a></li>
+    <li><a href="#">{{object.country}}:{{ object.name }}</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %}
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Country</th>
+        <th scope="col">Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">{{ object.id }}</th>
+        <td>{{ object.country }}</td>
+        <td>{{ object.name }}</td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}

@@ -21,7 +21,10 @@ from .views import (
     password_add_view,
     password_trash,
     PasswordDeleteView,
-    update_password
+    update_password,
+    IndexListView,
+    IndexDetailView,
+    HistoricalIndexPointList
 )
 # Create your views here.
 
@@ -30,6 +33,9 @@ urlpatterns = [
     path('', common_list_view, name='common-list'),
     path('stocks', StockListView.as_view(), name='stocks-list'),
     path('stocks/<id>/', StockDetailView.as_view(), name='stock-detail'),
+    path('indices', IndexListView.as_view(), name='index-list'),
+    path('index/<id>/', IndexDetailView.as_view(), name='index-detail'),
+    path('index/<id>/historical-points', HistoricalIndexPointList.as_view(), name='historical-index-point-list'),
     path('stocks/refresh', refresh, name='refresh'),
     path('stocks/<id>/historical-prices', HistoricalStockPriceList.as_view(), name='historical-stock-price-list'),
     path('passwords/', password_list_view, name='passwords-list'),

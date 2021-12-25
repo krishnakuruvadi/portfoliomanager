@@ -6,7 +6,7 @@ from django.views.generic import (
     DetailView,
     DeleteView
 )
-from .models import Stock, MutualFund, HistoricalStockPrice, HistoricalMFPrice, ScrollData, Preferences, Passwords
+from .models import Stock, MutualFund, HistoricalStockPrice, HistoricalMFPrice, ScrollData, Preferences, Passwords, HistoricalIndexPoints, Index
 from .helper import *
 from shared.handle_real_time_data import get_latest_vals, get_historical_mf_nav, get_conversion_rate
 from dateutil.relativedelta import relativedelta
@@ -64,6 +64,14 @@ def mf_refresh(request):
     update_mf_scheme_codes()
     return HttpResponseRedirect(reverse('common:mf-list'))
 
+class HistoricalIndexPointList(ListView):
+    template_name = 'common/historical_index_point_list.html'
+
+    paginate_by = 15
+    model = HistoricalIndexPoints
+    def get_queryset(self):
+        return HistoricalIndexPoints.objects.filter(index__id=self.kwargs['id'])
+
 class HistoricalStockPriceList(ListView):
     template_name = 'common/historical_stock_price_list.html'
 
@@ -85,6 +93,22 @@ class HistoricalMFPriceList(ListView):
         data = super().get_context_data(**kwargs)
         data['curr_module_id'] = 'id_internals_module'
         return data
+
+class IndexListView(ListView):
+    template_name = 'common/index_list.html'
+    model = Index
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['curr_module_id'] = 'id_internals_module'
+        return data
+
+class IndexDetailView(DetailView):
+    template_name = 'common/index_detail.html'
+
+    def get_object(self):
+        id_ = self.kwargs.get("id")
+        return get_object_or_404(Index, id=id_)
 
 class StockListView(ListView):
     template_name = 'common/stock_list.html'

@@ -60,9 +60,14 @@
         </tr>
       </table>
     </div>
+    <div class="col-sm-12 col-md-6 col-lg-4" style="width:75%;height:40vh">
+      <canvas id="compare"></canvas>
+    </div>
+  </div>
+  <div class="row">
     <div class='col-sm-4'>
+      <h5>Split</h5>
         {% if split %}
-          <h5>Split</h5>
           <table class="table table-hover">
             {% if object.exchange in 'NASDAQ,NYSE' %}
               <tr>
@@ -95,9 +100,11 @@
             {% endif %}
           </table>
         {% endif %}
-
+    </div>
+    <div class='col-sm-4'>
+        <h5>Bonus</h5>
         {% if bonus %}
-          <h5>Bonus</h5>
+        
           <table class="table table-hover">
             <tr>
               <th>Announcement Date</th>
@@ -115,9 +122,11 @@
             {% endfor %}
           </table>
         {% endif %}
-
-        {% if dividend %}
+      </div>
+      <div class='col-sm-4'>
         <h5>Dividend</h5>
+        {% if dividend %}
+        
         <table class="table table-hover">
           <tr>
             <th>Announcement Date</th>
@@ -134,9 +143,58 @@
         </table>
         {% endif %}
 
+      </div>
     </div>
-    <div class='col-sm-4'>
-
-    </div>
-  </div>
   {% endblock content %}
+
+  <script>
+    {% block jquery %}
+    {%if comp_vals %}
+    set_comparision_chart({{my_vals|safe}}, {{comp_vals|safe}}, {{chart_labels|safe}}, "{{my_name}}", "{{comp_name}}")
+    {% endif %}
+  function set_comparision_chart(my_vals, comp_vals, chart_labels, my_name, comp_name) {
+    var canvas = document.getElementById('compare');
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        //labels: ['1', '2', '3', '4', '5'],
+        labels: chart_labels,
+        datasets: [{
+          label: my_name,
+          yAxisID: my_name,
+          //data: [100, 96, 84, 76, 69],
+          data: my_vals,
+          borderColor: "#3e95cd",
+          fill: false
+        }, {
+          label: comp_name,
+          yAxisID: comp_name,
+          //data: [1, 1, 1, 1, 0],
+          data: comp_vals,
+          borderColor: "#bfff00",
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio:false,
+        title: {
+          display: true,
+          text: my_name + ' vs ' + comp_name
+        },
+        scales: {
+          yAxes: [{
+            id: my_name,
+            type: 'linear',
+            position: 'left',
+          }, {
+            id: comp_name,
+            type: 'linear',
+            position: 'right'
+          }]
+        }
+      }
+    });
+  }
+{% endblock jquery %}
+</script>

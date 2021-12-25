@@ -113,6 +113,28 @@ class HistoricalStockPrice(models.Model):
     def __str__(self):
         return str(self.id) + ":" + self.symbol.exchange + ":" + self.symbol.symbol + " " + self.date.strftime('%d-%m-%Y') + " " + str(self.price)
 
+class Index(models.Model):
+    class Meta:
+        unique_together = (('country','name'),)
+    country = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
+    yahoo_symbol = models.CharField(max_length=20)
+    
+    def get_absolute_url(self):
+        return reverse("common:index-detail", kwargs={'id': self.id})
+    
+    def __str__(self):
+        return str(self.id) + ":" + self.country + ":" + self.name
+
+class HistoricalIndexPoints(models.Model):
+    class Meta:
+        unique_together = (('index','date'),)
+    index = models.ForeignKey('Index', on_delete=models.CASCADE)
+    date = models.DateField(_('Date'), )
+    points = models.DecimalField(_('Points'), max_digits=20, decimal_places=2, null=False)
+
+    def __str__(self):
+        return str(self.id) + ":" + self.index.country + ":" + self.index.name + " " + self.date.strftime('%d-%m-%Y') + " " + str(self.points)
 
 class MutualFund(models.Model):
     code = models.CharField(max_length=15) # amfi code for India
