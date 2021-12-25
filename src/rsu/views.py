@@ -22,6 +22,8 @@ from tasks.tasks import update_rsu
 from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol
 import random
 from tools.stock_reconcile import Trans, reconcile_event_based
+from common.index_helpers import get_comp_index_values
+from common.models import Stock
 
 
 def create_rsu(request):
@@ -179,6 +181,19 @@ class RsuVestDetailView(DetailView):
             if std > today:
                 std = today
         data['progress_data'] = ret
+        try:
+            s = Stock.objects.get(symbol=rsu.award.symbol, exchange=rsu.award.exchange)
+            last_date = datetime.date.today()
+            if rsu.unsold_shares == 0:
+                all_sell = RSUSellTransactions.objects.filter(rsu_vest=rsu).order_by('trans_date')
+                last_date = all_sell[-1].trans_date
+
+            res = get_comp_index_values(s, rsu.vest_date, last_date)
+            if 'chart_labels' in res and len(res['chart_labels']) > 0:
+                for k, v in res.items():
+                    data[k] = v 
+        except Stock.DoesNotExist:
+            print(f'trying to get stock that does not exist {rsu.award.symbol} {rsu.award.exchange}')
         return data
 
 def refresh_rsu_trans(request):

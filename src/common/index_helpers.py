@@ -1,7 +1,7 @@
-from .models import Index, HistoricalIndexPoints
+from .models import Index, HistoricalIndexPoints, HistoricalStockPrice
 from shared.yahoo_finance_2 import YahooFinance2
 from django.db import IntegrityError
-
+from tasks.tasks import update_index_points
 
 def get_comp_index(exchange):
     if exchange == 'NASDAQ':
@@ -71,3 +71,51 @@ def get_name_of_index(yahoo_symbol):
         return 'NIFTY 100 Equal Weight'
     elif yahoo_symbol == '^NYA':
         return 'NYSE Composite'
+
+def get_comp_index_values(stock, start_date, last_date):
+    data = dict()
+    data['my_name'] = stock.symbol
+
+    start_date = start_date.replace(day=1)
+    symbol, country = get_comp_index(stock.exchange)            
+    if not symbol:
+        return data
+    try:
+        index = Index.objects.get(country=country, yahoo_symbol=symbol)
+        first_missing = None
+        last_missing = None
+        first_found = None
+        last_found = None
+        data['my_vals'] = list()
+        data['comp_vals'] = list()
+        data['comp_name'] = index.name
+        data['chart_labels'] = list()
+        for hsp in HistoricalStockPrice.objects.filter(symbol=stock, date__gte=start_date):
+            try:
+                t = HistoricalIndexPoints.objects.get(index=index, date=hsp.date)
+                if not first_found:
+                    first_found = hsp.date
+                last_found = hsp.date
+                dt = hsp.date.strftime('%Y-%m-%d')
+                data['comp_vals'].append({'x':dt, 'y':float(t.points)})
+                data['my_vals'].append({'x':dt, 'y':float(hsp.price)})
+                data['chart_labels'].append(dt)
+            except HistoricalIndexPoints.DoesNotExist:
+                if not first_missing:
+                    first_missing = hsp.date
+                last_missing = hsp.date
+
+            if first_missing and first_found and (first_found - first_missing).days > 15:
+                update_index_points(stock.exchange, first_missing, first_found)
+                    
+            if last_missing and last_found and (last_missing - last_found).days > 15:
+                update_index_points(stock.exchange, last_missing, last_found)
+                    
+            if not first_found and not last_found:
+                update_index_points(stock.exchange, start_date, last_date)
+
+            print(f'first_missing:{first_missing} first_found:{first_found} last_missing:{last_missing}  last_found:{last_found}')
+            
+    except Index.DoesNotExist:
+        update_index_points(stock.exchange, start_date, last_date)
+    return data

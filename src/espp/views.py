@@ -24,7 +24,8 @@ import random
 from tools.stock_reconcile import Trans, reconcile_event_based
 from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol
 from dateutil.relativedelta import relativedelta
-
+from common.index_helpers import get_comp_index_values
+from common.models import Stock
 
 class EsppCreateView(CreateView):
     template_name = 'espps/espp_create.html'
@@ -114,6 +115,7 @@ class EsppDetailView(DetailView):
         roi = round(roi, 2)
         data['roi'] = roi
         data['curr_module_id'] = 'id_espp_module'
+        '''
         data['transactions'] = list()
         for st in EsppSellTransactions.objects.filter(espp=data['object']):
             data['transactions'].append({
@@ -126,6 +128,7 @@ class EsppDetailView(DetailView):
                 'realised_gain':st.realised_gain,
                 'notes':st.notes
             })
+        '''
         std = obj.purchase_date
         today = datetime.date.today()
         r = lambda: random.randint(0,255)
@@ -177,23 +180,20 @@ class EsppDetailView(DetailView):
             if std > today:
                 std = today
         data['progress_data'] = ret
-        '''
-        [{
-            label: 'Fund',
-            yAxisID: 'Fund',
-            //data: [100, 96, 84, 76, 69],
-            data: fund_vals,
-            borderColor: "#3e95cd",
-            fill: false
-          }, {
-            label: 'SPY',
-            yAxisID: 'SPY',
-            //data: [1, 1, 1, 1, 0],
-            data: spy_vals,
-            borderColor: "#bfff00",
-            fill: false
-          }]
-        '''
+        try:
+            s = Stock.objects.get(symbol=obj.symbol, exchange=obj.exchange)
+            last_date = datetime.date.today()
+            if obj.shares_avail_for_sale == 0:
+                all_sell = EsppSellTransactions.objects.filter(espp=obj).order_by('trans_date')
+                last_date = all_sell[-1].trans_date
+
+            res = get_comp_index_values(s, obj.purchase_date, last_date)
+            if 'chart_labels' in res and len(res['chart_labels']) > 0:
+                for k, v in res.items():
+                    data[k] = v 
+        except Stock.DoesNotExist:
+            print(f'trying to get stock that does not exist {obj.symbol} {obj.exchange}')
+        
         return data
 
 class EsppUpdateView(UpdateView):

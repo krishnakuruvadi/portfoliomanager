@@ -85,3 +85,48 @@ function get_forex_rate(from_year, from_month, from_day, from_currency, to_curre
     })
     return ret;
 }
+
+function set_comparision_chart(my_vals, comp_vals, chart_labels, my_name, comp_name) {
+    var canvas = document.getElementById('compare');
+    new Chart(canvas, {
+        type: 'line',
+        data: {
+            //labels: ['1', '2', '3', '4', '5'],
+            labels: chart_labels,
+            datasets: [{
+                label: my_name,
+                yAxisID: my_name,
+                //data: [100, 96, 84, 76, 69],
+                data: my_vals,
+                borderColor: "#3e95cd",
+                fill: false
+            }, {
+                label: comp_name,
+                yAxisID: comp_name,
+                //data: [1, 1, 1, 1, 0],
+                data: comp_vals,
+                borderColor: "#bfff00",
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio:false,
+            title: {
+                display: true,
+                text: my_name + ' vs ' + comp_name
+            },
+            scales: {
+                yAxes: [{
+                    id: my_name,
+                    type: 'linear',
+                    position: 'left',
+                }, {
+                    id: comp_name,
+                    type: 'linear',
+                    position: 'right'
+                }]
+            }
+        }
+    });
+}

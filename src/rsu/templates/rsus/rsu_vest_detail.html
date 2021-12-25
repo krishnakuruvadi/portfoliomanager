@@ -36,8 +36,18 @@
     </table>
   </div>
   <div class='col-sm-3 col-md-1 col-lg-1'></div>
-  <div id="tempChart" style="width:100%;height:46vh;box-shadow: 6px 6px 6px 6px #888888;" class='col-sm-4 col-md-6 col-lg-4'>
-    <canvas id="myChart"></canvas>
+  <div class='col-sm-4 col-md-6 col-lg-4'>
+    <div class="row">
+      <div id="tempChart" style="width:100%;height:46vh;box-shadow: 6px 6px 6px 6px #888888;" >
+        <canvas id="myChart"></canvas>
+      </div>
+      <!--div class='col-sm-3 col-md-1 col-lg-1'></div-->
+      <p>&nbsp;</p>
+      
+      <div id="compChart" style="width:100%;height:46vh;box-shadow: 6px 6px 6px 6px #888888;">
+        <canvas id="compare"></canvas>
+      </div>
+    </div>
   </div>
 </div>
 <br>
@@ -55,7 +65,12 @@
 {% endblock content %}
 
 {% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
   <script>
+  {%if comp_vals %}
+    set_comparision_chart({{my_vals|safe}}, {{comp_vals|safe}}, {{chart_labels|safe}}, "{{my_name}}", "{{comp_name}}")
+  {% endif %}
   </script>
 {% endblock javascript %}
 
@@ -66,6 +81,7 @@
   if (!jQuery.isEmptyObject(progressdata)) {
       setProgressChart(progressdata)
   }
+
   function setProgressChart(progress_data) {
     var ctx = document.getElementById("myChart");
     var config = {

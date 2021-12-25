@@ -15,8 +15,8 @@
 {% endblock viewname %}
 
 {% block content %}
-<div class="row">
-  <div class='col-sm-12 col-md-6 col-lg-4' style="width:100%;height:50vh;box-shadow: 6px 6px 6px 6px #888888;">
+<div class="card-deck">
+  <div class='card col-sm-12 col-md-6 col-lg-4' style="width:100%;height:50vh;box-shadow: 6px 6px 6px 6px #888888;">
   <table class="paddingBetweenCols">
     <tr>
       <td>#</td>
@@ -96,12 +96,15 @@
     </tr>
   </table>
   </div>
-  <div class='col-sm-1 col-md-1 col-lg-1'></div>
-  <div id="tempChart" style="width:100%;height:50vh;box-shadow: 6px 6px 6px 6px #888888;" class='col-sm-12 col-md-9 col-lg-6'>
+  <!--div class='col-sm-1 col-md-1 col-lg-1'></div-->
+  <div id="tempChart" style="width:100%;height:50vh;box-shadow: 6px 6px 6px 6px #888888;" class='card col-sm-12 col-md-6 col-lg-4'>
     <canvas id="myChart"></canvas>
   </div>
+  <div id="compChart" style="width:100%;height:50vh;box-shadow: 6px 6px 6px 6px #888888;" class='card col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="compare"></canvas>
+  </div>
 </div>
-  <br>
+  <!--br>
   <table class="table table-hover dt-responsive" id="espp-sell-table" style="width:100%">
     <thead class="thead-dark">
       <tr>
@@ -127,8 +130,8 @@
       </tr>
       {% endfor %}
     </tbody>
-  </table>
-
+  </table-->
+<br>
 {% endblock content %}
 
 
@@ -178,3 +181,13 @@
     }
   {% endblock jquery %}
 </script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+  {%if comp_vals %}
+    set_comparision_chart({{my_vals|safe}}, {{comp_vals|safe}}, {{chart_labels|safe}}, "{{my_name}}", "{{comp_name}}")
+  {% endif %}
+  </script>
+{% endblock javascript %}
