@@ -1,4 +1,3 @@
-from types import ClassMethodDescriptorType
 from .models import InsurancePolicy, Transaction, Fund, NAVHistory
 import datetime
 from .insurance_helper import get_historical_nav
@@ -138,6 +137,14 @@ class InsuranceInterface:
             amt += 0 if not obj.latest_value else obj.latest_value
         return amt
     
+    @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt
+
     @classmethod
     def get_value_as_on(self, end_date):
         amt = 0

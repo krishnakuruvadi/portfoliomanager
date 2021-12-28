@@ -124,6 +124,32 @@ class SsyInterface:
         return contrib, deduct
     
     @classmethod
+    def get_amount_for_user(self, user_id):
+        ssy_objs = Ssy.objects.filter(user=user_id)
+        total_ssy = 0
+        for ssy_obj in ssy_objs:
+            ssy_num = ssy_obj.number
+            amt = 0
+            ssy_trans = SsyEntry.objects.filter(number=ssy_num)
+            for entry in ssy_trans:
+                if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
+                    amt += entry.amount
+                else:
+                    amt -= entry.amount
+            if amt < 0:
+                amt = 0
+            total_ssy += amt
+        return total_ssy
+
+    @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt
+        
+    @classmethod
     def get_export_name(self):
         return 'ssy'
     

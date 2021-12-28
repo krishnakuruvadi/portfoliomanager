@@ -162,6 +162,14 @@ class GoldInterface:
         return amt
     
     @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt
+
+    @classmethod
     def get_value_as_on(self, end_date):
         amt = 0
         unsold_wt = {'physical': {'24K':0, '22K':0}, "digital":0}

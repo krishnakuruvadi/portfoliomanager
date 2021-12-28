@@ -111,6 +111,29 @@ class EpfInterface:
         return contrib, deduct
 
     @classmethod
+    def get_amount_for_user(self, user_id):
+        epf_objs = Epf.objects.filter(user=user_id)
+        total_epf = 0
+        for epf_obj in epf_objs:
+            epf_id = epf_obj.id
+            amt = 0
+            epf_trans = EpfEntry.objects.filter(epf_id=epf_id)
+            for entry in epf_trans:
+                amt += entry.employee_contribution + entry.employer_contribution + entry.interest_contribution - entry.withdrawl
+            if amt < 0:
+                amt = 0
+            total_epf += amt
+        return total_epf
+
+    @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt
+
+    @classmethod
     def get_export_name(self):
         return 'epf'
     

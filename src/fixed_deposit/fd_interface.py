@@ -118,6 +118,22 @@ class FdInterface:
         return contrib, deduct
 
     @classmethod
+    def get_amount_for_user(self, user_id):
+        fd_objs = FixedDeposit.objects.filter(user=user_id)
+        total_fd = 0
+        for fd_obj in fd_objs:
+            total_fd += fd_obj.final_val
+        return total_fd
+
+    @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt
+
+    @classmethod
     def get_export_name(self):
         return 'fd'
     

@@ -201,3 +201,20 @@ class MfInterface:
         ret[self.get_export_name()]['data'] = data
         print(ret)
         return ret
+    
+    @classmethod
+    def get_amount_for_user(self, user_id):
+        mf_objs = Folio.objects.filter(user=user_id)
+        total = 0
+        for mf_obj in mf_objs:
+            if mf_obj.latest_value:
+                total += mf_obj.latest_value
+        return total
+
+    @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt

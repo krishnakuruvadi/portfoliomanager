@@ -72,14 +72,6 @@ def get_401k_amount_for_goal(id):
         total += obj.latest_value
     return total
 
-def get_401k_amount_for_user(user_id):
-    objs = Account401K.objects.filter(user=user_id)
-    total = 0
-    for obj in objs:
-        if obj.latest_value:
-            total += obj.latest_value
-    return total
-
 def get_r401k_value_as_on(dt, currency='INR'):
     '''
     dt = input date as on type:datetime.date object

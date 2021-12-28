@@ -16,7 +16,7 @@ from shared.handle_real_time_data import get_conversion_rate, get_historical_sto
 from shared.handle_create import add_common_stock
 from mutualfunds.models import Folio, MutualFundTransaction
 from shared.financial import xirr
-from retirement_401k.helper import get_401k_amount_for_goal, get_401k_amount_for_user, get_r401k_value_as_on
+from retirement_401k.helper import get_401k_amount_for_goal, get_r401k_value_as_on
 from shared.utils import get_min
 from epf.epf_interface import EpfInterface
 from espp.espp_interface import EsppInterface
@@ -681,95 +681,6 @@ def sort_set(cash_flows):
         done.append(largest_num)
     return ret
 
-
-def get_ppf_amount_for_user(user_id):
-    ppf_objs = Ppf.objects.filter(user=user_id)
-    total_ppf = 0
-    for ppf_obj in ppf_objs:
-        ppf_num = ppf_obj.number
-        amt = 0
-        ppf_trans = PpfEntry.objects.filter(number=ppf_num)
-        for entry in ppf_trans:
-            if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
-                amt += entry.amount
-            else:
-                amt -= entry.amount
-        if amt < 0:
-            amt = 0
-        total_ppf += amt
-    return total_ppf
-
-def get_ssy_amount_for_user(user_id):
-    ssy_objs = Ssy.objects.filter(user=user_id)
-    total_ssy = 0
-    for ssy_obj in ssy_objs:
-        ssy_num = ssy_obj.number
-        amt = 0
-        ssy_trans = SsyEntry.objects.filter(number=ssy_num)
-        for entry in ssy_trans:
-            if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
-                amt += entry.amount
-            else:
-                amt -= entry.amount
-        if amt < 0:
-            amt = 0
-        total_ssy += amt
-    return total_ssy
-
-def get_fd_amount_for_user(user_id):
-    fd_objs = FixedDeposit.objects.filter(user=user_id)
-    total_fd = 0
-    for fd_obj in fd_objs:
-        total_fd += fd_obj.final_val
-    return total_fd
-
-def get_espp_amount_for_user(user_id):
-    espp_objs = Espp.objects.filter(user=user_id)
-    total_espp = 0
-    for espp_obj in espp_objs:
-        if espp_obj.latest_value:
-            total_espp += espp_obj.latest_value
-    return total_espp
-
-def get_rsu_amount_for_user(user_id):
-    award_objs = RSUAward.objects.filter(user=user_id)
-    total_rsu = 0
-    for award_obj in award_objs:
-        for rsu_obj in RestrictedStockUnits.objects.filter(award=award_obj):
-            if rsu_obj.latest_value:
-                total_rsu += rsu_obj.latest_value
-    return total_rsu
-
-def get_shares_amount_for_user(user_id):
-    share_objs = Share.objects.filter(user=user_id)
-    total_shares = 0
-    for share_obj in share_objs:
-        if share_obj.latest_value:
-            total_shares += share_obj.latest_value
-    return total_shares
-
-def get_mf_amount_for_user(user_id):
-    mf_objs = Folio.objects.filter(user=user_id)
-    total = 0
-    for mf_obj in mf_objs:
-        if mf_obj.latest_value:
-            total += mf_obj.latest_value
-    return total
-
-def get_epf_amount_for_user(user_id):
-    epf_objs = Epf.objects.filter(user=user_id)
-    total_epf = 0
-    for epf_obj in epf_objs:
-        epf_id = epf_obj.id
-        amt = 0
-        epf_trans = EpfEntry.objects.filter(epf_id=epf_id)
-        for entry in epf_trans:
-            amt += entry.employee_contribution + entry.employer_contribution + entry.interest_contribution - entry.withdrawl
-        if amt < 0:
-            amt = 0
-        total_epf += amt
-    return total_epf
-
 def get_goal_target_for_user(user_id):
     goal_objs = Goal.objects.filter(user=user_id)
     target_amt = 0
@@ -786,16 +697,16 @@ def get_user_contributions(user_id):
         contrib['distrib_vals'] = list()
         contrib['distrib_labels'] = list()
         contrib['target'] = int(get_goal_target_for_user(user_id))
-        contrib['EPF'] = int(get_epf_amount_for_user(user_id))
-        contrib['ESPP'] = int(get_espp_amount_for_user(user_id))
-        contrib['FD'] = int(get_fd_amount_for_user(user_id))
-        contrib['PPF'] =int(get_ppf_amount_for_user(user_id))
-        contrib['SSY'] =int(get_ssy_amount_for_user(user_id))
-        contrib['RSU'] = int(get_rsu_amount_for_user(user_id))
+        contrib['EPF'] = int(EpfInterface.get_amount_for_user(user_id))
+        contrib['ESPP'] = int(EsppInterface.get_amount_for_user(user_id))
+        contrib['FD'] = int(FdInterface.get_amount_for_user(user_id))
+        contrib['PPF'] =int(PpfInterface.get_amount_for_user(user_id))
+        contrib['SSY'] =int(SsyInterface.get_amount_for_user(user_id))
+        contrib['RSU'] = int(RsuInterface.get_amount_for_user(user_id))
         contrib['Insurance'] = int(InsuranceInterface.get_amount_for_user(user_id))
-        contrib['Shares'] = int(get_shares_amount_for_user(user_id))
-        contrib['MutualFunds'] = int(get_mf_amount_for_user(user_id))
-        contrib['401K'] = int(get_401k_amount_for_user(user_id))
+        contrib['Shares'] = int(ShareInterface.get_amount_for_user(user_id))
+        contrib['MutualFunds'] = int(MfInterface.get_amount_for_user(user_id))
+        contrib['401K'] = int(R401KInterface.get_amount_for_user(user_id))
         contrib['Gold'] = int(GoldInterface.get_amount_for_user(user_id))
         contrib['Cash'] = int(BankAccountInterface.get_amount_for_user(user_id))
         contrib['equity'] = contrib['ESPP']+contrib['RSU']+contrib['Shares']+contrib['MutualFunds']+contrib['401K']+contrib['Insurance']
@@ -868,11 +779,18 @@ def get_investment_data(start_date):
 
     share_qty = dict()
     mf_qty = dict()
-    
-    while data_start_date + relativedelta(months=+1) < datetime.date.today():
+    today = datetime.date.today()
+    data_end_date = data_start_date
+    while True:
+        if data_end_date == today:
+            break
+
         print('Calculating for the month', data_start_date)
         total = 0
         data_end_date = data_start_date + relativedelta(months=+1)
+        if data_end_date > today:
+            data_end_date = today
+
         epf_entries = EpfEntry.objects.filter(trans_date__year=data_start_date.year, trans_date__month=data_start_date.month)
         for epf_entry in epf_entries:
             total_epf += int(epf_entry.employee_contribution) + int(epf_entry.employer_contribution) + int(epf_entry.interest_contribution) - int(epf_entry.withdrawl)

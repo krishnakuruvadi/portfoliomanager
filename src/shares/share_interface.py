@@ -5,7 +5,6 @@ from common.models import Bonusv2, Splitv2, Stock
 from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol
 from dateutil.relativedelta import relativedelta
 
-
 class ShareInterface:
 
     @classmethod
@@ -150,6 +149,23 @@ class ShareInterface:
                     deduct[t.trans_date.month-1] += -1*float(t.trans_price)
         return contrib, deduct
     
+    @classmethod
+    def get_amount_for_user(self, user_id):
+        share_objs = Share.objects.filter(user=user_id)
+        total_shares = 0
+        for share_obj in share_objs:
+            if share_obj.latest_value:
+                total_shares += share_obj.latest_value
+        return total_shares
+    
+    @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt
+
     @classmethod
     def get_export_name(self):
         return 'shares'

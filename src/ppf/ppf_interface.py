@@ -121,6 +121,32 @@ class PpfInterface:
         return contrib, deduct
     
     @classmethod
+    def get_amount_for_user(self, user_id):
+        ppf_objs = Ppf.objects.filter(user=user_id)
+        total_ppf = 0
+        for ppf_obj in ppf_objs:
+            ppf_num = ppf_obj.number
+            amt = 0
+            ppf_trans = PpfEntry.objects.filter(number=ppf_num)
+            for entry in ppf_trans:
+                if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
+                    amt += entry.amount
+                else:
+                    amt -= entry.amount
+            if amt < 0:
+                amt = 0
+            total_ppf += amt
+        return total_ppf
+
+    @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt
+
+    @classmethod
     def get_export_name(self):
         return 'ppf'
     

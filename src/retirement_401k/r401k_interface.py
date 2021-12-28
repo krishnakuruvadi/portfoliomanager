@@ -154,6 +154,23 @@ class R401KInterface:
         return 'v1'
 
     @classmethod
+    def get_amount_for_user(self, user_id):
+        objs = Account401K.objects.filter(user=user_id)
+        total = 0
+        for obj in objs:
+            if obj.latest_value:
+                total += obj.latest_value
+        return total
+    
+    @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt
+
+    @classmethod
     def export(self, user_id):
         from shared.handle_get import get_goal_name_from_id
 

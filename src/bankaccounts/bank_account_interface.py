@@ -167,6 +167,14 @@ class BankAccountInterface:
         return round(amt, 2)
     
     @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt
+
+    @classmethod
     def get_value_as_on(self, end_date):
         today = datetime.date.today()
         if end_date > today:

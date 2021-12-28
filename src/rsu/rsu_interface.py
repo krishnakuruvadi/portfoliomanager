@@ -144,6 +144,24 @@ class RsuInterface:
         return contrib, deduct
     
     @classmethod
+    def get_amount_for_user(self, user_id):
+        award_objs = RSUAward.objects.filter(user=user_id)
+        total_rsu = 0
+        for award_obj in award_objs:
+            for rsu_obj in RestrictedStockUnits.objects.filter(award=award_obj):
+                if rsu_obj.latest_value:
+                    total_rsu += rsu_obj.latest_value
+        return total_rsu
+    
+    @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt
+
+    @classmethod
     def get_export_name(self):
         return 'rsu'
     

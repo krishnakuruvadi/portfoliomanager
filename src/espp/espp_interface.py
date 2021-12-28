@@ -135,6 +135,23 @@ class EsppInterface:
         return contrib, deduct
 
     @classmethod
+    def get_amount_for_user(self, user_id):
+        espp_objs = Espp.objects.filter(user=user_id)
+        total_espp = 0
+        for espp_obj in espp_objs:
+            if espp_obj.latest_value:
+                total_espp += espp_obj.latest_value
+        return total_espp
+    
+    @classmethod
+    def get_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_amount_for_user(u.id)
+        return amt
+
+    @classmethod
     def get_export_name(self):
         return 'espp'
     
