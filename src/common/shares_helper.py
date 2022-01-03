@@ -10,6 +10,7 @@ import traceback
 from shares.models import Share
 from espp.models import Espp
 from rsu.models import RSUAward
+import pytz
 
 def pull_corporate_actions(symbol, exchange, from_date, to_date):
     dest_path = os.path.join(settings.MEDIA_ROOT, 'corporateActions')
@@ -544,3 +545,43 @@ def update_stock_status():
                             stock.save()
                         except Exception as ex:
                             print(f'exception {ex} when updating status for {stock.symbol} {stock.exchange}')  
+
+def is_exchange_open(exchange):
+    tz = 'Asia/Kolkata'
+    if exchange in ['NSE', 'BSE', 'NSE/BSE']:
+        tz = 'Asia/Kolkata'
+        sym = 'INFY.NS'
+    elif exchange in ['NYSE', 'NASDAQ']:
+        tz = 'US/Eastern'
+        sym = 'MSFT'
+    user_agent_headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+    r = requests.get(f"https://query2.finance.yahoo.com/v7/finance/quote?symbols={sym}", timeout=15, headers=user_agent_headers)
+    if r.status_code == 200:
+        print(r.json())
+        try:
+            market_state = r.json()['quoteResponse']['result'][0].get('marketState', '')
+            return  market_state.lower() != 'closed' and market_state.lower() != 'prepre' and market_state.lower != "postpost"
+        except Exception as ex:
+            print(f'exception {ex} when finding if exchange {exchange} is open')
+    return True
+
+def get_start_time(exchange):
+    dtnow = datetime.datetime.now()
+    if exchange in ['NSE', 'BSE', 'NSE/BSE']:
+        dtnow = dtnow.replace(hour=3, minute=45, second=0)
+    elif exchange in ['NYSE', 'NASDAQ']:
+        today = datetime.date.today()
+        temp = datetime.datetime(today.year, today.month, today.day, 9, 30, 0, 0, pytz.timezone('US/Eastern'))
+        dtnow = temp.astimezone(pytz.UTC)
+    return dtnow
+
+def get_end_time(exchange):
+    dtnow = datetime.datetime.now()
+    if exchange in ['NSE', 'BSE', 'NSE/BSE']:
+        dtnow = dtnow.replace(hour=10, minute=00, second=0)
+    elif exchange in ['NYSE', 'NASDAQ']:
+        today = datetime.date.today()
+        temp = datetime.datetime(today.year, today.month, today.day, 16, 0, 0, 0, pytz.timezone('US/Eastern'))
+        dtnow = temp.astimezone(pytz.UTC)
+    return dtnow
+    

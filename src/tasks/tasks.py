@@ -1017,6 +1017,12 @@ def update_index_points(exchange, start_date, end_date):
     update_index(exchange, start_date, end_date)
 
 
+@db_periodic_task(crontab(minute='*/10', hour='*'))
+def check_for_all_alerts():
+    from common.stocks_alerts import check_stock_price_change_alerts
+    check_stock_price_change_alerts()
+
+
 '''
 @db_task()
 def add_gold_trans(broker, trans):

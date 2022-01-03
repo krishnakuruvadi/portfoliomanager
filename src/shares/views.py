@@ -196,7 +196,7 @@ class ShareDetailView(DetailView):
                 bonuses.append({'announcement_date':bonus.announcement_date, 'record_date':bonus.record_date, 'ex_date':bonus.ex_date, 'ratio':str(bonus.ratio_num)+':'+str(bonus.ratio_denom)})
             if len(bonuses) > 0:
                 data['bonus'] = bonuses
-
+            data['user_name_mapping'] = get_all_users()
             data['my_name'] = stock.symbol
             trans = Transactions.objects.filter(share=obj).order_by('trans_date')
             start_date = trans[0].trans_date

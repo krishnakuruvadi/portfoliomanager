@@ -57,7 +57,7 @@ def get_all_goals_id_to_name_mapping():
         goal_mapping[goal.id] = goal.name
     return goal_mapping
 
-def get_all_users(short_name_prefer=True):
+def get_all_users(short_name_prefer=True, ext_user=None):
     ret_user = dict()
     users = User.objects.all()
     for user in users:

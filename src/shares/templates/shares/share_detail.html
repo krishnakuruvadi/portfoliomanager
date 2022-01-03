@@ -32,7 +32,7 @@
         </tr>
         <tr>
           <th scope="col">User</th>
-          <td>{{ object.user }}</td>
+          <td>{{ user_name_mapping|lookup:object.user }}</td>
         </tr>
         <tr>
           <th scope="col">Realised Gain</th>
@@ -198,3 +198,7 @@
   }
 {% endblock jquery %}
 </script>
+
+{% block javascript %}
+  {% load static %}
+{% endblock javascript %}

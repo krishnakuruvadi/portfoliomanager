@@ -86,6 +86,7 @@ class YahooFinance2(Exchange):
     def get_live_price(self, name, include_crumb=False):
         print('getting live values for symbol ', self.symbol)
         for _ in range(self.retries):
+            data = None
             try:
                 if not self.session or len(self.session.cookies) == 0:
                     self.get_session()
@@ -97,7 +98,7 @@ class YahooFinance2(Exchange):
                 text = StringIO(response.text)#response.text
                 #print("in YahooFinance2 response.text:", response.text)
                 data = response.json()
-                print(data)
+                #print(data)
                 ret = dict()
                 ret['name'] = name
                 meta_data = data["chart"]["result"][0]['meta']
@@ -118,7 +119,7 @@ class YahooFinance2(Exchange):
                 return ret
 
             except Exception as e:
-                print(e)
+                print(f'exception {e} when processing {data}')
         if not include_crumb:
             return self.get_live_price(name, True)
 
