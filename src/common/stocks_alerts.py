@@ -6,7 +6,7 @@ from common.shares_helper import is_exchange_open, get_start_time, get_end_time
 
 def check_stock_price_change_alerts():
     ss = dict()
-    for stock in Stock.objects.all():
+    for stock in Stock.objects.exclude(trading_status='Delisted'):
         symbol = stock.symbol
         if stock.exchange in ss:
             if not ss[stock.exchange]:
@@ -56,5 +56,60 @@ def check_stock_price_change_alerts():
                 )
             else:
                 print(f'{stock.exchange} {stock.symbol} change {v["pChange"]}%')
+
+            if v['version'] == 'v2':
+                if v['52wHigh'] == v['dayHigh']:
+                    search_str = f"{stock.exchange} {stock.symbol} hit 52 Week high of"
+                    str = f"{search_str} {v['dayHigh']}"
+                    print(str)
+
+                    create_alert_today_if_not_exist(
+                        search_str=search_str,
+                        summary=str,
+                        content= str,
+                        severity=Severity.info,
+                        start_time=start_time,
+                        end_time=end_time
+                    )
+                if v['52wLow'] == v['dayLow']:
+                    search_str = f"{stock.exchange} {stock.symbol} hit 52 Week low of"
+                    str = f"{search_str} {v['dayLow']}"
+                    print(str)
+
+                    create_alert_today_if_not_exist(
+                        search_str=search_str,
+                        summary=str,
+                        content= str,
+                        severity=Severity.info,
+                        start_time=start_time,
+                        end_time=end_time
+                    )
+                if v['prevClose'] > v['200dAvg'] and v['lastPrice'] < v['200dAvg']:
+                    search_str = f"{stock.exchange} {stock.symbol} below 200 day average of"
+                    str = f"{search_str} {v['200dAvg']}"
+                    print(str)
+
+                    create_alert_today_if_not_exist(
+                        search_str=search_str,
+                        summary=str,
+                        content= str,
+                        severity=Severity.info,
+                        start_time=start_time,
+                        end_time=end_time
+                    )
+                if v['prevClose'] < v['200dAvg'] and v['lastPrice'] > v['200dAvg']:
+                    search_str = f"{stock.exchange} {stock.symbol} above 200 day average of "
+                    str = f"{search_str} {v['200dAvg']}"
+                    print(str)
+
+                    create_alert_today_if_not_exist(
+                        search_str=search_str,
+                        summary=str,
+                        content= str,
+                        severity=Severity.info,
+                        start_time=start_time,
+                        end_time=end_time
+                    )
+
         else:
             print(f'failed to get live price for {symbol} {stock.exchange}')

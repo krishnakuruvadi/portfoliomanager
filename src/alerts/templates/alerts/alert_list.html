@@ -44,13 +44,13 @@
         <td>{{ instance.summary }}</td>
         <td>
           {% if instance.seen %}
-            <a href="{{ instance.get_absolute_url }}toggle_seen"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></a>
+            <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></a>
           {% else %}
-            <a href="{{ instance.get_absolute_url }}toggle_seen"><i class="fa fa-check" aria-hidden="true" style="color:grey"></i></a>
+            <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:grey"></i></a>
           {% endif %}
         </td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          <a href="{% url 'alerts:alert-delete' instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
         </td>
       </tr>
       {% endfor %}

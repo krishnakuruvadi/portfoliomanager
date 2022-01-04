@@ -560,7 +560,7 @@ def is_exchange_open(exchange):
         print(r.json())
         try:
             market_state = r.json()['quoteResponse']['result'][0].get('marketState', '')
-            return  market_state.lower() != 'closed' and market_state.lower() != 'prepre' and market_state.lower != "postpost"
+            return  market_state.lower() != 'closed' and market_state.lower() != 'prepre' and market_state.lower() != "postpost" and market_state.lower() != "post"
         except Exception as ex:
             print(f'exception {ex} when finding if exchange {exchange} is open')
     return True
@@ -584,4 +584,3 @@ def get_end_time(exchange):
         temp = datetime.datetime(today.year, today.month, today.day, 16, 0, 0, 0, pytz.timezone('US/Eastern'))
         dtnow = temp.astimezone(pytz.UTC)
     return dtnow
-    
