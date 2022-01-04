@@ -13,6 +13,12 @@ from gold.gold_interface import GoldInterface
 from bankaccounts.bank_account_interface import BankAccountInterface
 from goal.goal_interace import GoalInterface
 
+def get_users(ext_user):
+    return User.objects.all()
+
+def get_ext_user(id):
+    return None
+
 class UserInterface:
 
     @classmethod

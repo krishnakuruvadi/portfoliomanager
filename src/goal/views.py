@@ -24,6 +24,7 @@ import colorsys
 from shared.utils import get_int_or_none_from_string
 
 from bankaccounts.bank_account_interface import BankAccountInterface
+from users.user_interface import get_ext_user, get_users
 
 # Create your views here.
 
@@ -690,6 +691,13 @@ class GoalNames(APIView):
             goal_objs = Goal.objects.filter(user=user)
             for goal_obj in goal_objs:
                 goal_list[goal_obj.id] = goal_obj.name
+            ext_user = get_ext_user(user)
+            for u in get_users(ext_user):
+                if u.id == int(user):
+                    continue
+                gos = Goal.objects.filter(user=u.id)
+                for go in gos:
+                    goal_list[go.id] = '* ' + go.name
             data['goal_list'] = goal_list
         except Exception as e:
             print(e)

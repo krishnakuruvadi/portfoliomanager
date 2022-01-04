@@ -143,7 +143,7 @@ class YahooFinance2(Exchange):
                 response = self.session.get(url, timeout=self.timeout, headers=self.user_agent_headers)
                 response.raise_for_status()
                 data = response.json()
-                print(data)
+                #print(data)
                 ret = dict()
                 meta_data = data["quoteResponse"]["result"][0]
                 ret['lastPrice'] = round(meta_data['regularMarketPrice'], 2)

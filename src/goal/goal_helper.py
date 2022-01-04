@@ -2,6 +2,7 @@ from .models import Goal
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from shared.handle_chart_data import get_goal_contributions
+from users.user_interface import get_ext_user, get_users
 
 def one_time_pay_final_val(curr_val, inflation, time_period):
     #final_val = curr_val*(pow(1+inflation/100, time_period/12)-1)
@@ -108,6 +109,13 @@ def get_goal_id_name_mapping_for_user(id):
         goal_objs = Goal.objects.filter(user=id)
         for goal_obj in goal_objs:
             goal_list[goal_obj.id] = goal_obj.name
+        ext_user = get_ext_user(id)
+        for u in get_users(ext_user):
+            if u.id == int(id):
+                continue
+            gos = Goal.objects.filter(user=u.id)
+            for go in gos:
+                goal_list[go.id] = '* ' + go.name
         return goal_list
     except Exception as e:
         print(e)
