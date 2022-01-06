@@ -31,6 +31,14 @@
   </ul>
 {% endblock viewname %}
 
+{% block canvas %}
+<!--div style="width:80%;height:60vh;"-->
+<div style="width:100%;height:70vh;">
+  <canvas id="myChart"></canvas>
+</div>
+
+{% endblock canvas %}
+
 {% block applicableactions %} 
   <div class="btn-toolbar mb-2 mb-md-0">
     <div class="btn-group mr-2">
@@ -70,7 +78,7 @@
       <hr>
       <div class="card-deck">
         <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
-              <canvas id="all_classificationChart"></canvas>
+          <canvas id="all_classificationChart"></canvas>
         </div>
         <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
           <canvas id="all_distributionChart"></canvas>
@@ -210,7 +218,7 @@
       }
       if (duration > 0) {
         let year = today.getFullYear()
-        let month = today.getMonth()
+        let month = today.getMonth() + 1
         while (duration > 0) {
           month = month -1
           if (month == 0) {
