@@ -26,9 +26,9 @@ def create_alert(summary, content, severity, seen=False, action_url=None, json_d
     return alert.id
 
 def is_alert_raised(summary, start_time, end_time):
-    print(f'searching {summary} between {start_time} and {end_time}')
+    #print(f'searching {summary} between {start_time} and {end_time}')
     for alert in Alert.objects.filter(time__gte=start_time, time__lte=end_time):
-        print(f'checking if {summary} is a substring in {alert.summary}')
+        #print(f'checking if {summary} is a substring in {alert.summary}')
         if summary in alert.summary:
             return True
     return False

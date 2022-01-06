@@ -12,7 +12,7 @@ def get_comp_index(exchange):
     elif exchange == 'BSE':
         return '^BSESN', 'India'
     elif exchange in ['NSE', 'NSE/BSE']:
-        return 'NIFTY100_EQL_WGT.NS', 'India'
+        return '^NSEI', 'India'
     return None, None
 
 def get_comp_index_vals(exchange, start_date, end_date, chart_format=True):
@@ -88,6 +88,8 @@ def get_name_of_index(yahoo_symbol):
         return 'NIFTY 100 Equal Weight'
     elif yahoo_symbol == '^NYA':
         return 'NYSE Composite'
+    elif yahoo_symbol == '^NSEI':
+        return 'NIFTY 50'
 
 def get_comp_index_values(stock, start_date, last_date):
     data = dict()

@@ -970,8 +970,11 @@ def pull_and_store_stock_historical_vals(exchange, symbol, dt):
 def update_markets():
     from markets.vr_returns import get_india_index_returns
     from markets.markets_helper import update_india_market_returns
+    from common.index_helpers import update_indexes
     ret = get_india_index_returns()
     update_india_market_returns(ret)
+    today = datetime.date.today()
+    update_indexes(today+relativedelta(days=-10), today)
 
 @db_task()
 def update_insurance_policy_vals(policy_num):

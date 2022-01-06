@@ -209,7 +209,7 @@ class ShareDetailView(DetailView):
             start_date = trans[0].trans_date
             last_date = datetime.date.today()
             if obj.latest_value <= 0:
-                last_date = trans[-1].trans_date
+                last_date = trans[len(trans)-1].trans_date
             start_date = start_date.replace(day=1)
             symbol, country = get_comp_index(obj.exchange)
             #comp_name, comp_vals = get_comp_index_vals(obj.exchange, start_date, last_date)
