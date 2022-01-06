@@ -9,11 +9,11 @@ import requests
 from decimal import Decimal
 import datetime
 from goal.goal_helper import get_goal_id_name_mapping_for_user
-from shared.handle_real_time_data import get_in_preferred_currency, get_preferred_currency
+from shared.handle_real_time_data import get_in_preferred_currency
 from tasks.tasks import update_bank_acc_bal, upload_bank_account_transactions
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
-
+from common.helper import get_preferred_currency_symbol
 
 # Create your views here.
 
@@ -58,7 +58,7 @@ def get_accounts(request):
     context['preferred_currency_bal'] = round(balance, 2)
     context['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
     context['user_name_mapping'] = get_all_users()
-    context['preferred_currency'] = get_preferred_currency()    
+    context['preferred_currency'] = get_preferred_currency_symbol()    
     return render(request, template, context)
 
 def get_transactions(request, id):
@@ -313,7 +313,7 @@ def account_detail(request, id):
             context['goal'] = None
         user_name_mapping = get_all_users()
         context['user'] = user_name_mapping[acc.user]
-        context['preferred_currency'] = get_preferred_currency()
+        context['preferred_currency'] = get_preferred_currency_symbol()
         context['number'] = acc.number
         context['bank_name'] = acc.bank_name
         context['acc_type'] = acc.acc_type

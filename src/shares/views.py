@@ -31,6 +31,7 @@ import time
 from common.models import Preferences, HistoricalStockPrice, HistoricalIndexPoints, Index
 from common.index_helpers import get_comp_index
 from tasks.tasks import update_index_points
+from common.helper import get_preferred_currency_symbol
 
 # Create your views here.
 
@@ -180,7 +181,13 @@ class ShareDetailView(DetailView):
         data['user_str'] = get_user_name_from_id(data['object'].user)
         obj = self.get_object()        
         try:
+            data['pcs'] = get_preferred_currency_symbol()
+            data['share_name'] = obj.exchange+'/'+obj.symbol+'/'+get_user_short_name_or_name_from_id(obj.user)
             stock = Stock.objects.get(exchange=obj.exchange, symbol=obj.symbol)
+            if stock.exchange in ['NASDAQ', 'NYSE']:
+                data['scs'] = '$'
+            else:
+                data['scs'] = u"\u20B9"
             divs = list()
             for dividend in Dividendv2.objects.filter(stock=stock).order_by('-announcement_date'):
                 divs.append({'announcement_date':dividend.announcement_date, 'ex_date':dividend.ex_date, 'amount':dividend.amount})

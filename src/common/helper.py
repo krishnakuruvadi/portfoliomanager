@@ -248,6 +248,17 @@ def get_preferences(key):
         return getattr(config, key)
     return None
 
+def get_preferred_currency_symbol():
+    pcs = u"\u20B9"
+    preferred_currency = get_preferences('currency')
+    if preferred_currency == 'USD':
+        pcs = '$'
+    elif preferred_currency == 'INR':
+        pcs = u"\u20B9"
+    else:
+        pcs = preferred_currency
+    return pcs
+
 def get_password(id, token):
     pass_file = get_password_file()
     if not os.path.exists(pass_file):

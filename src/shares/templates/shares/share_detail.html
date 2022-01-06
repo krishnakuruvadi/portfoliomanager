@@ -9,7 +9,7 @@
 {% block viewname %}
 <ul class="breadcrumb">
     <li><a href="{% url 'shares:shares-list' %}">Shares </a></li>
-    <li><a href="#">{{object.symbol }}</a></li>
+    <li><a href="#">{{share_name}}</a></li>
 </ul>
  
 {% endblock viewname %}
@@ -43,29 +43,42 @@
           <td>{{ object.quantity }}</td>
         </tr>
         <tr>
+          <th scope="col">Latest Price</th>
+          <td>{{scs}} {{ object.latest_price }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Avg. Buy Price</th>
+          <td>{{scs}} {{ object.buy_price }}</td>
+        </tr>
+        <tr>
           <th scope="col">Buy Value</th>
-          <td>{{ object.buy_value }}</td>
+          <td>{{pcs}} {{ object.buy_value }}</td>
         </tr>
         <tr>
           <th scope="col">Latest Value</th>
-          <td>{{ object.latest_value }}</td>
+          <td>{{pcs}} {{ object.latest_value }}</td>
         </tr>
         <tr>
           <th scope="col">Gain</th>
-          <td>{{ object.gain }}</td>
+          <td>{{pcs}} {{ object.gain }}</td>
         </tr>
         <tr>
           <th scope="col">Notes</th>
           <td>{{ object.notes }}</td>
         </tr>
+        <tr>
+          <th scope="col"><small>As On</small></th>
+          <td><small>{{ object.as_on_date }}</small></td>
+        </tr>
+        
       </table>
     </div>
     <div class="col-sm-12 col-md-6 col-lg-4" style="width:75%;height:40vh">
       <canvas id="compare"></canvas>
     </div>
   </div>
-  <div class="row">
-    <div class='col-sm-4'>
+  <div class="card-deck">
+    <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
       <h5>Split</h5>
         {% if split %}
           <table class="table table-hover">
@@ -101,8 +114,8 @@
           </table>
         {% endif %}
     </div>
-    <div class='col-sm-4'>
-        <h5>Bonus</h5>
+    <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+      <h5>Bonus</h5>
         {% if bonus %}
         
           <table class="table table-hover">
@@ -123,7 +136,7 @@
           </table>
         {% endif %}
       </div>
-      <div class='col-sm-4'>
+      <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
         <h5>Dividend</h5>
         {% if dividend %}
         
@@ -145,6 +158,7 @@
 
       </div>
     </div>
+    <br>
   {% endblock content %}
 
   <script>

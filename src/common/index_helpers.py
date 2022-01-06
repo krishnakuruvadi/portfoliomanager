@@ -2,6 +2,7 @@ from .models import Index, HistoricalIndexPoints, HistoricalStockPrice
 from shared.yahoo_finance_2 import YahooFinance2
 from django.db import IntegrityError
 from tasks.tasks import update_index_points
+import datetime
 
 def get_comp_index(exchange):
     if exchange == 'NASDAQ':
@@ -30,6 +31,22 @@ def get_comp_index_vals(exchange, start_date, end_date, chart_format=True):
         except Index.DoesNotExist:
             return None, None
     return None, None
+
+def update_indexes(start_date, end_date):
+    today = datetime.date.today()
+    for index in Index.objects.all():
+        try:
+            response = YahooFinance2(index.yahoo_symbol).get_historical_value(start_date, end_date)
+            
+            last_val = 0
+            for k,v in response.items():
+                if (today - k).days <=5 or k.day in [25, 26, 27, 28, 29, 30, 31, 1, 2, 3, 4, 5]:
+                    add_hip(index, k, v)
+                elif abs((v-last_val)*100/(last_val+1)) > 1:
+                        add_hip(index, k, v)
+                last_val = v
+        except Exception as ex:
+            print(f'exception {ex} when updating index {index.country}/{index.name}')
 
 def update_index(exchange, start_date, end_date):
     symbol, country = get_comp_index(exchange)
