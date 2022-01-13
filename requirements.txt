@@ -20,7 +20,7 @@ cryptography==3.4.4
 cssselect==1.1.0
 daphne==3.0.1
 dateutils==0.6.8
-Django==2.2.25
+Django==2.2.26
 django-solo==1.1.5
 djangorestframework==3.11.2
 feedfinder2==0.0.4
