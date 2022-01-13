@@ -42,7 +42,7 @@ multitasking==0.0.9
 newspaper3k==0.2.8
 nltk==3.6.5
 nsetools==1.0.11
-numpy==1.19.5
+numpy==1.21.0
 ofxparse==0.21
 packaging==20.9
 pandas==1.2.5
