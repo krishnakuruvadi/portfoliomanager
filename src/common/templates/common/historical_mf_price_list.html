@@ -1,6 +1,13 @@
 {% extends 'base.html' %} 
 {% load template_filters %}
-{% block viewname %}{{ page_obj.0.code.code }} {{ page_obj.0.code.name }} {% endblock %} 
+{% block viewname %}
+<ul class="breadcrumb">
+  <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+  <li><a href="{% url 'common:mf-list' %}">Mutual Funds</a></li>
+  <li><a href="{% url 'common:mf-detail' page_obj.0.code.id %}">{{ page_obj.0.code.code }} {{ page_obj.0.code.name }} </a></li>
+  <li><a href="#">NAV History</a></li>
+</ul>
+{% endblock %} 
 
 {% block applicableactions %} {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
@@ -39,4 +46,5 @@
         {% endif %}
     </span>
   </div>
+  <br>
 {% endblock %}

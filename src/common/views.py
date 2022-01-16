@@ -87,7 +87,7 @@ class HistoricalMFPriceList(ListView):
     model = HistoricalMFPrice
 
     def get_queryset(self):
-        return HistoricalMFPrice.objects.filter(code__id=self.kwargs['id'])
+        return HistoricalMFPrice.objects.filter(code__id=self.kwargs['id']).order_by("-date")
     
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
