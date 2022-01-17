@@ -30,6 +30,7 @@
 {% endblock viewname %}
 
 {% block content %}
+
   <table class="table table-borderless">
     <tr>
       <td><ul class="nav nav-pills">
@@ -49,6 +50,60 @@
     </tr>
     <tr></tr>
   </table>
+  <div class="card-deck">
+    <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+      <p>The price-to-equity <b>P/E ratio</b> shows what the market is willing to pay today for a stock based on its past or future earnings. A high P/E could mean that a stock's price is high relative to earnings and possibly overvalued. Conversely, a low P/E might indicate that the current stock price is low relative to earnings.
+        <a href="https://www.investopedia.com/terms/p/price-earningsratio.asp" target="_blank"><i class="fas fa-external-link-alt"></i></a>
+      </p>
+      <p>The price-to-book <b>P/B Ratio</b> compares a company's market value to its book value. The market value of a company is its share price multiplied by the number of outstanding shares. The book value is the net assets of a company.
+          In other words, if a company liquidated all of its assets and paid off all its debt, the value remaining would be the company's book value.
+          Overvalued growth stocks frequently show a combination of low ROE and high P/B ratios. If a company's ROE is growing, its P/B ratio should also be growing.  High-growth companies will often show price-to-book ratios well above 1.0, whereas companies facing severe distress will occasionally show ratios below 1.0.
+          <a href="https://www.investopedia.com/terms/p/price-to-bookratio.asp" target="_blank"><i class="fas fa-external-link-alt"></i></a>
+      </p>
+    </div>
+    <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class="col-sm-12 col-md-6 col-lg-4">
+      <table class="table">
+        <tr>
+          <th>
+            Nifty PE Ratio Range
+          </th>
+          <th>
+            Valuation
+          </th>
+          <th>
+            Nifty PB Ratio Range
+          </th>
+        </tr>
+        <tr>
+          <td>25-30</td>
+          <td>Very Expensive. Better to sell</td>
+          <td>>4.5</td>
+        </tr>
+        <tr>
+          <td>20-25</td>
+          <td>Expensive. Book partial profits</td>
+          <td>3.25-4.5</td>
+        </tr>
+        <tr>
+          <td>15-20</td>
+          <td>Average. Buy or Hold</td>
+          <td>2.75-3.25</td>
+        </tr>
+        <tr>
+          <td>12-15</td>
+          <td>Cheap. Buy a lot</td>
+          <td>2-2.75</td>
+        </tr>
+        <tr>
+          <td>&lt;12</td>
+          <td>Very Cheap. Buy like crazy</td>
+          <td>&lt;2</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <br>
+
     {% if pe_vals %}
         <div>
             {% for key, value in pe_vals.items %}
@@ -107,7 +162,7 @@
       }
       if (duration > 0) {
         let year = today.getFullYear()
-        let month = today.getMonth()
+        let month = today.getMonth() + 1
         while (duration > 0) {
           month = month -1
           if (month == 0) {
