@@ -186,7 +186,7 @@ class RsuVestDetailView(DetailView):
             last_date = datetime.date.today()
             if rsu.unsold_shares == 0:
                 all_sell = RSUSellTransactions.objects.filter(rsu_vest=rsu).order_by('trans_date')
-                last_date = all_sell[-1].trans_date
+                last_date = all_sell[len(all_sell)-1].trans_date
 
             res = get_comp_index_values(s, rsu.vest_date, last_date)
             if 'chart_labels' in res and len(res['chart_labels']) > 0:
