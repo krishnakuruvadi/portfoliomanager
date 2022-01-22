@@ -146,6 +146,8 @@ class RsuVestDetailView(DetailView):
             'fill': 'false',
             'borderColor':color
         })
+        ret[0]['data'].append({'x': rsu.vest_date.strftime('%Y-%m-%d'), 'y':round(float(rsu.shares_for_sale*rsu.aquisition_price*rsu.conversion_rate),2)})
+
         std = std+relativedelta(months=1)
         if std > today:
             std = today

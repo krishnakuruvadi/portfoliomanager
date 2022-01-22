@@ -140,6 +140,7 @@ class EsppDetailView(DetailView):
             'fill': 'false',
             'borderColor':color
         })
+        ret[0]['data'].append({'x': obj.purchase_date.strftime('%Y-%m-%d'), 'y':round(float(obj.total_purchase_price),2)})
         std = std+relativedelta(months=1)
         if std > today:
             std = today
