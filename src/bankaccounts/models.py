@@ -33,6 +33,10 @@ ACCOUNT_TYPE_CHOICES = [
     ('Savings', 'Savings'),
     ('Checking', 'Checking'),
     ('Current', 'Current'),
+    ('HomeLoan', 'Home Loan'),
+    ('CarLoan', 'Car Loan'),
+    ('PersonalLoan', 'Personal Loan'),
+    ('OtherLoan', 'Other Loan'),
     ('Other', 'Other')
 ]
 

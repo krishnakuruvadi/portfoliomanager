@@ -36,7 +36,8 @@ class BankAccountInterface:
     def get_start_day_for_goal(self, goal_id):
         start_day = None
         try:
-            objs = BankAccount.objects.filter(goal=goal_id)
+            valid_acc_types = ['Savings', 'Checking', 'Current', 'Other']
+            objs = BankAccount.objects.filter(goal=goal_id, acc_type__in=valid_acc_types)
             for obj in objs:
                 trans = Transaction.objects.filter(account=obj).order_by('trans_date')
                 if len(trans) > 0:
@@ -67,10 +68,11 @@ class BankAccountInterface:
     @classmethod
     def get_no_goal_amount(self, user_id=None):
         amt = 0
+        valid_acc_types = ['Savings', 'Checking', 'Current', 'Other']
         if user_id:
-            objs = BankAccount.objects.filter(user=user_id)
+            objs = BankAccount.objects.filter(user=user_id, acc_type__in=valid_acc_types)
         else:
-            objs = BankAccount.objects.filter()
+            objs = BankAccount.objects.filter(acc_type__in=valid_acc_types)
         for obj in objs:
             if not obj.goal:
                 amt += 0 if not obj.balance else get_in_preferred_currency(float(obj.balance), obj.currency, datetime.date.today())
@@ -85,7 +87,8 @@ class BankAccountInterface:
             end_date = today
         contrib = [0]*12
         deduct = [0]*12
-        for acc in BankAccount.objects.filter(user=user_id):
+        valid_acc_types = ['Savings', 'Checking', 'Current', 'Other']
+        for acc in BankAccount.objects.filter(user=user_id, acc_type__in=valid_acc_types):
             c = [0]*12
             d = [0]*12
             for trans in Transaction.objects.filter(account=acc, trans_date__lte=end_date, trans_date__gte=st_date):
@@ -107,7 +110,8 @@ class BankAccountInterface:
             end_date = today
         contrib = 0
         deduct = 0
-        for acc in BankAccount.objects.filter(user=user_id):
+        valid_acc_types = ['Savings', 'Checking', 'Current', 'Other']
+        for acc in BankAccount.objects.filter(user=user_id, acc_type__in=valid_acc_types):
             c = 0
             d = 0
             for trans in Transaction.objects.filter(account=acc, trans_date__lte=end_date, trans_date__gte=st_date):
@@ -129,7 +133,8 @@ class BankAccountInterface:
         deduct = 0
         total = 0
         cash_flows = list()
-        for obj in BankAccount.objects.filter(goal=goal_id):
+        valid_acc_types = ['Savings', 'Checking', 'Current', 'Other']
+        for obj in BankAccount.objects.filter(goal=goal_id, acc_type__in=valid_acc_types):
             c = 0
             d = 0
             tot = 0
@@ -153,7 +158,8 @@ class BankAccountInterface:
     @classmethod
     def get_amount_for_goal(self, goal_id):
         amt = 0
-        objs = BankAccount.objects.filter(goal=goal_id)
+        valid_acc_types = ['Savings', 'Checking', 'Current', 'Other']
+        objs = BankAccount.objects.filter(goal=goal_id, acc_type__in=valid_acc_types)
         for obj in objs:
             amt += 0 if not obj.balance else get_in_preferred_currency(float(obj.balance), obj.currency, datetime.date.today())
         return amt
@@ -161,7 +167,8 @@ class BankAccountInterface:
     @classmethod
     def get_amount_for_user(self, user_id):
         amt = 0
-        objs = BankAccount.objects.filter(user=user_id)
+        valid_acc_types = ['Savings', 'Checking', 'Current', 'Other']
+        objs = BankAccount.objects.filter(user=user_id, acc_type__in=valid_acc_types)
         for obj in objs:
             amt += 0 if not obj.balance else get_in_preferred_currency(float(obj.balance), obj.currency, datetime.date.today())
         return round(amt, 2)
@@ -180,7 +187,8 @@ class BankAccountInterface:
         if end_date > today:
             end_date = today
         amt = 0
-        for acc in BankAccount.objects.all():
+        valid_acc_types = ['Savings', 'Checking', 'Current', 'Other']
+        for acc in BankAccount.objects.filter(acc_type__in=valid_acc_types):
             b_amt = 0
             for trans in Transaction.objects.filter(account=acc, trans_date__lte=end_date):
                 if trans.trans_type == 'Credit':
@@ -189,6 +197,40 @@ class BankAccountInterface:
                     b_amt -= float(trans.amount)
             if b_amt > 0:
                 amt += get_in_preferred_currency(b_amt, acc.currency, end_date)
+        return round(amt, 2)
+
+    @classmethod
+    def get_loan_amount_for_user(self, user_id):
+        amt = 0
+        valid_acc_types = ['HomeLoan', 'CarLoan', 'PersonalLoan', 'OtherLoan']
+        objs = BankAccount.objects.filter(user=user_id, acc_type__in=valid_acc_types)
+        for obj in objs:
+            amt += 0 if not obj.balance else get_in_preferred_currency(float(obj.balance), obj.currency, datetime.date.today())
+        return round(amt, 2)
+    
+    @classmethod
+    def get_loan_amount_for_all_users(self, ext_user):
+        from users.user_interface import get_users
+        amt = 0
+        for u in get_users(ext_user):
+            amt += self.get_loan_amount_for_user(u.id)
+        return amt
+
+    @classmethod
+    def get_loan_value_as_on(self, end_date):
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
+        amt = 0
+        valid_acc_types = ['HomeLoan', 'CarLoan', 'PersonalLoan', 'OtherLoan']
+        for acc in BankAccount.objects.filter(acc_type__in=valid_acc_types):
+            b_amt = 0
+            for trans in Transaction.objects.filter(account=acc, trans_date__lte=end_date):
+                if trans.trans_type == 'Credit':
+                    b_amt += float(trans.amount)
+                else:
+                    b_amt -= float(trans.amount)
+            amt += get_in_preferred_currency(b_amt, acc.currency, end_date)
         return round(amt, 2)
 
     @classmethod

@@ -3,6 +3,11 @@ from .models import BankAccount, Transaction
 from ofxparse import OfxParser
 import datetime
 
+def is_a_loan_account(acc_type):
+    if acc_type in ['Savings', 'Checking', 'Current', 'Other']:
+        return False
+    return True
+
 def update_balance_for_accounts():
     for ba in BankAccount.objects.all():
         update_balance_for_account(ba.id)

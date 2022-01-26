@@ -49,7 +49,11 @@
                 <option value="Savings">Savings</option>
                 <option value="Checking">Checking</option>
                 <option value="Current">Current</option>
+                <option value="HomeLoan">Home Loan</option>
+                <option value="CarLoan">Car Loan</option>
+                <option value="PersonalLoan">Personal Loan</option>
                 <option value="Other">Other</option>
+                <option value="OtherLoan">Other Loan</option>
               </select>
             </div>
           </div>
@@ -82,7 +86,7 @@
           </div>
         </div>
 
-        <div class="form-group row">
+        <div class="form-group row" id="div_goal">
           <label for="goal" class="col-sm-3 col-form-label">Goal</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
@@ -132,6 +136,10 @@
       var resp = {"goal_list":{{goals|safe}}};
       get_goals_and_set_goal(resp)
     {% endif %}
+    adjust_div_for_loan()
+    $("#id_acc_type").change(function () {
+      adjust_div_for_loan();
+    });
     function get_goals_and_set_goal(response) {
       set_goals(response, '{{goal|safe}}');
     }
@@ -151,6 +159,15 @@
         opt.value = currency;
         // add opt to end of select box (sel)
         dropdown.appendChild(opt);
+      }
+    }
+
+    function adjust_div_for_loan() {
+      var sel = document.getElementById('id_acc_type').value;
+      if (sel == 'CarLoan' || sel == 'HomeLoan' || sel == 'PersonalLoan' || sel == 'OtherLoan') {
+        document.getElementById("div_goal").style.display="none";
+      } else {
+        document.getElementById("div_goal").style.display=null;
       }
     }
   </script>

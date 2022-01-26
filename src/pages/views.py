@@ -128,6 +128,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         context['investment_data']['insurance'] = json.loads(investment_data.insurance_data.replace("\'", "\""))
         context['investment_data']['gold'] = json.loads(investment_data.gold_data.replace("\'", "\""))
         context['investment_data']['cash'] = json.loads(investment_data.cash_data.replace("\'", "\""))
+        context['investment_data']['loan'] = json.loads(investment_data.loan_data.replace("\'", "\""))
         context['investment_data']['total'] = json.loads(investment_data.total_data.replace("\'", "\""))
         context['investment_data']['start_date'] =  investment_data.start_day_across_portfolio.strftime("%Y-%b-%d")
         utc = investment_data.as_on_date

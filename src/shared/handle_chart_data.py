@@ -757,6 +757,7 @@ def get_investment_data(start_date):
     insurance_data = list()
     gold_data = list()
     cash_data = list()
+    loan_data = list()
     total_data = list()
 
     total_epf = 0
@@ -775,6 +776,7 @@ def get_investment_data(start_date):
     insurance_reset_on_zero = False
     gold_reset_on_zero = False
     cash_reset_on_zero = False
+    loan_reset_on_zero = False
     total_reset_on_zero = False
 
     share_qty = dict()
@@ -1075,6 +1077,20 @@ def get_investment_data(start_date):
             mf_reset_on_zero = False
             mf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
         
+        try:
+            loan_val = BankAccountInterface.get_loan_value_as_on(data_end_date)
+            if loan_val != 0:
+                if not loan_reset_on_zero:
+                    loan_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
+                loan_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':loan_val})
+                total += loan_val
+                loan_reset_on_zero = True
+            elif loan_reset_on_zero:
+                loan_reset_on_zero = False
+                loan_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+        except Exception as ex:
+            print(f'exception {ex} when getting values for loan as on {data_end_date}')
+
         if total != 0:
             if not total_reset_on_zero:
                 total_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
@@ -1100,6 +1116,7 @@ def get_investment_data(start_date):
         'shares':shares_data, 
         'mf':mf_data,
         'cash': cash_data,
+        'loan': loan_data,
         'total':total_data
         }
         

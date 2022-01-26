@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from bankaccounts.bank_account_helper import is_a_loan_account
 from shared.utils import *
 from shared.handle_get import *
 from .models import BankAccount, Transaction
@@ -27,6 +28,7 @@ def get_accounts(request):
     context['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
     context['user_name_mapping'] = get_all_users()
     balance = 0
+    loan_balance = 0
     accounts = BankAccount.objects.all()
     as_on = None
     for acc in accounts:
@@ -43,7 +45,10 @@ def get_accounts(request):
         acc.first_trans_dt = first_trans_dt
         acc.preferred_currency_bal = get_in_preferred_currency(float(acc.balance), acc.currency, datetime.date.today())
         context['object_list'].append(acc)
-        balance += acc.preferred_currency_bal
+        if is_a_loan_account(acc.acc_type):
+            loan_balance += get_in_preferred_currency(float(acc.balance), acc.currency, datetime.date.today())
+        else:
+            balance += get_in_preferred_currency(float(acc.balance), acc.currency, datetime.date.today())
         if not as_on:
             as_on = acc.as_on_date
         elif acc.as_on_date:
@@ -56,6 +61,7 @@ def get_accounts(request):
         context['as_on_date'] = 'None'
     context['curr_module_id'] = 'id_bank_acc_module'
     context['preferred_currency_bal'] = round(balance, 2)
+    context['preferred_currency_loan_bal'] = round(loan_balance, 2)
     context['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
     context['user_name_mapping'] = get_all_users()
     context['preferred_currency'] = get_preferred_currency_symbol()    
