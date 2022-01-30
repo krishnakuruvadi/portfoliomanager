@@ -186,6 +186,7 @@ def update_investment_data():
             all_investment_data.insurance_data=investment_data['insurance']
             all_investment_data.gold_data=investment_data['gold']
             all_investment_data.cash_data=investment_data['cash']
+            all_investment_data.loan_data=investment_data['loan']
             all_investment_data.start_day_across_portfolio=start_date
             all_investment_data.as_on_date=datetime.datetime.now()
             all_investment_data.save()
@@ -204,6 +205,7 @@ def update_investment_data():
                 gold_data=investment_data['gold'],
                 cash_data=investment_data['cash'],
                 insurance_data=investment_data['insurance'],
+                loan_data=investment_data['loan'],
                 total_data=investment_data['total'],
                 start_day_across_portfolio=start_date,
                 as_on_date=datetime.datetime.now()

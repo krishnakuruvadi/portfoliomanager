@@ -25,6 +25,7 @@ from shared.utils import get_int_or_none_from_string
 
 from bankaccounts.bank_account_interface import BankAccountInterface
 from users.user_interface import get_ext_user, get_users
+from django.conf import settings
 
 # Create your views here.
 
@@ -436,14 +437,39 @@ class GoalDetailView(DetailView):
         data['target_date'] = data['object'].start_date+relativedelta(months=data['object'].time_period)
         data['progress_data'] = dict()
         id = data['object'].id
-        chart_data, ret = get_goal_yearly_contrib(id, None)
+        
+        full_file_path = settings.MEDIA_ROOT + '/goal/yearly_contrib/' + str(id) + '/chart_data.json'
+        read_from_file_successful = False
+        
+        if os.path.exists(full_file_path):
+            try:
+                with open(full_file_path) as f:
+                    chart_data = json.load(f)
+                    read_from_file_successful = True
+            except Exception as ex:
+                print(f'exception opening {full_file_path}: {ex}')
+                read_from_file_successful = False
+            full_file_path = settings.MEDIA_ROOT + '/goal/yearly_contrib/' + str(id) + '/projection_data.json'
+            try:
+                with open(full_file_path) as f:
+                    ret = json.load(f)
+                    read_from_file_successful = True
+            except Exception as ex:
+                print(f'exception opening {full_file_path}: {ex}')
+                read_from_file_successful = False
+        
+        if not read_from_file_successful:
+            chart_data, ret = get_goal_yearly_contrib(id, None)
+
         data['progress_data']['chart_data'] = chart_data
         data['progress_data']['avg_growth'] = ret.get('avg_growth', 0)
         data['progress_data']['avg_contrib'] = ret.get('avg_contrib', 0)
         data['final_projection'] = ret.get('final_projection', 0)
-        total_contribution = ret.get('total_contribution', 0)
+        #total_contribution = ret.get('total_contribution', 0)
+        total_contribution = float(data['object'].achieved_amt)
         contrib_percent = int(total_contribution*100/float(data['object'].final_val))
         project_percent = int(float(data['final_projection']-data['object'].achieved_amt)*100/float(data['object'].final_val))
+
         remaining_percent = 100 - contrib_percent - project_percent
         if remaining_percent < 0:
             remaining_percent = 0

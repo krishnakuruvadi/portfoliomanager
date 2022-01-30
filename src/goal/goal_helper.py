@@ -3,6 +3,10 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from shared.handle_chart_data import get_goal_contributions
 from users.user_interface import get_ext_user, get_users
+from django.conf import settings
+import os
+from shared.handle_chart_data import get_goal_yearly_contrib
+import json
 
 def one_time_pay_final_val(curr_val, inflation, time_period):
     #final_val = curr_val*(pow(1+inflation/100, time_period/12)-1)
@@ -63,10 +67,22 @@ def get_corpus_to_be_saved(curr_yrly_exp, inflation, accum_period, depletion_per
         corpus = corpus + cur_sav
     return corpus
 
+def update_yearly_contrib_and_projections(goal_id):
+    full_file_path = settings.MEDIA_ROOT + '/goal/yearly_contrib/' + str(goal_id)
+    if not os.path.exists(full_file_path):
+        os.makedirs(full_file_path)
+    chart_data, ret = get_goal_yearly_contrib(goal_id, None)
+    chart_data_file = full_file_path + '/chart_data.json'
+    with open(chart_data_file, 'w') as outfile:
+        json.dump(chart_data, outfile, default=str)
+    projection_data_file = full_file_path + '/projection_data.json'
+    with open(projection_data_file, 'w') as outfile:
+            json.dump(ret, outfile, default=str)
 
 def update_all_goals_contributions():
     for goal_obj in Goal.objects.all():
         update_goal_contributions(goal_obj.id)
+        update_yearly_contrib_and_projections(goal_obj.id)
 
 def update_goal_contributions(id):
     try:
