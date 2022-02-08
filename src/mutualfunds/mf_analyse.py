@@ -281,7 +281,8 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
         create_alert(
             summary='Code:' + code + ' Mutual fund not present',
             content= 'Not able to find a matching Mutual Fund with the code.',
-            severity=Severity.error
+            severity=Severity.error,
+            alert_type="Action"
         )
         return None, token
     mf_name = None

@@ -187,7 +187,8 @@ def pull_bse():
                 create_alert(
                     summary='Failure to get bse equity list.  More than one file found',
                     content= description,
-                    severity=Severity.error
+                    severity=Severity.error,
+                    alert_type="Application"
                 )
                 break
         if dload_file_name:

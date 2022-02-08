@@ -299,7 +299,8 @@ def update_mf_mapping():
                         create_alert(
                             summary='Code:' + k + ' Mutual fund not found',
                             content= 'Not able to find a matching Mutual Fund with the code.',
-                            severity=Severity.error
+                            severity=Severity.error,
+                            alert_type="Application"
                         )
         set_task_state('update_mf_mapping', TaskState.Successful)
     else:
@@ -350,7 +351,8 @@ def analyse_mf():
             create_alert(
                 summary='Code:' + code + ' Mutual fund not analysed',
                 content= 'Not able to find a matching Mutual Fund with the code for analysis.',
-                severity=Severity.error
+                severity=Severity.error,
+                alert_type="Application"
             )
             continue
         print('analysed data for mf', data)
@@ -935,6 +937,11 @@ def update_401k_month_end_vals():
 @db_periodic_task(crontab(minute='20', hour='*/6'))
 def check_updates_pending():
     update_401k_month_end_vals()
+
+@db_periodic_task(crontab(minute='35', hour='*/12'))
+def clean_stale_alerts():
+    from alerts.alert_helper import clean_alerts
+    clean_alerts()
 
 @db_task()
 def pull_and_store_stock_historical_vals(exchange, symbol, dt):

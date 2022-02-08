@@ -13,49 +13,205 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
-  <table class="table table-hover table-condensed dt-responsive" id="alerts-table" style="width:100%">
-    <thead class="thead-dark">
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col" style="text-align:center">Severity</th>
-        <th scope="col">Time</th>
-        <th scope="col">Summary</th>
-        <th scope="col">Read</th>
-        <th scope="col"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for instance in alerts %}
-      <tr>
-        <td><a href="{% url 'alerts:alert-detail' instance.id %}">{{ instance.id }}</a></td>
-        <td style="text-align:center">
-          {% if instance.severity == 0 %}
-            <i class="far fa-times-circle" title="critical" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
-          {% elif instance.severity == 1 %}
-            <i class="fas fa-exclamation-triangle" title="error" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
-          {% elif instance.severity == 2 %}
-            <i class="fas fa-exclamation-triangle" title="warning" aria-hidden="true" style="color:#ffae42" style="font-size: 1.2em;"></i>
-          {% elif instance.severity == 3 %}
-          {% else %}
-          <i class="fas fa-info-circle" title="info" aria-hidden="true" style="color:green" style="font-size: 1.2em;"></i>
-          {% endif %}
-        </td>
-        <td>{{ instance.time }}</td>
-        <td>{{ instance.summary }}</td>
-        <td>
-          {% if instance.seen %}
-            <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></a>
-          {% else %}
-            <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:grey"></i></a>
-          {% endif %}
-        </td>
-        <td>
-          <a href="{% url 'alerts:alert-delete' instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+<ul class="nav nav-tabs nav-justified" id="alerts-tabs">
+  <li class="nav-item active"><a data-toggle="tab" href="#actions" id="actions-item">Actions {% if num_action > 0 %} ({{num_action}}) {% endif %} </a></li>
+  <li class="nav-item"><a data-toggle="tab" href="#notifications">Notifications {% if num_notification > 0 %} ({{num_notification}}) {% endif %} </a></li>
+  <li class="nav-item"><a data-toggle="tab" href="#application">Application {% if num_application > 0 %} ({{num_application}}) {% endif %} </a></li>
+  <!--li class="nav-item"><a data-toggle="tab" href="#marketing">Marketing {% if num_marketing > 0 %} ({{num_marketing}}) {% endif %} </a></li-->
+</ul>
+<br>
+<div class="tab-content">
+  <br>
+  <div id="actions" class="tab-pane fade in active">
+
+    <h4>Actions</h4>
+    <br>
+
+    <table class="table table-hover table-condensed dt-responsive" id="actions-table" style="width:100%">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col" style="text-align:center">Severity</th>
+          <th scope="col">Time</th>
+          <th scope="col">Summary</th>
+          <th scope="col">Read</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for instance in actions %}
+        <tr>
+          <td><a href="{% url 'alerts:alert-detail' instance.id %}">{{ instance.id }}</a></td>
+          <td style="text-align:center">
+            {% if instance.severity == 0 %}
+              <i class="far fa-times-circle" title="critical" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 1 %}
+              <i class="fas fa-exclamation-triangle" title="error" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 2 %}
+              <i class="fas fa-exclamation-triangle" title="warning" aria-hidden="true" style="color:#ffae42" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 3 %}
+            {% else %}
+            <i class="fas fa-info-circle" title="info" aria-hidden="true" style="color:green" style="font-size: 1.2em;"></i>
+            {% endif %}
+          </td>
+          <td>{{ instance.time }}</td>
+          <td>{{ instance.summary }}</td>
+          <td>
+            {% if instance.seen %}
+              <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></a>
+            {% else %}
+              <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:grey"></i></a>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'alerts:alert-delete' instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div id="notifications" class="tab-pane fade">
+    <h4>Notifications</h4>    <br>
+    <table class="table table-hover table-condensed dt-responsive" id="notifications-table" style="width:100%">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col" style="text-align:center">Severity</th>
+          <th scope="col">Time</th>
+          <th scope="col">Summary</th>
+          <th scope="col">Read</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for instance in notifications %}
+        <tr>
+          <td><a href="{% url 'alerts:alert-detail' instance.id %}">{{ instance.id }}</a></td>
+          <td style="text-align:center">
+            {% if instance.severity == 0 %}
+              <i class="far fa-times-circle" title="critical" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 1 %}
+              <i class="fas fa-exclamation-triangle" title="error" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 2 %}
+              <i class="fas fa-exclamation-triangle" title="warning" aria-hidden="true" style="color:#ffae42" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 3 %}
+            {% else %}
+            <i class="fas fa-info-circle" title="info" aria-hidden="true" style="color:green" style="font-size: 1.2em;"></i>
+            {% endif %}
+          </td>
+          <td>{{ instance.time }}</td>
+          <td>{{ instance.summary }}</td>
+          <td>
+            {% if instance.seen %}
+              <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></a>
+            {% else %}
+              <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:grey"></i></a>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'alerts:alert-delete' instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div id="application" class="tab-pane fade">
+    <h4>Application</h4>   <br>
+    <table class="table table-hover table-condensed dt-responsive" id="application-table" style="width:100%">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col" style="text-align:center">Severity</th>
+          <th scope="col">Time</th>
+          <th scope="col">Summary</th>
+          <th scope="col">Read</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for instance in application %}
+        <tr>
+          <td><a href="{% url 'alerts:alert-detail' instance.id %}">{{ instance.id }}</a></td>
+          <td style="text-align:center">
+            {% if instance.severity == 0 %}
+              <i class="far fa-times-circle" title="critical" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 1 %}
+              <i class="fas fa-exclamation-triangle" title="error" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 2 %}
+              <i class="fas fa-exclamation-triangle" title="warning" aria-hidden="true" style="color:#ffae42" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 3 %}
+            {% else %}
+            <i class="fas fa-info-circle" title="info" aria-hidden="true" style="color:green" style="font-size: 1.2em;"></i>
+            {% endif %}
+          </td>
+          <td>{{ instance.time }}</td>
+          <td>{{ instance.summary }}</td>
+          <td>
+            {% if instance.seen %}
+              <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></a>
+            {% else %}
+              <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:grey"></i></a>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'alerts:alert-delete' instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <!--div id="marketing" class="tab-pane fade">
+    <h4>Marketing</h4>    <br>
+    <table class="table table-hover table-condensed dt-responsive" id="marketing-table" style="width:100%">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col" style="text-align:center">Severity</th>
+          <th scope="col">Time</th>
+          <th scope="col">Summary</th>
+          <th scope="col">Read</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for instance in marketing %}
+        <tr>
+          <td><a href="{% url 'alerts:alert-detail' instance.id %}">{{ instance.id }}</a></td>
+          <td style="text-align:center">
+            {% if instance.severity == 0 %}
+              <i class="far fa-times-circle" title="critical" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 1 %}
+              <i class="fas fa-exclamation-triangle" title="error" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 2 %}
+              <i class="fas fa-exclamation-triangle" title="warning" aria-hidden="true" style="color:#ffae42" style="font-size: 1.2em;"></i>
+            {% elif instance.severity == 3 %}
+            {% else %}
+            <i class="fas fa-info-circle" title="info" aria-hidden="true" style="color:green" style="font-size: 1.2em;"></i>
+            {% endif %}
+          </td>
+          <td>{{ instance.time }}</td>
+          <td>{{ instance.summary }}</td>
+          <td>
+            {% if instance.seen %}
+              <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></a>
+            {% else %}
+              <a href="{% url 'alerts:toggle-alert-seen' instance.id %}"><i class="fa fa-check" aria-hidden="true" style="color:grey"></i></a>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'alerts:alert-delete' instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div-->
+</div>
+
 {% endblock %}
 
 {% block javascript %}
@@ -66,13 +222,25 @@
     $(document).on('click', '.confirm-delete-all', function(){
       return confirm('Are you sure you want to delete all alerts?');
     })
+    $("document").ready(function() {
+        $("#actions-item").trigger('click');
+    });
   </script>
 {% endblock javascript %}
 
 <script>
   {% block jquery %}
-  $('#alerts-table').DataTable({
-        "order": [[ 0, "desc" ]]
-    } );
+  $('#actions-table').DataTable({
+    "order": [[ 0, "desc" ]]
+  });
+  $('#notifications-table').DataTable({
+    "order": [[ 0, "desc" ]]
+  });
+  $('#application-table').DataTable({
+    "order": [[ 0, "desc" ]]
+  });
+  //$('#marketing-table').DataTable({
+  //  "order": [[ 0, "desc" ]]
+  //});
   {% endblock jquery %}
 </script>

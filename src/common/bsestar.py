@@ -87,7 +87,8 @@ def download_bsestar_schemes():
             create_alert(
                 summary='Failure to update BSE StAR schemes',
                 content='schemes parsed is 0',
-                severity=Severity.error
+                severity=Severity.error,
+                alert_type="Application"
             )
     else:
         print('no bse star file. not updating schemes')
@@ -95,7 +96,8 @@ def download_bsestar_schemes():
         create_alert(
             summary='Failure to update BSE StAR schemes',
             content= description,
-            severity=Severity.error
+            severity=Severity.error,
+            alert_type="Application"
         )
 
     '''

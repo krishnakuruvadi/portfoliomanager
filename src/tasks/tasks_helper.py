@@ -12,7 +12,8 @@ def is_task_run_today(task_name):
     for task in Task.objects.all():
         if task.task_name == task_name:
             task_found = True
-            if task.last_run and task.last_run.date() == datetime.date.today() and task.last_run_status == TaskState.Successful.value:
+            if task.last_run and task.last_run.date() == datetime.date.today() and task.current_state == TaskState.Unknown.value and task.last_run_status == TaskState.Successful.value:
+                print(f'task was last run on {task.last_run.date() } with status {task.last_run_status}')
                 return True
             else:
                 if not task.last_run:

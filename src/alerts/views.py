@@ -18,7 +18,16 @@ def get_alerts(request):
     template = 'alerts/alert_list.html'
     queryset = models.Alert.objects.all()
     context = dict()
-    context['alerts'] = list()
+    context['actions'] = list()
+    context['notifications'] = list()
+    context['marketing'] = list()
+    context['application'] = list()
+    notifs = 0
+    acts = 0
+    mrktngs = 0
+    applns = 0
+
+
     for a in queryset:
         e = dict()
         e['seen'] = a.seen
@@ -28,7 +37,29 @@ def get_alerts(request):
         e['summary'] = a.summary
         e['severity'] = a.severity
         e['id'] = a.id
-        context['alerts'].append(e)
+        if a.alert_type == 'Action':
+            context['actions'].append(e)
+            if not a.seen:
+                acts += 1
+        elif a.alert_type == 'Marketing':
+            context['marketing'].append(e)
+            if not a.seen:
+                mrktngs += 1
+        elif a.alert_type == 'Application':
+            context['application'].append(e)
+            if not a.seen:
+                applns += 1
+        else:
+            context['notifications'].append(e)
+            if not a.seen:
+                notifs += 1
+
+    context['num_notification'] = notifs
+    context['num_action'] = acts
+    context['num_marketing'] = mrktngs
+    context['num_application'] = applns
+
+    #print(context)
 
     return render(request, template, context)
 

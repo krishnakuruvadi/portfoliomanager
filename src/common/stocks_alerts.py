@@ -36,8 +36,9 @@ def check_stock_price_change_alerts():
                 create_alert_today_if_not_exist(
                     search_str=search_str,
                     summary=str,
-                    content= str,
+                    content=str,
                     severity=Severity.info,
+                    alert_type="Notification",
                     start_time=start_time,
                     end_time=end_time
                 )
@@ -51,6 +52,7 @@ def check_stock_price_change_alerts():
                     summary=str,
                     content= str,
                     severity=Severity.info,
+                    alert_type="Notification",
                     start_time=start_time,
                     end_time=end_time
                 )
@@ -68,6 +70,7 @@ def check_stock_price_change_alerts():
                         summary=str,
                         content= str,
                         severity=Severity.info,
+                        alert_type="Notification",
                         start_time=start_time,
                         end_time=end_time
                     )
@@ -81,6 +84,7 @@ def check_stock_price_change_alerts():
                         summary=str,
                         content= str,
                         severity=Severity.info,
+                        alert_type="Notification",
                         start_time=start_time,
                         end_time=end_time
                     )
@@ -94,6 +98,7 @@ def check_stock_price_change_alerts():
                         summary=str,
                         content= str,
                         severity=Severity.info,
+                        alert_type="Notification",
                         start_time=start_time,
                         end_time=end_time
                     )
@@ -107,6 +112,7 @@ def check_stock_price_change_alerts():
                         summary=str,
                         content= str,
                         severity=Severity.info,
+                        alert_type="Notification",
                         start_time=start_time,
                         end_time=end_time
                     )

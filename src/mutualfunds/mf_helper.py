@@ -186,7 +186,8 @@ def mf_add_or_update_sip_kuvera(sips):
                 create_alert(
                     summary='Folio:' + sip['folio'] + ' Failure to add a sip',
                     content= description,
-                    severity=Severity.error
+                    severity=Severity.error,
+                    alert_type="Action"
                 )
                 return
             mf_add_or_update_sip(folio=folio, amount=sip['amount'], date=sip['date'])
@@ -195,37 +196,39 @@ def mf_add_or_update_sip_kuvera(sips):
             create_alert(
                 summary='Folio:' + sip['folio'] + ' Failure to add a sip since no folio by that number found',
                 content= description,
-                severity=Severity.error
+                severity=Severity.error,
+                alert_type="Action"
             )
         except Exception as ex:
             print(f'failed while adding sip for {sip["folio"]}', ex)
 
-def mf_add_or_update_sip_coin(sips, filename):
+def mf_add_or_update_sip_coin(sips, filenames):
     mfs = list()
-    if isfile(filename):
-        ignored_folios = set()
-        with open(filename, mode='r', encoding='utf-8-sig') as csv_file:
-            print("opened file as csv:", filename)
-            csv_reader = csv.DictReader(csv_file, delimiter=",")
-            for row in csv_reader:
-                    #client_id	isin	scheme_name	plan	transaction_mode	trade_date	ordered_at	folio_number	amount	units	nav	status	remarks
-                for k,v in row.items():
-                    if 'isin' in k:
-                        isin = v.strip()
-                    if 'folio_number'in k:
-                        folio = v.strip()
-                    if 'scheme_name' in k:
-                        name = v.strip()
-                    if 'plan' in k:
-                        plan = v.strip()
-                if isin and folio and name:
-                    if not name in mfs:
-                        mf = dict()
-                        mf['name'] = name
-                        mf['isin'] = isin
-                        mf['folio'] = folio
-                        mf['plan'] = plan
-                        mfs.append(mf)
+    for filename in filenames:
+        if isfile(filename):
+            ignored_folios = set()
+            with open(filename, mode='r', encoding='utf-8-sig') as csv_file:
+                print("opened file as csv:", filename)
+                csv_reader = csv.DictReader(csv_file, delimiter=",")
+                for row in csv_reader:
+                        #client_id	isin	scheme_name	plan	transaction_mode	trade_date	ordered_at	folio_number	amount	units	nav	status	remarks
+                    for k,v in row.items():
+                        if 'isin' in k:
+                            isin = v.strip()
+                        if 'folio_number'in k:
+                            folio = v.strip()
+                        if 'scheme_name' in k:
+                            name = v.strip()
+                        if 'plan' in k:
+                            plan = v.strip()
+                    if isin and folio and name:
+                        if not name in mfs:
+                            mf = dict()
+                            mf['name'] = name
+                            mf['isin'] = isin
+                            mf['folio'] = folio
+                            mf['plan'] = plan
+                            mfs.append(mf)
     print(mfs)
     print(sips)
     for sip in sips:
@@ -241,7 +244,8 @@ def mf_add_or_update_sip_coin(sips, filename):
                 create_alert(
                     summary='Name: ' + sip['name'] + ' Failure to add a sip',
                     content= description,
-                    severity=Severity.error
+                    severity=Severity.error,
+                    alert_type="Action"
                 )
                 return 
             folios = Folio.objects.filter(folio=folio)
@@ -252,7 +256,8 @@ def mf_add_or_update_sip_coin(sips, filename):
                 create_alert(
                     summary='Name: ' + sip['name'] + ' Failure to add a sip',
                     content= description,
-                    severity=Severity.error
+                    severity=Severity.error,
+                    alert_type="Action"
                 )
                 return
             mf_add_or_update_sip(folio=folio, amount=sip['amount'], date=sip['date'])

@@ -80,7 +80,8 @@ class Kuvera:
                 create_alert(
                     summary='Folio:' + fol + ' Failure to add transactions',
                     content= f'Not able to find a matching entry between Kuvera names {names} and AMFII names.',
-                    severity=Severity.error
+                    severity=Severity.error,
+                    alert_type="Action"
                 )
 
     def _get_fund(self, fund_name):

@@ -247,9 +247,10 @@ def insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, date
         print(ex)
         description = 'failed to add transaction for ' + exchange + ':' + symbol + ' for user ' + get_user_name_from_id(user)
         create_alert(
-                summary=exchange + ':' + symbol + ' - Failed to add transaction',
-                content=description,
-                severity=Severity.warning
+            summary=exchange + ':' + symbol + ' - Failed to add transaction',
+            content=description,
+            severity=Severity.warning,
+            alert_type="Action"
         )
 
 def merge_bse_nse():
@@ -435,7 +436,8 @@ def reconcile_share(share_obj):
         create_alert(
             summary=f'{share_obj.exchange} {share_obj.symbol}  not found in db.',
             content=description,
-            severity=Severity.warning
+            severity=Severity.warning,
+            alert_type="Application"
         )
     except Exception as ex:
         print(f'exception {ex} when reconciling {share_obj.exchange} {share_obj.symbol}')
@@ -686,7 +688,8 @@ def update_shares_latest_val():
                     create_alert(
                         summary=share_obj.exchange + ':' + share_obj.symbol + ' - Failed to get latest value',
                         content=share_obj.exchange + ':' + share_obj.symbol + ' - Failed to get latest value',
-                        severity=Severity.warning
+                        severity=Severity.warning,
+                        alert_type="Action"
                     )
                 if share_obj.latest_value: 
                     share_obj.gain=float(share_obj.latest_value)-float(share_obj.buy_value)

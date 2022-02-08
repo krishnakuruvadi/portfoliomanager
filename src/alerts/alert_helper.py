@@ -1,6 +1,7 @@
 from .models import Alert
 import datetime
 import enum
+from dateutil.relativedelta import relativedelta
 
 class Severity(enum.Enum):
     critical = 0
@@ -9,7 +10,7 @@ class Severity(enum.Enum):
     unknown = 3
     info = 4
 
-def create_alert(summary, content, severity, seen=False, action_url=None, json_data=None):
+def create_alert(summary, content, severity, alert_type, seen=False, action_url=None, json_data=None):
     print('creating alert')
     alert = Alert.objects.create(
         summary=summary,
@@ -18,6 +19,7 @@ def create_alert(summary, content, severity, seen=False, action_url=None, json_d
         seen=seen,
         time=datetime.datetime.now(),
         action_url=action_url,
+        alert_type=alert_type,
         json_data=json_data
     )
     # not hitting the save function model if using just create
@@ -33,6 +35,14 @@ def is_alert_raised(summary, start_time, end_time):
             return True
     return False
 
-def create_alert_today_if_not_exist(search_str, summary, content, severity, start_time, end_time, seen=False, action_url=None, json_data=None):
+def create_alert_today_if_not_exist(search_str, summary, content, severity, alert_type, start_time, end_time, seen=False, action_url=None, json_data=None):
     if not is_alert_raised(search_str, start_time, end_time):
-        create_alert(summary, content, severity,seen, action_url, json_data)
+        create_alert(summary, content, severity, alert_type, seen, action_url, json_data)
+
+
+def clean_alerts():
+    today= datetime.date.today()
+    Alert.objects.filter(alert_type='Notification', time__lte=today+relativedelta(days=-5)).delete()
+    Alert.objects.filter(alert_type='Action', time__lte=today+relativedelta(months=-1)).delete()
+    Alert.objects.filter(alert_type='Application', time__lte=today+relativedelta(days=-10)).delete()
+    Alert.objects.filter(alert_type='Marketing', time__lte=today+relativedelta(days=-15)).delete()

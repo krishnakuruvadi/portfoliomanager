@@ -47,7 +47,8 @@ class CAS:
                         create_alert(
                             summary='Folio:' + folio_num + ' Failure to add transactions',
                             content= description,
-                            severity=Severity.error
+                            severity=Severity.error,
+                            alert_type="Action"
                         )
                         continue
                     for trans in scheme['transactions']:

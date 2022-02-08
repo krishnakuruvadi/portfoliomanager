@@ -129,7 +129,8 @@ def pull_zerodha(userid, passwd, pin):
                         create_alert(
                             summary='Failure to get transactions for ' + userid + '.  More than one file found',
                             content= description,
-                            severity=Severity.error
+                            severity=Severity.error,
+                            alert_type="Action"
                         )
                 
             else:
