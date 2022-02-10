@@ -45,6 +45,7 @@ class TransactionsListView(ListView):
         data['share_name'] = ''
         data['share_id'] = ''
         data['curr_module_id'] = 'id_shares_module'
+        data['user_name_mapping'] = get_all_users()
         return data
 
 def get_shares_list(request):

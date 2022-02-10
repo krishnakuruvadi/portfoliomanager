@@ -1030,9 +1030,18 @@ def update_index_points(exchange, start_date, end_date):
 
 
 @db_periodic_task(crontab(minute='*/10', hour='*'))
-def check_for_all_alerts():
+def check_for_stock_alerts():
     from common.stocks_alerts import check_stock_price_change_alerts
     check_stock_price_change_alerts()
+
+@db_periodic_task(crontab(minute='*/5', hour='*/12'))
+def check_for_all_alerts():
+    from retirement_401k.r401k_interface import R401KInterface
+    R401KInterface.raise_alerts()
+    from fixed_deposit.fd_interface import FdInterface
+    FdInterface.raise_alerts()
+    from rsu.rsu_interface import RsuInterface
+    RsuInterface.raise_alerts()
 
 
 '''

@@ -2,6 +2,7 @@ from .models import RSUAward, RestrictedStockUnits, RSUSellTransactions
 import datetime
 from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol
 from dateutil.relativedelta import relativedelta
+from alerts.alert_helper import create_alert_month_if_not_exist, Severity
 
 class RsuInterface:
     @classmethod
@@ -191,19 +192,19 @@ class RsuInterface:
             if rao.goal:
                 rad['goal_name'] = get_goal_name_from_id(rao.goal)
             t = list()
-            for trans in RestrictedStockUnits.objects.filter(award=rao):
+            for rsuo in RestrictedStockUnits.objects.filter(award=rao):
                 rsu = {
-                    'vest_date':trans.vest_date,
-                    'fmv': trans.fmv,
-                    'aquisition_price': trans.aquisition_price,
-                    'shares_vested': trans.shares_vested,
-                    'shares_for_sale': trans.shares_for_sale,
-                    'conversion_rate': trans.conversion_rate,
-                    'total_aquisition_price': trans.total_aquisition_price,
-                    'notes':trans.notes
+                    'vest_date':rsuo.vest_date,
+                    'fmv': rsuo.fmv,
+                    'aquisition_price': rsuo.aquisition_price,
+                    'shares_vested': rsuo.shares_vested,
+                    'shares_for_sale': rsuo.shares_for_sale,
+                    'conversion_rate': rsuo.conversion_rate,
+                    'total_aquisition_price': rsuo.total_aquisition_price,
+                    'notes':rsuo.notes
                 }
                 st = list()
-                for trans in RSUSellTransactions.objects.filter(rsu_vest=trans):
+                for trans in RSUSellTransactions.objects.filter(rsu_vest=rsuo):
                     t.append({
                         'trans_date':trans.trans_date,
                         'price': trans.price,
@@ -219,3 +220,31 @@ class RsuInterface:
         ret[self.get_export_name()]['data'] = data
         print(ret)
         return ret
+
+    @classmethod
+    def raise_alerts(self):
+        today = datetime.date.today()
+        for rao in RSUAward.objects.all():
+            vested = 0
+            rsuos = RestrictedStockUnits.objects.filter(award=rao).order_by("-vest_date")
+            for rsuo in rsuos:
+                vested += rsuo.shares_vested
+            if vested < rao.shares_awarded and len(rsuos) > 3:
+                vest_period = (rsuos[0].vest_date - rsuos[1].vest_date).days
+                if vest_period > 0:
+                    expected_dt = rsuos[0].vest_date + relativedelta(days=vest_period)
+                    if expected_dt < today:
+                        cont = f"Vest entry ({expected_dt}) missing for RSU {rao.symbol}/{rao.award_id}"
+                        print(cont+ ". Raising an alarm")
+                                        
+                        create_alert_month_if_not_exist(
+                            cont,
+                            cont,
+                            cont,
+                            severity=Severity.warning,
+                            alert_type="Action"
+                        )
+                    else:
+                        print (f'next vest for {rao.symbol}/{rao.award_id} on {expected_dt}')
+                else:
+                    print(f'vest period is not valid {vest_period}')

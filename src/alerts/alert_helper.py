@@ -29,7 +29,7 @@ def create_alert(summary, content, severity, alert_type, seen=False, action_url=
 
 def is_alert_raised(summary, start_time, end_time):
     #print(f'searching {summary} between {start_time} and {end_time}')
-    for alert in Alert.objects.filter(time__gte=start_time, time__lte=end_time):
+    for alert in Alert.objects.filter(time__gte=start_time, time__lte=end_time).order_by("-time"):
         #print(f'checking if {summary} is a substring in {alert.summary}')
         if summary in alert.summary:
             return True
@@ -38,7 +38,16 @@ def is_alert_raised(summary, start_time, end_time):
 def create_alert_today_if_not_exist(search_str, summary, content, severity, alert_type, start_time, end_time, seen=False, action_url=None, json_data=None):
     if not is_alert_raised(search_str, start_time, end_time):
         create_alert(summary, content, severity, alert_type, seen, action_url, json_data)
+    else:
+        print(f'alert already present {search_str}')
 
+def create_alert_month_if_not_exist(search_str, summary, content, severity, alert_type, seen=False, action_url=None, json_data=None):
+    end_time = datetime.datetime.now()
+    start_time = end_time+relativedelta(months=-1) 
+    if not is_alert_raised(search_str, start_time, end_time):
+        create_alert(summary, content, severity, alert_type, seen, action_url, json_data)
+    else:
+        print(f'alert already present {search_str}')
 
 def clean_alerts():
     today= datetime.date.today()

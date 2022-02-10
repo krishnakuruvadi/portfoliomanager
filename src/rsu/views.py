@@ -496,7 +496,7 @@ def rsu_insights(request):
     if len(ret) > 0:
         d = list()
         for k,v in sorted(total.items()):
-            d.append({'x':k, 'y':v})
+            d.append({'x':k, 'y':round(v, 2)})
         r = lambda: random.randint(0,255)
         color = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
         ret.append({

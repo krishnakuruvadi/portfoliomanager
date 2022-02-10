@@ -1,6 +1,8 @@
 from .models import Account401K, Transaction401K, NAVHistory
 import datetime
 from shared.handle_real_time_data import get_conversion_rate
+from alerts.alert_helper import create_alert_month_if_not_exist, Severity
+from dateutil.relativedelta import relativedelta
 
 class R401KInterface:
 
@@ -212,3 +214,48 @@ class R401KInterface:
         ret[self.get_export_name()]['data'] = data
         print(ret)
         return ret
+
+    @classmethod
+    def raise_alerts(self):
+        today = datetime.date.today()
+        for ao in Account401K.objects.filter(end_date=None):
+            trans = Transaction401K.objects.filter(account=ao).order_by("-trans_date")
+            if len(trans) < 2:
+                pass
+            else:
+                diff1 = trans[0].trans_date - trans[1].trans_date
+                last_trans_diff =  today - trans[0].trans_date
+                expected_trans_date = trans[0].trans_date + diff1
+                if  last_trans_diff > diff1:
+                    print(f'{ao.company}: last transaction is {last_trans_diff} from today.  Expectation is to keep it {diff1}.  Raising an alarm')
+                    cont = f"Missing transactions in account {ao.company} 401K since {expected_trans_date}"
+                        
+                    create_alert_month_if_not_exist(
+                        cont,
+                        cont,
+                        cont,
+                        severity=Severity.warning,
+                        alert_type="Action"
+                    )
+            nh_start = ao.start_date
+            nh_end = ao.end_date if ao.end_date is not None else today
+            nh_start = nh_start+relativedelta(months=1)
+            nh_start = nh_start.replace(day=1)
+
+            while nh_start <= nh_end:
+                temp = nh_start+relativedelta(days=-7)
+                nhos = NAVHistory.objects.filter(account=ao, nav_date__lte=nh_start,  nav_date__gte=temp)
+                if len(nhos) == 0:
+                    cont = f"Month end NAV for {ao.company} 401K for {temp.month}/{temp.year} missing"
+                    print(cont+ ". Raising an alarm")
+                            
+                    create_alert_month_if_not_exist(
+                        cont,
+                        cont,
+                        cont,
+                        severity=Severity.warning,
+                        alert_type="Action"
+                    )
+                else:
+                    print(f'found {len(nhos)} transactions between {temp} and {nh_start}')
+                nh_start = nh_start+relativedelta(months=1)

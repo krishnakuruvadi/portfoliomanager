@@ -1,6 +1,8 @@
 from .models import FixedDeposit
 import datetime
 from .fixed_deposit_helper import get_maturity_value
+from dateutil.relativedelta import relativedelta
+from alerts.alert_helper import create_alert_month_if_not_exist, Severity
 
 class FdInterface:
     @classmethod
@@ -132,6 +134,22 @@ class FdInterface:
         for u in get_users(ext_user):
             amt += self.get_amount_for_user(u.id)
         return amt
+
+    @classmethod
+    def raise_alerts(self):
+        today = datetime.date.today()
+        fd_objs = FixedDeposit.objects.filter(mat_date__gte=today, mat_date__lte=today+relativedelta(days=15))
+        for fdo in fd_objs:
+            cont = f"FD {fdo.number} will be maturing on {fdo.mat_date}.  Renew and stay invested"
+            print(cont+ ". Raising an alarm")
+                            
+            create_alert_month_if_not_exist(
+                cont,
+                cont,
+                cont,
+                severity=Severity.warning,
+                alert_type="Action"
+            )
 
     @classmethod
     def get_export_name(self):

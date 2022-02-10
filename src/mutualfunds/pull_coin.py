@@ -74,7 +74,7 @@ def pull_coin(user, userid, passwd, twofa):
         #logout_elem = driver.find_element_by_xpath("//a[text()[contains(.,'Logout')]]")
         #logout_elem.click()
         sips = pull_sip(driver)
-        driver.get(url+'logout')
+        driver.get('https://coin.zerodha.com/logout')
         time.sleep(5)
         driver.quit()
         if sips:
