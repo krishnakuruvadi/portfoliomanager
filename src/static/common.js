@@ -27,6 +27,25 @@ function set_user_list(users, sel_user) {
     }
 }
 
+function set_currencies(currencies) {
+    $('#id_currencies').empty();
+    $('#id_currencies')
+        .append($('<option>', { value : '' })
+        .text(''));
+    var dropdown = document.getElementById('id_currencies');
+    for (x in currencies) {
+      currency = currencies[x]
+      // create new option element
+      var opt = document.createElement('option');
+      // create text node to add to option element (opt)
+      opt.appendChild( document.createTextNode(currency) );
+      // set value property of opt
+      opt.value = currency;
+      // add opt to end of select box (sel)
+      dropdown.appendChild(opt);
+    }
+  }
+
 $("#id_user").change(function () {
     var user = $(this).val();
     console.log(user)

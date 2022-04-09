@@ -143,24 +143,6 @@
     function get_goals_and_set_goal(response) {
       set_goals(response, '{{goal|safe}}');
     }
-    function set_currencies(currencies) {
-      $('#id_currencies').empty();
-      $('#id_currencies')
-          .append($('<option>', { value : '' })
-          .text(''));
-      var dropdown = document.getElementById('id_currencies');
-      for (x in currencies) {
-        currency = currencies[x]
-        // create new option element
-        var opt = document.createElement('option');
-        // create text node to add to option element (opt)
-        opt.appendChild( document.createTextNode(currency) );
-        // set value property of opt
-        opt.value = currency;
-        // add opt to end of select box (sel)
-        dropdown.appendChild(opt);
-      }
-    }
 
     function adjust_div_for_loan() {
       var sel = document.getElementById('id_acc_type').value;

@@ -18,12 +18,27 @@ from users.models import User
 from goal.models import Goal
 from shared.utils import get_min
 
+def get_ext_user(request):
+    return None
+
 def get_all_users_names_as_list():
     users_list = list()
     users = User.objects.all()
     for user in users:
         users_list.append(user.name)
     return users_list
+
+def get_users_from_ext_user(ext_user):
+    users = None
+    if not ext_user:
+        users = User.objects.all()
+    return users
+
+def get_all_user_ids_as_list(ext_user=None):
+    userids = list()
+    for user in get_users_from_ext_user(ext_user):
+        userids.append(user.id)
+    return userids
 
 def get_all_goals_for_user_as_list(user_id):
     goal_list = list()
@@ -50,9 +65,10 @@ def get_goal_name_from_id(goal_id):
         print("goal with id", goal_id, " does not exist")
         return None
 
-def get_all_goals_id_to_name_mapping():
+def get_all_goals_id_to_name_mapping(ext_user=None):
     goal_mapping = dict()
-    goals = Goal.objects.all()
+    user_ids = get_all_user_ids_as_list(ext_user)
+    goals = Goal.objects.filter(user__in=user_ids)
     for goal in goals:
         goal_mapping[goal.id] = goal.name
     return goal_mapping
@@ -90,12 +106,13 @@ def get_user_short_name_or_name_from_id(id):
     except Exception as e:
         return None
 
+'''
 def get_day_range_of_month(year, month):
     last_day_of_month = calendar.monthrange(2019,8)[1]
     first_day = datetime.datetime(year, month, 1)
     last_day = datetime.datetime(year, month, last_day_of_month)
     return first_day, last_day
-
+'''
 
 def get_start_day_across_portfolio(user_id=None):
     #TODO: Fill for other investment avenues

@@ -229,7 +229,7 @@ class RsuInterface:
             rsuos = RestrictedStockUnits.objects.filter(award=rao).order_by("-vest_date")
             for rsuo in rsuos:
                 vested += rsuo.shares_vested
-            if vested < rao.shares_awarded and len(rsuos) > 3:
+            if vested < rao.shares_awarded and len(rsuos) > 1:
                 vest_period = (rsuos[0].vest_date - rsuos[1].vest_date).days
                 if vest_period > 0:
                     expected_dt = rsuos[0].vest_date + relativedelta(days=vest_period)

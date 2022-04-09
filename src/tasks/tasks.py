@@ -113,6 +113,9 @@ def update_mf():
                     finished_funds[folio.fund.code] = dict()
                     finished_funds[folio.fund.code]['val'] = get_float_or_zero_from_string(q['nav'])
                     finished_funds[folio.fund.code]['as_on'] = q['last_updated']
+                else:
+                    print(f'failed to get mutual fund nav in periodic task {folio.fund.code}')
+                    finished_funds[folio.fund.code] = None
             except Exception as ex:
                 print('error getting mutual fund nav in periodic task',folio.fund.code, ex)
                 finished_funds[folio.fund.code] = None

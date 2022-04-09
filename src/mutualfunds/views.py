@@ -95,6 +95,7 @@ class FolioTransactionsListView(ListView):
         data = super().get_context_data(**kwargs)
         data['folio_id'] = self.kwargs['id']
         data['curr_module_id'] = 'id_mf_module'
+        data['user_name_mapping'] = get_all_users()
         print(data)
         return data
 
@@ -513,6 +514,7 @@ class TransactionsListView(ListView):
         data = super().get_context_data(**kwargs)
         #data['folio_id'] = self.kwargs['id']
         data['curr_module_id'] = 'id_mf_module'
+        data['user_name_mapping'] = get_all_users()
         print(data)
         return data
 
