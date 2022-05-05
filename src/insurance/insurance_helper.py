@@ -97,7 +97,7 @@ def update_fund(policy, fund, summ):
                                             nav_date=res['nav_date']
                                         )
             except IntegrityError as ex:
-                print('exception {ex} when adding NAV to history')
+                print(f'exception {ex} when adding NAV to history')
             try:
                 fund.nav_date = res['nav_date']
                 fund.nav = res['nav']

@@ -257,15 +257,19 @@ def pull_mf_transactions():
         print('pull_mf_transactions task already run today successfully.  Not trying again')
         return
     set_task_state('pull_mf_transactions', TaskState.Running)
-    passwords = get_mf_passwords()
-    for passwd in passwords:
-        if passwd['broker'] == 'KUVERA':
-            #print(f"Pulling Kuvera for {passwd['user']} with user id {passwd['user_id']} and password {passwd['password']} with KUVERA username {passwd['additional_field']}")
-            pull_kuvera(passwd['user'], passwd['user_id'], passwd['password'], passwd['additional_field'])
-        elif passwd['broker'] == 'COIN ZERODHA':
-            #print(f"Pulling COIN for {passwd['user']} with user id {passwd['user_id']} and password {passwd['password']} with 2fa {passwd['password2']}")
-            pull_coin(passwd['user'], passwd['user_id'], passwd['password'], passwd['password2'])
-    set_task_state('pull_mf_transactions', TaskState.Successful)
+    try:
+        passwords = get_mf_passwords()
+        for passwd in passwords:
+            if passwd['broker'] == 'KUVERA':
+                #print(f"Pulling Kuvera for {passwd['user']} with user id {passwd['user_id']} and password {passwd['password']} with KUVERA username {passwd['additional_field']}")
+                pull_kuvera(passwd['user'], passwd['user_id'], passwd['password'], passwd['additional_field'])
+            elif passwd['broker'] == 'COIN ZERODHA':
+                #print(f"Pulling COIN for {passwd['user']} with user id {passwd['user_id']} and password {passwd['password']} with 2fa {passwd['password2']}")
+                pull_coin(passwd['user'], passwd['user_id'], passwd['password'], passwd['password2'])
+        set_task_state('pull_mf_transactions', TaskState.Successful)
+    except Exception as ex:
+        print(f'exception pulling mf transactions {ex}')
+        set_task_state('pull_mf_transactions', TaskState.Failed)
 
 @db_periodic_task(crontab(minute='0', hour='2'))
 def update_mf_mapping():

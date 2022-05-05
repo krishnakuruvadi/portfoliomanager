@@ -520,7 +520,7 @@ def fund_detail(request, id, fund_id):
         return HttpResponseRedirect(reverse('insurance:policy-list'))
 
 def add_transactions_from_file(company, policy, full_file_path):
-    if company == 'ICICI Prudential':
+    if company == 'ICICI Prudential Life Insurance Co. Ltd.':
         ipru = ICICIPruLife()
         itrans = ipru.get_transactions(full_file_path)
         for fund_name, transactions in itrans.items():
