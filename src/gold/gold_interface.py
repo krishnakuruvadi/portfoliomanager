@@ -1,6 +1,7 @@
 from .models import Gold, SellTransaction
 import datetime
-from .gold_helper import get_historical_price
+from .gold_helper import get_historical_price, get_latest_price
+from dateutil.relativedelta import relativedelta
 
 class GoldInterface:
     
@@ -99,8 +100,9 @@ class GoldInterface:
     def get_goal_yearly_contrib(self, goal_id, yr):
         st_date = datetime.date(year=yr, day=1, month=1)
         end_date = datetime.date(year=yr, day=31, month=12)
-        if end_date > datetime.date.today():
-            end_date = datetime.date.today()
+        today = datetime.date.today()
+        if end_date > today:
+            end_date = today
         contrib = 0
         deduct = 0
         total = 0
@@ -109,9 +111,9 @@ class GoldInterface:
         for g_obj in Gold.objects.filter(goal=goal_id, buy_date__lte=end_date):
             bt = 'physical' if g_obj.buy_type == 'Physical' else 'digital'
             if bt == 'digital':
-                wt[bt] += g_obj.weight
+                wt[bt] += float(g_obj.weight)
             else:
-                wt[bt][g_obj.purity] += g_obj.weight
+                wt[bt][g_obj.purity] += float(g_obj.weight)
             if g_obj.buy_date >= st_date:
                 contrib += float(g_obj.buy_value)
                 cash_flows.append((g_obj.buy_date, -1*float(g_obj.buy_value)))
@@ -121,28 +123,47 @@ class GoldInterface:
                     cash_flows.append((tran_obj.trans_date, -1*float(tran_obj.trans_amount)))
                     deduct += float(tran_obj.trans_amount)
                 if bt == 'digital':
-                    wt[bt] -= tran_obj.weight
+                    wt[bt] -= float(tran_obj.weight)
                 else:
-                    wt[bt][g_obj.purity] -= tran_obj.weight
-
-        if wt['digital'] > 0:
-            res = get_historical_price(end_date, 'Digital', '24K')
-            if res:
-                total += res * wt['digital']
-            else:
-                print(f'failed to get total value for digital 24K for year {yr}')
-        if wt['physical']['24K'] > 0:
-            res = get_historical_price(end_date, 'Physical', '24K')
-            if res:
-                total += res * wt['physical']['24K']
-            else:
-                print(f'failed to get total value for physical 24K for year {yr}')
-        if wt['physical']['22K'] > 0:
-            res = get_historical_price(end_date, 'Physical', '22K')
-            if res:
-                total += res * wt['physical']['22K']
-            else:
-                print(f'failed to get total value for physical 22K for year {yr}')
+                    wt[bt][g_obj.purity] -= float(tran_obj.weight)
+        if end_date == today:
+            if wt['digital'] > 0:
+                price,dt = get_latest_price('Digital', '24K')
+                if price:
+                    total += price * wt['digital']
+                else:
+                    print(f'failed to get total value for digital 24K for year {yr} {end_date}')
+            if wt['physical']['24K'] > 0:
+                price,dt = get_latest_price('Physical', '24K')
+                if price:
+                    total += price * wt['physical']['24K']
+                else:
+                    print(f'failed to get total value for physical 24K for year {yr}')
+            if wt['physical']['22K'] > 0:
+                price,dt = get_latest_price('Physical', '22K')
+                if price:
+                    total += price * wt['physical']['22K']
+                else:
+                    print(f'failed to get total value for physical 22K for year {yr}')
+        else:
+            if wt['digital'] > 0:
+                res = get_historical_price(end_date+relativedelta(days=1), 'Digital', '24K')
+                if res:
+                    total += res * wt['digital']
+                else:
+                    print(f'failed to get total value for digital 24K for year {yr} {end_date}')
+            if wt['physical']['24K'] > 0:
+                res = get_historical_price(end_date+relativedelta(days=1), 'Physical', '24K')
+                if res:
+                    total += res * wt['physical']['24K']
+                else:
+                    print(f'failed to get total value for physical 24K for year {yr}')
+            if wt['physical']['22K'] > 0:
+                res = get_historical_price(end_date+relativedelta(days=1), 'Physical', '22K')
+                if res:
+                    total += res * wt['physical']['22K']
+                else:
+                    print(f'failed to get total value for physical 22K for year {yr}')
         return cash_flows, contrib, deduct, total
     
     @classmethod

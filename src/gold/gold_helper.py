@@ -60,7 +60,7 @@ def get_latest_price(buy_type, purity='24K'):
     latest_day = datetime.date.today() + relativedelta(days=-1)
     try:
         hgp = HistoricalGoldPrice.objects.get(purity=purity, buy_type=buy_type, date=latest_day)
-        return hgp.price, hgp.date
+        return float(hgp.price), hgp.date
     except HistoricalGoldPrice.DoesNotExist:
         print(f'latest price for {latest_day} {buy_type} {purity} not found')
 
@@ -84,7 +84,9 @@ def get_latest_price(buy_type, purity='24K'):
                 print(f'error adding entry to gold {res}, {buy_type} : {ie}')
             price = res.get(purity, None)
     if dt and price:
+        #print(f'returning {dt} {price} for gold {buy_type} {purity}')
         return price,dt
+    print(f'not found any valid value for gold {buy_type} {purity}')
     return None, None
 
 def update_latest_value(user):

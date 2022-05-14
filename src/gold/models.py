@@ -15,11 +15,11 @@ GOLD_PURITY_CHOICES = [
 ]
 
 class Gold(models.Model):
-    weight = models.DecimalField(max_digits=20, decimal_places=6, null=False)
-    per_gm = models.DecimalField(max_digits=10, decimal_places=2, null=False)
-    buy_value = models.DecimalField(max_digits=10, decimal_places=2, null=False)
-    latest_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    latest_value = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    weight = models.DecimalField(max_digits=20, decimal_places=10, null=False)
+    per_gm = models.DecimalField(max_digits=20, decimal_places=4, null=False)
+    buy_value = models.DecimalField(max_digits=20, decimal_places=4, null=False)
+    latest_price = models.DecimalField(max_digits=20, decimal_places=4, null=True, blank=True)
+    latest_value = models.DecimalField(max_digits=200, decimal_places=4, null=True, blank=True)
     buy_date = models.DateField(null=False)
     as_on_date = models.DateField(null=True, blank=True)
     user = models.IntegerField(null=False)
@@ -27,9 +27,9 @@ class Gold(models.Model):
     goal = models.IntegerField(null=True, blank=True)
     roi = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     buy_type = models.CharField(max_length=50, choices=BUY_TYPE_CHOICES)
-    realised_gain = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    unrealised_gain = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    unsold_weight = models.DecimalField(max_digits=20, decimal_places=2, null=False)
+    realised_gain = models.DecimalField(max_digits=20, decimal_places=4, null=True, blank=True)
+    unrealised_gain = models.DecimalField(max_digits=20, decimal_places=4, null=True, blank=True)
+    unsold_weight = models.DecimalField(max_digits=20, decimal_places=10, null=False)
     purity = models.CharField(max_length=10, choices=GOLD_PURITY_CHOICES, default='24K')
 
     def get_absolute_url(self):
@@ -42,7 +42,7 @@ class SellTransaction(models.Model):
     buy_trans = models.ForeignKey('Gold', on_delete=models.CASCADE)
     trans_date = models.DateField(null=False)
     notes = models.CharField(max_length=40, null=True, blank=True)
-    weight = models.DecimalField(max_digits=20, decimal_places=4)
+    weight = models.DecimalField(max_digits=20, decimal_places=10)
     per_gm = models.DecimalField(max_digits=20, decimal_places=4)
     trans_amount = models.DecimalField(max_digits=20, decimal_places=4)
 
