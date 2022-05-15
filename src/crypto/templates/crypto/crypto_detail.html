@@ -1,0 +1,113 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+
+<a href="transactions"><i class="far fa-file-alt" aria-hidden="true" title="Transactions" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'crypto:crypto-list' %}">Crypto</a></li>
+    <li><a href="#">{{symbol}}</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+<div class="card-deck">
+  <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+    <table class="table table-hover">
+      <tr>
+        <th scope="col">Symbol</th>
+        <td>{{symbol}}</td>
+      </tr>
+      <tr>
+        <th scope="col">As On</th>
+        <td>{{ as_on_date }}</td>
+      </tr>
+      <tr>
+        <th scope="col">Latest Value ({{preferred_currency}})</th>
+        <td>{{ latest_value_preferred_currency }}</td>
+      </tr>
+      <tr>
+        <th scope="col">User</th>
+        <td>{{ user }}</td>
+      </tr>
+      <tr>
+        <th scope="col">Goal</th>
+        <td>{{ goal }}</td>
+      </tr>
+      <tr>
+        <th scope="col">Notes</th>
+        <td>{{ notes }}</td>
+      </tr>
+    </table>
+  </div>
+  <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class="col-sm-12 col-md-6 col-lg-4">
+    <canvas id="balance-progress"></canvas>
+  </div>
+</div>
+<br>
+{% endblock content %}
+
+<script>
+  {% block jquery %}
+    {%if bal_vals %}
+      set_bal_chart({{bal_vals|safe}}, {{price_vals|safe}}, {{chart_labels|safe}})
+    {% endif %}
+
+    function set_bal_chart(bal_vals, price_vals, chart_labels) {
+      var canvas = document.getElementById('balance-progress');
+      new Chart(canvas, {
+        type: 'line',
+        data: {
+          //labels: ['1', '2', '3', '4', '5'],
+          labels: chart_labels,
+          datasets: [{
+            label: 'Investment Value',
+            yAxisID: 'Investment Value',
+            //data: [100, 96, 84, 76, 69],
+            data: bal_vals,
+            borderColor: "#3e95cd",
+            fill: false
+          },
+          {
+            label: 'Price (USD)',
+            yAxisID: 'Price',
+            data: price_vals,
+            //data: bal_vals,
+            borderColor: "#1f963f",
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title: {
+            display: true,
+            text: 'Account Balance'
+          },
+          scales: {
+            yAxes: [{
+              id: 'Investment Value',
+              type: 'linear',
+              position: 'left',
+              ticks: {
+                beginAtZero: true
+              }
+            },
+            {
+              id: 'Price',
+              type: 'linear',
+              position: 'right',
+              ticks: {
+                beginAtZero: true
+              }
+            }]
+          }
+        }
+      });
+    }
+  {% endblock jquery %}
+</script>

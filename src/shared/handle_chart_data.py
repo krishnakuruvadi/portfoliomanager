@@ -30,6 +30,7 @@ from rsu.rsu_interface import RsuInterface
 from insurance.insurance_interface import InsuranceInterface
 from gold.gold_interface import GoldInterface
 from bankaccounts.bank_account_interface import BankAccountInterface
+from crypto.crypto_interface import CryptoInterface
 from shared.handle_get import get_goal_name_from_id
 
 
@@ -166,6 +167,12 @@ def get_goal_contributions(goal_id):
         contrib['distrib_labels'].append('Cash')
         contrib['distrib_vals'].append(contrib['cash'])
         contrib['distrib_colors'].append(BankAccountInterface.get_chart_color())
+    
+    contrib['crypto'] = int(CryptoInterface.get_amount_for_goal(goal_id))
+    if contrib['crypto'] > 0:
+        contrib['distrib_labels'].append('Crypto')
+        contrib['distrib_vals'].append(contrib['crypto'])
+        contrib['distrib_colors'].append(CryptoInterface.get_chart_color())
 
     contrib['total'] = contrib['equity'] + contrib['debt'] + contrib['gold'] + contrib['cash']
 
@@ -202,6 +209,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
     start_day = get_min(InsuranceInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(GoldInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(BankAccountInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(CryptoInterface.get_start_day_for_goal(goal_id), start_day)
 
     new_start_day = datetime.date(start_day.year, start_day.month, 1)
     
@@ -338,6 +346,16 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         total_deduct += float(d)
         if yr == curr_yr:
             print(f'after adding cash {t} latest_value is {latest_value}')
+        
+        cf, c, d, t = CryptoInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'Crypto', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if yr == curr_yr:
+            print(f'after adding crypto {t} latest_value is {latest_value}')
 
     print(f'total_contrib {total_contrib}  total_deduct {total_deduct}  latest_value {latest_value}')
     if len(cash_flows) > 0  and latest_value != 0:
@@ -609,7 +627,8 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                 'Insurance':'#ede76d',
                 'Projected':'#cbcdd1',
                 'Gold':'#ffd700',
-                'Cash':BankAccountInterface.get_chart_color()
+                'Cash':BankAccountInterface.get_chart_color(),
+                'Crypto':CryptoInterface.get_chart_color()
                 }
     data = dict()
     data['labels'] = list()
@@ -709,9 +728,10 @@ def get_user_contributions(user_id):
         contrib['401K'] = int(R401KInterface.get_amount_for_user(user_id))
         contrib['Gold'] = int(GoldInterface.get_amount_for_user(user_id))
         contrib['Cash'] = int(BankAccountInterface.get_amount_for_user(user_id))
+        contrib['Crypto'] = int(CryptoInterface.get_amount_for_user(user_id))
         contrib['equity'] = contrib['ESPP']+contrib['RSU']+contrib['Shares']+contrib['MutualFunds']+contrib['401K']+contrib['Insurance']
         contrib['debt'] = contrib['EPF'] + contrib['FD'] + contrib['PPF'] + contrib['SSY']
-        contrib['total'] = contrib['equity'] + contrib['debt'] + contrib['Gold'] + contrib['Cash']
+        contrib['total'] = contrib['equity'] + contrib['debt'] + contrib['Gold'] + contrib['Cash'] + contrib['Crypto']
         
         item_color_mapping = {
             'EPF': '#f15664',
@@ -725,7 +745,8 @@ def get_user_contributions(user_id):
             '401K': '#617688',
             'Insurance': '#ede76d',
             'Gold': '#ffd700',
-            'Cash': BankAccountInterface.get_chart_color()
+            'Cash': BankAccountInterface.get_chart_color(),
+            'Crypto': CryptoInterface.get_chart_color()
         }
         for k,v in item_color_mapping.items():
             if contrib[k] > 0:
@@ -758,6 +779,7 @@ def get_investment_data(start_date):
     gold_data = list()
     cash_data = list()
     loan_data = list()
+    crypto_data = list()
     total_data = list()
 
     total_epf = 0
@@ -774,6 +796,7 @@ def get_investment_data(start_date):
     shares_reset_on_zero = False
     mf_reset_on_zero = False
     insurance_reset_on_zero = False
+    crypto_reset_on_zero = False
     gold_reset_on_zero = False
     cash_reset_on_zero = False
     loan_reset_on_zero = False
@@ -878,6 +901,20 @@ def get_investment_data(start_date):
                 insurance_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
         except Exception as ex:
             print(f'exception {ex} when getting values for insurance as on {data_end_date}')
+        
+        try:
+            crypto_val = CryptoInterface.get_value_as_on(data_end_date)
+            if crypto_val != 0:
+                if not crypto_reset_on_zero:
+                    crypto_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
+                crypto_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':crypto_val})
+                total += crypto_val
+                crypto_reset_on_zero = True
+            elif crypto_reset_on_zero:
+                crypto_reset_on_zero = False
+                crypto_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+        except Exception as ex:
+            print(f'exception {ex} when getting values for crypto as on {data_end_date}')
 
         try:
             gold_val = GoldInterface.get_value_as_on(data_end_date)
@@ -1117,8 +1154,9 @@ def get_investment_data(start_date):
         'mf':mf_data,
         'cash': cash_data,
         'loan': loan_data,
+        'crypto': crypto_data,
         'total':total_data
-        }
+    }
         
     print(f'returning {rv}')
     return rv

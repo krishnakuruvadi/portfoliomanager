@@ -1,0 +1,381 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'crypto:crypto-list' %}">Crypto</a></li>
+    <li><a href="#">{{operation}}</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6'>
+
+        <div class="form-group row">
+          <label for="symbol" class="col-sm-3 col-form-label">Coin</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0 autocomplete">
+              <input type="text" id="symbol" name="symbol" value="{{symbol}}" readonly>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="user" name="user" value="{{users|lookup:user}}" readonly>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="trans_type" class="col-sm-3 col-form-label">Transaction Type <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="trans_type" name="trans_type" class="form-control" required="true">
+                <option value="Buy">Buy</option>
+                <option value="Buy">Sell</option>
+                <option value="Buy">Receive</option>
+                <option value="Buy">Send</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="currency" class="col-sm-3 col-form-label">Currency <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_currencies" name="currency" class="form-control" required="true"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row" id="div_conv_rate">
+          <label for="conversion_rate" class="col-sm-3 col-form-label">Conversion Rate <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="conversion_rate" name="conversion_rate" value="{{conversion_rate}}" step="0.001">
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <button type="submit" class="btn btn-primary" id="fetch" name="fetch">Fetch</button>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="price" class="col-sm-3 col-form-label">Price <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="price" name="price" value="{{price}}" step="0.000001" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="price" class="col-sm-3 col-form-label">Fees/Charges</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="charges" name="charges" value="{{charges}}" step="0.000001">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="quantity" class="col-sm-3 col-form-label">Quantity <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="quantity" name="quantity" value="{{quantity}}" step="0.000000001" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="trans_price" class="col-sm-3 col-form-label">Transaction Price <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="trans_price" name="trans_price" value="{{trans_price}}" step="0.000000001" required="true"> 
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="broker" class="col-sm-3 col-form-label">Broker <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="broker" name="broker" value="{{broker}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    set_currencies({{currencies|safe}});
+    /*
+    var exchange = '{{exchange|safe}}';
+    var exchdropdown = document.getElementById('exchange');
+    var exchs = ['BSE', 'NSE', 'NASDAQ', 'NYSE'];
+    exchs.forEach(function(item, index, array) {
+      console.log(item, index)
+      var opt = document.createElement('option');
+      opt.appendChild( document.createTextNode(item) );
+      opt.value = item;
+      if (exchange != '') {
+        if (item == exchange) {
+          opt.selected = true;
+        }
+      }
+      exchdropdown.appendChild(opt);
+    })
+    */
+    var curr = '{{currency|safe}}'
+    if (curr != '') {
+      set_currency(curr)
+    }
+    handleCurrencyChange();
+
+    $("#price").change(function () {
+      setTransPrice();
+    });
+    $("#charges").change(function () {
+      setTransPrice();
+    });
+    $("#quantity").change(function () {
+      setTransPrice();
+    });
+    $("#conversion_rate").change(function () {
+      setTransPrice();
+    });
+    $("#id_currencies").change(function () {
+      handleCurrencyChange();
+    });
+    $("#trans_date").change(function () {
+      handleCurrencyChange();
+    });
+
+    function handleCurrencyChange() {
+      conv_section = document.getElementById("div_conv_rate")
+      var elem = document.getElementById("id_currencies");
+      var val = elem.value
+      console.log(val)
+      if (val == '') {
+        document.getElementById("div_conv_rate").style.display="none";
+      } else {
+        document.getElementById("div_conv_rate").style.display=null;
+      
+        var conversionRateElem = document.getElementById("conversion_rate");
+        if (val == '{{preferred_currency}}') {
+          document.getElementById('fetch').disabled=true;
+          conversionRateElem.value = 1;
+        } else {
+
+          var dateElem = document.getElementById("trans_date");
+          dateVal = dateElem.value;
+          if (dateVal !='') {
+            document.getElementById('fetch').disabled=false;
+          } else {
+            document.getElementById('fetch').disabled=true;
+          }
+        }
+      }
+      var curr = '{{currency}}'
+      if (curr != '') {
+        set_currency(curr)
+      }
+      setTransPrice();
+    }
+    
+    function set_currency(curr) {
+      //var currencies = document.getElementById('id_currencies');
+      Array.from(document.querySelector("#id_currencies").options).forEach(function(option_element) {
+        let option_text = option_element.text;
+        let option_value = option_element.value;
+        let is_option_selected = option_element.selected;
+        if (curr == option_value) {
+          option_element.selected = true;
+        } else {
+          console.log(option_value)
+          console.log(curr)
+        }
+      });
+    }
+
+    function setTransPrice(){
+      var priceElem = document.getElementById("price");
+      var price = priceElem.value
+      var chargesElem = document.getElementById("charges");
+      var charges = chargesElem.value
+      var quantityElem = document.getElementById("quantity");
+      var quantity = quantityElem.value
+      var conversionRateElem = document.getElementById("conversion_rate");
+      var conversionRate = conversionRateElem.value
+      console.log(price)
+      console.log(charges)
+      console.log(quantity)
+      console.log(conversionRate)
+      if (quantity!= '' && price!='' && conversionRate!='') {
+        totalPrice = quantity*price*conversionRate
+        if (charges != '') {
+          //ch = parseInt(charges)
+          ch = charges
+          console.log('charges', ch)
+          totalPrice += ch*conversionRate
+        }
+        
+        console.log(totalPrice)
+        totalPriceElem = document.getElementById("trans_price")
+        totalPriceElem.value = precise(totalPrice)
+      }  
+    }
+    function precise(num) {
+      //return Number.parseFloat(x).toPrecision(prec);
+      return Math.round((num + Number.EPSILON) * 1000000) / 1000000
+    }
+    function autocomplete(inp, arr) {
+      /*the autocomplete function takes two arguments,
+      the text field element and an array of possible autocompleted values:*/
+      var currentFocus;
+      /*execute a function when someone writes in the text field:*/
+      inp.addEventListener("input", function(e) {
+          var a, b, i, val = this.value;
+          /*close any already open lists of autocompleted values*/
+          closeAllLists();
+          if (!val) { return false;}
+          currentFocus = -1;
+          /*create a DIV element that will contain the items (values):*/
+          a = document.createElement("DIV");
+          a.setAttribute("id", this.id + "autocomplete-list");
+          a.setAttribute("class", "autocomplete-items");
+          /*append the DIV element as a child of the autocomplete container:*/
+          this.parentNode.appendChild(a);
+          /*for each item in the array...*/
+          for (i = 0; i < arr.length; i++) {
+            /*check if the item starts with the same letters as the text field value:*/
+            if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+              /*create a DIV element for each matching element:*/
+              b = document.createElement("DIV");
+              /*make the matching letters bold:*/
+              b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+              b.innerHTML += arr[i].substr(val.length);
+              /*insert a input field that will hold the current array item's value:*/
+              b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+              /*execute a function when someone clicks on the item value (DIV element):*/
+                  b.addEventListener("click", function(e) {
+                  /*insert the value for the autocomplete text field:*/
+                  inp.value = this.getElementsByTagName("input")[0].value;
+                  /*close the list of autocompleted values,
+                  (or any other open lists of autocompleted values:*/
+                  closeAllLists();
+              });
+              a.appendChild(b);
+            }
+          }
+      });
+      /*execute a function presses a key on the keyboard:*/
+      inp.addEventListener("keydown", function(e) {
+          var x = document.getElementById(this.id + "autocomplete-list");
+          if (x) x = x.getElementsByTagName("div");
+          if (e.keyCode == 40) {
+            /*If the arrow DOWN key is pressed,
+            increase the currentFocus variable:*/
+            currentFocus++;
+            /*and and make the current item more visible:*/
+            addActive(x);
+          } else if (e.keyCode == 38) { //up
+            /*If the arrow UP key is pressed,
+            decrease the currentFocus variable:*/
+            currentFocus--;
+            /*and and make the current item more visible:*/
+            addActive(x);
+          } else if (e.keyCode == 13) {
+            /*If the ENTER key is pressed, prevent the form from being submitted,*/
+            e.preventDefault();
+            if (currentFocus > -1) {
+              /*and simulate a click on the "active" item:*/
+              if (x) x[currentFocus].click();
+            }
+          }
+      });
+      function addActive(x) {
+        /*a function to classify an item as "active":*/
+        if (!x) return false;
+        /*start by removing the "active" class on all items:*/
+        removeActive(x);
+        if (currentFocus >= x.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (x.length - 1);
+        /*add class "autocomplete-active":*/
+        x[currentFocus].classList.add("autocomplete-active");
+      }
+      function removeActive(x) {
+        /*a function to remove the "active" class from all autocomplete items:*/
+        for (var i = 0; i < x.length; i++) {
+          x[i].classList.remove("autocomplete-active");
+        }
+      }
+      function closeAllLists(elmnt) {
+        /*close all autocomplete lists in the document,
+        except the one passed as an argument:*/
+        var x = document.getElementsByClassName("autocomplete-items");
+        for (var i = 0; i < x.length; i++) {
+          if (elmnt != x[i] && elmnt != inp) {
+          x[i].parentNode.removeChild(x[i]);
+        }
+      }
+    }
+    /*execute a function when someone clicks in the document:*/
+    document.addEventListener("click", function (e) {
+        closeAllLists(e.target);
+    });
+    } 
+    //$(function() {
+    //  var availableCoins = {{coins|safe}}
+    //  
+    //  $(".autocomplete").autocomplete({
+    //    source: availableCoins
+    //  });
+    //});
+    autocomplete(document.getElementById("symbol"), {{coins|safe}});
+  </script>
+{% endblock %}

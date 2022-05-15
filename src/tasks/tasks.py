@@ -190,6 +190,7 @@ def update_investment_data():
             all_investment_data.gold_data=investment_data['gold']
             all_investment_data.cash_data=investment_data['cash']
             all_investment_data.loan_data=investment_data['loan']
+            all_investment_data.crypto_data=investment_data['crypto']
             all_investment_data.start_day_across_portfolio=start_date
             all_investment_data.as_on_date=datetime.datetime.now()
             all_investment_data.save()
@@ -210,6 +211,7 @@ def update_investment_data():
                 insurance_data=investment_data['insurance'],
                 loan_data=investment_data['loan'],
                 total_data=investment_data['total'],
+                crypto_data=investment_data['crypto'],
                 start_day_across_portfolio=start_date,
                 as_on_date=datetime.datetime.now()
             )
@@ -992,7 +994,7 @@ def update_markets():
     today = datetime.date.today()
     update_indexes(today+relativedelta(days=-10), today)
 
-@db_task()
+@db_task(crontab(day='*/7',minute='40', hour='*/12'))
 def update_insurance_policy_vals(policy_num):
     from insurance.insurance_helper import update_policy_val_using_policy_num, update_policies
     if policy_num:
@@ -1036,7 +1038,7 @@ def update_index_points(exchange, start_date, end_date):
     update_index(exchange, start_date, end_date)
 
 
-@db_periodic_task(crontab(minute='*/10', hour='*'))
+@db_periodic_task(crontab(minute='*/15', hour='*'))
 def check_for_stock_alerts():
     from common.stocks_alerts import check_stock_price_change_alerts
     check_stock_price_change_alerts()
@@ -1050,6 +1052,48 @@ def check_for_all_alerts():
     from rsu.rsu_interface import RsuInterface
     RsuInterface.raise_alerts()
 
+@db_periodic_task(crontab(minute='5', hour='*/4'))
+def handle_crypto():
+    from crypto.crypto_helper import update_crypto_all
+    update_crypto_all()
+
+@db_task()
+def pull_and_store_coin_historical_vals(symbol, dt):
+    from crypto.crypto_helper import get_historical_price
+    from common.models import Coin, HistoricalCoinPrice
+    try:
+        coin = Coin.objects.get(symbol=symbol)
+    except Coin.DoesNotExist:
+        coin = Coin.objects.create(symbol=symbol, collection_start_date=dt)
+    added = 0
+    exists = 0
+    for yr in range(dt.year, datetime.date.today().year+1):
+        for month in range(1,12):
+            cdt = datetime.date(year=yr, month=month+1, day=1)
+            cdt = cdt+relativedelta(days=-1)
+            if cdt > datetime.date.today():
+                cdt = datetime.date.today()
+            val = get_historical_price(symbol, cdt)
+            try:
+                HistoricalCoinPrice.objects.create(coin=coin, date=cdt, price=val)
+                added += 1
+            except IntegrityError:
+                exists += 1
+        yed = datetime.date(year=yr, month=12, day=31)
+        if yed < datetime.date.today():
+            val = get_historical_price(symbol, yed)
+            try:
+                HistoricalCoinPrice.objects.create(coin=coin, date=yed, price=val)
+                added += 1
+            except IntegrityError:
+                exists += 1
+
+    if added > 0:
+        print(f'added {added}, retained {exists} historical coin price entries for {symbol}')
+    elif exists > 0:
+        print(f'retained {exists} historical coin price entries for {symbol}')
+    else:
+        print(f'failed to add any historical coin price entries for {symbol} starting {dt}')
 
 '''
 @db_task()

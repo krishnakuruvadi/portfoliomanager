@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'insurance',
     'gold',
     'bankaccounts',
+    "crypto",
 ]
 
 MIDDLEWARE = [
@@ -100,6 +101,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "insurance"),
     os.path.join(BASE_DIR, "gold"),
     os.path.join(BASE_DIR, "bankaccounts"),
+    os.path.join(BASE_DIR, "crypto"),
     os.path.join(BASE_DIR, "static"),
 ]
 
@@ -229,3 +231,10 @@ LOGGING = {
     }
 }
 '''
+
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_USE_TLS = True
+#EMAIL_PORT = 587
+#EMAIL_HOST_USER = 'your_account@gmail.com'
+#EMAIL_HOST_PASSWORD = 'your accounts password'

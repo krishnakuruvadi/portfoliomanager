@@ -12,6 +12,7 @@ from insurance.insurance_interface import InsuranceInterface
 from gold.gold_interface import GoldInterface
 from bankaccounts.bank_account_interface import BankAccountInterface
 from goal.goal_interace import GoalInterface
+from crypto.crypto_interface import CryptoInterface
 
 def get_users(ext_user):
     return User.objects.all()
@@ -49,7 +50,7 @@ class UserInterface:
                 'notes':user.notes,
                 'short_name': user.short_name
             }
-            for intf in [GoalInterface, EpfInterface, EsppInterface, FdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface]:
+            for intf in [GoalInterface, EpfInterface, EsppInterface, FdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
                 ud = {**ud, **intf.export(user.id)}
             data.append(ud)
         ret[self.get_export_name()]['data'] = data

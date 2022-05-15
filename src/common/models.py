@@ -274,3 +274,21 @@ class Passwords(models.Model):
 
     def get_absolute_url(self):
         return reverse("common:password-detail", kwargs={'id': self.id})
+
+class Coin(models.Model):
+    symbol = models.CharField(max_length=20, blank=False, null=False, unique=True)
+    collection_start_date = models.DateField(_('Collection Start Date'), )
+    name = models.CharField(max_length=200)
+
+    def get_absolute_url(self):
+        return reverse("common:coin-detail", kwargs={'id': self.id})
+    
+    def __str__(self):
+        return str(self.id) + ":" + self.symbol + ":" + self.name
+
+class HistoricalCoinPrice(models.Model):
+    class Meta:
+        unique_together = (('coin','date'),)
+    coin = models.ForeignKey('Coin', on_delete=models.CASCADE)
+    date = models.DateField(_('Date'), )
+    price = models.DecimalField(_('Price'), max_digits=30, decimal_places=10, null=False)

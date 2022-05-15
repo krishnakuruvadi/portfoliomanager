@@ -19,4 +19,5 @@ class InvestmentData(models.Model):
     gold_data = models.CharField(max_length=6000, null=True, blank=True)
     cash_data = models.CharField(max_length=6000, null=True, blank=True)
     loan_data = models.CharField(max_length=6000, null=True, blank=True, default="")
+    crypto_data = models.CharField(max_length=6000, null=True, blank=True, default="")
     total_data = models.CharField(max_length=6000, null=True, blank=True)

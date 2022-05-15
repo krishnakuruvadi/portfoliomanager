@@ -1,0 +1,87 @@
+{% extends 'base.html' %} 
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'crypto:crypto-list' %}">Crypto</a></li>
+    {% if crypto_name != '' %}
+    <li><a href="{% url 'crypto:crypto-detail' cypto_id %}">{{crypto_name}}</a></li>
+    {% endif %}
+    <li><a href="#">Transactions</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a href="{% url 'crypto:transaction-upload' %}"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="{% url 'crypto:crypto-add' %}"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+
+  <table class="table table-hover dt-responsive" id="trans-table" style="width:100%">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Symbol</th>
+        <th scope="col">Date</th>
+        <th scope="col">Type</th>
+        <th scope="col">Price</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Fees/Charges</th>
+        <th scope="col">Currency</th>
+        <th scope="col">Conversion Rate</th>
+        <th scope="col">Total Price</th>
+        <th scope="col">Broker</th>
+        <th scope="col">User</th>
+        <th scope="col">Notes</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <td>{{ instance.id }}</td>
+        <td>{{ instance.crypto.symbol }}</td>
+        <td>{{ instance.trans_date }}</td>
+        <td>{{ instance.trans_type }}</td>
+        <td>{{ instance.price }}</td>
+        <td>{{ instance.units }}</td>
+        <td>{{ instance.fees }}</td>
+        <td>{{ instance.buy_currency }}</td>
+        <td>{{ instance.conversion_rate }}</td>
+        <td>{{ instance.trans_price }}</td>
+        <td>{{ instance.broker }}</td>
+        <td>{{ user_name_mapping |lookup:instance.crypto.user }}</td>
+        <td>{{ instance.notes }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}/delete" class="confirm-delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}/update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+<script>
+  {% block jquery %}
+  $('#trans-table').DataTable({
+    "columnDefs": [
+      { "type": "num", "targets": [0,4,5,6,7] },
+      { "type": "date", "targets": [2] }
+    ],
+    "order": [[ 2, "desc" ]]
+  });
+{% endblock jquery %}
+</script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete the transaction?');
+    })
+  </script>
+{% endblock javascript %}

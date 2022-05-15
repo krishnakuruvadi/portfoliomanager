@@ -1,0 +1,92 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'crypto:crypto-list' %}">Crypto</a></li>
+    <li><a href="#">Update Crypto</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+<form method="POST">
+  {% csrf_token %}
+  <div class="row">
+    <div class='col-sm-6'>
+      <div class="form-group row">
+        <label for="symbol" class="col-sm-3 col-form-label">Symbol</label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            <input type="text" id="symbol" name="symbol" value="{{symbol}}" readonly>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="user" class="col-sm-3 col-form-label">User</label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            <input type="text" id="user" name="user" value="{{ users |lookup:user }}" readonly>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="goal" class="col-sm-3 col-form-label">Goal</label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            <select id="id_goal" name="goal" class="form-control"></select>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+        <div class="col-sm-3">
+          <div class="md-form mt-0">
+            <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-6">
+          <div class="md-form mt-0">
+            <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+            <a href="../" class="btn btn-danger" role="button">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% endblock content %}
+
+{% block ajaxcalls %}
+          {
+            url      : '/goal/get-goals/{{user|safe}}',
+            data     : null,
+            callback : get_goals_and_set_goal
+          },
+{% endblock ajaxcalls %}
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    set_user_list({{users|safe}}, '{{user|safe}}');
+    e = document.getElementById('etf');
+    var etf = "{{etf|safe}}"
+    console.log(e.checked);
+    console.log(etf);
+    if (etf == "True") {
+      e.checked = true;
+    } else {
+      e.checked = false;
+    }
+
+    function get_goals_and_set_goal(response) {
+      set_goals(response, '{{goal|safe}}');
+    }
+  </script>
+{% endblock %}

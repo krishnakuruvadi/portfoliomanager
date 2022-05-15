@@ -32,6 +32,7 @@ def get_latest_physical_gold_price():
         print("Page not found")
     else:
         print("A different status code received : "+str(r.status_code))
+    print('failed to get any price for latest physical gold price')
     return None   
 
 def get_last_close_digital_gold_price():
@@ -44,7 +45,7 @@ def get_last_close_digital_gold_price():
         h2 = soup.find_all("h2")
         for item in h2:
             #print(item.text)
-            if 'Daily Gold Price for Last 30 ' in item.text:
+            if 'Digital Gold Price for Last ' in item.text:
                 print(item.parent.text)
                 rows = item.parent.find_all('tr')
                 for i, row in enumerate(rows):
@@ -60,8 +61,10 @@ def get_last_close_digital_gold_price():
         print("Page not found")
     else:
         print("A different status code received : "+str(r.status_code))
+    print('failed to get any price for digital gold price last close')
     return None, None
 
+'''
 def get_latest_digital_gold_price():
     url = 'https://gadgets.ndtv.com/finance/digital-gold-price-in-india'
     r = requests.get(url, timeout=15)
@@ -94,7 +97,7 @@ def get_latest_digital_gold_price():
     else:
         print("A different status code received : "+str(r.status_code))
     return None, None
-
+'''
 
 def get_date_or_none_from_string(input, format='%Y-%m-%d', printout=True):
     if input != None and input != '':

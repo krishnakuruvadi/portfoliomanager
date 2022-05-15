@@ -151,6 +151,7 @@ def get_unallocated_amount():
     from insurance.insurance_interface import InsuranceInterface
     from gold.gold_interface import GoldInterface
     from bankaccounts.bank_account_interface import BankAccountInterface
+    from crypto.crypto_interface import CryptoInterface
 
     amt = 0
     amt += SsyInterface.get_no_goal_amount()
@@ -166,5 +167,6 @@ def get_unallocated_amount():
     amt += InsuranceInterface.get_no_goal_amount()
     amt += GoldInterface.get_no_goal_amount()
     amt += BankAccountInterface.get_no_goal_amount()
+    amt += CryptoInterface.get_no_goal_amount()
 
     return round(amt, 2)

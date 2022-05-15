@@ -1,0 +1,132 @@
+{% extends 'base.html' %} 
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Crypto</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="transactions"><i class="far fa-file-alt" aria-hidden="true" title="All Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="upload"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="add"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Crypto" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+<table class="table table-borderless">
+  <tr>
+    <td>
+      <ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link" href="../crypto/">Crypto</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Insights</a>
+        </li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+<div class="row">
+  <div class='col-sm-6 col-lg-2 col-md-4' style="width:75%;height:30vh">
+    <canvas id="symbolChart"></canvas>
+  </div>
+  <div class='col-sm-6 col-md-6 col-lg-3'>
+    <table>
+      {% for color in symbol_colors %}
+        <tr>
+          <td style="padding:0 5px 0 5px;">
+            <div id="rectangle" style="width:30px;height:15px;background:{{color}}"></div>
+          </td>
+          <td style="padding:0 5px 0 5px;">
+            {{symbol_labels|indexone:forloop.counter}}
+          </td>
+          <td style="padding:0 5px 0 5px;">
+            {{symbol_vals|indexone:forloop.counter}} ({{symbol_percents|indexone:forloop.counter}}%)
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class='col-sm-12 col-lg-1 col-md-1'><br><br></div>
+  <div class='col-sm-6 col-lg-3 col-md-6'>
+    <table>
+      {% for color in blend_colors %}
+        <tr>
+          <td style="padding:0 5px 0 5px;">
+            <div id="rectangle" style="width:30px;height:15px;background:{{color}}"></div>
+          </td>
+          <td style="padding:0 5px 0 5px;">
+            {{blend_labels|indexone:forloop.counter}}
+          </td>
+          <td style="padding:0 5px 0 5px;">
+            {{blend_vals|indexone:forloop.counter}} ({{blend_percents|indexone:forloop.counter}}%)
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class='col-sm-6 col-lg-2 col-md-4' style="width:75%;height:30vh">
+    <canvas id="blendChart"></canvas>
+  </div>
+</div>
+{% endblock content %}
+
+<script>
+{% block jquery %}
+var blend_colors = {{blend_colors|safe}}
+var blend_vals = {{blend_vals|safe}}
+var blend_labels = {{blend_labels|safe}}
+var symbol_colors = {{symbol_colors|safe}}
+var symbol_vals = {{symbol_vals|safe}}
+var symbol_labels = {{symbol_labels|safe}}
+setChart()
+
+function setChart(){
+    var ctx = document.getElementById('symbolChart').getContext('2d');
+    var config = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: symbol_vals,
+          backgroundColor: symbol_colors,
+          label: 'symbol'
+        }],
+        labels: symbol_labels
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: {
+          display: false
+        }
+      }
+    };
+    var ctx2 = document.getElementById('blendChart').getContext('2d');
+    var config2 = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: blend_vals,
+          backgroundColor: blend_colors,
+          label: 'Blend'
+        }],
+        labels: blend_labels
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: {
+          display: false
+        }
+      }
+    };
+    var symbolChart = new Chart(ctx,config);
+    var blendChart = new Chart(ctx2, config2);
+  }
+{% endblock jquery %}
+</script>
