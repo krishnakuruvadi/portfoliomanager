@@ -1054,8 +1054,14 @@ def check_for_all_alerts():
 
 @db_periodic_task(crontab(minute='5', hour='*/4'))
 def handle_crypto():
-    from crypto.crypto_helper import update_crypto_all
+    from crypto.crypto_helper import update_crypto_all, store_returns
     update_crypto_all()
+    store_returns()
+
+@db_task()
+def update_crypto_for_user(id):
+    from crypto.crypto_helper import update_crypto_user
+    update_crypto_user(None, id)
 
 @db_task()
 def pull_and_store_coin_historical_vals(symbol, dt):

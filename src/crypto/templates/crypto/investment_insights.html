@@ -7,11 +7,11 @@
 {% endblock %} 
 
 {% block applicableactions %} 
-    <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
-    <a style="padding-left:25px;" href="transactions"><i class="far fa-file-alt" aria-hidden="true" title="All Transactions" style="font-size: 1.2em;"></i></a>
-    <a style="padding-left:25px;" href="upload"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
-    <a style="padding-left:25px;" href="add"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
-    <a style="padding-left:25px;" href="delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Crypto" style="font-size: 1.2em;"></i></a>
+    <!--a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a-->
+    <a style="padding-left:25px;" href="../transactions"><i class="far fa-file-alt" aria-hidden="true" title="All Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="../upload"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="../add"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="../delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Crypto" style="font-size: 1.2em;"></i></a>
 {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
 
@@ -21,7 +21,7 @@
     <td>
       <ul class="nav nav-pills">
         <li class="nav-item">
-          <a class="nav-link" href="../crypto/">Crypto</a>
+          <a class="nav-link" href="../">Crypto</a>
         </li>
         <li class="nav-item">
           <a class="nav-link active" href="#">Insights</a>
@@ -31,6 +31,7 @@
   </tr>
 </table>
 
+{% if symbol_colors|length > 0 %}
 <div class="row">
   <div class='col-sm-6 col-lg-2 col-md-4' style="width:75%;height:30vh">
     <canvas id="symbolChart"></canvas>
@@ -54,37 +55,82 @@
   </div>
   <div class='col-sm-12 col-lg-1 col-md-1'><br><br></div>
   <div class='col-sm-6 col-lg-3 col-md-6'>
-    <table>
-      {% for color in blend_colors %}
-        <tr>
-          <td style="padding:0 5px 0 5px;">
-            <div id="rectangle" style="width:30px;height:15px;background:{{color}}"></div>
-          </td>
-          <td style="padding:0 5px 0 5px;">
-            {{blend_labels|indexone:forloop.counter}}
-          </td>
-          <td style="padding:0 5px 0 5px;">
-            {{blend_vals|indexone:forloop.counter}} ({{blend_percents|indexone:forloop.counter}}%)
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
+
   </div>
   <div class='col-sm-6 col-lg-2 col-md-4' style="width:75%;height:30vh">
     <canvas id="blendChart"></canvas>
   </div>
 </div>
+{% endif %}
+
+<p align="right"> <small >As on {{as_on}}</small></p>
+
+<table class="table table-hover dt-responsive" id="crypto-table" style="width:100%">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Symbol</th>
+      <th scope="col">Units</th>
+      <th scope="col">Investment</th>
+      <th scope="col">Latest Value</th>
+      <th scope="col">1D (%)</th>
+      <th scope="col">1W (%)</th>
+      <th scope="col">1M (%)</th>
+      <th scope="col">3M (%)</th>
+      <th scope="col">6M (%)</th>
+      <th scope="col">YTD (%)</th>
+      <th scope="col">1Y (%)</th>
+      <th scope="col">2Y (%)</th>
+      <th scope="col">3Y (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for instance in crypto_list %}
+    <tr>
+      <td>{{ instance.symbol }}</a></td>
+      <td>{{ instance.units }}</td>
+      <td>{{ instance.investment }}</td>
+      <td>{{ instance.latest_value }}</td>
+      <td>{{ instance.1d }}</td>
+      <td>{{ instance.1w }}</td>
+      <td>{{ instance.1m }}</td>
+      <td>{{ instance.3m }}</td>
+      <td>{{ instance.6m }}</td>
+      <td>{{ instance.ytd }}</td>
+      <td>{{ instance.1y }}</td>
+      <td>{{ instance.2y }}</td>
+      <td>{{ instance.3y }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
 {% endblock content %}
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all cryptos?');
+    })
+  </script>
+{% endblock javascript %}
 
 <script>
 {% block jquery %}
-var blend_colors = {{blend_colors|safe}}
-var blend_vals = {{blend_vals|safe}}
-var blend_labels = {{blend_labels|safe}}
+$('#crypto-table').DataTable();
+
+
+{% if symbol_colors|length > 0 %}
+//var blend_colors = {{blend_colors|safe}}
+//var blend_vals = {{blend_vals|safe}}
+//var blend_labels = {{blend_labels|safe}}
 var symbol_colors = {{symbol_colors|safe}}
 var symbol_vals = {{symbol_vals|safe}}
 var symbol_labels = {{symbol_labels|safe}}
 setChart()
+{% endif %}
 
 function setChart(){
     var ctx = document.getElementById('symbolChart').getContext('2d');
@@ -106,6 +152,8 @@ function setChart(){
         }
       }
     };
+    var symbolChart = new Chart(ctx,config);
+    /*
     var ctx2 = document.getElementById('blendChart').getContext('2d');
     var config2 = {
       type: 'pie',
@@ -125,8 +173,9 @@ function setChart(){
         }
       }
     };
-    var symbolChart = new Chart(ctx,config);
+    
     var blendChart = new Chart(ctx2, config2);
+    */
   }
 {% endblock jquery %}
 </script>

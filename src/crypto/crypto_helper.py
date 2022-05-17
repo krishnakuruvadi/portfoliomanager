@@ -9,6 +9,9 @@ from enum import IntEnum
 from shared.handle_real_time_data import get_in_preferred_currency
 import datetime
 from shared.financial import xirr
+import os
+from dateutil.relativedelta import relativedelta
+from django.conf import settings
 
 
 def insert_trans_entry(symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate=1, fees=0, currency='USD', trans_price=None):
@@ -53,12 +56,21 @@ def insert_trans_entry(symbol, user, trans_type, quantity, price, date, notes, b
             alert_type="Action"
         )
 
+
 def update_crypto_user(symbol, user):
-    try:
-        co = Crypto.objects.get(symbol=symbol, user=user)
-        update_crypto(co)
-    except Crypto.DoesNotExist:
-        print(f'crypto object {symbol} for user {user} not found')
+    latest_prices = dict()
+    if symbol:
+        try:
+            co = Crypto.objects.get(symbol=symbol, user=user)
+            update_crypto(co, latest_prices)
+        except Crypto.DoesNotExist:
+            print(f'crypto object {symbol} for user {user} not found')
+    else:
+        try:
+            for co in Crypto.objects.filter(user=user):
+                update_crypto(co, latest_prices)
+        except Crypto.DoesNotExist:
+            print(f'crypto object {symbol} for user {user} not found')
                 
 def update_crypto_all():
     latest_prices = dict()
@@ -235,15 +247,19 @@ def update_crypto(co, latest_prices=None):
 
 def get_price(symbol):
     versus = "usd"
-    coin_id = symbol_to_id(symbol)
-    # ex: https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=USD&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true 
-    coingecko_price_url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies={versus}&include_market_cap" \
-                          "=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true"
+    try:
+        coin_id = symbol_to_id(symbol)
+        # ex: https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=USD&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true 
+        coingecko_price_url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies={versus}&include_market_cap" \
+                            "=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true"
 
-    price_request = json.loads(requests.get(url=coingecko_price_url).text)
-    price_output = price_request[coin_id]
-    price = price_output["usd"]
-    print(price_output)
+        price_request = json.loads(requests.get(url=coingecko_price_url).text)
+        price_output = price_request[coin_id]
+        price = price_output["usd"]
+        print(price_output)
+    except Exception as ex:
+        print(f'exception getting latest price {symbol} {ex}')
+        return None, None
     '''
     markup = symbol.title() + " - " + symbol_to_name(
         symbol) + "\n" + "Price: " + price + "\n" + "24h Change: " + str(usd_24h_change) + "\n" + "Market Cap: " + str(
@@ -266,11 +282,32 @@ def get_crypto_coins():
     return coins
 
 def symbol_to_id(symbol):
+    coin_id = None
+    fp = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    mapping_file = os.path.join(fp, 'media', 'crypto_mapping.json')
+    if os.path.exists(mapping_file):
+        with open(mapping_file) as f:
+            data = json.load(f)
+            for item in data:
+                if item['symbol'] == symbol:
+                    return item['id']
     try:  # based on API some keys are lower case and some are upper, so handle this with try and except to resolve
         # KeyError
         cleaned_symbol = str(symbol).strip().lower()
+        headers = {'Accept': '*/*',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
+            'X-Requested-With': 'XMLHttpRequest'
+            }
         symbol_url = "https://api.coingecko.com/api/v3/coins/list?include_platform=true"
-        id_request = json.loads(requests.get(url=symbol_url).text)
+        response = requests.get(symbol_url, headers=headers, timeout=15)
+        response.raise_for_status()  # raises exception when not a 2xx response
+        if response.status_code != 204:
+            id_request = response.json()
+        else:
+            id_request = json.loads(response.text)
+        with open(mapping_file, "w") as f:
+            json.dump(id_request, f)
         find = {y["symbol"]: x for x, y in list(enumerate(id_request))}
         location = find[cleaned_symbol]
 
@@ -278,15 +315,19 @@ def symbol_to_id(symbol):
         print("id lower", coin_id)
 
         return coin_id
-    except:
-        cleaned_symbol = str(symbol).strip().upper()
-        symbol_url = "https://api.coingecko.com/api/v3/coins/list?include_platform=true"
-        id_request = json.loads(requests.get(url=symbol_url).text)
-        find = {y["symbol"]: x for x, y in list(enumerate(id_request))}
-        location = find[cleaned_symbol]
+    except Exception as ex:
+        print(f'exception while accessing {symbol_url} {ex}.  Trying alternate url')
+        try:
+            cleaned_symbol = str(symbol).strip().upper()
+            symbol_url = "https://api.coingecko.com/api/v3/coins/list?include_platform=true"
+            id_request = json.loads(requests.get(url=symbol_url).text)
+            find = {y["symbol"]: x for x, y in list(enumerate(id_request))}
+            location = find[cleaned_symbol]
 
-        coin_id = id_request[location]["id"]
-        print("id upper", coin_id)
+            coin_id = id_request[location]["id"]
+            print("id upper", coin_id)
+        except Exception as ex:
+            print(f'exception while accessing alternate url too {symbol_url} {ex}.')
         return coin_id
 
 def get_historical_price(symbol, date):
@@ -303,3 +344,95 @@ def get_historical_price(symbol, date):
     except Exception as ex:
         print(f'exception {ex} while getting historical price for {symbol} on {date} using url {url}')
     return None
+
+def store_returns():
+    path = os.path.join(settings.MEDIA_ROOT, "crypto")
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    today = datetime.date.today()
+    yesterday = today+relativedelta(days=-1)
+    returns_file = os.path.join(path, 'crypto_returns.json')
+    if os.path.exists(returns_file):
+        with open(returns_file) as f:
+            data = json.load(f)
+            if data['last_run'] == today.strftime('%d-%b-%Y') or data['reference_dt'] == yesterday.strftime('%d-%b-%Y'):
+                return
+    
+    top_crypto = ['btc', 'eth', 'ltc', 'xrp', 'usdc', 'usdt', 'doge', 'shib', 'bnb', 'bch']
+    res = dict()
+    res['returns'] = list()
+    for symbol in top_crypto:
+        
+        yprice = get_historical_price(symbol, yesterday)
+        ret = {
+            'symbol':symbol
+        }
+        try:
+            dbprice = get_historical_price(symbol, yesterday+relativedelta(days=-1))
+            c1d = ((yprice-dbprice)/dbprice)*100
+            ret['1d'] = round(c1d, 2)
+        except Exception as ex:
+            print(f'exception getting price change {ex}')
+
+        try:
+            wbprice = get_historical_price(symbol, yesterday+relativedelta(days=-7))
+            c1w = ((yprice-wbprice)/wbprice)*100
+            ret['1w'] = round(c1w, 2)
+        except Exception as ex:
+            print(f'exception getting price change {ex}')
+
+        try:
+            mbprice = get_historical_price(symbol, yesterday+relativedelta(months=-1))
+            c1m = ((yprice-mbprice)/mbprice)*100
+            ret['1m'] = round(c1m, 2)
+        except Exception as ex:
+            print(f'exception getting price change {ex}')
+
+        try:
+            mb3price = get_historical_price(symbol, yesterday+relativedelta(months=-3))
+            c3m = ((yprice-mb3price)/mb3price)*100
+            ret['3m'] = round(c3m, 2)
+        except Exception as ex:
+            print(f'exception getting price change {ex}')
+        
+        try:
+            mb6price = get_historical_price(symbol, yesterday+relativedelta(months=-6))
+            c6m = ((yprice-mb6price)/mb6price)*100
+            ret['6m'] = round(c6m, 2)
+        except Exception as ex:
+            print(f'exception getting price change {ex}')
+
+        try:
+            ytdprice = get_historical_price(symbol, datetime.date(day=1, month=1, year=today.year))
+            cytd = ((yprice-ytdprice)/ytdprice)*100
+            ret['ytd'] = round(cytd, 2)
+        except Exception as ex:
+            print(f'exception getting price change {ex}')
+
+        try:
+            ybprice = get_historical_price(symbol, yesterday+relativedelta(years=-1))
+            c1y = ((yprice-ybprice)/ybprice)*100
+            ret['1y'] = round(c1y, 2)
+        except Exception as ex:
+            print(f'exception getting price change {ex}')
+
+        try:
+            yb2price = get_historical_price(symbol, yesterday+relativedelta(years=-2))
+            c2y = ((yprice-yb2price)/yb2price)*100
+            ret['2y'] = round(c2y, 2)
+        except Exception as ex:
+            print(f'exception getting price change {ex}')
+
+        try:
+            yb3price = get_historical_price(symbol, yesterday+relativedelta(years=-3))
+            c3y = ((yprice-yb3price)/yb3price)*100
+            ret['3y'] = round(c3y, 2)
+        except Exception as ex:
+            print(f'exception getting price change {ex}')
+
+        res['returns'].append(ret)
+    res['reference_dt'] = yesterday.strftime('%d-%b-%Y')
+    res['last_updated'] = today.strftime('%d-%b-%Y')
+    with open(returns_file, "w") as f:
+        json.dump(res, f)

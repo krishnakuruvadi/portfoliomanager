@@ -11,9 +11,10 @@ from .crypto_interface import CryptoInterface
 from django.http import HttpResponseRedirect
 import json
 import requests
-from .crypto_helper import insert_trans_entry, get_crypto_coins, reconcile_event_based
+from .crypto_helper import insert_trans_entry, get_crypto_coins, reconcile_event_based, get_price
 from common.models import Coin, HistoricalCoinPrice
-from tasks.tasks import pull_and_store_coin_historical_vals
+from tasks.tasks import pull_and_store_coin_historical_vals, update_crypto_for_user
+from django.conf import settings
 
 # Create your views here.
 def get_crypto(request):
@@ -68,6 +69,7 @@ def update_crypto(request, id):
             notes = request.POST['notes']
             cobj.notes = notes
             cobj.save()
+            update_crypto_for_user(cobj.user)
         else:
             users = get_all_users()
             context = {
@@ -119,6 +121,7 @@ def update_transaction(request, id, trans_id):
                 trans.fees = fees
                 trans.buy_currency = chosen_currency
                 trans.save()
+                update_crypto_for_user(trans.crypto.user)
             else:
                 print('fetching exchange price')
                 trans_date = get_datetime_or_none_from_string(request.POST['trans_date'])
@@ -137,7 +140,7 @@ def update_transaction(request, id, trans_id):
                 return render(request, template, context)
         context = {'users':users, 'currencies':currencies, 'operation': 'Update Transaction', 'conversion_rate':trans.conversion_rate, 'curr_module_id': CryptoInterface.get_module_id(),
                     'preferred_currency':preferred_currency, 'symbol':symbol, 'user':user, 'trans_date':trans.trans_date.strftime("%Y-%m-%d"), 'trans_price':trans.trans_price,
-                    'price':trans.price, 'quantity':trans.units, 'broker':trans.broker, 'notes':trans.notes, 'charges':trans.fees, 'currency':trans.buy_currency}
+                    'price':trans.price, 'quantity':trans.units, 'broker':trans.broker, 'notes':trans.notes, 'charges':trans.fees, 'currency':trans.buy_currency, 'trans_type':trans.trans_type}
         print(f'view context: {context}')
         return render(request, template, context)
     except Crypto.DoesNotExist:
@@ -151,6 +154,7 @@ def delete_transaction(request, id, trans_id):
             trans.delete()
             if len(Transaction.objects.filter(crypto=cobj)) == 0:
                 cobj.delete()
+            update_crypto_for_user(id)
         except Transaction.DoesNotExist:
             return HttpResponseRedirect(reverse('crypto:crypto-list'))
     except Crypto.DoesNotExist:
@@ -177,6 +181,7 @@ def add_transaction(request):
             chosen_currency = request.POST['currency']
             charges = get_float_or_zero_from_string(request.POST['charges'])
             insert_trans_entry(symbol, user, trans_type, quantity, price, trans_date, notes, broker, conversion_rate, charges, chosen_currency, trans_price)
+            update_crypto_for_user(user)
         else:
             print('fetching exchange price')
             symbol = request.POST['symbol']
@@ -236,7 +241,13 @@ def upload_transactions(request):
 
 
 def delete_crypto(request, id):
-    Crypto.objects.get(id=id).delete()
+    try:
+        cobj = Crypto.objects.get(id=id)
+        uid = cobj.user
+        cobj.delete()
+        update_crypto_for_user(uid)
+    except Exception as ex:
+        print(f'exception deleting crypto {ex}')
     return HttpResponseRedirect(reverse('crypto:crypto-list'))
 
 def crypto_detail(request, id):
@@ -323,6 +334,60 @@ def transaction_detail(request, id, trans_id):
     return HttpResponseRedirect(reverse('crypto:crypto-list'))
 
 def insights(request):
-    #TBD: handle me
     template = 'crypto/investment_insights.html'
-    return HttpResponseRedirect(reverse('crypto:crypto-list'))
+    context = {'crypto_list':list()}
+    path = os.path.join(settings.MEDIA_ROOT, "crypto")
+    returns_file = os.path.join(path, 'crypto_returns.json')
+    if os.path.exists(returns_file):
+        with open(returns_file) as f:
+            data = json.load(f)
+            context['as_on'] = data['reference_dt']
+            for entry in data['returns']:
+                units = 0
+                investment = 0
+                latest_value = 0
+                for cobj in Crypto.objects.filter(symbol=entry['symbol']):
+                    units += float(cobj.units)
+                    investment += float(cobj.buy_value)
+                    latest_value += float(cobj.latest_value)
+                context['crypto_list'].append({
+                    'symbol':entry['symbol'],
+                    'units':units,
+                    'investment':round(investment, 2),
+                    'latest_value':round(latest_value, 2),
+                    '1d':entry.get('1d', '-'),
+                    '1w':entry.get('1w', '-'),
+                    '1m':entry.get('1m', '-'),
+                    '3m':entry.get('3m', '-'),
+                    '6m':entry.get('6m', '-'),
+                    'ytd':entry.get('ytd', '-'),
+                    '1y':entry.get('1y', '-'),
+                    '2y':entry.get('2y', '-'),
+                    '3y':entry.get('3y', '-')
+                })
+    context['blend_colors'] = list()
+    context['blend_vals'] = list()
+    context['blend_labels'] = list()
+    context['symbol_colors'] = list()
+    context['symbol_vals'] = list()
+    context['symbol_labels'] = list()
+    context['symbol_percents'] = list()
+
+    total = 0
+    investment_per_crypto = dict()
+    for cobj in Crypto.objects.all():
+        investment_per_crypto[cobj.symbol] = investment_per_crypto.get(cobj.symbol, 0) + float(cobj.latest_value)
+        total += float(cobj.latest_value)
+    for ipc, val in investment_per_crypto.items():
+        import random
+        r = lambda: random.randint(0,255)
+        context['symbol_colors'].append('#{:02x}{:02x}{:02x}'.format(r(), r(), r()))
+        context['symbol_vals'].append(round(val,2))
+        context['symbol_labels'].append(ipc)
+        h = float(val)*100/float(total)
+        h = int(round(h))
+        context['symbol_percents'].append(h)
+    
+    print(context)
+    return render(request, template, context)
+
