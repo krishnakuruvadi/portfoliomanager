@@ -356,7 +356,7 @@ def store_returns():
     if os.path.exists(returns_file):
         with open(returns_file) as f:
             data = json.load(f)
-            if data['last_run'] == today.strftime('%d-%b-%Y') or data['reference_dt'] == yesterday.strftime('%d-%b-%Y'):
+            if data['last_updated'] == today.strftime('%d-%b-%Y') or data['reference_dt'] == yesterday.strftime('%d-%b-%Y'):
                 return
     
     top_crypto = ['btc', 'eth', 'ltc', 'xrp', 'usdc', 'usdt', 'doge', 'shib', 'bnb', 'bch']

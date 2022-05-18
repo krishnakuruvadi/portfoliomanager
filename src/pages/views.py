@@ -23,6 +23,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
     all_debt = 0
     all_equity = 0
     all_gold = 0
+    all_crypto = 0
     all_cash = 0
     all_distrib_labels = list()
     all_distrib_colors = list()
@@ -42,6 +43,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         all_equity += equity
         gold = contrib.get('Gold', 0)
         all_gold += gold
+        crypto = contrib.get('Crypto', 0)
+        all_crypto += crypto
         cash = contrib.get('Cash', 0)
         all_cash += cash
         achieved = contrib.get('total', 0)
@@ -62,6 +65,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "equity": equity,
             "gold": gold,
             "cash": cash,
+            "crypto": crypto,
             "distrib_labels": contrib['distrib_labels'],
             "distrib_vals": contrib['distrib_vals'],
             "distrib_colors": contrib['distrib_colors'],
@@ -69,10 +73,11 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "remaining": remaining,
             "remaining_per": remaining_per,
             "achieve_per": achieve_per,
-            "debt_per": round(debt*100/(debt+equity+gold+cash+1), 2),
-            "equity_per": round(equity*100/(debt+equity+gold+cash+1), 2),
-            "gold_per": round(gold*100/(debt+equity+gold+cash+1), 2),
-            "cash_per": round(cash*100/(debt+equity+gold+cash+1), 2)
+            "debt_per": round(debt*100/(debt+equity+gold+cash+crypto+1), 2),
+            "equity_per": round(equity*100/(debt+equity+gold+cash+crypto+1), 2),
+            "gold_per": round(gold*100/(debt+equity+gold+cash+crypto+1), 2),
+            "crypto_per": round(crypto*100/(debt+equity+gold+cash+crypto+1), 2),
+            "cash_per": round(cash*100/(debt+equity+gold+cash+crypto+1), 2)
         }
 
         for d in range(len(contrib['distrib_labels'])):
@@ -101,6 +106,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "equity": all_equity,
             "gold": all_gold,
             "cash": all_cash,
+            "crypto": all_crypto,
             "distrib_labels": all_distrib_labels,
             "distrib_vals": all_distrib_vals,
             "distrib_colors": all_distrib_colors,
@@ -108,10 +114,11 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
             "remaining": all_remaining,
             "remaining_per": all_remaining_per,
             "achieve_per": all_achieve_per,
-            "debt_per": round(all_debt*100/(all_debt+all_equity+all_gold+all_cash+1), 2),
-            "equity_per": round(all_equity*100/(all_debt+all_equity+all_gold+all_cash+1), 2),
-            "gold_per": round(all_gold*100/(all_debt+all_equity+all_gold+all_cash+1), 2),
-            "cash_per": round(all_cash*100/(all_debt+all_equity+all_gold+all_cash+1), 2),
+            "debt_per": round(all_debt*100/(all_debt+all_equity+all_gold+all_cash+all_crypto+1), 2),
+            "equity_per": round(all_equity*100/(all_debt+all_equity+all_gold+all_cash+all_crypto+1), 2),
+            "gold_per": round(all_gold*100/(all_debt+all_equity+all_gold+all_cash+all_crypto+1), 2),
+            "crypto_per": round(all_crypto*100/(all_debt+all_equity+all_gold+all_cash+all_crypto+1), 2),
+            "cash_per": round(all_cash*100/(all_debt+all_equity+all_gold+all_cash+all_crypto+1), 2),
         }
     context['investment_data'] = dict()
     try:

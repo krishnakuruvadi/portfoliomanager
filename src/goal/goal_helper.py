@@ -113,6 +113,7 @@ def update_goal_contributions(id):
         goal_obj.r_401k_contribution = contrib.get('401k', 0)
         goal_obj.gold_contribution = contrib.get('gold', 0)
         goal_obj.cash_contribution = contrib.get('cash', 0)
+        goal_obj.crypto_contribution = contrib.get('crypto', 0)
         goal_obj.save()
     except Exception as e:
         print(e)

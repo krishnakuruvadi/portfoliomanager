@@ -155,14 +155,14 @@
     function get_vals_and_set_chart(data) {
       var debt_equity = [0, 0, 0]
       var done_pending = [0, 0]
-      var debt_equity_labels = ['Debt', 'Equity', 'Gold', 'Cash']
+      var debt_equity_labels = ['Debt', 'Equity', 'Gold', 'Crypto', 'Cash']
       var status_vals = [0, 0]
       var status_labels = ['Achieved', 'Remaining']
       var distribution_vals = [0, 0]
       var distribution_labels = ['PPF', 'MF']
       
       console.log(data)
-      debt_equity = [data.debt, data.equity, data.gold, data.cash]
+      debt_equity = [data.debt, data.equity, data.gold, data.crypto, data.cash]
       distribution_vals = data.distrib_vals
       distribution_labels = data.distrib_labels
       distribution_colors = data.distrib_colors
@@ -181,7 +181,7 @@
           datasets: [{
             data: debt_equity,
             backgroundColor: [
-              '#519463', '#a85b6a', '#ffd700', '#E3CA95'
+              '#519463', '#a85b6a', '#ffd700', '#000080', '#E3CA95'
             ],
             label: 'Classification'
           }],

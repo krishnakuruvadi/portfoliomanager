@@ -122,7 +122,7 @@ class CryptoInterface:
         for obj in Crypto.objects.filter(user=user_id):
             transactions = Transaction.objects.filter(crypto=obj, trans_date__gte=st_date, trans_date__lte=end_date)
             for t in transactions:
-                if t.trans_type == 'Buy' and t.trans_type == 'Receive':
+                if t.trans_type == 'Buy' or t.trans_type == 'Receive':
                     contrib += float(t.trans_price)
                 else:
                     deduct += -1*float(t.trans_price)

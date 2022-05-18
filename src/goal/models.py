@@ -33,6 +33,7 @@ class Goal(models.Model):
     insurance_contribution = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     gold_contribution = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     cash_contribution = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    crypto_contribution = models.DecimalField(max_digits=20, decimal_places=2, default=0)
 
     def get_absolute_url(self):
         return reverse("goals:goal-detail", kwargs={'id': self.id})

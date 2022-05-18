@@ -275,6 +275,7 @@ class ChartData(APIView):
                 "equity": equity,
                 "gold":contrib['Gold'],
                 'cash':contrib['Cash'],
+                'crypto':contrib['Crypto'],
                 "distrib_labels": contrib['distrib_labels'],
                 "distrib_vals": contrib['distrib_vals'],
                 "distrib_colors": contrib['distrib_colors'],

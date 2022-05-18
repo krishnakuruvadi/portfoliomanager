@@ -24,6 +24,7 @@ import colorsys
 from shared.utils import get_int_or_none_from_string
 
 from bankaccounts.bank_account_interface import BankAccountInterface
+from crypto.crypto_interface import CryptoInterface
 from users.user_interface import get_ext_user, get_users
 from django.conf import settings
 
@@ -429,6 +430,11 @@ class GoalDetailView(DetailView):
             data['distribution']['labels'].append('Cash')
             data['distribution']['vals'].append(float(data['object'].cash_contribution))
             data['distribution']['colors'].append(BankAccountInterface.get_chart_color())
+            has_data = True
+        if data['object'].crypto_contribution > 0:
+            data['distribution']['labels'].append('Crypto')
+            data['distribution']['vals'].append(float(data['object'].crypto_contribution))
+            data['distribution']['colors'].append(CryptoInterface.get_chart_color())
             has_data = True
         if has_data:
             print(data['distribution'])
