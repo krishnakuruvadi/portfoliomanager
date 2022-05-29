@@ -50,7 +50,7 @@
         <td>{{ instance.trans_price }}</td>
         <td>{{ instance.broker }}</td>
         <td>{{ user_name_mapping |lookup:instance.share.user }}</td>
-        <td>{{ instance.notes }}</td>
+        <td>{{ instance.notes|default_if_none:""}}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}/delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
           <a href="{{ instance.get_absolute_url }}/update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>

@@ -70,13 +70,28 @@ def upload_transactions(full_file_path, bank_name, file_type, acc_number, accoun
                     if trans_type == 'Debit' and amount < 0:
                         amount = -1*amount
                     try:
+                        t = Transaction.objects.get(account=ba,
+                            trans_date=transaction.date,
+                            trans_type=trans_type,
+                            amount=amount,
+                            description=transaction.payee,
+                            category=category,
+                            tran_id=None
+                        )
+                        
+                        t.tran_id = transaction.id
+                        t.save()
+                    except Transaction.DoesNotExist:
+                        pass
+                    try:
                         Transaction.objects.create(
                             account=ba,
                             trans_date=transaction.date,
                             trans_type=trans_type,
                             amount=amount,
                             description=transaction.payee,
-                            category=category
+                            category=category,
+                            tran_id=transaction.id
                         )
                     except IntegrityError as ie:
                         print(f'error {ie} when adding transaction {transaction.date} {amount}')

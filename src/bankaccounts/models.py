@@ -61,7 +61,7 @@ class BankAccount(models.Model):
 
 class Transaction(models.Model):
     class Meta:
-        unique_together = (('account', 'trans_date', 'amount', 'trans_type', 'description'),)
+        unique_together = (('account', 'trans_date', 'amount', 'trans_type', 'description', 'notes', 'tran_id'),)
 
     account = models.ForeignKey('BankAccount',on_delete=models.CASCADE)
     trans_date = models.DateField(_('Transaction Date'), )
@@ -70,6 +70,7 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=20, decimal_places=2, null=False, validators=[MinValueValidator(0.01)])
     notes = models.CharField(max_length=80, null=True, blank=True)
     description = models.CharField(max_length=80, null=True, blank=True)
+    tran_id = models.CharField(max_length=30, null=True, blank=True)
 
     def get_absolute_url(self):
         return reverse('bankaccounts:transaction-detail', args=[str(self.account.id),str(self.id)])
