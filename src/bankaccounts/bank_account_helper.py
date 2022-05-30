@@ -28,7 +28,7 @@ def update_balance_for_account(id):
     except BankAccount.DoesNotExist:
         print(f'No bank account with id {id} to update balance')
 
-def upload_transactions(full_file_path, bank_name, file_type, acc_number, account_id):
+def upload_transactions(full_file_path, bank_name, file_type, acc_number, account_id, passwd):
     try:
         ba = BankAccount.objects.get(id=account_id)
         if file_type == 'QUICKEN' and full_file_path.lower().endswith("qfx"):
@@ -96,6 +96,10 @@ def upload_transactions(full_file_path, bank_name, file_type, acc_number, accoun
                     except IntegrityError as ie:
                         print(f'error {ie} when adding transaction {transaction.date} {amount}')
         else:
-            print(f'unsupported type {file_type}')
+            if file_type == 'PDF' and bank_name == 'IDFC':
+                from .idfc_helper import upload_transactions
+                upload_transactions(full_file_path, ba, passwd)
+            else:
+                print(f'unsupported type {file_type} {bank_name} {acc_number}')
     except BankAccount.DoesNotExist:
         print(f'not uploading transactions from {full_file_path} {bank_name} since no account with number {acc_number}')

@@ -407,8 +407,8 @@ def upload_transactions(request, id):
                 full_file_path = settings.MEDIA_ROOT + '/' + file_locn
                 file_type = request.POST['file_format']
                 print(f'Read transactions from file: {uploaded_file} {file_type} {file_locn} {full_file_path}')
-                
-                upload_bank_account_transactions(full_file_path, acc.bank_name, file_type, acc.number, acc.id)
+                passwd = request.POST['cas-pass']
+                upload_bank_account_transactions(full_file_path, acc.bank_name, file_type, acc.number, acc.id, passwd)
                 message = 'Upload successful. Processing file'
                 message_color = 'green'
             except Exception as ex:

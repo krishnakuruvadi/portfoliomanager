@@ -1021,9 +1021,9 @@ def update_bank_acc_bal(acc_id=None):
         update_balance_for_accounts()
 
 @db_task()
-def upload_bank_account_transactions(full_file_path, bank_name, file_type, number, account_id):
+def upload_bank_account_transactions(full_file_path, bank_name, file_type, number, account_id, passwd):
     from bankaccounts.bank_account_helper import upload_transactions
-    upload_transactions(full_file_path, bank_name, file_type, number, account_id)
+    upload_transactions(full_file_path, bank_name, file_type, number, account_id, passwd)
     update_bank_acc_bal(account_id)
 
 @db_periodic_task(crontab(minute='30', hour='*/12'))
