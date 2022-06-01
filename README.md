@@ -28,10 +28,15 @@ To build a portfolio manager which can track and provide insights into a individ
 
 ## How to start
 * Install the following libraries
+
 MacOS:
-    brew install ghostscript tcl-tk
+```
+brew install ghostscript tcl-tk
+```
 Ubuntu
-    apt install ghostscript python3-tk
+```
+apt install ghostscript python3-tk
+```
 * Clone or download this source code
 * Create a virtual environment
 ```
