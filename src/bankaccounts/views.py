@@ -64,7 +64,7 @@ def get_accounts(request):
     context['preferred_currency_loan_bal'] = round(loan_balance, 2)
     context['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
     context['user_name_mapping'] = get_all_users()
-    context['preferred_currency'] = get_preferred_currency_symbol()    
+    context['preferred_currency'] = get_preferred_currency_symbol()
     return render(request, template, context)
 
 def get_transactions(request, id):
@@ -144,7 +144,8 @@ def update_transaction(request, id, trans_id):
                 try:
                     message = 'Transaction updated successfully'
                     message_color = 'green'
-                    trans.notes = request.POST['notes']
+                    if request.POST['notes'] and request.POST['notes'] != '':
+                        trans.notes = request.POST['notes']
                     trans.category = request.POST['tran_sub_type']
                     trans.save()
                 except Exception as ex:
@@ -383,13 +384,14 @@ def delete_transactions(request, id):
 def delete_transaction(request, id, trans_id):
     try:
         ba = BankAccount.objects.get(id=id)
-        Transaction.objects.get(account=ba, id=trans_id).delete()
-        update_bank_acc_bal(ba.id)
+        try:
+            Transaction.objects.get(account=ba, id=trans_id).delete()
+            update_bank_acc_bal(ba.id)
+        except Transaction.DoesNotExist:
+            return HttpResponseRedirect(reverse('bankaccounts:get-transactions', args=[str(id)]))
         return HttpResponseRedirect(reverse('bankaccounts:get-transactions', args=[str(id)]))
     except BankAccount.DoesNotExist:
         return HttpResponseRedirect(reverse('bankaccounts:account-list'))
-    except Transaction.DoesNotExist:
-        return HttpResponseRedirect(reverse('bankaccounts:get-transactions', args=[str(id)]))
 
 def upload_transactions(request, id):
     template = 'bankaccounts/upload_transactions.html'
@@ -427,3 +429,136 @@ def upload_transactions(request, id):
 
     except BankAccount.DoesNotExist:
         return HttpResponseRedirect(reverse('bankaccounts:account-list'))
+
+def fr(val, precision=2):
+    return round(float(val), precision)
+
+class MultiCurr:
+    def __init__(self):
+        self.amount = dict()
+
+    def add(self, curr, amount):
+        self.amount[curr] = self.amount.get(curr, 0) + fr(amount)
+    
+    def sub(self, curr, amount):
+        self.amount[curr] = self.amount.get(curr, 0) - fr(amount)
+
+    def get_in_preferred_currency(self, end_date, prec=2):
+        ret = 0
+        for curr, val in self.amount.items():
+            ret += get_in_preferred_currency(val, curr, end_date)
+        return round(ret, prec)
+    
+def insights(request):
+    template = "bankaccounts/insights.html"
+    context = dict()
+    context['users'] = get_all_users()
+    context['accounts'] = dict()
+    context['preferred_currency'] = get_preferred_currency_symbol()
+    for ba in BankAccount.objects.all():
+        if 'Loan' in ba.acc_type:
+            continue
+        if not ba.user in context['accounts']:
+            context['accounts'][ba.user] = list()
+        context['accounts'][ba.user].append(ba.number)
+    if request.method == 'POST':
+        print(request.POST)
+        user = request.POST['user']
+        # get from post as list
+        sel_accounts = request.POST.getlist('accounts')
+        date_from = get_date_or_none_from_string(request.POST['from_date'])
+        date_to = get_date_or_none_from_string(request.POST['to_date'])
+        context['user'] = user
+        context['sel_accounts'] = sel_accounts
+        context['from_date'] = request.POST['from_date']
+        context['to_date'] = request.POST['to_date']
+        context['curr_module_id'] = 'id_bank_acc_module'
+
+        start_curr = MultiCurr()
+        credits_curr = MultiCurr()
+        debits_curr = MultiCurr()
+        end_curr = MultiCurr()
+
+        bas = None
+        context['credit_labels'] = list()
+        context['credit_vals'] = list()
+        context['debit_labels'] = list()
+        context['debit_vals'] = list()
+        context['credit_colors'] = list()
+        context['debit_colors'] = list()
+        if 'All' in sel_accounts:
+            ext_user = get_ext_user(request)
+            users = get_users_from_ext_user(ext_user)
+            bas = BankAccount.objects.filter(user__in=users)
+        else:
+            bas = BankAccount.objects.filter(user=user, number__in=sel_accounts)
+        end_dt = datetime.date.today()
+        if end_dt < date_to:
+            end_dt = date_to
+        for ba in bas:
+            if 'Loan' in ba.acc_type:
+                continue
+            for trans in Transaction.objects.filter(account=ba, trans_date__lt=end_dt).order_by("trans_date"):
+                if trans.trans_date < date_from:
+                    if trans.trans_type == 'Credit':
+                        start_curr.add(ba.currency, trans.amount)
+                        end_curr.add(ba.currency, trans.amount)
+                    else:
+                        start_curr.sub(ba.currency, trans.amount)
+                        end_curr.sub(ba.currency, trans.amount)
+                else:
+                    if trans.trans_type == 'Credit':
+                        
+                        credits_curr.add(ba.currency, trans.amount)
+                        end_curr.add(ba.currency, trans.amount)
+                        cat = trans.category if trans.category else 'Other'
+                        if cat not in context['credit_labels']:
+                            context['credit_labels'].append(cat)
+                            t = MultiCurr()
+                            t.add(ba.currency, trans.amount)
+                            context['credit_vals'].append(t)
+                        else:
+                            # find string position in list
+                            pos = context['credit_labels'].index(cat)
+                            context['credit_vals'][pos].add(ba.currency, trans.amount)
+                    else:
+                        debits_curr.add(ba.currency, trans.amount)
+                        end_curr.sub(ba.currency, trans.amount)
+                        cat = trans.category if trans.category else 'Other'
+                        if cat not in context['debit_labels']:
+                            context['debit_labels'].append(cat)
+                            t = MultiCurr()
+                            t.add(ba.currency, trans.amount)
+                            context['debit_vals'].append(t)
+                        else:
+                            # find string position in list
+                            pos = context['debit_labels'].index(cat)
+                            context['debit_vals'][pos].add(ba.currency, trans.amount)
+        context['start'] = start_curr.get_in_preferred_currency(end_dt)
+        context['end'] = end_curr.get_in_preferred_currency(end_dt)
+        context['credits'] = credits_curr.get_in_preferred_currency(end_dt)
+        context['debits'] = debits_curr.get_in_preferred_currency(end_dt)
+        for _ in range(len(context['credit_labels'])):
+            import random
+            r = lambda: random.randint(0,255)
+            context['credit_colors'].append('#{:02x}{:02x}{:02x}'.format(r(), r(), r()))
+        for _ in range(len(context['debit_labels'])):
+            import random
+            r = lambda: random.randint(0,255)
+            context['debit_colors'].append('#{:02x}{:02x}{:02x}'.format(r(), r(), r()))
+        for i, val in enumerate(context['credit_vals']):
+            context['credit_vals'][i] = val.get_in_preferred_currency(end_dt)
+        for i, val in enumerate(context['debit_vals']):
+            context['debit_vals'][i] = val.get_in_preferred_currency(end_dt) 
+        print(f'context {context}')
+
+        return render(request, template, context)
+    context['start'] = 0
+    context['end'] = 0
+    context['credits'] = 0
+    context['debits'] = 0
+    context['curr_module_id'] = 'id_bank_acc_module'
+    context['user_name_mapping'] = get_all_users()
+    context['sel_accounts'] = list()
+    print(f'context {context}')
+    return render(request, template, context)

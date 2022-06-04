@@ -1,0 +1,288 @@
+{% extends 'base.html' %} 
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="../">Bank Accounts</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %}
+    <a href="../add"><i class="fa fa-plus" aria-hidden="true" title="Add Bank Account" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;padding-right:25px;" href="../delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Accounts" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-borderless">
+    <tr>
+      <td><ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link" href="../">Bank Accounts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Insights</a>
+        </li>
+      </ul></td>
+    </tr>
+  </table>
+  <br>
+
+  <form method="POST">
+    {% csrf_token %}
+      <div class="row">
+
+        <div class="col-sm-12 col-md-6 col-lg-1">
+          <label for="user" class="col-sm-3 col-form-label">User</label>
+        </div>
+
+        <div class="col-sm-12 col-md-6 col-lg-2">
+          <div class="md-form mt-0">
+            <select id="id_user" name="user" class="form-control"></select>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-6 col-lg-1">
+          <label for="accounts" class="col-sm-3 col-form-label">Accounts<span style="color:red;">*</span></label>
+        </div>
+
+        <div class="col-sm-12 col-md-6 col-lg-2">
+          <div class="md-form mt-0">
+            <select id="id_accounts" name="accounts" class="form-control" multiple required="true"></select>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-6 col-lg-1">
+          <label for="from_date" class="col-sm-3 col-form-label">From<span style="color:red;">*</span></label>
+        </div>
+
+        <div class="col-sm-12 col-md-6 col-lg-2">
+          <div class="md-form mt-0">
+            <input type="date" id="from_date" name="from_date" value="{{from_date}}" required="true">
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-6 col-lg-1">
+          <label for="to_date" class="col-sm-3 col-form-label">To<span style="color:red;">*</span></label>
+        </div>
+
+        <div class="col-sm-12 col-md-6 col-lg-2">
+          <div class="md-form mt-0">
+            <input type="date" id="to_date" name="to_date" value="{{to_date}}" required="true">
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-md-6 col-lg-1">
+          <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+        </div>
+
+      </div>
+  </form>
+  <!--table class="table table-borderless"  style="width:30%">
+    <th colspan=5 style="text-align:center;">Amount to invest @12% expected growth</th>
+  {% for key, value in yrly_invest_12.items %}
+    {% if forloop.counter0|divisibleby:"5" %}
+      {% if forloop.counter0 != 0 %}
+        </tr>
+      {% endif %}
+      <tr>
+    {% endif %}
+      <td>
+        <table class="table table-bordered">
+          <tr style="background-color:green"><td>{{key}}</td></tr>
+          <tr><td>{{value}}</td></tr>
+        </table>
+      </td>
+  {% endfor %}
+  {% if yrly_invest_12|length > 0 %}
+    {% if yrly_invest_12|length|divisibleby:"5" %}
+    {% else %}
+      </tr>
+    {% endif %}
+  {% endif %}
+  </table>
+  <br-->
+  <!--table class="table table-borderless" style="width:30%">
+    <th colspan=5 style="text-align:center;">Amount to invest @8% expected growth</th>
+
+  {% for key, value in yrly_invest_8.items %}
+    {% if forloop.counter0|divisibleby:"5" %}
+      {% if forloop.counter0 != 0 %}
+        </tr>
+      {% endif %}
+      <tr>
+    {% endif %}
+      <td>
+        <table class="table table-bordered">
+          <tr style="background-color:green"><td>{{key}}</td></tr>
+          <tr><td>{{value}}</td></tr>
+        </table>
+      </td>
+  {% endfor %}
+  {% if yrly_invest_8|length > 0 %}
+    {% if yrly_invest_8|length|divisibleby:"5" %}
+    {% else %}
+      </tr>
+    {% endif %}
+  {% endif %}
+  </table-->
+  <br>
+  {% if start != 0 or end != 0 or credits != 0 or debits != 0 %}
+  <div class="card-deck">
+    <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+      <canvas id="credit_chart"></canvas>
+    </div>
+    <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+      <table>
+        <tr>
+          <td>Start</td><td>{{preferred_currency}} {{start}}</td>
+        </tr>
+        <tr>
+          <td>Credits</td><td>{{preferred_currency}} {{credits}}</td>
+        </tr>
+        <tr>
+          <td>Debits</td><td>{{preferred_currency}} {{debits}}</td>
+        </tr>
+        <tr>
+          <td>End</td><td>{{preferred_currency}} {{end}}</td>
+        </tr>
+      </table>
+    </div>
+    <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+      <canvas id="debit_chart"></canvas>
+    </div>
+  </div>
+  {% endif %}
+{% endblock %}
+
+<script>
+  {% block jquery %}
+  //var chartdata = {{chart_data|safe}};
+  //setProgressChart(chartdata);
+  //document.getElementById('table_goal_yrly_inv').innerHTML = '{{table_goal_yrly_inv|safe}}';
+  //$('#table_goal_yrly_inv').DataTable({});
+  {% if start != 0 or end != 0 or credits != 0 or debits != 0 %}
+    setChart({{credit_labels|safe}}, {{credit_vals|safe}}, {{credit_colors|safe}}, {{debit_labels|safe}}, {{debit_vals|safe}}, {{debit_colors|safe}});
+  {% endif %}
+  function setChart(credit_labels, credit_vals, credit_colors, debit_labels, debit_vals, debit_colors){
+    if(credit_labels.length > 0){
+      console.log('setting credit chart');
+      var ctx = document.getElementById('credit_chart').getContext('2d');
+      var config = {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: credit_vals,
+            backgroundColor: credit_colors,
+            label: 'Credits'
+          }],
+          labels: credit_labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title: {
+            display: true,
+            text: 'Credits Classification'
+          },
+          tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+        }
+      };
+      var cChart = new Chart(ctx,config);
+    }
+    if(debit_labels.length > 0){
+      console.log('setting debit chart');
+      var ctx2 = document.getElementById('debit_chart').getContext('2d');
+      var config2 = {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: debit_vals,
+            backgroundColor: debit_colors,
+            label: 'Debits'
+          }],
+          labels: debit_labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title: {
+            display: true,
+            text: 'Debits Classification'
+          },
+          tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+        }
+      };
+      var dChart = new Chart(ctx2, config2);
+    }
+  }
+  {% endblock jquery %}
+</script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    set_user_list({{users|safe}}, '{{user|safe}}');
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all bank accounts?');
+    })
+    set_account_list({{accounts|safe}})
+    // if user change call function to set account list
+    $('#id_user').change(function(){
+      set_account_list({{accounts|safe}})
+    });
+    function set_account_list(accounts) {
+      sel_accs= {{sel_accounts|safe}}
+      $('#id_accounts').empty();
+      $('#id_accounts')
+          .append($('<option>', { value : 'All' })
+          .text('All'));
+      
+      var accdropdown = document.getElementById('id_accounts');
+      if (sel_accs.includes('All')) {
+        accdropdown.options[accdropdown.options.length-1].selected = true;
+      }
+      var u = document.getElementById('id_user').value;
+
+      console.log('selected user: ' + u);
+      // loop over a dictionary
+      for (var key in accounts) {
+        if (accounts.hasOwnProperty(key)) {
+          if (key == u || u == '') {
+            for (var i = 0; i < accounts[key].length; i++) {
+              accdropdown.options[accdropdown.options.length] = new Option(accounts[key][i], accounts[key][i]);
+              // check if the account is selected
+              if (sel_accs.includes(accounts[key][i])) {
+                accdropdown.options[accdropdown.options.length-1].selected = true;
+              }
+            }
+          }
+        }
+      }
+    }
+  </script>
+{% endblock javascript %}

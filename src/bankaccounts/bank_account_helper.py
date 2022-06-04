@@ -2,6 +2,7 @@ from django.db.utils import IntegrityError
 from .models import BankAccount, Transaction
 from ofxparse import OfxParser
 import datetime
+import os
 
 def is_a_loan_account(acc_type):
     if acc_type in ['Savings', 'Checking', 'Current', 'Other']:
@@ -103,3 +104,5 @@ def upload_transactions(full_file_path, bank_name, file_type, acc_number, accoun
                 print(f'unsupported type {file_type} {bank_name} {acc_number}')
     except BankAccount.DoesNotExist:
         print(f'not uploading transactions from {full_file_path} {bank_name} since no account with number {acc_number}')
+    # remove the file from disk
+    os.remove(full_file_path)

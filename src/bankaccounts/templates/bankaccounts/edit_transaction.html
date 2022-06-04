@@ -120,7 +120,7 @@
           <label for="notes" class="col-sm-3 col-form-label">Notes</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <textarea name="notes" rows="5" cols="20">{{notes|safe}}</textarea>
+              <textarea name="notes" rows="5" cols="20">{{notes|default_if_none:""}}</textarea>
             </div>
           </div>
         </div>

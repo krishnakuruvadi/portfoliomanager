@@ -13,13 +13,15 @@ from .views import (
     delete_transaction,
     update_account,
     upload_transactions,
-    update_transaction
+    update_transaction,
+    insights
 )
 
 app_name = 'bankaccounts'
 
 urlpatterns = [
     path('', get_accounts, name='account-list'),
+    path('insights/', insights, name='insights'),
     path('add/', add_account, name='account-add'),
     path('<id>/transactions', get_transactions, name='get-transactions'),
     path('delete/', delete_accounts, name='delete-all-accounts'),
