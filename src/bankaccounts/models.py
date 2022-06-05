@@ -26,7 +26,8 @@ CATEGORY_CHOICES = [
     ('Utility', 'Utility'),
     ('Gift', 'Gift'),
     ('Salary/Payment', 'Salary/Payment'),
-    ('Insurance', 'Insurance')
+    ('Insurance', 'Insurance'),
+    ('Self Transfer', 'Self Transfer')
 ]
 
 ACCOUNT_TYPE_CHOICES = [

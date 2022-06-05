@@ -65,6 +65,8 @@ def upload_transactions(full_file_path, bank_name, file_type, acc_number, accoun
                         category = 'Groceries'
                     elif 'robinhood' in transaction.payee.lower():
                         category = 'Investment'
+                    elif 'pgande web' in transaction.payee.lower():
+                        category = 'Utilitiy'
                     if not category:
                         print(f'unknown category {transaction.payee.lower()}')
                         category = 'Other'

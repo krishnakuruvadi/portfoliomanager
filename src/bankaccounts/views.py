@@ -486,12 +486,16 @@ def insights(request):
         context['debit_vals'] = list()
         context['credit_colors'] = list()
         context['debit_colors'] = list()
-        if 'All' in sel_accounts:
+        users = None
+        if user == '':
             ext_user = get_ext_user(request)
             users = get_users_from_ext_user(ext_user)
+        else:
+            users = [user]
+        if 'All' in sel_accounts:
             bas = BankAccount.objects.filter(user__in=users)
         else:
-            bas = BankAccount.objects.filter(user=user, number__in=sel_accounts)
+            bas = BankAccount.objects.filter(user__in=users, number__in=sel_accounts)
         end_dt = datetime.date.today()
         if end_dt < date_to:
             end_dt = date_to
@@ -508,32 +512,33 @@ def insights(request):
                         end_curr.sub(ba.currency, trans.amount)
                 else:
                     if trans.trans_type == 'Credit':
-                        
-                        credits_curr.add(ba.currency, trans.amount)
                         end_curr.add(ba.currency, trans.amount)
                         cat = trans.category if trans.category else 'Other'
-                        if cat not in context['credit_labels']:
-                            context['credit_labels'].append(cat)
-                            t = MultiCurr()
-                            t.add(ba.currency, trans.amount)
-                            context['credit_vals'].append(t)
-                        else:
-                            # find string position in list
-                            pos = context['credit_labels'].index(cat)
-                            context['credit_vals'][pos].add(ba.currency, trans.amount)
+                        if cat != 'Self Transfer':
+                            credits_curr.add(ba.currency, trans.amount)
+                            if cat not in context['credit_labels']:
+                                context['credit_labels'].append(cat)
+                                t = MultiCurr()
+                                t.add(ba.currency, trans.amount)
+                                context['credit_vals'].append(t)
+                            else:
+                                # find string position in list
+                                pos = context['credit_labels'].index(cat)
+                                context['credit_vals'][pos].add(ba.currency, trans.amount)
                     else:
-                        debits_curr.add(ba.currency, trans.amount)
                         end_curr.sub(ba.currency, trans.amount)
                         cat = trans.category if trans.category else 'Other'
-                        if cat not in context['debit_labels']:
-                            context['debit_labels'].append(cat)
-                            t = MultiCurr()
-                            t.add(ba.currency, trans.amount)
-                            context['debit_vals'].append(t)
-                        else:
-                            # find string position in list
-                            pos = context['debit_labels'].index(cat)
-                            context['debit_vals'][pos].add(ba.currency, trans.amount)
+                        if cat != 'Self Transfer':
+                            debits_curr.add(ba.currency, trans.amount)
+                            if cat not in context['debit_labels']:
+                                context['debit_labels'].append(cat)
+                                t = MultiCurr()
+                                t.add(ba.currency, trans.amount)
+                                context['debit_vals'].append(t)
+                            else:
+                                # find string position in list
+                                pos = context['debit_labels'].index(cat)
+                                context['debit_vals'][pos].add(ba.currency, trans.amount)
         context['start'] = start_curr.get_in_preferred_currency(end_dt)
         context['end'] = end_curr.get_in_preferred_currency(end_dt)
         context['credits'] = credits_curr.get_in_preferred_currency(end_dt)
