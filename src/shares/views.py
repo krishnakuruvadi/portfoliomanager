@@ -32,6 +32,7 @@ from common.models import Preferences, HistoricalStockPrice, HistoricalIndexPoin
 from common.index_helpers import get_comp_index
 from tasks.tasks import update_index_points
 from common.helper import get_preferred_currency_symbol
+from pages.models import InvestmentData
 
 # Create your views here.
 
@@ -539,6 +540,35 @@ def shares_insights(request):
             h = int(round(h))
             data['country_percents'].append(h)
     data['curr_module_id'] = 'id_shares_module'
+    st_day = ShareInterface.get_start_day()
+    today = datetime.date.today()
+    end_year = today.year+1
+    ext_user = get_ext_user(request)
+    users = get_users_from_ext_user(ext_user)
+    data['contrib_data'] = list()
+    total = 0
+    for yr in range(st_day.year, end_year):
+        c = [0]*12
+        d = [0]*12
+        for user in users:
+            contrib, deduct = ShareInterface.get_user_monthly_contrib(user.id, yr)
+            for i in range(12):
+                c[i] = add_two(c[i], contrib[i])
+                d[i] = add_two(d[i], deduct[i])
+        st_month = 1 if st_day.year != yr else st_day.month
+        end_month = 12 if yr != today.year else today.month
+        for month in range (st_month, end_month):
+            dt = datetime.date(yr, month, 1) + relativedelta(months=1, days=-1)
+            val = add_two(c[month-1], d[month-1]) 
+            val = (0 if not val else val) + total
+            data['contrib_data'].append({'x':dt.strftime('%Y-%m-%d'), 'y':val})
+            total = val    
+    try:
+        investment_data = InvestmentData.objects.get(user='all')
+        
+        data['investment_data'] = json.loads(investment_data.shares_data.replace("\'", "\""))
+    except Exception as ex:
+        print(f'exception {ex} while getting shares investment data')
     print('returning:', data)
     return render(request, template, data)
 

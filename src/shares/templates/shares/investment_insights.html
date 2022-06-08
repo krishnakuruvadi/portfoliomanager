@@ -74,6 +74,11 @@
     <canvas id="blendChart"></canvas>
   </div>
 </div>
+
+<div style="width:100%;height:70vh;">
+  <canvas id="myChart"></canvas>
+</div>
+
 {% endblock content %}
 
 <script>
@@ -85,6 +90,64 @@ var country_colors = {{country_colors|safe}}
 var country_vals = {{country_vals|safe}}
 var country_labels = {{country_labels|safe}}
 setChart()
+var investmentdata = {{investment_data|safe}}
+var contribdata = {{contrib_data|safe}}
+if (jQuery.isEmptyObject(investmentdata)) {
+  console.log("No investmentdata")
+} else {
+  setInvestmentChart(investmentdata, contribdata)
+}
+
+function setInvestmentChart(investment_data, contrib_data) {
+      var ctx = document.getElementById("myChart");
+      var config = {
+        type:    'line',
+        data:    {
+          datasets: [
+            {
+              label: "Value",
+              data: investment_data,
+              fill:  false,
+              borderColor: '#e31219'
+            },
+            {
+              label: "Contribution",
+              data: contrib_data,
+              fill:  false,
+              borderColor: '#0047AB'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title:      {
+            display: true,
+            text:    "Share Investments"
+          },
+          scales:     {
+            xAxes: [{
+              type:       "time",
+              time:       {
+                format: 'YYYY-MM-DD',
+                tooltipFormat: 'll'
+              },
+              scaleLabel: {
+                display:     true,
+                labelString: 'Date'
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display:     true,
+                labelString: 'Amount'
+              }
+            }]
+          }
+        }
+      };
+      var myChart = new Chart(ctx,config);
+    }
 
 function setChart(){
     var ctx = document.getElementById('countryChart').getContext('2d');
