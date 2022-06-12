@@ -39,6 +39,7 @@
         <th>Category</th>
         <th>Amount</th>
         <th>Description</th>
+        <th>Balance</th>
         <th>Notes</th>
         <th>Actions</th>
       </tr>
@@ -51,6 +52,7 @@
         <td>{{ instance.category }}</td>
         <td>{{ instance.amount }}</td>
         <td>{{ instance.description }}</td>
+        <td>{{ instance.balance|default_if_none:"" }}</td>
         <td>{{ instance.notes|default_if_none:"" }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}/delete" class="confirm-delete-trans"><i class="fa fa-trash" title="Delete Transaction" aria-hidden="true"></i> </a>

@@ -299,6 +299,7 @@ def update_account(request, id):
         context['acc_type'] = ba.acc_type
         context['goal'] = ba.goal if ba.goal else ''
         context['goals'] = get_goal_id_name_mapping_for_user(ba.user)
+        context['start_date'] = None if not ba.start_date else ba.start_date.strftime('%Y-%m-%d')
         
         context['curr_module_id'] = 'id_bank_acc_module'
         print(context)
@@ -409,7 +410,10 @@ def upload_transactions(request, id):
                 full_file_path = settings.MEDIA_ROOT + '/' + file_locn
                 file_type = request.POST['file_format']
                 print(f'Read transactions from file: {uploaded_file} {file_type} {file_locn} {full_file_path}')
-                passwd = request.POST['cas-pass']
+                if 'cas-pass' in request.POST:
+                    passwd = request.POST['cas-pass']
+                else:
+                    passwd = None
                 upload_bank_account_transactions(full_file_path, acc.bank_name, file_type, acc.number, acc.id, passwd)
                 message = 'Upload successful. Processing file'
                 message_color = 'green'

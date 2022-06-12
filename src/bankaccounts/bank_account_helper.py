@@ -17,11 +17,13 @@ def update_balance_for_account(id):
     try:
         ba = BankAccount.objects.get(id=id)
         bal = 0
-        for t in Transaction.objects.filter(account=ba):
+        for t in Transaction.objects.filter(account=ba).order_by('trans_date'):
             if t.trans_type == 'Credit':
                 bal += float(t.amount)
             else:
                 bal -= float(t.amount)
+            t.balance = bal
+            t.save()
         ba.balance = bal
         ba.as_on_date = datetime.date.today()
         ba.save()

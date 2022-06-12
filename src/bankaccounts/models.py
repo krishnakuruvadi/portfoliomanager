@@ -72,6 +72,7 @@ class Transaction(models.Model):
     notes = models.CharField(max_length=80, null=True, blank=True)
     description = models.CharField(max_length=80, null=True, blank=True)
     tran_id = models.CharField(max_length=30, null=True, blank=True)
+    balance = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
 
     def get_absolute_url(self):
         return reverse('bankaccounts:transaction-detail', args=[str(self.account.id),str(self.id)])
