@@ -345,6 +345,7 @@ def espp_insights(request):
     total = dict()
     
     for i, espp in enumerate(Espp.objects.all()):
+        print(f'{i} {espp.symbol} {espp.exchange} {espp.user} {espp.purchase_date}')
         std = espp.purchase_date
         r = lambda: random.randint(0,255)
         color = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
@@ -355,10 +356,7 @@ def espp_insights(request):
             'borderColor':color
         })
         std = std+relativedelta(months=1)
-        if std > today:
-            std = today
-        else:
-            std = std.replace(day=1)
+        std = std.replace(day=1)
         reset_to_zero = False
 
         while True:
@@ -396,11 +394,13 @@ def espp_insights(request):
                 std = std+relativedelta(months=1)
                 if std > today:
                     std = today
+            else:
+                print(f'failed to get value of {espp.exchange}:{espp.symbol} on {std}')
     print(ret)
     if len(ret) > 0:
         d = list()
         for k,v in sorted(total.items()):
-            d.append({'x':k, 'y':v})
+            d.append({'x':k, 'y':round(v,2)})
         r = lambda: random.randint(0,255)
         color = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
         ret.append({
