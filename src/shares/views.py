@@ -556,9 +556,11 @@ def shares_insights(request):
                 c[i] = add_two(c[i], contrib[i])
                 d[i] = add_two(d[i], deduct[i])
         st_month = 1 if st_day.year != yr else st_day.month
-        end_month = 12 if yr != today.year else today.month
+        end_month = 12 if yr != today.year else today.month+1
         for month in range (st_month, end_month):
             dt = datetime.date(yr, month, 1) + relativedelta(months=1, days=-1)
+            if dt > today:
+                dt = today
             val = add_two(c[month-1], d[month-1]) 
             val = (0 if not val else val) + total
             data['contrib_data'].append({'x':dt.strftime('%Y-%m-%d'), 'y':val})
