@@ -109,3 +109,10 @@ def get_min(a, b):
     if not b:
         return a
     return a if a<b else b
+
+def get_max(a, b):
+    if not a:
+        return b
+    if not b:
+        return a
+    return a if a>b else b

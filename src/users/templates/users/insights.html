@@ -49,7 +49,7 @@
   {% endif %}
 
   {% for key, value in users.items %}
-    {{value.name}}
+    {{value.name}} &nbsp;&#9830;&nbsp; ROI: {{value.roi}} %
     <hr>
     <div id="div_{{key}}_chart" style="width:100%;height:48vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-12 col-lg-12'>
         <canvas id="{{key}}_chart"></canvas>

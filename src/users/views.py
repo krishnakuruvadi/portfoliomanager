@@ -27,11 +27,12 @@ from gold.gold_interface import GoldInterface
 from bankaccounts.bank_account_interface import BankAccountInterface
 from crypto.crypto_interface import CryptoInterface
 import datetime
-from shared.utils import get_min
+from shared.utils import get_min, get_max
 from dateutil import tz
 from pytz import timezone
 from common.helper import get_preferences
 from shared.handle_get import *
+from shared.financial import xirr
 from dateutil.relativedelta import relativedelta
 from pages.models import InvestmentData
 import json
@@ -342,17 +343,17 @@ def insights_view(request):
     template = 'users/insights.html'
     try:
         context =dict()
-        users = get_all_users_names_as_list()
+        users = get_all_users()
         context = dict()
-        context['all'] = dict()
         context['users'] = dict()
-
+        networth = 0
+        nw_as_on = None
         i = 1
         today = datetime.date.today()
         start_day_for_family = today
-        for user in users:
-            context['users'][str(i)] = {'name':user}
-            id = get_user_id_from_name(user)
+        for id, name in users.items():
+            cash_flows = list()
+            context['users'][str(i)] = {'name':name}
             contribs = list()
             contrib = 0
             #contrib = get_user_contributions(id)
@@ -371,8 +372,25 @@ def insights_view(request):
                     if dt <= today:
                         contribs.append({'x':dt.strftime('%Y-%m-%d'), 'y':round(contrib_totals[month]+contrib,2)})
                         contrib += contrib_totals[month]
+                        cash_flows.append((dt, -1*float(contrib_totals[month])))
             context['users'][str(i)]['contribs'] = contribs
             context['users'][str(i)]['totals'] = list()
+            context['users'][str(i)]['roi'] = 0
+            try:
+                user = User.objects.get(id=id)
+                try:
+                    cash_flows.append((user.as_on.date(), float(user.total_networth)))
+                    nw_as_on = get_max(nw_as_on, user.as_on.date())
+                    networth += float(user.total_networth)
+                    print(f'getting xirr for cashflows: {cash_flows}')
+                    roi = xirr(cash_flows, 0.1)*100
+                    roi = round(roi, 2)
+                    context['users'][str(i)]['roi'] = roi
+                
+                except Exception as ex:
+                    print(f'exception finding xirr {ex}')
+            except User.DoesNotExist:
+                print(f'user with id {id} does not exist')
             i = i + 1
         context['users'][str(i)] = {'name':'All'}
         max_vals = 0
@@ -380,6 +398,9 @@ def insights_view(request):
             max_vals = max_vals if max_vals > len(context['users'][str(j)]['contribs']) else len(context['users'][str(j)]['contribs'])
         context['users'][str(i)]['contribs'] = list()
         print(f"start: {context['users'][str(i)]['contribs']}")
+        cash_flows = list()
+        last = None
+        last_dt = None
         for k in range(max_vals-1,-1,-1):
             tt = 0
             tt_d = None
@@ -392,9 +413,25 @@ def insights_view(request):
                     tt += context['users'][str(j)]['contribs'][jl-ul-1]['y']
                     tt_d = context['users'][str(j)]['contribs'][jl-ul-1]['x']
             context['users'][str(i)]['contribs'].insert(0,{'x':tt_d, 'y':round(tt,2)})
+            if last:
+                cash_flows.insert(0, (get_date_or_none_from_string(last_dt), -1*float(last-tt)))
+            last = tt
+            last_dt = tt_d
+        cash_flows.insert(0, (get_date_or_none_from_string(last_dt), -1*float(last)))
         try:
             investment_data = InvestmentData.objects.get(user='all')
             context['users'][str(i)]['totals'] = json.loads(investment_data.total_data.replace("\'", "\""))
+            last_entry = context['users'][str(i)]['totals'][len(context['users'][str(i)]['totals'])-1]
+            last_dt = get_date_or_none_from_string(last_entry['x'])
+            if last_dt is not None:
+                cash_flows.append((last_dt, last_entry['y']))
+                #print(f'unreasonable returns from cash_flows {cash_flows}')
+                try:
+                    roi = xirr(cash_flows, 0.1)*100
+                    roi = round(roi, 2)
+                    context['users'][str(i)]['roi'] = roi
+                except Exception as ex:
+                    print(f'exception finding xirr {ex}')
         except InvestmentData.DoesNotExist:
             context['users'][str(i)]['totals'] = list()
         print(context)

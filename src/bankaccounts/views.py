@@ -429,6 +429,7 @@ def upload_transactions(request, id):
         context['account_id'] = acc.id
         context['number'] = acc.number
         context['bank_name'] = acc.bank_name
+        context['acc_type'] = acc.acc_type
         return render(request, template, context)
 
     except BankAccount.DoesNotExist:
