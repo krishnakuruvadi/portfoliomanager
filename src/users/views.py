@@ -373,6 +373,10 @@ def insights_view(request):
                         contribs.append({'x':dt.strftime('%Y-%m-%d'), 'y':round(contrib_totals[month]+contrib,2)})
                         contrib += contrib_totals[month]
                         cash_flows.append((dt, -1*float(contrib_totals[month])))
+                    elif dt.month == today.month and dt.year == today.year:
+                        contribs.append({'x':today.strftime('%Y-%m-%d'), 'y':round(contrib_totals[month]+contrib,2)})
+                        contrib += contrib_totals[month]
+                        cash_flows.append((today, -1*float(contrib_totals[month])))
             context['users'][str(i)]['contribs'] = contribs
             context['users'][str(i)]['totals'] = list()
             context['users'][str(i)]['roi'] = 0
