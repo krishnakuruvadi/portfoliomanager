@@ -52,11 +52,11 @@
     <tbody>
       {% for instance in object_list %}
       <tr>
-        <th scope="row">{{ instance.id }}</th>
+        <th scope="row"><a href="{% url 'rsus:rsu-detail' instance.id %}">{{ instance.id }}</a></th>
         <td>{{ instance.exchange }}</td>
         <td>{{ instance.symbol }}</td>
         <td>{{ instance.award_date }}</td>
-        <td><a href="{{ instance.award_id }}"></a>{{ instance.award_id }}</a></td>
+        <td>{{ instance.award_id }}</a></td>
         <td>{{ instance.shares_awarded }}</td>
         {% if award_latest_vals|lookup:instance.id == None %}
         <td></td>

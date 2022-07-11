@@ -2,7 +2,8 @@
 {% block viewname %} 
 <ul class="breadcrumb">
   <li><a href="{% url 'rsus:rsu-list' %}">RSU</a></li>
-  <li><a href="#">{{symbol}}/{{award_id}}</a></li>
+  <li><a href="{% url 'rsus:rsu-detail' id %}">{{symbol}}/{{award_id}}</a></li>
+  <li><a href="#">Vest Info</a></li>
 </ul> 
 {% endblock %} 
 

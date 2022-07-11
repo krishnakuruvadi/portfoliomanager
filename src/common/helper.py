@@ -259,6 +259,16 @@ def get_preferred_currency_symbol():
         pcs = preferred_currency
     return pcs
 
+def get_currency_symbol(currency_str):
+    pcs = u"\u20B9"
+    if currency_str == 'USD':
+        pcs = '$'
+    elif currency_str == 'INR':
+        pcs = u"\u20B9"
+    else:
+        pcs = currency_str
+    return pcs
+
 def get_password(id, token):
     pass_file = get_password_file()
     if not os.path.exists(pass_file):

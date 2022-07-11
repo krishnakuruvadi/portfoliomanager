@@ -24,7 +24,7 @@ import random
 from tools.stock_reconcile import Trans, reconcile_event_based
 from common.index_helpers import get_comp_index_values
 from common.models import Stock
-
+from common.helper import get_currency_symbol, get_preferred_currency_symbol
 
 def create_rsu(request):
     template = "rsus/rsu_create.html"
@@ -118,9 +118,134 @@ class RsuDetailView(DetailView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         print(data)
-        data['goal_str'] = get_goal_name_from_id(data['object'].goal)
-        data['user_str'] = get_user_name_from_id(data['object'].user)
+        award = data['object']
+        data['goal_str'] = get_goal_name_from_id(award.goal)
+        data['user_str'] = get_user_name_from_id(award.user)
         data['curr_module_id'] = 'id_rsu_module'
+        total_aquisition_price = 0
+        unsold_shares = 0
+        latest_conversion_rate = 0
+        latest_price = 0
+        latest_value = 0
+        as_on_date = None
+        realised_gain = 0
+        unrealised_gain = 0
+        tax_at_vest = 0
+        shares_for_sale = 0
+        unvested_shares = 0
+        vested_shares = 0
+        for rsu in RestrictedStockUnits.objects.filter(award=award):
+            total_aquisition_price += rsu.total_aquisition_price
+            unsold_shares += rsu.unsold_shares
+            latest_value += rsu.latest_value
+            if not as_on_date or as_on_date < rsu.as_on_date:
+                as_on_date = rsu.as_on_date
+                latest_price = rsu.latest_price
+                latest_conversion_rate = rsu.latest_conversion_rate
+            realised_gain += rsu.realised_gain
+            unrealised_gain += rsu.unrealised_gain
+            tax_at_vest += rsu.tax_at_vest
+            shares_for_sale += rsu.shares_for_sale
+            vested_shares += rsu.shares_vested
+        unvested_shares = data['object'].shares_awarded - vested_shares
+        data['total_aquisition_price'] = total_aquisition_price
+        data['unsold_shares'] = unsold_shares
+        data['latest_conversion_rate'] = latest_conversion_rate
+        data['latest_price'] = latest_price
+        data['latest_value'] = latest_value
+        data['as_on_date'] = as_on_date
+        data['realised_gain'] = realised_gain
+        data['unrealised_gain'] = unrealised_gain
+        data['tax_at_vest'] = tax_at_vest
+        data['shares_for_sale'] = shares_for_sale
+        data['unvested_shares'] = unvested_shares
+        data['vested_shares'] = vested_shares
+        if data['object'].exchange in ['NSE', 'BSE']:
+            data['currency'] = get_currency_symbol('INR')
+        elif data['object'].exchange in ['NYSE', 'NASDAQ']:
+            data['currency'] = get_currency_symbol('USD')
+        data['preferred_currency'] = get_preferred_currency_symbol()
+
+        today = datetime.date.today()
+        r = lambda: random.randint(0,255)
+        color = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
+        color2 = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
+        color3 = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
+        ret = list()
+        ret.append({
+            'label':'Value',
+            'data': list(),
+            'fill': 'false',
+            'borderColor':color
+        })
+        ret.append({
+            'label':'Aquisition Price (excluding tax)',
+            'data': list(),
+            'fill': 'false',
+            'borderColor':color2
+        })
+        ret.append({
+            'label':'Aquisition Price (including tax)',
+            'data': list(),
+            'fill': 'false',
+            'borderColor':color3
+        })
+        #from award date to today or until unsold shares are available
+        st_dt = award.award_date.replace(day=1)
+        unsold_shares = award.shares_awarded
+        trans = list()
+        aq_price = 0
+        aq_price_incl_tax = 0
+        while st_dt <= today and unsold_shares > 0:
+            end_dt = st_dt + relativedelta(months=1)
+            if end_dt > today:
+                end_dt = today
+            print(f'end_dt: {end_dt}')
+            for rsu in RestrictedStockUnits.objects.filter(award=data['object'], vest_date__lte=end_dt).order_by('vest_date'):
+                if rsu.vest_date >= st_dt and rsu.vest_date <= end_dt:
+                    trans.append(Trans(rsu.shares_for_sale, rsu.vest_date, 'buy', rsu.shares_for_sale*rsu.aquisition_price*rsu.conversion_rate))
+                    aq_price += float(rsu.shares_for_sale*rsu.aquisition_price*rsu.conversion_rate)
+                    aq_price_incl_tax += float(rsu.total_aquisition_price)
+                for st in RSUSellTransactions.objects.filter(rsu_vest=rsu, trans_date__gte=st_dt, trans_date__lte=end_dt):
+                    trans.append(Trans(st.units, st.trans_date, 'sell', st.trans_price))
+                    unsold_shares -= st.units
+                    aq_price -= float(st.units*rsu.aquisition_price*rsu.conversion_rate)
+                    aq_price_incl_tax -= float(st.units*rsu.aquisition_price*rsu.conversion_rate)
+            q, _,_,_,_ = reconcile_event_based(trans, list(), list())
+            if q > 0:
+                lv = get_historical_stock_price_based_on_symbol(rsu.award.symbol, rsu.award.exchange, end_dt+relativedelta(days=-5), end_dt)
+                val = 0
+                if lv:
+                    print(lv)
+                    conv_rate = 1
+                    if rsu.award.exchange == 'NASDAQ' or rsu.award.exchange == 'NYSE':
+                        conv_val = get_conversion_rate('USD', 'INR', end_dt)
+                        if conv_val:
+                            conv_rate = conv_val
+                        for k,v in lv.items():
+                            val += float(v)*float(conv_rate)*float(q)
+                            break
+                else:
+                    print(f'failed to get value of {rsu.award.exchange}:{rsu.award.symbol} on {end_dt}')
+                if val > 0:
+                    x = end_dt.strftime('%Y-%m-%d')
+                    ret[0]['data'].append({'x': x, 'y':round(val,2)})
+                    ret[1]['data'].append({'x': x, 'y':round(aq_price,2)})
+                    ret[2]['data'].append({'x': x, 'y':round(aq_price_incl_tax,2)})
+            st_dt = st_dt + relativedelta(months=1)
+        
+        data['progress_data'] = ret
+        try:
+            s = Stock.objects.get(symbol=rsu.award.symbol, exchange=rsu.award.exchange)
+            if st_dt > today:
+                st_dt = datetime.date.today()
+            res = get_comp_index_values(s, award.award_date.replace(day=1), st_dt)
+            if 'chart_labels' in res and len(res['chart_labels']) > 0:
+                for k, v in res.items():
+                    data[k] = v 
+        except Stock.DoesNotExist:
+            print(f'trying to get stock that does not exist {rsu.award.symbol} {rsu.award.exchange}')
+        print(f'returning data {data}')
         return data
 
 class RsuVestDetailView(DetailView):
@@ -242,7 +367,7 @@ def show_vest_list(request,id):
         entry['unsold_shares'] = rsu_obj.unsold_shares
         vest_list.append(entry)
      
-    context = {'vest_list':vest_list, 'award_id':rsu_award.award_id, 'symbol':rsu_award.symbol, 'award_date':rsu_award.award_date}
+    context = {'vest_list':vest_list, 'award_id':rsu_award.award_id, 'symbol':rsu_award.symbol, 'award_date':rsu_award.award_date, 'id':rsu_award.id}
     context['curr_module_id'] = 'id_rsu_module'
     return render(request, template, context)
 
