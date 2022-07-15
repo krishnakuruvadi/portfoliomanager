@@ -1035,6 +1035,9 @@ def update_shares_status():
 @db_task()
 def update_index_points(exchange, start_date, end_date):
     from common.index_helpers import update_index
+    if end_date < start_date:
+        print(f'end date {end_date} is before start date {start_date}')
+        return
     update_index(exchange, start_date, end_date)
 
 

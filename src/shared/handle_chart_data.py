@@ -578,6 +578,8 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
         calc_avg_growth = None
         try:
             calc_avg_growth = xirr(cash_flows, 0.1)
+            if calc_avg_growth == 0:
+                print(f'couldnt get valid xirr for cashflows {cash_flows}')
         except Exception as ex:
             print(f'Exception {ex} when finding XIRR')
 
@@ -599,17 +601,21 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
         print(ret)
         print('*************')
 
-        for yr in range(curr_yr+1, goal_end_date.year+1):
-            contrib[yr] = dict()
-            total[yr] = dict()
-            deduct[yr] = dict()
-            contrib[yr]['Projected'] = avg_contrib
-            if 'Projected' in total[yr-1]:
-                total[yr]['Projected'] = (float(total[yr-1]['Projected'])+float(avg_contrib))*(1+float(avg_growth))
-            else:
-                total[yr]['Projected'] = (float(latest_value)+float(avg_contrib))*(1+float(avg_growth))
-            deduct[yr]['Projected'] = 0
-            ret['final_projection'] = int(total[yr]['Projected'])
+        if curr_yr == goal_end_date.year:
+            from fixed_deposit.fixed_deposit_helper import get_maturity_value_on_date
+            ret['final_projection'] = get_maturity_value_on_date(latest_value, datetime.date.today(), float(avg_growth), goal_end_date)
+        else:
+            for yr in range(curr_yr+1, goal_end_date.year+1):
+                contrib[yr] = dict()
+                total[yr] = dict()
+                deduct[yr] = dict()
+                contrib[yr]['Projected'] = avg_contrib
+                if 'Projected' in total[yr-1]:
+                    total[yr]['Projected'] = (float(total[yr-1]['Projected'])+float(avg_contrib))*(1+float(avg_growth))
+                else:
+                    total[yr]['Projected'] = (float(latest_value)+float(avg_contrib))*(1+float(avg_growth))
+                deduct[yr]['Projected'] = 0
+                ret['final_projection'] = int(total[yr]['Projected'])
 
     print('contrib', contrib)
     print('deduct', deduct)

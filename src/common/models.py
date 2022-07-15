@@ -84,6 +84,7 @@ class Stock(models.Model):
     trading_status = models.CharField(max_length=25,choices=TRADING_STATUS_CHOICES, default='Listed')
     delisting_date = models.DateField(_('Delisting Date'), null=True, blank=True)
     listing_date = models.DateField(_('Listing Date'), null=True, blank=True)
+    suspension_date = models.DateField(_('Suspension Date'), null=True, blank=True)
     
     def get_absolute_url(self):
         return reverse("common:stock-detail", kwargs={'id': self.id})

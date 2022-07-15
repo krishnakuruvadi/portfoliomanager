@@ -474,7 +474,7 @@ class GoalDetailView(DetailView):
         #total_contribution = ret.get('total_contribution', 0)
         total_contribution = float(data['object'].achieved_amt)
         contrib_percent = int(total_contribution*100/float(data['object'].final_val))
-        project_percent = int(float(data['final_projection']-data['object'].achieved_amt)*100/float(data['object'].final_val))
+        project_percent = int(float(data['final_projection']-float(data['object'].achieved_amt))*100/float(data['object'].final_val))
 
         remaining_percent = 100 - contrib_percent - project_percent
         if remaining_percent < 0:

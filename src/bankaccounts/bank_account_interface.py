@@ -140,7 +140,7 @@ class BankAccountInterface:
             tot = 0
             for t in Transaction.objects.filter(account=obj, trans_date__lte=end_date):
                 if t.trans_type == 'Credit':
-                    if t.trans_date >= st_date:
+                    if t.trans_date >= st_date and t.category != "Interest":
                         c += float(t.amount)
                         #cash_flows.append((t.trans_date, -1*float(t.amount)))
                     tot += float(t.amount)
@@ -152,7 +152,8 @@ class BankAccountInterface:
             contrib +=  get_in_preferred_currency(c, obj.currency, end_date)
             deduct += get_in_preferred_currency(d, obj.currency, end_date)
             total += get_in_preferred_currency(tot, obj.currency, end_date)
-            cash_flows.append((end_date, -1*get_in_preferred_currency(tot, obj.currency, end_date)))
+            #print(f'for ba {obj.number} contrib is {c} deduction is {d} total is {tot} for year {yr}')
+            cash_flows.append((end_date, -1*get_in_preferred_currency(c+d, obj.currency, end_date)))
         return cash_flows, contrib, deduct, total
     
     @classmethod

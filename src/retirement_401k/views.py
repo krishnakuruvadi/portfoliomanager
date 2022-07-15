@@ -11,6 +11,7 @@ from django.views.generic import DeleteView
 from .helper import reconcile_401k, get_yearly_contribution
 from dateutil.relativedelta import relativedelta
 from django.db import IntegrityError
+from common.helper import get_preferred_currency_symbol
 # Create your views here.
 
 
@@ -217,6 +218,7 @@ def account_detail(request, id):
     acct['chart_labels'] = chart_labels
     
     acct['spy_vals'] = spy_vals
+    acct['preferred_currency_symbol'] = get_preferred_currency_symbol()
     acct['curr_module_id'] = 'id_401k_module'
     return render(request, template_name, acct)
 

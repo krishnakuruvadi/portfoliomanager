@@ -125,12 +125,15 @@ def get_comp_index_values(stock, start_date, last_date):
                 last_missing = hsp.date
 
             if first_missing and first_found and (first_found - first_missing).days > 15:
+                print(f'from get_comp_index_values: first_missing {first_missing} first_found {first_found}')
                 update_index_points(stock.exchange, first_missing, first_found)
                     
             if last_missing and last_found and (last_missing - last_found).days > 15:
+                print(f'from get_comp_index_values: last_missing {last_missing} last_found {last_found}')
                 update_index_points(stock.exchange, last_missing, last_found)
                     
             if not first_found and not last_found:
+                print(f'from get_comp_index_values: first_found {first_found} last_found {last_found}')
                 update_index_points(stock.exchange, start_date, last_date)
 
             print(f'first_missing:{first_missing} first_found:{first_found} last_missing:{last_missing}  last_found:{last_found}')

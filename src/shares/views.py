@@ -170,7 +170,6 @@ class TransactionDeleteView(DeleteView):
 
 class ShareDetailView(DetailView):
     template_name = 'shares/share_detail.html'
-    #queryset = Ppf.objects.all()
 
     def get_object(self):
         id_ = self.kwargs.get("id")
@@ -243,12 +242,15 @@ class ShareDetailView(DetailView):
                             last_missing = hsp.date
 
                     if first_missing and first_found and (first_found - first_missing).days > 15:
+                        print(f'from shares/share_detail.html: first_missing: {first_missing} first_found: {first_found}')
                         update_index_points(obj.exchange, first_missing, first_found)
                     
                     if last_missing and last_found and (last_missing - last_found).days > 15:
+                        print(f'from shares/share_detail.html: last_missing: {last_missing} last_found: {last_found}')
                         update_index_points(obj.exchange, last_missing, last_found)
                     
                     if not first_found and not last_found:
+                        print(f'from shares/share_detail.html: first_found: {first_found} last_found: {last_found}')
                         update_index_points(obj.exchange, start_date, last_date)
 
                     print(f'first_missing:{first_missing} first_found:{first_found} last_missing:{last_missing}  last_found:{last_found}')
