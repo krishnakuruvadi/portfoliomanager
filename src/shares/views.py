@@ -226,7 +226,7 @@ class ShareDetailView(DetailView):
                     data['comp_vals'] = list()
                     data['comp_name'] = index.name
                     data['chart_labels'] = list()
-                    for hsp in HistoricalStockPrice.objects.filter(symbol=stock, date__gte=start_date):
+                    for hsp in HistoricalStockPrice.objects.filter(symbol=stock, date__gte=start_date).order_by('date'):
                         try:
                             t = HistoricalIndexPoints.objects.get(index=index, date=hsp.date)
                             if not first_found:
@@ -404,8 +404,8 @@ def add_transaction(request):
             user = request.POST['user']
             trans_date = get_datetime_or_none_from_string(request.POST['trans_date'])
             exchange_rate = 1
-            if exchange == 'NASDAQ' or exchange == 'NYSE':
-                exchange_rate = get_conversion_rate('USD', 'INR', trans_date)
+            if exchange in ['NASDAQ', 'NYSE']:
+                exchange_rate = get_in_preferred_currency(1, 'USD', trans_date)
             users = get_all_users()
             trans_type = request.POST['trans_type']
             price = get_float_or_none_from_string(request.POST['price'])

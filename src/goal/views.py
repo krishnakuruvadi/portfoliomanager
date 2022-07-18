@@ -61,6 +61,9 @@ def goal_list(request):
     else:
         data['ach_per'] = 0
     data['unalloc'] = get_unallocated_amount()
+    data['remaining'] = data['target'] - data['achieved']
+    if data['remaining'] < 0:
+        data['remaining'] = 0
     data['curr_module_id'] = 'id_goal_module'
     print(data)
     return render(request, template, context=data)

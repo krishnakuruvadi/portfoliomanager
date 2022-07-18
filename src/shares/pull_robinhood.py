@@ -10,7 +10,7 @@ import time
 import datetime
 from robin_stocks.robinhood.orders import *
 from shared.utils import get_date_or_none_from_string, get_float_or_none_from_string
-from shared.handle_real_time_data import get_conversion_rate
+from shared.handle_real_time_data import get_conversion_rate, get_in_preferred_currency
 
 
 class Robinhood:
@@ -135,7 +135,7 @@ class Robinhood:
                         if 'drip_dividend_id' in order:
                             o['div_reinv'] = True if order['drip_dividend_id'] else False
                         o['price'] = get_float_or_none_from_string(order['average_price'])
-                        o['conv_price'] = get_conversion_rate('USD', 'INR', o['date'])
+                        o['conv_price'] = get_in_preferred_currency(1, 'USD', o['date'])
                         o['trans_price'] = o['quantity'] * o['price'] * o['conv_price']
                         ret[ot].append(o)
                     except Exception as ex:

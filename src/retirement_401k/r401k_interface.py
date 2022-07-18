@@ -1,6 +1,6 @@
 from .models import Account401K, Transaction401K, NAVHistory
 import datetime
-from shared.handle_real_time_data import get_conversion_rate
+from shared.handle_real_time_data import get_conversion_rate, get_in_preferred_currency
 from alerts.alert_helper import create_alert_month_if_not_exist, Severity
 from dateutil.relativedelta import relativedelta
 
@@ -89,11 +89,11 @@ class R401KInterface:
             for trans in Transaction401K.objects.filter(account=obj, trans_date__lte=end_date):
                 if trans.trans_date >= st_date:
                     conv_rate = 1
-                    conv_val = get_conversion_rate('USD', 'INR', trans.trans_date)
+                    conv_val = get_in_preferred_currency(1, 'USD', trans.trans_date)
                     if conv_val:
                         conv_rate = conv_val
                     else:
-                        print(f'failed to get conversion rate from USD to INR for date {trans.trans_date}')
+                        print(f'failed to get conversion rate from USD to preferred currency for date {trans.trans_date}')
                     v = float(trans.employee_contribution + trans.employer_contribution) * float(conv_rate)
                     contrib += v
                     cash_flows.append((trans.trans_date, -1*v))
@@ -101,11 +101,11 @@ class R401KInterface:
             if qty > 0:
                 nav_objs = NAVHistory.objects.filter(account=obj, nav_date__lte=end_date).order_by('-nav_date')#descending
                 conv_rate = 1
-                conv_val = get_conversion_rate('USD', 'INR', nav_objs[0].nav_date)
+                conv_val = get_in_preferred_currency(1, 'USD', nav_objs[0].nav_date)
                 if conv_val:
                     conv_rate = conv_val
                 else:
-                    print(f'failed to get conversion rate from USD to INR for date {nav_objs[0].nav_date}')
+                    print(f'failed to get conversion rate from USD to preferred currency for date {nav_objs[0].nav_date}')
 
                 total += float(nav_objs[0].nav_value)*qty*float(conv_rate)
         return cash_flows, contrib, deduct, total
@@ -119,11 +119,11 @@ class R401KInterface:
         for obj in Account401K.objects.filter(user=user_id):
             for trans in Transaction401K.objects.filter(account=obj, trans_date__gte=st_date, trans_date__lte=end_date):
                 conv_rate = 1
-                conv_val = get_conversion_rate('USD', 'INR', trans.trans_date)
+                conv_val = get_in_preferred_currency(1, 'USD', trans.trans_date)
                 if conv_val:
                     conv_rate = conv_val
                 else:
-                    print(f'failed to get conversion rate from USD to INR for date {trans.trans_date}')
+                    print(f'failed to get conversion rate from USD to preferred currency for date {trans.trans_date}')
                 contrib += float(trans.employee_contribution + trans.employer_contribution) * float(conv_rate)
         return contrib, deduct
 
@@ -139,11 +139,11 @@ class R401KInterface:
         for obj in Account401K.objects.filter(user=user_id):
             for trans in Transaction401K.objects.filter(account=obj, trans_date__gte=st_date, trans_date__lte=end_date):
                 conv_rate = 1
-                conv_val = get_conversion_rate('USD', 'INR', trans.trans_date)
+                conv_val = get_in_preferred_currency(1, 'USD', trans.trans_date)
                 if conv_val:
                     conv_rate = conv_val
                 else:
-                    print(f'failed to get conversion rate from USD to INR for date {trans.trans_date}')
+                    print(f'failed to get conversion rate from USD to preferred currency for date {trans.trans_date}')
                 contrib[trans.trans_date.month-1] += float(trans.employee_contribution + trans.employer_contribution) * float(conv_rate)
         return contrib, deduct
     

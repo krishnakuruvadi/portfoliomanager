@@ -12,7 +12,7 @@ from users.models import User
 import datetime
 from dateutil.relativedelta import relativedelta
 from common.models import HistoricalStockPrice, Stock, MutualFund
-from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price, get_historical_mf_nav, get_historical_stock_price_based_on_symbol
+from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price, get_historical_mf_nav, get_historical_stock_price_based_on_symbol, get_in_preferred_currency
 from shared.handle_create import add_common_stock
 from mutualfunds.models import Folio, MutualFundTransaction
 from shared.financial import xirr
@@ -968,8 +968,8 @@ def get_investment_data(start_date):
                         found = False
                         #print(val)
                         for k,v in val.items():
-                            if espp_entry.exchange == 'NYSE' or espp_entry.exchange == 'NASDAQ':
-                                conv_val = get_conversion_rate('USD', 'INR', data_end_date)
+                            if espp_entry.exchange in ['NYSE', 'NASDAQ']:
+                                conv_val = get_in_preferred_currency(1, 'USD', data_end_date)
                                 #print('conversion value', conv_val)
                                 if conv_val:
                                     espp_val += float(conv_val)*float(v)*float(avail_units)
@@ -1009,8 +1009,8 @@ def get_investment_data(start_date):
                         found = False
                         #print(val)
                         for k,v in val.items():
-                            if stock.exchange == 'NYSE' or stock.exchange == 'NASDAQ':
-                                conv_val = get_conversion_rate('USD', 'INR', data_end_date)
+                            if stock.exchange in ['NYSE', 'NASDAQ']:
+                                conv_val = get_in_preferred_currency(1, 'USD', data_end_date)
                                 #print('conversion value', conv_val)
                                 if conv_val:
                                     rsu_val += float(conv_val)*float(v)*unsold_shares
@@ -1057,8 +1057,8 @@ def get_investment_data(start_date):
                         found = False
                         #print(val)
                         for k,v in val.items():
-                            if stock_obj.exchange == 'NYSE' or stock_obj.exchange == 'NASDAQ':
-                                conv_val = get_conversion_rate('USD', 'INR', data_end_date)
+                            if stock_obj.exchange in ['NYSE', 'NASDAQ']:
+                                conv_val = get_in_preferred_currency(1, 'USD', data_end_date)
                                 #print('conversion value', conv_val)
                                 if conv_val:
                                     share_val += float(conv_val)*float(v)*float(q)

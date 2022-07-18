@@ -22,7 +22,7 @@ from shared.financial import xirr
 from django.db import IntegrityError
 import random
 from tools.stock_reconcile import Trans, reconcile_event_based
-from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol
+from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol, get_in_preferred_currency
 from dateutil.relativedelta import relativedelta
 from common.index_helpers import get_comp_index_values
 from common.models import Stock
@@ -133,14 +133,25 @@ class EsppDetailView(DetailView):
         today = datetime.date.today()
         r = lambda: random.randint(0,255)
         color = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
+        color2 = '#{:02x}{:02x}{:02x}'.format(r(), r(), r())
         ret = list()
         ret.append({
-            'label':'',
+            'label':'Value',
             'data': list(),
             'fill': 'false',
             'borderColor':color
         })
-        ret[0]['data'].append({'x': obj.purchase_date.strftime('%Y-%m-%d'), 'y':round(float(obj.total_purchase_price),2)})
+        ret.append({
+            'label':'Investment',
+            'data': list(),
+            'fill': 'false',
+            'borderColor':color2
+        })
+        tpp = round(float(obj.total_purchase_price),2)
+        pfmv = round(float(obj.purchase_fmv*obj.shares_purchased*obj.purchase_conversion_rate),2)
+        ret[0]['data'].append({'x': obj.purchase_date.strftime('%Y-%m-%d'), 'y':pfmv})
+        ret[1]['data'].append({'x': obj.purchase_date.strftime('%Y-%m-%d'), 'y':tpp})
+
         std = std+relativedelta(months=1)
         if std > today:
             std = today
@@ -158,8 +169,8 @@ class EsppDetailView(DetailView):
             if lv:
                 print(lv)
                 conv_rate = 1
-                if obj.exchange == 'NASDAQ' or obj.exchange == 'NYSE':
-                    conv_val = get_conversion_rate('USD', 'INR', std)
+                if obj.exchange in ['NASDAQ', 'NYSE']:
+                    conv_val = get_in_preferred_currency(1, 'USD', std)
                     if conv_val:
                         conv_rate = conv_val
                     for k,v in lv.items():
@@ -170,6 +181,7 @@ class EsppDetailView(DetailView):
             if val > 0 or reset_to_zero:
                 x = std.strftime('%Y-%m-%d')
                 ret[0]['data'].append({'x': x, 'y':round(val,2)})
+                ret[1]['data'].append({'x': x, 'y':tpp})
                 if val > 0:
                     reset_to_zero = True
                 else:
@@ -371,7 +383,7 @@ def espp_insights(request):
                 print(lv)
                 conv_rate = 1
                 if espp.exchange == 'NASDAQ' or espp.exchange == 'NYSE':
-                    conv_val = get_conversion_rate('USD', 'INR', std)
+                    conv_val = get_in_preferred_currency(1, 'USD', std)
                     if conv_val:
                         conv_rate = conv_val
                     for k,v in lv.items():

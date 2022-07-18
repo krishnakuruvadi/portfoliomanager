@@ -109,7 +109,7 @@ def get_comp_index_values(stock, start_date, last_date):
         data['comp_vals'] = list()
         data['comp_name'] = index.name
         data['chart_labels'] = list()
-        for hsp in HistoricalStockPrice.objects.filter(symbol=stock, date__gte=start_date):
+        for hsp in HistoricalStockPrice.objects.filter(symbol=stock, date__gte=start_date).order_by('date'):
             try:
                 t = HistoricalIndexPoints.objects.get(index=index, date=hsp.date)
                 if not first_found:
@@ -124,19 +124,19 @@ def get_comp_index_values(stock, start_date, last_date):
                     first_missing = hsp.date
                 last_missing = hsp.date
 
-            if first_missing and first_found and (first_found - first_missing).days > 15:
-                print(f'from get_comp_index_values: first_missing {first_missing} first_found {first_found}')
-                update_index_points(stock.exchange, first_missing, first_found)
+        if first_missing and first_found and (first_found - first_missing).days > 15:
+            print(f'from get_comp_index_values: first_missing {first_missing} first_found {first_found}')
+            update_index_points(stock.exchange, first_missing, first_found)
                     
-            if last_missing and last_found and (last_missing - last_found).days > 15:
-                print(f'from get_comp_index_values: last_missing {last_missing} last_found {last_found}')
-                update_index_points(stock.exchange, last_missing, last_found)
+        if last_missing and last_found and (last_missing - last_found).days > 15:
+            print(f'from get_comp_index_values: last_missing {last_missing} last_found {last_found}')
+            update_index_points(stock.exchange, last_missing, last_found)
                     
-            if not first_found and not last_found:
-                print(f'from get_comp_index_values: first_found {first_found} last_found {last_found}')
-                update_index_points(stock.exchange, start_date, last_date)
+        if not first_found and not last_found:
+            print(f'from get_comp_index_values: first_found {first_found} last_found {last_found}')
+            update_index_points(stock.exchange, start_date, last_date)
 
-            print(f'first_missing:{first_missing} first_found:{first_found} last_missing:{last_missing}  last_found:{last_found}')
+        print(f'first_missing:{first_missing} first_found:{first_found} last_missing:{last_missing}  last_found:{last_found}')
             
     except Index.DoesNotExist:
         update_index_points(stock.exchange, start_date, last_date)

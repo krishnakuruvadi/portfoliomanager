@@ -2,7 +2,7 @@ from .models import Share, Transactions
 import datetime
 from tools.stock_reconcile import reconcile_event_based
 from common.models import Bonusv2, Splitv2, Stock
-from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol
+from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol, get_in_preferred_currency
 from dateutil.relativedelta import relativedelta
 
 class ShareInterface:
@@ -106,7 +106,7 @@ class ShareInterface:
                 if year_end_value_vals:
                     conv_rate = 1
                     if share_obj.exchange == 'NASDAQ' or share_obj.exchange == 'NYSE':
-                        conv_val = get_conversion_rate('USD', 'INR', end_date)
+                        conv_val = get_in_preferred_currency(1, 'USD', end_date)
                         if conv_val:
                             conv_rate = conv_val
                         for k,v in year_end_value_vals.items():

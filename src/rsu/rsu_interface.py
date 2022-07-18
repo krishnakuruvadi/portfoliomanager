@@ -1,6 +1,6 @@
 from .models import RSUAward, RestrictedStockUnits, RSUSellTransactions
 import datetime
-from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol
+from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol, get_in_preferred_currency
 from dateutil.relativedelta import relativedelta
 from alerts.alert_helper import create_alert_month_if_not_exist, Severity
 
@@ -102,8 +102,8 @@ class RsuInterface:
                     year_end_value_vals = get_historical_stock_price_based_on_symbol(aw_obj.symbol, aw_obj.exchange, end_date+relativedelta(days=-5), end_date)
                     if year_end_value_vals:
                         conv_rate = 1
-                        if aw_obj.exchange == 'NASDAQ' or aw_obj.exchange == 'NYSE':
-                            conv_val = get_conversion_rate('USD', 'INR', end_date)
+                        if aw_obj.exchange in ['NASDAQ', 'NYSE']:
+                            conv_val = get_in_preferred_currency(1, 'USD', end_date)
                             if conv_val:
                                 conv_rate = conv_val
                             for k,v in year_end_value_vals.items():

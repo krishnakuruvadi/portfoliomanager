@@ -165,6 +165,7 @@ def get_preferred_currency():
         preferred_currency = 'INR'
     return preferred_currency
 
+# get provided amount in preferred currency given the date, amount and the from currency
 def get_in_preferred_currency(amount, from_curr, dt, precision=2):
     if amount == 0:
         return 0

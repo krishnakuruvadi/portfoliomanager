@@ -1,5 +1,5 @@
 from .models import Account401K, Transaction401K, NAVHistory
-from shared.handle_real_time_data import get_conversion_rate
+from shared.handle_real_time_data import get_conversion_rate, get_in_preferred_currency
 from shared.financial import xirr
 from django.conf import settings
 import csv
@@ -39,7 +39,7 @@ def reconcile_401k():
             if nav_date and nav_date > latest_date:
                 latest_date = nav_date
                 latest_nav = nav_value
-            fx = get_conversion_rate('USD', 'INR', latest_date)
+            fx = get_in_preferred_currency(1, 'USD', latest_date)
             account.latest_value = float(latest_nav)*float(account.units)*fx
             account.gain = float(account.latest_value) - float(account.total)*fx
             if len(cash_flows) > 1:

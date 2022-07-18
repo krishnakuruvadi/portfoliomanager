@@ -19,7 +19,7 @@ from shared.utils import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from tasks.tasks import update_rsu
-from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol
+from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol, get_in_preferred_currency
 import random
 from tools.stock_reconcile import Trans, reconcile_event_based
 from common.index_helpers import get_comp_index_values
@@ -219,7 +219,7 @@ class RsuDetailView(DetailView):
                     print(lv)
                     conv_rate = 1
                     if rsu.award.exchange == 'NASDAQ' or rsu.award.exchange == 'NYSE':
-                        conv_val = get_conversion_rate('USD', 'INR', end_dt)
+                        conv_val = get_in_preferred_currency(1, 'USD', end_dt)
                         if conv_val:
                             conv_rate = conv_val
                         for k,v in lv.items():
@@ -290,8 +290,8 @@ class RsuVestDetailView(DetailView):
             if lv:
                 print(lv)
                 conv_rate = 1
-                if rsu.award.exchange == 'NASDAQ' or rsu.award.exchange == 'NYSE':
-                    conv_val = get_conversion_rate('USD', 'INR', std)
+                if rsu.award.exchange in ['NASDAQ', 'NYSE']:
+                    conv_val = get_in_preferred_currency(1, 'USD', std)
                     if conv_val:
                         conv_rate = conv_val
                     for k,v in lv.items():
@@ -593,8 +593,8 @@ def rsu_insights(request):
                     if lv:
                         print(lv)
                         conv_rate = 1
-                        if award.exchange == 'NASDAQ' or award.exchange == 'NYSE':
-                            conv_val = get_conversion_rate('USD', 'INR', std)
+                        if award.exchange in ['NASDAQ', 'NYSE']:
+                            conv_val = get_in_preferred_currency(1, 'USD', std)
                             if conv_val:
                                 conv_rate = conv_val
                             for k,v in lv.items():

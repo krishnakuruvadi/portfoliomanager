@@ -1,6 +1,6 @@
 from .models import Espp, EsppSellTransactions
 import datetime
-from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol
+from shared.handle_real_time_data import get_conversion_rate, get_historical_stock_price_based_on_symbol, get_in_preferred_currency
 from dateutil.relativedelta import relativedelta
 
 class EsppInterface:
@@ -93,7 +93,7 @@ class EsppInterface:
                 if year_end_value_vals:
                     conv_rate = 1
                     if espp_obj.exchange == 'NASDAQ' or espp_obj.exchange == 'NYSE':
-                        conv_val = get_conversion_rate('USD', 'INR', end_date)
+                        conv_val = get_in_preferred_currency(1, 'USD', end_date)
                         if conv_val:
                             conv_rate = conv_val
                         for k,v in year_end_value_vals.items():
