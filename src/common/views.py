@@ -376,7 +376,9 @@ def preferences(request):
         pref_obj.document_backup_locn = request.POST.get('timezone')
         pref_obj.show_zero_value_mfs = 'show_zero_val_mfs' in request.POST
         pref_obj.show_zero_value_shares = 'show_zero_val_shares' in request.POST
-
+        curr = request.POST.get('currency')
+        if curr:
+            pref_obj.currency = curr.upper()
         pref_obj.save()
  
     tzs = list()
@@ -419,5 +421,6 @@ def preferences(request):
         'document_backup_locn':'' if not pref_obj.document_backup_locn else pref_obj.document_backup_locn,
         'show_zero_val_mfs': pref_obj.show_zero_value_mfs,
         'show_zero_val_shares': pref_obj.show_zero_value_shares,
+        'currency': pref_obj.currency
     }
     return render(request, template, context)
