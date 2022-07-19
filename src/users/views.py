@@ -53,7 +53,8 @@ class UserListView(ListView):
                 data['as_on'] = user.as_on
         preferred_currency = get_preferences('currency')
         data['preferred_currency'] = preferred_currency if preferred_currency else 'INR'
-        data['as_on'] = get_in_preferred_tz(data['as_on'])
+        if 'as_on' in data:
+            data['as_on'] = get_in_preferred_tz(data['as_on'])
         print(data)
         return data
 
