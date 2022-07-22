@@ -1,3 +1,9 @@
+venv
+.venv
+.git
+.gitignore
+txsadmin@dockernode01:~/apps/portfoliomanager$ ^C
+txsadmin@dockernode01:~/apps/portfoliomanager$ cat .gitignore
 chromedriver
 src/db.sqlite3
 src/huey.db
@@ -5,3 +11,4 @@ src/huey.db-shm
 src/huey.db-wal
 src/media/secrets/
 venv
+*__pycache__*
