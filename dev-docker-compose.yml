@@ -1,0 +1,65 @@
+version: "3"
+
+services:
+  pm-app:
+    container_name: portfolio-manager-app
+    build:
+      context: .
+    environment:
+      DJANGO_SUPERUSER_USERNAME: "admin"
+      DJANGO_SUPERUSER_PASSWORD: "secretpassword"
+      DJANGO_SUPERUSER_EMAIL: "admin@example.com"
+      DJANGO_ENABLE_DEBUG: "True" # Accepted values are True/False
+      DB_ENGINE: "postgresql"
+      DB_HOST: "pm-db"
+      DB_NAME: "pmdb"
+      DB_USER: "svc_pm"
+      DB_PASSWORD: "secretpassword1!"
+      DB_PORT: 5432
+    command: gunicorn portfoliomgr.wsgi:application --user www-data --bind 0.0.0.0:8020 --workers 3
+    restart: unless-stopped
+    expose:
+      - "8020"
+    networks:
+      - frontend
+      - backend
+    volumes:
+      - pm_static_files:/opt/app/portfoliomanager/collected_files
+    depends_on:
+      - pm-db
+
+  pm-frontend:
+    container_name: pm-frontend
+    build: ./nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - frontend
+    volumes:
+      - pm_static_files:/static
+    depends_on:
+      - pm-app
+
+  pm-db:
+    container_name: pm-db
+    image: postgres:13
+    environment:
+      POSTGRES_DB: "pmdb"
+      POSTGRES_PASSWORD: "secretpassword1!"
+      POSTGRES_USER: "svc_pm"
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+  pm_static_files:
+
+networks:
+  frontend:
+    name: "pm-frontend"
+  backend:
+    name: "pm-backend"
