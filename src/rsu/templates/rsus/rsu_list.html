@@ -26,6 +26,143 @@
         </ul>
       </td>
     </tr>
+    <tr>
+      <td style="text-align:right; padding: 40px;">
+        <div class="row">
+          <div class="col-sm-6 col-lg-6 col-md-6" style="margin-left: auto;margin-right: 0;" >
+            <input id="chkToggle" type="checkbox" checked data-toggle="toggle" data-on="Current" data-off="All Time" data-onstyle="primary" data-offstyle="info">
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr></tr>
+    <tr id="contentB">
+      <td style="text-align:right">
+        <div class="row">
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Aquisition Price</h5>
+                  <p class="card-text">{{preferred_currency}} {{aq_price}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Tax At Vest</h5>
+                  <p class="card-text">{{preferred_currency}} {{tax_at_vest}} </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Aquisition Price + tax</h5>
+                  <p class="card-text">{{preferred_currency}} {{aq_price_incl_tax}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Current Value</h5>
+                  <p class="card-text">{{preferred_currency}} {{latest_value}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Unrealised Gain</h5>
+                  <p class="card-text">{{preferred_currency}} {{unrealised_gain}} </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Realised Gain</h5>
+                  <p class="card-text">{{preferred_currency}} {{realised_gain}} </p>
+              </div>
+            </div>
+          </div>
+          <!--div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">All time XIRR</h5>
+                  <p class="card-text">{{all_ret}}% </p>
+              </div>
+            </div>
+          </div-->
+        </div>
+      </td>
+    </tr>
+    <tr id="contentA">
+      <td style="text-align:right">
+        <div class="row">
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Aquisition Price</h5>
+                  <p class="card-text">{{preferred_currency}} {{current_aq_price_excl_tax}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Tax At Vest</h5>
+                  <p class="card-text">{{preferred_currency}} {{current_tax_at_vest}} </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Aquisition Price + tax</h5>
+                  <p class="card-text">{{preferred_currency}} {{current_aq_price}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Current Value</h5>
+                  <p class="card-text">{{preferred_currency}} {{latest_value}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Unrealised Gain</h5>
+                  <p class="card-text">{{preferred_currency}} {{unrealised_gain}} </p>
+              </div>
+            </div>
+          </div>
+          <!--div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Current XIRR</h5>
+                  <p class="card-text">{{curr_ret}}% </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">All time XIRR</h5>
+                  <p class="card-text">{{all_ret}}% </p>
+              </div>
+            </div>
+          </div-->
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:right"><small class="text-muted">Last updated  {{as_on_date}}</small></td>
+    </tr>
   </table>
 
   <table class="table table-hover dt-responsive" id="rsu-table" style="width:100%">
@@ -101,3 +238,20 @@
     });
   {% endblock jquery %}
 </script>
+
+{% block javascript %}
+  <script>
+    $("#contentB").hide();
+    $("#chkToggle").change(function () {
+      if ($(this).is(":checked")) {
+          console.log("checked");
+          $("#contentA").show();
+          $("#contentB").hide();
+      } else {
+        console.log("unchecked");
+          $("#contentA").hide();
+          $("#contentB").show();
+      }
+    });
+  </script>
+{% endblock %}

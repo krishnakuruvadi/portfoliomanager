@@ -94,6 +94,41 @@ class RsuListView(ListView):
         data['user_name_mapping'] = get_all_users()
         data['award_latest_vals'] = get_rsu_award_latest_vals()
         data['curr_module_id'] = 'id_rsu_module'
+        today = datetime.date.today()
+        aq_price = 0
+        aq_price_incl_tax = 0
+        unrealised_gain = 0
+        realised_gain = 0
+        latest_value = 0
+        current_aq_price = 0
+        tax_at_vest = 0
+        current_tax_at_vest = 0
+        current_aq_price_excl_tax = 0
+        as_on_date = None
+        for rsu in RestrictedStockUnits.objects.all():
+            aq_price_excl_tax = float(rsu.shares_for_sale*rsu.aquisition_price*rsu.conversion_rate)
+            aq_price += aq_price_excl_tax
+            aq_price_incl_tax += float(rsu.total_aquisition_price)
+            unrealised_gain += float(rsu.unrealised_gain)
+            realised_gain += float(rsu.realised_gain)
+            latest_value += float(rsu.latest_value)
+            tax_at_vest += float(rsu.tax_at_vest)
+            if rsu.unsold_shares > 0:
+                current_aq_price_excl_tax += float(rsu.unsold_shares*rsu.aquisition_price*rsu.conversion_rate)
+            current_aq_price += float(rsu.total_aquisition_price)
+            current_tax_at_vest += float(rsu.tax_at_vest*rsu.unsold_shares/rsu.shares_for_sale)
+            as_on_date = get_max(as_on_date, rsu.as_on_date)
+        data['aq_price'] = round(aq_price, 2)
+        data['aq_price_incl_tax'] = round(aq_price_incl_tax, 2)
+        data['realised_gain'] = round(realised_gain, 2)
+        data['unrealised_gain'] = round(unrealised_gain, 2)
+        data['latest_value'] = round(latest_value, 2)
+        data['current_aq_price'] = round(current_aq_price, 2)
+        data['tax_at_vest'] = round(tax_at_vest, 2)
+        data['current_aq_price_excl_tax'] = round(current_aq_price_excl_tax, 2)
+        data['current_tax_at_vest'] = round(current_tax_at_vest, 2)
+        data['preferred_currency'] = get_preferred_currency_symbol()
+        data['as_on_date'] = get_min(as_on_date, today)
         print(data)
         return data
 

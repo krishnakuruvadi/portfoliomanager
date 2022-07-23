@@ -1,15 +1,9 @@
-import requests
 from dateutil.relativedelta import relativedelta
 import datetime
-import csv
-import codecs
-from contextlib import closing
-from shared.handle_real_time_data import get_in_preferred_currency, get_latest_vals, get_conversion_rate
+from shared.handle_real_time_data import get_in_preferred_currency, get_latest_vals
 from .models import RSUAward, RestrictedStockUnits, RSUSellTransactions
 
-def update_latest_vals(rsu_obj):
-    start = datetime.date.today()+relativedelta(days=-5)
-    end = datetime.date.today()
+def update_latest_vals(rsu_obj, latest_vals):
     rsu_award = rsu_obj.award
     rg = 0
     su = 0
@@ -23,26 +17,45 @@ def update_latest_vals(rsu_obj):
     rsu_obj.unsold_shares = float(rsu_obj.shares_for_sale) - su
     rsu_obj.tax_at_vest = float(rsu_obj.shares_vested-rsu_obj.shares_for_sale)*float(rsu_obj.conversion_rate)*float(rsu_obj.aquisition_price)
     if rsu_obj.unsold_shares > 0:
-        vals = get_latest_vals(rsu_award.symbol, rsu_award.exchange, start, end)
-        if vals:
-            for k, v in vals.items():
-                if k and v:
-                    if not rsu_obj.as_on_date or k > rsu_obj.as_on_date:
-                        rsu_obj.as_on_date = k
-                        rsu_obj.latest_price = v
-                        if rsu_award.exchange in ['NASDAQ', 'NYSE']:
-                            rsu_obj.latest_conversion_rate = get_in_preferred_currency(1, 'USD', k)
-                        else:
-                            rsu_obj.latest_conversion_rate = 1
+        rsu_obj.as_on_date = latest_vals[rsu_award.exchange]['symbols'][rsu_award.symbol]['date']
+        rsu_obj.latest_price = latest_vals[rsu_award.exchange]['symbols'][rsu_award.symbol]['value']
+        rsu_obj.latest_conversion_rate = latest_vals[rsu_award.exchange]['latest_conversion_rate']
     rsu_obj.latest_value = float(rsu_obj.latest_price) * float(rsu_obj.latest_conversion_rate) * float(rsu_obj.unsold_shares)
     rsu_obj.unrealised_gain = rsu_obj.latest_value - float(rsu_obj.unsold_shares)*float(rsu_obj.conversion_rate)*float(rsu_obj.aquisition_price)
     rsu_obj.save()
 
 def update_rsu_latest_vals():
+    today = datetime.date.today()
+    start = datetime.date.today()+relativedelta(days=-5)
+    end = today
+    latest_vals = dict()
     for rsu_award in RSUAward.objects.all():
+        print(f'processing award {rsu_award.award_id}')
+        if rsu_award.exchange not in latest_vals:
+            print(f'not found {rsu_award.exchange} in  {latest_vals}')
+            latest_vals[rsu_award.exchange] = dict()
+            latest_vals[rsu_award.exchange]['symbols'] = dict()
+            if rsu_award.exchange in ['NASDAQ', 'NYSE']:
+                latest_vals[rsu_award.exchange]['latest_conversion_rate'] = get_in_preferred_currency(1, 'USD', today)
+            else:
+                latest_vals[rsu_award.exchange]['latest_conversion_rate'] = 1
+        if rsu_award.symbol not in latest_vals[rsu_award.exchange]['symbols']:
+            print(f'not found {rsu_award.symbol} in  {latest_vals}')
+            dt = None
+            val = None
+            vals = get_latest_vals(rsu_award.symbol, rsu_award.exchange, start, end)
+            if vals:
+                for k, v in vals.items():
+                    if k and v:
+                        if not dt or k>dt:
+                            dt = k
+                            val = v
+            latest_vals[rsu_award.exchange]['symbols'][rsu_award.symbol]=dict()
+            latest_vals[rsu_award.exchange]['symbols'][rsu_award.symbol]['date'] = dt
+            latest_vals[rsu_award.exchange]['symbols'][rsu_award.symbol]['value'] = val 
         for rsu_obj in RestrictedStockUnits.objects.filter(award=rsu_award):
             print("looping through rsu " + str(rsu_obj.id))
-            update_latest_vals(rsu_obj)
+            update_latest_vals(rsu_obj, latest_vals)
 
 def get_rsu_award_latest_vals():
     ret = dict()
@@ -84,11 +97,3 @@ def get_rsu_award_latest_vals():
             ret[rsu_award.id]['shares_vested'] = shares_vested
             ret[rsu_award.id]['aquisition_price'] = aquisition_price
     return ret
-
-def get_no_goal_amount():
-    amt = 0
-    for obj in RSUAward.objects.all():
-        if not obj.goal:
-            for rsu_obj in RestrictedStockUnits.objects.filter(award=obj):
-                amt += 0 if not rsu_obj.latest_value else rsu_obj.latest_value
-    return amt

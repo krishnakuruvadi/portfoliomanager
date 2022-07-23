@@ -30,7 +30,7 @@ import datetime
 from shared.utils import get_min, get_max
 from dateutil import tz
 from pytz import timezone
-from common.helper import get_preferences
+from common.helper import get_preferences, get_preferred_currency_symbol
 from shared.handle_get import *
 from shared.financial import xirr
 from dateutil.relativedelta import relativedelta
@@ -52,7 +52,7 @@ class UserListView(ListView):
             if user.as_on:
                 data['as_on'] = user.as_on
         preferred_currency = get_preferences('currency')
-        data['preferred_currency'] = preferred_currency if preferred_currency else 'INR'
+        data['preferred_currency'] = get_preferred_currency_symbol()
         if 'as_on' in data:
             data['as_on'] = get_in_preferred_tz(data['as_on'])
         print(data)
