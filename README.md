@@ -51,7 +51,7 @@ To build a portfolio manager which can track and provide insights into a individ
 - Clone or download this docker source code.
 
 ``` bash
-  git clone -b docker-dev https://github.com/krishnakuruvadi/portfoliomanager.git
+git clone -b docker-dev https://github.com/krishnakuruvadi/portfoliomanager.git
 ```
 
 ### Prepare the application to launch
@@ -59,13 +59,13 @@ To build a portfolio manager which can track and provide insights into a individ
 - Change into the recently clone/downloaded directory.
 
 ``` bash
-  cd ./portfoliomanager
+cd ./portfoliomanager
 ```
 
 - Open the docker compose file to edit the application environment.
 
 ``` bash
-  nano ./dev-docker-compose.yml
+nano ./dev-docker-compose.yml
 ```
 
 - Edit the application environment as needed. Parameters that can be changed are:
@@ -89,13 +89,13 @@ To build a portfolio manager which can track and provide insights into a individ
 - Within the application folder (i.e. portfoliomanager), run the docker compose file to build the appliaction and launch the docker containers. This step should take approximately *two* minutes.
 
 ``` bash
-  docker compose -f dev-docker-compose.yml up -d
+docker compose -f dev-docker-compose.yml up -d
 ```
 
 - To tear down the app environment, run:
 
 ``` bash
-  docker compose -f dev-docker-compose.yml down
+docker compose -f dev-docker-compose.yml down
 ```
 
 ### Browse to Portfolio Manager
@@ -103,7 +103,7 @@ To build a portfolio manager which can track and provide insights into a individ
 - Open your favorite web browser and go to:
   
 ``` http
-  http://<docker-host-ip>/
+http://<docker-host-ip>/
 ```
 
 - Enjoy Portfolio Manager
