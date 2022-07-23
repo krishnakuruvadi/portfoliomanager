@@ -23,8 +23,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'uuoc10!bp#0bkgq2oyh3s@sd^8%^k3(q8poba@onqv)@9zy(*4'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost'] if DEBUG==False else [ ]
+DEBUG = eval(str(os.environ['DJANGO_ENABLE_DEBUG']).capitalize())
+ALLOWED_HOSTS = ['*', '127.0.0.1', 'localhost'] if DEBUG==False else ['*']
+
+# Database declarations
+DB_ENGINE = str(os.environ['DB_ENGINE'])
+DB_HOST = str(os.environ['DB_HOST'])
+DB_NAME = str(os.environ['DB_NAME'])
+DB_USER = str(os.environ['DB_USER'])
+DB_PASSWORD = str(os.environ['DB_PASSWORD'])
+DB_PORT = int(os.environ['DB_PORT'])
 
 # Application definition
 
@@ -78,33 +86,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'portfoliomgr.urls'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "ppf"),
-    os.path.join(BASE_DIR, "ssy"),
-    os.path.join(BASE_DIR, "epf"),
-    os.path.join(BASE_DIR, "espp"),
-    os.path.join(BASE_DIR, "shares"),
-    os.path.join(BASE_DIR, "goal"),
-    os.path.join(BASE_DIR, "mutualfunds"),
-    os.path.join(BASE_DIR, "fixed_deposit"),
-    os.path.join(BASE_DIR, "rsu"),
-    os.path.join(BASE_DIR, "users"),
-    os.path.join(BASE_DIR, "reports"),
-    os.path.join(BASE_DIR, "common"),
-    os.path.join(BASE_DIR, "calculator"),
-    os.path.join(BASE_DIR, "alerts"),
-    os.path.join(BASE_DIR, "pages"),
-    os.path.join(BASE_DIR, "tasks"),
-    os.path.join(BASE_DIR, "retirement_401k"),
-    os.path.join(BASE_DIR, "markets"),
-    os.path.join(BASE_DIR, "tax"),
-    os.path.join(BASE_DIR, "insurance"),
-    os.path.join(BASE_DIR, "gold"),
-    os.path.join(BASE_DIR, "bankaccounts"),
-    os.path.join(BASE_DIR, "crypto"),
-    os.path.join(BASE_DIR, "static"),
-]
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -129,12 +110,17 @@ WSGI_APPLICATION = 'portfoliomgr.wsgi.application'
 ASGI_APPLICATION = "portfoliomgr.routing.application"
 
 # Database
+# See Database declarations above
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': f'django.db.backends.{DB_ENGINE}',
+        'NAME': DB_NAME,
+	'USER': DB_USER,
+	'PASSWORD': DB_PASSWORD,
+	'HOST': DB_HOST,
+	'PORT': DB_PORT,
     }
 }
 
@@ -175,7 +161,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
 STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'collected_files')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -205,8 +197,6 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
 }
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 '''
 LOGGING = {
