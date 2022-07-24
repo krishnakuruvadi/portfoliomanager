@@ -26,6 +26,8 @@ from shared.handle_real_time_data import get_conversion_rate, get_historical_sto
 from dateutil.relativedelta import relativedelta
 from common.index_helpers import get_comp_index_values
 from common.models import Stock
+from common.helper import get_preferred_currency_symbol
+
 
 class EsppCreateView(CreateView):
     template_name = 'espps/espp_create.html'
@@ -77,6 +79,7 @@ class EsppListView(ListView):
         data['latest_value'] = latest_value
         data['unrealised_gain'] = unrealised_gain
         data['realised_gain'] = realised_gain
+        data['preferred_currency'] = get_preferred_currency_symbol()
         data['curr_module_id'] = 'id_espp_module'
         print(data)
         return data

@@ -152,6 +152,7 @@ def get_accounts(request):
     context['latest_value'] = round(latest_value, 2)
     context['total_gain'] = round(total_gain, 2)
     context['curr_module_id'] = 'id_401k_module'
+    context['preferred_currency'] = get_preferred_currency_symbol()
     return render(request, template_name, context)
 
 def links(request):

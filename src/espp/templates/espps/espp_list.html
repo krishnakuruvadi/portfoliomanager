@@ -30,7 +30,50 @@
   </table>
   <table class="table table-borderless">
     <tr>
-      <td style="text-align:right"><b>Total Investment:</b> {{total_investment}} &nbsp;&nbsp;&nbsp;<b>Current Investment:</b> {{current_investment}} &nbsp;&nbsp;&nbsp;<b>Current Value:</b> {{latest_value}} &nbsp;&nbsp;&nbsp;<b>Unrealised Gain:</b> {{unrealised_gain}} &nbsp;&nbsp;&nbsp;<b>Realised Gain:</b> {{realised_gain}}</td>
+      <td style="text-align:right">
+        <div class="row">
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Total Investment</h5>
+                  <p class="card-text">{{preferred_currency}} {{total_investment}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Current Investment</h5>
+                  <p class="card-text">{{preferred_currency}} {{current_investment}} </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Latest Value</h5>
+                  <p class="card-text">{{preferred_currency}} {{latest_value}} </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Unrealised Gain</h5>
+                  <p class="card-text">{{preferred_currency}} {{unrealised_gain}} </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Realised Gain</h5>
+                  <p class="card-text">{{preferred_currency}} {{realised_gain}} </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
     </tr>
   </table>
   <table class="table table-hover dt-responsive" id="espp-table" style="width:100%">

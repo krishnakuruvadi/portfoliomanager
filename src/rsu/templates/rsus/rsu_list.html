@@ -219,9 +219,9 @@
         <td>{{ award_latest_vals|lookup:instance.id|lookup:'as_on_date' }}</td>
         {% endif %}
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}vest"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Award"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true" title="Edit Award"></i> </a>
+          <a href="{{ instance.get_absolute_url }}vest"><i class="far fa-file-alt" aria-hidden="true" title="Vest Transactions"></i></a>
         </td>
       </tr>
       {% endfor %}

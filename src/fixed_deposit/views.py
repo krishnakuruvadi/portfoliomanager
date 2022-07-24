@@ -15,6 +15,7 @@ from shared.handle_get import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from goal.goal_helper import get_goal_id_name_mapping_for_user
+from common.helper import get_preferred_currency_symbol
 
 # Create your views here.
 
@@ -28,6 +29,17 @@ class FixedDepositListView(ListView):
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
         data['user_name_mapping'] = get_all_users()
         data['curr_module_id'] = 'id_fd_module'
+        maturity_value = 0
+        principal = 0
+        for fd_obj in FixedDeposit.objects.all():
+            maturity_value += fd_obj.final_val
+            principal += fd_obj.principal
+            fd_obj.save()
+        data['total_maturity'] = maturity_value
+        data['total_principal'] = principal
+        data['total_interest'] = maturity_value - principal
+        data['preferred_currency'] = get_preferred_currency_symbol()
+
         return data
 
 class FixedDepositDetailView(DetailView):

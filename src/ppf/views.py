@@ -25,6 +25,7 @@ from rest_framework.response import Response
 from django.http import HttpResponseRedirect
 from goal.goal_helper import get_goal_id_name_mapping_for_user
 from tasks.tasks import pull_ppf_trans_from_bank
+from common.helper import get_preferred_currency_symbol
 
 
 def add_ppf(request):
@@ -63,6 +64,9 @@ class PpfListView(ListView):
         data['principal'] = dict()
         data['interest'] = dict()
         data['roi'] = dict()
+        latest_value = 0
+        total_contribution = 0
+        total_interest = 0
         for ppf_obj in Ppf.objects.all():
             data[ppf_obj.number] = dict()
             ppf_details = get_ppf_details(ppf_obj.number)
@@ -70,6 +74,14 @@ class PpfListView(ListView):
             data['principal'][ppf_obj.number] = ppf_details['principal']
             data['interest'][ppf_obj.number] = ppf_details['interest']
             data['roi'][ppf_obj.number] = ppf_details['roi']
+            latest_value += ppf_obj.total
+            total_contribution += ppf_obj.contribution
+            total_interest += ppf_obj.interest_contribution
+        data['latest_value'] = latest_value
+        data['total_contribution'] = total_contribution
+        data['total_interest'] = total_interest
+        data['preferred_currency'] = get_preferred_currency_symbol()
+
         data['curr_module_id'] = 'id_ppf_module'
         return data
 

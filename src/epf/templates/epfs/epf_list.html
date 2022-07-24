@@ -12,6 +12,62 @@
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
+  <table class="table table-borderless">
+    <tr>
+      <td style="text-align:right">
+        <div class="row">
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Employee Contribution</h5>
+                  <p class="card-text">{{preferred_currency}} {{employee_contribution}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Employer Contribution</h5>
+                  <p class="card-text">{{preferred_currency}} {{employer_contribution}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Contribution</h5>
+                  <p class="card-text">{{preferred_currency}} {{total_contribution}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Interest</h5>
+                  <p class="card-text">{{preferred_currency}} {{total_interest}} </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Withdrawals</h5>
+                  <p class="card-text">{{preferred_currency}} {{withdrawal}} </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Latest Value</h5>
+                  <p class="card-text">{{preferred_currency}} {{latest_value}} </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
   <table class="table table-hover dt-responsive" id="epf-table" style="width:100%">
     <thead class="thead-dark">
       <tr>

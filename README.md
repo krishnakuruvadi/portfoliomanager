@@ -27,6 +27,9 @@ To build a portfolio manager which can track and provide insights into a individ
 
 
 ## How to start
+For docker-compose based hosting check this branch: https://github.com/krishnakuruvadi/portfoliomanager/tree/docker-dev
+
+For hosting on baremetal/VM/laptop, proceed with the below steps
 * Install the following libraries
 
 MacOS:
