@@ -20,7 +20,7 @@ class Alert(models.Model):
     content = models.CharField(max_length=500, null=True)
     summary = models.CharField(max_length=100, null=False)
     severity = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(4)],default=4)
-    alert_type = models.CharField(max_length=10, choices=ALERT_TYPE_CHOICES, default='Notification')
+    alert_type = models.CharField(max_length=20, choices=ALERT_TYPE_CHOICES, default='Notification')
 
     def get_absolute_url(self):
         return reverse("alerts:alert-detail", kwargs={'id': self.id})
