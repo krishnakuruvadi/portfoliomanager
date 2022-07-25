@@ -5,7 +5,11 @@ from channels.db import database_sync_to_async
 
 @database_sync_to_async
 def get_unseen_alert_count():
-    return len(Alert.objects.filter(seen=False))
+    try:
+        return Alert.objects.filter(seen=False).count()
+    except Exception as e:
+        print(f'exception {e} when finding unseen alerts')
+        return 0
 
 class NoseyConsumer(AsyncWebsocketConsumer):
 
