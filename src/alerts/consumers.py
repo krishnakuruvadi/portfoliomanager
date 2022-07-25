@@ -49,8 +49,9 @@ class NoseyConsumer(AsyncWebsocketConsumer):
         eve = event['event']
         count = event['count']
         print(f"Got message {event} at {self.channel_name}")
-        await self.send(text_data=json.dumps({
+        txt = json.dumps({
             'event': eve,
             'count': count,
-        }).encode("utf-8"))
+        })
+        await self.send(text_data=txt)
     pass
