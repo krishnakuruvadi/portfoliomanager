@@ -1,3 +1,4 @@
 FROM nginx:1.22.0
 
-COPY ./default.conf /etc/nginx/conf.d/default.conf
+RUN rm -f /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d
