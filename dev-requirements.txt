@@ -55,7 +55,7 @@ packaging==20.9
 pandas==1.2.5
 pdfminer.six==20201018
 Pillow==9.0.1
-psycopg2-binary==2.9.3
+psycopg2-binary==2.8.6
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.20
