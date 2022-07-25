@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 RUN pip install --upgrade pip
-RUN apt-get update && apt-get install gcc gfortran python3-dev libopenblas-dev liblapack-dev -y --no-install-recommends
+RUN apt-get update && apt-get install gcc gfortran ghostscript python3-dev python3-tk libopenblas-dev liblapack-dev wget unzip -y --no-install-recommends
 
 # Create app directories
 RUN mkdir -p /opt/app/portfoliomanager
@@ -24,6 +24,11 @@ RUN chown -R www-data:www-data /opt/app
 # Apache Tika library log file prep
 RUN echo '' > /tmp/tika.log
 RUN chmod 777 /tmp/tika.log
+
+# Adding Chromedriver
+RUN wget https://chromedriver.storage.googleapis.com/104.0.5112.29/chromedriver_linux64.zip
+RUN unzip chromedriver_linux64.zip
+RUN rm -f chromedriver_linux64.zip 
 
 # Final Set up
 EXPOSE 8020
