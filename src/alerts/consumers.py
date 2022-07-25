@@ -1,6 +1,11 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from .models import Alert
+from channels.db import database_sync_to_async
+
+@database_sync_to_async
+def get_unseen_alert_count():
+    return len(Alert.objects.filter(seen=False))
 
 class NoseyConsumer(AsyncWebsocketConsumer):
 
@@ -15,11 +20,12 @@ class NoseyConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         print(text_data)
+        count = await get_unseen_alert_count()
         if text_data == "giveAlertCount":
             await self.send(text_data=json.dumps({
                 "type": "alert.gossip",
                 "event": "Alert Count",
-                "count": len(Alert.objects.filter(seen=False))
+                "count": count
             }))
         else:
             text_data_json = json.loads(text_data)
