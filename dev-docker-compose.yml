@@ -16,6 +16,7 @@ services:
       DB_USER: "svc_pm"
       DB_PASSWORD: "secretpassword1!"
       DB_PORT: 5432
+      SQLHUEY_URL: "postgresql://svc_pm:secretpassword1!@pm-db:5432/pmdb"
     restart: unless-stopped
     expose:
       - "8020"
