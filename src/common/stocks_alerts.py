@@ -116,6 +116,6 @@ def check_stock_price_change_alerts():
                         start_time=start_time,
                         end_time=end_time
                     )
-
         else:
             print(f'failed to get live price for {symbol} {stock.exchange}')
+        y.close()

@@ -20,15 +20,21 @@ def get_latest_vals(stock, exchange, start, end, etf=False):
         if not response:
             response = Nasdaq(stock, etf).get_historical_value(start, end)
             if not response:
-                response = YahooFinance2(stock).get_historical_value(start, end)
+                yf = YahooFinance2(stock)
+                response = yf.get_historical_value(start, end)
+                yf.close()
         return response
     if exchange == 'NSE' or exchange == 'NSE/BSE':
         #response = Nse(stock).get_historical_value(start, end)
-        response = YahooFinance2(stock+'.NS').get_historical_value(start, end)
+        yf = YahooFinance2(stock+'.NS')
+        response = yf.get_historical_value(start, end)
+        yf.close()
         return response
     if exchange == 'BSE':
         #response = Nse(stock).get_historical_value(start, end)
-        response = YahooFinance2(stock+'.BO').get_historical_value(start, end)
+        yf = YahooFinance2(stock+'.BO')
+        response = yf.get_historical_value(start, end)
+        yf.close()
         return response
 
 
@@ -37,15 +43,21 @@ def get_historic_vals(stock, exchange, start, end, etf=False):
     if exchange == 'NASDAQ':
         response = Nasdaq(stock, etf).get_historical_value(start, end)
         if not response:
-            response = YahooFinance2(stock).get_historical_value(start, end)
+            yf = YahooFinance2(stock)
+            response = yf.get_historical_value(start, end)
+            yf.close()
         return response
     if exchange == 'NSE' or exchange == 'NSE/BSE':
         #response = Nse(stock).get_historical_value(start, end)
-        response = YahooFinance2(stock+'.NS').get_historical_value(start, end)
+        yf = YahooFinance2(stock+'.NS')
+        response = yf.get_historical_value(start, end)
+        yf.close()
         return response
     if exchange == 'BSE':
         #response = Nse(stock).get_historical_value(start, end)
-        response = YahooFinance2(stock+'.BO').get_historical_value(start, end)
+        yf = YahooFinance2(stock+'.BO')
+        response = yf.get_historical_value(start, end)
+        yf.close()
         return response
 
 def get_mf_vals(amfi_code, start, end):

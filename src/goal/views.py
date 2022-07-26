@@ -27,6 +27,7 @@ from bankaccounts.bank_account_interface import BankAccountInterface
 from crypto.crypto_interface import CryptoInterface
 from users.user_interface import get_ext_user, get_users
 from django.conf import settings
+from common.helper import get_preferred_currency_symbol
 
 # Create your views here.
 
@@ -65,6 +66,7 @@ def goal_list(request):
     if data['remaining'] < 0:
         data['remaining'] = 0
     data['curr_module_id'] = 'id_goal_module'
+    data['preferred_currency'] = get_preferred_currency_symbol()
     print(data)
     return render(request, template, context=data)
 

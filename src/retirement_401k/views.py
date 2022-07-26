@@ -152,6 +152,7 @@ def get_accounts(request):
     context['latest_value'] = round(latest_value, 2)
     context['total_gain'] = round(total_gain, 2)
     context['curr_module_id'] = 'id_401k_module'
+    context['preferred_currency'] = get_preferred_currency_symbol()
     return render(request, template_name, context)
 
 def links(request):
@@ -197,8 +198,9 @@ def account_detail(request, id):
         if nav.comparision_nav_value and nav.comparision_nav_value != 0:
             val = float(nav.comparision_nav_value)
         else:
-            response = YahooFinance2('SPY').get_historical_value(nav.nav_date, nav.nav_date+relativedelta(days=5))
-        
+            yf = YahooFinance2('SPY')
+            response = yf.get_historical_value(nav.nav_date, nav.nav_date+relativedelta(days=5))
+            yf.close()
             val_date = None
             for k,v in response.items():
                 if not val:

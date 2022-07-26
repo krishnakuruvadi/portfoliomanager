@@ -648,6 +648,7 @@ def update_scroll_data():
                         scroll_item.save()
             except Exception as ex:
                 print(f'Exception {ex} adding index with content {v}')
+            y.close()
 
     n = Nasdaq('', None)
     data = n.get_all_index()
@@ -728,6 +729,7 @@ def update_scroll_data():
                     scroll_item.save()
         except Exception as ex:
             print(f'Exception {ex} adding index with content {v}')
+        y.close()
 
 
 @db_periodic_task(crontab(minute='10', hour='1-5', day='1-5'))

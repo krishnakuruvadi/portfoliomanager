@@ -21,6 +21,7 @@ from decimal import Decimal
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from goal.goal_helper import get_goal_id_name_mapping_for_user
+from common.helper import get_preferred_currency_symbol
 
 # Create your views here.
 
@@ -69,6 +70,27 @@ class EpfListView(ListView):
         data['goal_name_mapping'] = get_all_goals_id_to_name_mapping()
         data['user_name_mapping'] = get_all_users()
         data[ 'curr_module_id'] = 'id_epf_module'
+        latest_value = 0
+        total_contribution = 0
+        total_interest = 0
+        employee_contribution = 0
+        employer_contribution = 0
+        withdrawal = 0
+        for epf_obj in Epf.objects.all():
+            latest_value += epf_obj.total
+            total_interest += epf_obj.interest_contribution
+            employee_contribution += epf_obj.employee_contribution
+            employer_contribution += epf_obj.employer_contribution
+            withdrawal += epf_obj.withdrawl
+            total_contribution += epf_obj.employee_contribution + epf_obj.employer_contribution
+
+        data['latest_value'] = latest_value
+        data['total_contribution'] = total_contribution
+        data['total_interest'] = total_interest
+        data['employee_contribution'] = employee_contribution
+        data['employer_contribution'] = employer_contribution
+        data['withdrawal'] = withdrawal
+        data['preferred_currency'] = get_preferred_currency_symbol()
         return data
 
 class EpfDeleteView(DeleteView):

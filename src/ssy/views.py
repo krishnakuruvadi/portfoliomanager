@@ -25,6 +25,7 @@ from shared.handle_get import *
 from goal.goal_helper import get_goal_id_name_mapping_for_user
 from django.http import HttpResponseRedirect
 from tasks.tasks import pull_ssy_trans_from_bank
+from common.helper import get_preferred_currency_symbol
 
 
 def add_ssy(request):
@@ -96,6 +97,9 @@ class SsyListView(ListView):
         data['principal'] = dict()
         data['interest'] = dict()
         data['roi'] = dict()
+        latest_value = 0
+        total_contribution = 0
+        total_interest = 0
         for ssy_obj in Ssy.objects.all():
             data[ssy_obj.number] = dict()
             ssy_details = get_ssy_details(ssy_obj.number)
@@ -103,6 +107,14 @@ class SsyListView(ListView):
             data['principal'][ssy_obj.number] = ssy_details['principal']
             data['interest'][ssy_obj.number] = ssy_details['interest']
             data['roi'][ssy_obj.number] = ssy_details['roi']
+            latest_value += ssy_obj.total
+            total_contribution += ssy_obj.contribution
+            total_interest += ssy_obj.interest_contribution
+        data['latest_value'] = latest_value
+        data['total_contribution'] = total_contribution
+        data['total_interest'] = total_interest
+        data['preferred_currency'] = get_preferred_currency_symbol()
+
         data['curr_module_id'] = 'id_ssy_module'
         return data
 

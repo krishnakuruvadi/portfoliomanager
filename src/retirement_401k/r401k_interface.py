@@ -65,10 +65,13 @@ class R401KInterface:
     @classmethod
     def get_no_goal_amount(self, user_id=None):
         amt = 0
+        objs = None
         if user_id:
             objs = Account401K.objects.filter(user=user_id)
         else:
             objs = Account401K.objects.all()
+        if not objs:
+            return amt
         for obj in objs:
             if not obj.goal:
                 amt += 0 if not obj.latest_value else obj.latest_value
