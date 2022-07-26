@@ -1,4 +1,4 @@
-asgiref==3.3.1
+asgiref==3.5.2
 astroid==2.4.2
 attrs==20.3.0
 autobahn==20.12.3
@@ -21,9 +21,9 @@ cryptography==3.4.4
 cssselect==1.1.0
 daphne==3.0.1
 dateutils==0.6.8
-Django==3.0.14
-django-solo==1.1.5
-djangorestframework==3.11.2
+Django==3.2.14
+django-solo==1.2.0
+djangorestframework==3.13.1
 enum34==1.1.10
 et-xmlfile==1.1.0
 feedfinder2==0.0.4
