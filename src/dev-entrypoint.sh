@@ -1,5 +1,19 @@
 #!/bin/sh
 
+if [ "DB_ENGINE" = "postgresql" ]
+then
+    echo "Waiting for postgres..."
+
+    while ! nc -z $DB_HOST $DB_PORT; do
+        sleep 1
+    done
+
+    echo "PostgreSQL started"
+fi
+
+sleep 5
+
+python manage.py flush --no-input
 python manage.py makemigrations
 python manage.py migrate --no-input
 python manage.py collectstatic --no-input
