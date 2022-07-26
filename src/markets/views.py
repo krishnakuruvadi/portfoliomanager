@@ -112,7 +112,9 @@ def markets_home(request):
     return render(request, template, context)
 
 def get_index_on(index, date):
-    response = YahooFinance2(index).get_historical_value(date+relativedelta(days=-5), date)
+    yf = YahooFinance2(index)
+    response = yf.get_historical_value(date+relativedelta(days=-5), date)
+    yf.close()
     if response:
         val_date = None
         val = None

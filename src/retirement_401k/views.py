@@ -198,8 +198,9 @@ def account_detail(request, id):
         if nav.comparision_nav_value and nav.comparision_nav_value != 0:
             val = float(nav.comparision_nav_value)
         else:
-            response = YahooFinance2('SPY').get_historical_value(nav.nav_date, nav.nav_date+relativedelta(days=5))
-        
+            yf = YahooFinance2('SPY')
+            response = yf.get_historical_value(nav.nav_date, nav.nav_date+relativedelta(days=5))
+            yf.close()
             val_date = None
             for k,v in response.items():
                 if not val:

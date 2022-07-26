@@ -31,6 +31,11 @@ class YahooFinance2(Exchange):
     def get_session(self):
         self.session = requests.Session()
 
+    def close(self):
+        self.session.close()
+        self.session = None
+        self.crumb = None
+
     def get_crumb(self):
         response = self.session.get(self.crumb_link.format(self.symbol), timeout=self.timeout, headers=self.user_agent_headers)
         response.raise_for_status()

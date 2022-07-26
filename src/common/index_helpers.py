@@ -36,8 +36,9 @@ def update_indexes(start_date, end_date):
     today = datetime.date.today()
     for index in Index.objects.all():
         try:
-            response = YahooFinance2(index.yahoo_symbol).get_historical_value(start_date, end_date)
-            
+            yf = YahooFinance2(index.yahoo_symbol)
+            response = yf.get_historical_value(start_date, end_date)
+            yf.close()
             last_val = 0
             for k,v in response.items():
                 if (today - k).days <=5 or k.day in [25, 26, 27, 28, 29, 30, 31, 1, 2, 3, 4, 5]:
@@ -59,8 +60,9 @@ def update_index(exchange, start_date, end_date):
                 name=get_name_of_index(symbol),
                 yahoo_symbol=symbol
             )    
-        response = YahooFinance2(symbol).get_historical_value(start_date, end_date)
-        
+        yf = YahooFinance2(symbol)
+        response = yf.get_historical_value(start_date, end_date)
+        yf.close()
         last_val = 0
         for k,v in response.items():
             if k.day in [25, 26, 27, 28, 29, 30, 31, 1, 2, 3, 4, 5]:
