@@ -1,4 +1,4 @@
-from huey.contrib.djhuey import task, periodic_task, db_task, db_periodic_task
+from huey.contrib.djhuey import task, periodic_task, db_task, db_periodic_task, on_startup
 from huey import crontab
 from mutualfunds.models import Folio, MutualFundTransaction
 from common.models import HistoricalStockPrice, MutualFund, HistoricalMFPrice, MFYearlyReturns, Stock
@@ -561,6 +561,13 @@ def add_share_transactions(broker, user, full_file_path):
     os.remove(full_file_path)
 
 @db_periodic_task(crontab(minute='*/20'))
+def update_scroll_data_periodic():
+    update_scroll_data()
+
+@on_startup()
+def update_scroll_data_startup():
+    update_scroll_data()
+
 def update_scroll_data():
     pref_obj = Preferences.get_solo()
     sel_indexes = list()
@@ -1107,6 +1114,11 @@ def pull_and_store_coin_historical_vals(symbol, dt):
         print(f'failed to add any historical coin price entries for {symbol} starting {dt}')
 
 '''
+@db_task()
+def reconcile_stock(exchange, symbol, etf, only_if_not_exists=True):
+    from common.shares_helper import reconcile_stock
+    reconcile_stock(exchange, symbol, etf, only_if_not_exists)
+
 @db_task()
 def add_gold_trans(broker, trans):
     from gold.gold_helper import add_broker_trans
