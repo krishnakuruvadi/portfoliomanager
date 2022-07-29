@@ -28,13 +28,6 @@
     {% load static %}
     <div class="navigation">
       <ul>
-        <li class="nav-item">
-          <a class="nav-link" href="#" data-toggle="modal" data-target="#myModal">
-            <span class="icon"><img src="{% static 'favicon.ico' %}" height="20" width="24" class="fas" id="id_pm_img"></span>
-            <span class="title">PortfolioManager</span>
-          </a>
-        </li>
-        <div class="dropdown-divider"></div>
         <li class="nav-item" id="id_dashboard_module">
           <a class="nav-link" href="/" title="Dashboard">
             <span class="icon"><i class="fas fa-fw fa-home"></i></span>
@@ -165,9 +158,14 @@
         </li>
       </ul>
     </div>
-
-    <div class="toggle" id="toggleMenu" onclick="toggleMenu()">
-      <i class="fas fa-bars" id="bars-toggle" style="font-size: 2em;"></i>
+    <div class="menu-container sticky-top">
+      <a class="navbar-brand" href="#" data-toggle="modal" data-target="#myModal">
+        <span class="brand-icon"><img src="{% static 'favicon.ico' %}" style="display: inline-block;" height="40px" width="40px" class="fas" id="id_pm_img"></span>
+        <span style="display: inline-block;" class="brand-name">Portfolio Manager</span>
+      </a>
+      <div class="toggle" id="toggleMenu" onclick="toggleMenu()">
+        <i class="fas fa-bars" id="bars-toggle" style="font-size: 2em;"></i>
+      </div>
     </div>
 
     <div class="logo">
@@ -202,7 +200,7 @@
           </div>
         </div>
       </div>
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3"  style="height: 60px;background: rgb(238, 235, 235);display: block;padding: 0px 0px 0px 0px;margin:0px 0px 0px 0px;">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3"  style="height: 60px;display: block;padding: 0px 0px 0px 0px;margin:0px 0px 0px 0px;">
         {% block viewname %} replace me {% endblock %}
         <div class="btn-toolbar mb-2 mb-md-0">
           <div class="btn-group mr-2">
@@ -238,24 +236,34 @@
     <script src='https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap4.min.js'></script>
     <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
 
-    <script type="text/javascript">
+    <script>
+      var screensize = window.innerWidth;
       function toggleMenu() {
-        console.log('inside toggle menu');
-        let navigation = document.querySelector('.navigation');
-        let toggle = document.querySelector('.toggle');
-        navigation.classList.toggle('active');
-        toggle.classList.toggle('active');
-        let main = document.querySelector('.main');
-        main.classList.toggle('deactive');
-        let logo = document.querySelector('.logo');
-        logo.classList.toggle('deactive');
-        console.log(logo.classList);
-        if (logo.classList.value.includes('deactive')) {
-          document.getElementById("toggleMenu").innerHTML='<i class="fas fa-times" id="bars-toggle" style="font-size: 2em;"></i>';
-        } else {
-          document.getElementById("toggleMenu").innerHTML='<i class="fas fa-bars" id="bars-toggle" style="font-size: 2em;"></i>';
+          console.log('inside toggle menu');
+          let navigation = document.querySelector('.navigation');
+          let toggle = document.querySelector('.toggle');
+          navigation.classList.toggle('active');
+          toggle.classList.toggle('active');
+          let main = document.querySelector('.main');
+          main.classList.toggle('deactive');
+          let logo = document.querySelector('.logo');
+          logo.classList.toggle('deactive');
+          console.log(logo.classList);
+          if (screensize < 575){
+            if (logo.classList.value.includes('deactive')) {
+              document.getElementById("toggleMenu").innerHTML='<i class="fas fa-times" id="bars-toggle" style="font-size: 2em;"></i>';
+            } else {
+              document.getElementById("toggleMenu").innerHTML='<i class="fas fa-bars" id="bars-toggle" style="font-size: 2em;"></i>';
+            }
+          }
+          else{
+            if (logo.classList.value.includes('deactive')) {
+              document.getElementById("toggleMenu").innerHTML='<i class="fas fa-bars" id="bars-toggle" style="font-size: 2em;"></i>';
+            } else {
+              document.getElementById("toggleMenu").innerHTML='<i class="fas fa-times" id="bars-toggle" style="font-size: 2em;"></i>';
+            }
+          }
         }
-      }
     </script>
     {% block scriptlibrary %}{% endblock scriptlibrary %}
     <!--script src="dashboard.js"></script-->
