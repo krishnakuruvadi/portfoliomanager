@@ -1,6 +1,9 @@
 {
     "100120": {
-        "kuvera_name":"HDFC Balance Advantage Regular Dividend Payout Plan"
+        "kuvera_name":"HDFC Balance Advantage Regular IDCW Payout Plan"
+    },
+    "100614": {
+        "kuvera_name":"Sundaram Diversified Equity Regular IDCW Payout Plan"
     },
     "101762": {
         "kuvera_name":"HDFC Equity Growth Plan"
@@ -9,10 +12,10 @@
         "name": "HDFC Prudence Fund - Dividend Option",
         "isin": "INF179K01AT2",
         "isin2": "INF179K01AU0",
-        "kuvera_name": "HDFC Prudence Dividend Payout Plan"
+        "kuvera_name": "HDFC Prudence IDCW Payout Plan"
     },
     "101980": {
-        "kuvera_name": "HDFC Tax Saver Dividend Payout Plan"
+        "kuvera_name": "HDFC Tax Saver IDCW Payout Plan"
     },
     "105628": {
         "kuvera_name": "Magnum Taxgain Scheme 1993 Growth Plan"

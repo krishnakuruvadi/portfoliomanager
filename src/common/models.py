@@ -35,6 +35,10 @@ GOLD_PURITY_CHOICES = [
     ('24K', '24K')
 ]
 
+EMAIL_BACKEND_CHOICES = [
+    ('Mailjet', 'Mailjet')
+]
+
 class Bonusv2(models.Model):
     class Meta:
         unique_together = (('stock', 'announcement_date'),)
@@ -257,7 +261,10 @@ class Preferences(SingletonModel):
     currency = models.CharField(max_length=3, null=True, blank=True, default='INR')
     show_zero_value_mfs = models.BooleanField(default=False)
     show_zero_value_shares = models.BooleanField(default=False)
-
+    sender_email = models.EmailField(null=True, blank=True)
+    email_backend = models.CharField(max_length=100, null=True, blank=True, choices=EMAIL_BACKEND_CHOICES)
+    email_api_key = models.CharField(max_length=100, null=True, blank=True)
+    email_api_secret = models.CharField(max_length=100, null=True, blank=True)
 
 class Passwords(models.Model):
     class Meta:
