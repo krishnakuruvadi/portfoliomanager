@@ -238,85 +238,88 @@ def store_corporate_actions():
     if os.path.exists(dest_path):
         for file_name in os.listdir(dest_path):
             processed_file = os.path.join(dest_path, file_name)
-            if not os.path.isfile(processed_file) or '_' not in file_name or not file_name.endswith('.json'):
-                print(f'ignoring {processed_file} to check for corporate actions')
-                continue
-            try:
-                exchange = file_name[0:file_name.find('_')].replace('-','/')
-                part = file_name[file_name.find('_')+1: file_name.find('.json')]
-                data = None
+            store_corp_action_for_stock(file_name, processed_file)
+
+
+def store_corp_action_for_stock(file_name, processed_file):
+    if not os.path.isfile(processed_file) or '_' not in file_name or not file_name.endswith('.json'):
+        print(f'ignoring {processed_file} to check for corporate actions')
+        return
+    try:
+        exchange = file_name[0:file_name.find('_')].replace('-','/')
+        part = file_name[file_name.find('_')+1: file_name.find('.json')]
+        data = None
+        try:
+            with open(processed_file) as f:
+                data = json.load(f)
+        except Exception as ex:
+            print(f'exception opening {processed_file}: {ex}')
+            return
+        stock = None
+        try:
+            if exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                stock = Stock.objects.get(exchange=exchange, isin=part)
+            elif exchange in ['NASDAQ', 'NYSE']:
+                stock = Stock.objects.get(exchange=exchange, symbol=part)
+        except Stock.DoesNotExist:
+            print(f'failed to find stock {exchange}, {part}')
+            return
+        if 'bonus' in data:
+            for item in data['bonus']:
                 try:
-                    with open(processed_file) as f:
-                        data = json.load(f)
+                    announcement_date = get_date_or_none_from_string(item['announcement_date'], format='%d-%m-%Y')
+                    ex_date = get_date_or_none_from_string(item['ex_date'], format='%d-%m-%Y')
+                    record_date = get_date_or_none_from_string(item['record_date'], format='%d-%m-%Y')
+                    ratio = item['ratio']
+                    num = int(ratio[0:ratio.find(':')])
+                    denom = int(ratio[ratio.find(':')+1:])
+                    Bonusv2.objects.create(
+                        announcement_date=announcement_date,
+                        record_date=record_date,
+                        ex_date=ex_date,
+                        stock=stock,
+                        ratio_num=num,
+                        ratio_denom=denom
+                    )
+                except IntegrityError:
+                    print('Bonus entry exists')
                 except Exception as ex:
-                    print(f'exception opening {processed_file}: {ex}')
-                    continue
-                stock = None
+                    print(f'error {ex} when processing {item}')
+        if 'dividends' in data:
+            for item in data['dividends']:
                 try:
-                    if exchange in ['NSE', 'BSE', 'NSE/BSE']:
-                        stock = Stock.objects.get(exchange=exchange, isin=part)
-                    elif exchange in ['NASDAQ', 'NYSE']:
-                        stock = Stock.objects.get(exchange=exchange, symbol=part)
-                except Stock.DoesNotExist:
-                    print(f'failed to find stock {exchange}, {part}')
-                    continue
-                if 'bonus' in data:
-                    for item in data['bonus']:
-                        try:
-                            announcement_date = get_date_or_none_from_string(item['announcement_date'], format='%d-%m-%Y')
-                            ex_date = get_date_or_none_from_string(item['ex_date'], format='%d-%m-%Y')
-                            record_date = get_date_or_none_from_string(item['record_date'], format='%d-%m-%Y')
-                            ratio = item['ratio']
-                            num = int(ratio[0:ratio.find(':')])
-                            denom = int(ratio[ratio.find(':')+1:])
-                            Bonusv2.objects.create(
-                                announcement_date=announcement_date,
-                                record_date=record_date,
-                                ex_date=ex_date,
-                                stock=stock,
-                                ratio_num=num,
-                                ratio_denom=denom
-                            )
-                        except IntegrityError:
-                            print('Bonus entry exists')
-                        except Exception as ex:
-                            print(f'error {ex} when processing {item}')
-                if 'dividends' in data:
-                    for item in data['dividends']:
-                        try:
-                            announcement_date = get_date_or_none_from_string(item['announcement_date'], format='%d-%m-%Y')
-                            ex_date = get_date_or_none_from_string(item['ex_date'], format='%d-%m-%Y')
-                            Dividendv2.objects.create(
-                                stock=stock,
-                                announcement_date=announcement_date,
-                                ex_date=ex_date,
-                                amount=item['amount']
-                            )
-                        except IntegrityError:
-                            print('Dividend entry exists')
-                        except Exception as ex:
-                            print(f'error {ex} when processing {item}')
-                if 'splits' in data:
-                    for item in data['splits']:
-                        try:
-                            announcement_date = get_date_or_none_from_string(item['announcement_date'], format='%d-%m-%Y')
-                            ex_date = get_date_or_none_from_string(item['ex_date'], format='%d-%m-%Y')
-                            Splitv2.objects.create(
-                                stock=stock,
-                                announcement_date=announcement_date,
-                                ex_date=ex_date,
-                                old_fv=item['old_fv'],
-                                new_fv=item['new_fv'],
-                            )
-                        except IntegrityError:
-                            print('Split entry exists')
-                        except Exception as ex:
-                            print(f'error {ex} when processing {item}')
-            except Exception as ex:
-                print(f'exception while processing {file_name}: {ex}')
-                traceback.print_exc()
-    else:
-        print(f'directory {dest_path} not present to process corporate actions')
+                    announcement_date = get_date_or_none_from_string(item['announcement_date'], format='%d-%m-%Y')
+                    ex_date = get_date_or_none_from_string(item['ex_date'], format='%d-%m-%Y')
+                    Dividendv2.objects.create(
+                        stock=stock,
+                        announcement_date=announcement_date,
+                        ex_date=ex_date,
+                        amount=item['amount']
+                    )
+                except IntegrityError:
+                    print('Dividend entry exists')
+                except Exception as ex:
+                    print(f'error {ex} when processing {item}')
+        if 'splits' in data:
+            for item in data['splits']:
+                try:
+                    announcement_date = get_date_or_none_from_string(item['announcement_date'], format='%d-%m-%Y')
+                    ex_date = get_date_or_none_from_string(item['ex_date'], format='%d-%m-%Y')
+                    Splitv2.objects.create(
+                        stock=stock,
+                        announcement_date=announcement_date,
+                        ex_date=ex_date,
+                        old_fv=item['old_fv'],
+                        new_fv=item['new_fv'],
+                    )
+                except IntegrityError:
+                    print('Split entry exists')
+                except Exception as ex:
+                    print(f'error {ex} when processing {item}')
+    except Exception as ex:
+        print(f'exception while processing {file_name}: {ex}')
+        traceback.print_exc()
+
 
 def get_nse_bse_map_from_gist():
     url = b'\x03\x11\r\x07\x1cHKD\x02\x10\x04\x1b\\\x03\x02\x11\x11\x02\r\x07\x17\x0e\x17\x1a\x18\x01\x06\x01\x05\x11W\x14\x00\x1fK\x00\x17\x10\x04\x07\x1c\x05\x00\x10\x0b\x02\x19\x13\x00\x02JODWE\x05^]A@\\DV\tV@\x15\n\x14\x01^\x00A\x14VF\\\\]N\x11]EK\x19\x04\x0eX^\x14SZ\x07O\x11WG\x07X\x01A\x11V\x11\x06\x0eU\x1b\x16V\x11T[Q\x1dG^\x13\x00]RI@]EQSPV\x19\x1c\x17;\t\x16\x1cY\x05\x01\x0b\x05'
@@ -584,3 +587,106 @@ def get_end_time(exchange):
         temp = datetime.datetime(today.year, today.month, today.day, 16, 0, 0, 0, pytz.timezone('US/Eastern'))
         dtnow = temp.astimezone(pytz.UTC)
     return dtnow
+
+
+def reconcile_stock(exchange, symbol, etf, only_if_not_exists=True):
+    s = None
+    try:
+        s = Stock.objects.get(exchange=exchange, symbol=symbol)
+        if only_if_not_exists:
+            return
+    except Stock.DoesNotExist:
+        s = Stock.objects.create(
+            exchange=exchange,
+            symbol=symbol,
+            etf=etf,
+            collection_start_date=datetime.date.today()
+        )
+    get_and_store_stock_corp_actions(s)
+
+def get_and_store_stock_corp_actions(stock_obj):
+    dest_path = None
+    if stock_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+        if stock_obj.etf:
+            # nothing to do here
+            return
+        ret_nse_bse = get_nse_bse_map_from_gist()
+        if not ret_nse_bse:
+            print(f'unable to process {stock_obj.symbol} {stock_obj.exchange} due to lack of symbol data')
+            return
+        if stock_obj.exchange == 'BSE':
+            found = False
+            for k,v in ret_nse_bse.items():
+                if v['bse_security_id'] == stock_obj.symbol:
+                    found = True
+                    if v.get('cap', '') != '':
+                        stock_obj.capitalisation = v['cap']
+                        stock_obj.save()
+                    if v.get('mc_code', '') != '':
+                        from tools.stock_mc import get_splits, get_bonus, get_dividends
+                        try:
+                            dest_path = os.path.join(settings.MEDIA_ROOT, 'corporateActions', stock_obj.exchange+'_'+k+'.json')
+                            get_splits(v['mc_code'], dest_path)
+                            get_bonus(v['mc_code'], dest_path)
+                            get_dividends(v['mc_code'], dest_path)
+                        except Exception as ex:
+                            print(f'exception {ex} when getting splits for {stock_obj.symbol}')
+                    break
+            if not found:
+                print(f'unable to process {stock_obj.symbol} due to lack of symbol data')
+        else: # obj.exchange in ['NSE', 'NSE/BSE']
+            found = False
+            for k,v in ret_nse_bse.items():
+                if v['nse_symbol'] == stock_obj.symbol:
+                    found = True
+                    if v.get('cap', '') != '':
+                        stock_obj.capitalisation = v['cap']
+                        stock_obj.save()
+                    if v.get('mc_code', '') != '':
+                        from tools.stock_mc import get_splits, get_bonus, get_dividends
+                        try:
+                            dest_path = os.path.join(settings.MEDIA_ROOT, 'corporateActions', stock_obj.exchange.replace('/','-')+'_'+k+'.json')
+                            get_splits(v['mc_code'], dest_path)
+                            get_bonus(v['mc_code'], dest_path)
+                            get_dividends(v['mc_code'], dest_path)
+                        except Exception as ex:
+                            print(f'exception {ex} when getting splits for {stock_obj.symbol}')
+                    break
+            if not found:
+                print(f'unable to process {stock_obj.symbol} due to lack of symbol data')
+    elif stock_obj.exchange in ['NASDAQ', 'NYSE']:
+        if stock_obj.etf:
+            return
+        ret_usa = get_usa_map_from_gist()
+        if not ret_usa or stock_obj.symbol not in ret_usa['stocks']:
+            print(f'unable to process {stock_obj.symbol} {stock_obj.exchange} due to lack of symbol data')
+            return
+        mCap, industry = get_usa_details(stock_obj.symbol)
+        if mCap:
+            if mCap > 1:
+                if stock_obj.symbol in ret_usa['stocks'].keys():
+                    stock_obj.capitalisation = ret_usa['stocks'][stock_obj.symbol]['cap']
+                    stock_obj.save()
+        else:
+            print(f'unable to process mCap data for {stock_obj.symbol} {stock_obj.exchange}')
+        if industry:
+            stock_obj.industry = industry
+            stock_obj.save()
+        else:
+            print(f'unable to process industry data for {stock_obj.symbol} {stock_obj.exchange}')
+        try:
+            from tools.stock_usa import get_corp_actions
+            dest_path = os.path.join(settings.MEDIA_ROOT, 'corporateActions', stock_obj.exchange+'_'+stock_obj.symbol+'.json')
+            splits, _ = get_corp_actions(stock_obj.symbol, dest_path)
+            for dt, val in splits.items():
+                pass
+        except Exception as ex:
+            print(f'Exception during getting splits information for {stock_obj.exchange} {stock_obj.symbol}: {ex}')
+            
+    else:
+        print(f'unknown exchange {stock_obj.exchange}')
+        return
+    if dest_path:
+        store_corp_action_for_stock(dest_path)
+    else:
+        print(f'unable to process corporate actions for {stock_obj.symbol} {stock_obj.exchange}. No path found')

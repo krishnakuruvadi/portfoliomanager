@@ -373,12 +373,23 @@ def preferences(request):
             if sel_index_str:
                 print(f'sel_index_str {sel_index_str}')
                 pref_obj.indexes_to_scroll = sel_index_str
-        pref_obj.document_backup_locn = request.POST.get('timezone')
+        pref_obj.document_backup_locn = request.POST.get('doc_backup')
         pref_obj.show_zero_value_mfs = 'show_zero_val_mfs' in request.POST
         pref_obj.show_zero_value_shares = 'show_zero_val_shares' in request.POST
         curr = request.POST.get('currency')
         if curr:
             pref_obj.currency = curr.upper()
+        email_backend = request.POST['email_backend']
+        if email_backend != '' and email_backend.replace('-', '') != '':
+            pref_obj.email_backend = email_backend
+            pref_obj.email_api_key = request.POST['email_api_key']
+            pref_obj.email_api_secret = request.POST['email_api_secret']
+            pref_obj.sender_email = request.POST['sender_email']
+        else:
+            pref_obj.email_backend = ''
+            pref_obj.email_api_key = ''
+            pref_obj.email_api_secret = ''
+            pref_obj.sender_email = ''
         pref_obj.save()
  
     tzs = list()
@@ -421,6 +432,10 @@ def preferences(request):
         'document_backup_locn':'' if not pref_obj.document_backup_locn else pref_obj.document_backup_locn,
         'show_zero_val_mfs': pref_obj.show_zero_value_mfs,
         'show_zero_val_shares': pref_obj.show_zero_value_shares,
-        'currency': pref_obj.currency
+        'currency': pref_obj.currency,
+        'email_backend': pref_obj.email_backend,
+        'sender_email': pref_obj.sender_email,
+        'email_api_key': pref_obj.email_api_key,
+        'email_api_secret': pref_obj.email_api_secret,
     }
     return render(request, template, context)

@@ -76,6 +76,7 @@ def xirr(cashflows,guess=0.1):
     """
     
     #return secant_method(0.0001,lambda r: xnpv(r,cashflows),guess)
+    '''
     try:
         val = optimize.newton(lambda r: xnpv(r,cashflows),guess)
         if val > 10000000:
@@ -85,7 +86,40 @@ def xirr(cashflows,guess=0.1):
     except Exception as ex:
         print(f'exception while getting cash flows {ex}')
         print(f'cash flows: {cashflows}')
-        return 0
+        print(f'getting xirr from alternate method')
+        from .new_xirr import alt_xirr
+        res = alt_xirr(cashflows)
+        if res > 10000000:
+            print(f'unreasonable returns {res}.  returning 0 instead')
+            return 0
+        print(f'alt_xirr returned {res}')
+        return res
+    '''
+    try:
+        outc = optimize.newton(lambda r: xnpv(r, cashflows), guess, maxiter=100)
+        if outc.imag == 0:
+            print(f'xirr returning {outc}')
+            if outc > 10000000:
+                print(f'unreasonable returns {outc}.  returning 0 instead')
+                return 0
+            return outc
+        else:
+            raise
+    except (RuntimeError, OverflowError):
+        try:
+            outc = optimize.newton(lambda r: xnpv(r, cashflows), -guess, maxiter=100)
+            if outc.imag == 0:
+                print(f'xirr returning {outc}')
+                if outc > 10000000:
+                    print(f'unreasonable returns {outc}.  returning 0 instead')
+                    return 0
+                return outc
+            else:
+                raise
+        except (RuntimeError, OverflowError):
+            print(f'failed to get xirr again.  returning 0 instead')
+            return 0
+
 
 # Source: https://github.com/peliot/XIRR-and-XNPV/blob/master/financial.py
 

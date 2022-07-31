@@ -1,0 +1,14 @@
+{% extends 'email_templates/base_email.html' %}
+
+{% block title %}
+PORTFOLIO ALERT
+{% endblock %}
+
+{% block subject %}
+<strong>For the Week:</strong> {{from_date}} – {{to_date}}
+{% endblock %}
+
+{% block body %}
+{{content}}
+
+{% endblock %}
