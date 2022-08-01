@@ -29,7 +29,7 @@ def send_weekend_updates(ext_user=None):
     context['from_date'] = last_week.strftime('%Y-%m-%d')
     context['to_date'] = today.strftime('%Y-%m-%d')
     # list to comma separated string
-    context['name'] = ','.join(short_names)
+    context['name'] = ', '.join(short_names)
     context['content'] = None
     start = 0
     credits = 0

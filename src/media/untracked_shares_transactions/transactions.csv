@@ -1,9 +1,0 @@
-user,exchange,trade_date,trading_symbol,segment,trade_type,quantity,price,order_id,notes,broker
-1,NSE,28/09/2017,IGNORETRANS,EQ,buy,42,700,12345687,this is example buy transaction,ZERODHA
-1,NSE,28/09/2017,IGNORETRANS,EQ,sell,42,700,12345687,this is example sell transaction,ZERODHA
-1,NSE,23/10/2017,GICRE,EQ,buy,32,867,34936910,ipo buy,ZERODHA
-1,NSE,28/09/2017,SBILIFE,EQ,buy,42,700,30820920,ipo buy,ZERODHA
-1,NSE,24/07/2020,YESBANK,EQ,buy,1000,12,,fpo buy,ZERODHA
-1,NSE,26/4/2019,PPL,EQ,buy,2,0,,demerger allotment,ZERODHA
-1,NSE,12/6/2019,IIFLSEC,EQ,buy,4,0,,demerger allotment,ZERODHA
-1,NSE,5/2/2020,SUVENPHAR,EQ,buy,11,0,,demerger allotment,ZERODHA

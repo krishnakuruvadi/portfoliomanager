@@ -14,7 +14,7 @@
                         </tr>
                         <tr>
                         {% for item in col_values %}
-                            <td style="padding:5px 0;border-bottom:1px solid #28b66a" align="center">{{item}}</td>
+                            <td style="padding:5px 0;border-bottom:1px solid #28b66a" align="center">{% autoescape off %}{{item}}{% endautoescape %}</td>
                         {% endfor %}
                         </tr>
                     </tbody>	
