@@ -517,9 +517,10 @@ class GoalDeleteView(DeleteView):
     def get_success_url(self):
         return reverse('goals:goal-list')
 
-    def delete(self, request, *args, **kwargs):
-        delete_goal(kwargs['id'])
-        return super(DeleteView, self).delete(request, *args, **kwargs)
+    def form_valid(self, form):
+        obj = self.get_object()
+        delete_goal(obj.id)
+        return super().form_valid(form)
 
 def add_goal(request):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT

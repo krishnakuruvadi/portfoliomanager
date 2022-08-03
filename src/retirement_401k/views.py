@@ -313,6 +313,7 @@ def edit_transaction(request, id):
     context['curr_module_id'] = 'id_401k_module'
     return render(request, template_name, context)
 
+#TODO: add post processing call to reconcile_401k
 class TransactionDeleteView(DeleteView):
     def get_object(self):
         id_ = self.kwargs.get("id")
@@ -322,20 +323,11 @@ class TransactionDeleteView(DeleteView):
         id_ = self.kwargs.get("id")
         trans = get_object_or_404(Transaction401K, id=id_)
         return reverse('retirement_401k:transaction-list', args=(trans.account.id,))
-    
-    def delete(self, request, *args, **kwargs):
-        #response = super(TransactionDeleteView, self).delete(request, *args, **kwargs)
-        #return response
-        self.object = self.get_object()
-        success_url = self.get_success_url()
-        print(f'******success url {success_url}')
-        self.object.delete()
-        reconcile_401k()
-        return HttpResponseRedirect(success_url)
 
     def get(self, *args, **kwargs):
         return self.post(*args, **kwargs)
 
+#TODO: add post processing call to reconcile_401k
 class AccountDeleteView(DeleteView):
     def get_object(self):
         id_ = self.kwargs.get("id")
@@ -343,13 +335,6 @@ class AccountDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse('retirement_401k:account-list')
-
-    def delete(self, request, *args, **kwargs):
-        id_ = self.kwargs.get("id")
-        self.object = self.get_object()
-        success_url = self.get_success_url()
-        self.object.delete()
-        return HttpResponseRedirect(success_url)
     
     def get(self, *args, **kwargs):
         return self.post(*args, **kwargs)

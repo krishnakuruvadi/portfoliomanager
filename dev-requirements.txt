@@ -11,7 +11,7 @@ casparser==0.4.7
 casparser-isin==2021.6.1
 certifi==2020.4.5.1
 cffi==1.15.1
-channels==3.0.3
+channels==3.0.5
 chardet==3.0.4
 click==7.1.2
 colorama==0.4.4
@@ -21,8 +21,8 @@ cryptography==3.4.4
 cssselect==1.1.0
 daphne==3.0.1
 dateutils==0.6.8
-Django==3.2.14
-django-solo==1.2.0
+Django==4.0.7
+django-solo==2.0.0
 djangorestframework==3.13.1
 enum34==1.1.10
 et-xmlfile==1.1.0
