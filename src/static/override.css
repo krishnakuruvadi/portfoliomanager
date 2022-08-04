@@ -17,16 +17,17 @@ body
 .navigation
 {
     position: fixed;
-    width: 60px;
+    width: 250px;
     height: 100%;
     background: #593f75;
     transition: 0.5s;
     overflow: scroll;
+    margin-top: 60px;
 }
 
 .main
 {
-    margin-left:60px;
+    margin-left:255px;
     margin-top: 0px;
     transition: 0.5s;
     overflow:scroll;
@@ -43,17 +44,17 @@ body
 
 .navigation.active
 {
-    width: 200px;
+    width: 65px;
 }
 
 .main.deactive
 {
-    margin-left: 200px;   
+    margin-left: 70px;   
 }
 
 .logo.deactive
 {
-    margin-left: 200px;   
+    margin-left: 70px;   
 }
 
 .navigation ul
@@ -120,6 +121,27 @@ body
     white-space: nowrap;
 }
 
+.menu-container{
+    position: absolute;
+    top:0;
+    right:0;
+    width: 100%;
+    height:60px;
+    background: #593f75;
+    position: sticky;
+}
+
+.navbar-brand{
+    color: #ffffff;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    padding: 10px;
+}
+.brand-name{
+    padding-left: 10px;
+}
+
 .toggle
 {
     position: absolute;
@@ -127,12 +149,10 @@ body
     right:0;
     width: 60px;
     height:60px;
-    background: #593f75;
     cursor: pointer;
-    text-align: center;
-    padding: 15px 0;
+    text-align: right;
+    padding: 15px 15px 0px 10px;
 }
-
 
 .toggle:hover
 {
@@ -172,6 +192,7 @@ div {
     list-style: none; 
     overflow: hidden; 
     font: 14px Verdana, Helvetica, Arial, Sans-Serif;
+    background-color: transparent; /* Overriding default Bootstrap breadcrumb value of #e9ecef */
 }
 
 .breadcrumb li a {
@@ -247,40 +268,73 @@ div {
   display: none;
 }
 
-@media (max-width: 767px)
-{
-    .navigation
-    {
-        left: -60px;
-    }
-    .navigation.active
-    {
-        left: 0px;
-        width: 100%;
-    }
-    .main
-    {
-        margin-left:0px;
-        width:100%;
-        padding: 60px 0px 0px 0px;
-    }
-    .main.deactive
-    {
-        width:0%;
-        display: none;
-    }
-    .logo.deactive
-    {
-        width:0%;
-        display: none;
-    }
-    .logo
-    {
-        left: -60px;
-    }
-}
-
 .paddingBetweenCols td
 {
     padding:0 15px;
+}
+
+/* Change layout of content based on screen size by querying device for width */
+
+@viewport{
+    width: device-width;
+    zoom: 1.0;
+
+}
+
+/* Small devices or portrait mode */
+@media (max-width: 575px)
+{
+    .navigation {
+        left: -100%;
+    }
+    .navigation.active {
+        left: 0px;
+        width: 100%;
+    }
+    .main {
+        margin-left:0px;
+        width:100%;
+        padding: 0px 0px 0px 5px;
+    }
+    .main.deactive {
+        width:0%;
+        display: none;
+    }
+    .logo.deactive {
+        width:0%;
+        display: none;
+    }
+    .logo {
+        left: -60px;
+    }
+    .toggle{
+        position: absolute;
+        top:0;
+        right:0;
+        width: 60px;
+        height:60px;
+        cursor: pointer;
+        text-align: right;
+        padding: 15px 15px 0px 10px;
+    }
+    .menu-container{
+        position: absolute;
+        top:0;
+        right:0;
+        width: 100%;
+        height:60px;
+        background: #593f75;
+        position: sticky;
+    }
+    .navbar-brand{
+        color: #ffffff;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        padding: 10px;
+}
+    }
+    .brand-name{
+        padding-left: 10px;
+    }    
 }

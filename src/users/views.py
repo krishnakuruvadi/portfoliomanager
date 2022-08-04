@@ -212,11 +212,11 @@ class UserDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse('users:user-list')
-    
-    def delete(self, request, *args, **kwargs):
-        print(request)
-        delete_user(kwargs['id'])
-        return super(DeleteView, self).delete(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        obj = self.get_object()
+        delete_user(obj.id)
+        return super().form_valid(form)
 
 def add_user(request):
     template = 'users/add_user.html'
