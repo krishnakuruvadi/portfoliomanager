@@ -284,3 +284,9 @@ div {
 {
     padding:0 15px;
 }
+
+.confetti{
+    max-width: 100%;
+    display: block;
+    user-select: none;
+ }
