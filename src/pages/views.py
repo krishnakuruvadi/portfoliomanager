@@ -10,10 +10,16 @@ import json
 from dateutil import tz
 from pytz import timezone
 from common.helper import get_preferences
-from users.user_interface import UserInterface
+from users.user_interface import UserInterface, user_count
 
 # Create your views here.
 def home_view(request, *args, **kwargs): # *args, **kwargs
+    
+    if user_count() == 0:
+        return render(request, 'welcome.html')
+    else:
+        pass
+    
     print(args, kwargs)
     print(request.user)
     users = get_all_users_names_as_list()
