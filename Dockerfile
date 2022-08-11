@@ -14,11 +14,14 @@ RUN mkdir -p /opt/app/portfoliomanager
 
 # App environment set up
 COPY src /opt/app/portfoliomanager/
-COPY dev-requirements.txt /opt/app/portfoliomanager/dev-requirements.txt
+COPY env_files /opt/app/portfoliomanager/src
+COPY entrypoint.sh /opt/app/portfoliomanager/src/entrypoint.sh
+COPY requirements.txt /opt/app/portfoliomanager/requirements.txt
+
 WORKDIR /opt/app/portfoliomanager
 
-RUN chmod +x /opt/app/portfoliomanager/dev-entrypoint.sh
-RUN pip install -r /opt/app/portfoliomanager/dev-requirements.txt
+RUN chmod +x /opt/app/portfoliomanager/src/entrypoint.sh
+RUN pip install -r /opt/app/portfoliomanager/requirements.txt
 RUN chown -R www-data:www-data /opt/app
 
 # Apache Tika library log file prep
@@ -33,4 +36,4 @@ RUN rm -f chromedriver_linux64.zip
 # Final Set up
 EXPOSE 8020
 STOPSIGNAL SIGTERM
-ENTRYPOINT ["/opt/app/portfoliomanager/dev-entrypoint.sh"]
+ENTRYPOINT ["/opt/app/portfoliomanager/src/entrypoint.sh"]

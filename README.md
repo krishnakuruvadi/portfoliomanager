@@ -8,9 +8,13 @@ An sandbox live server is hosted at https://india-portfolio-manager.herokuapp.co
 ! Please be kind enough and not do any delete operations.
 ```
 
+---
+
 ## Intent
 
 To build a portfolio manager which can track and provide insights into a individual or family's financial interests.
+
+---
 
 ## What is supported?
 
@@ -28,7 +32,153 @@ To build a portfolio manager which can track and provide insights into a individ
 - Gold
 - 401K
 
+---
+
 ## Getting started with Portfolio Manager
+
+### Deployment methods
+
+- Baremetal (Laptop/Desktop/Server) and Virtual Machine
+  - [Install Walkthrough](#baremetal-and-virtual-machine-deployment-method)
+- Docker
+  - [Install Walkthrough](#docker-deployment-method)
+
+---
+
+## Baremetal and Virtual Machine Deployment Method
+
+### 1. Requirements
+
+- Python v3.8 or above.
+
+- Libraries
+
+  - macOS:
+
+``` bash
+brew install ghostscript tcl-tk
+```
+  - Ubuntu
+
+``` bash
+apt install ghostscript python3-tk
+```
+
+- Git v2.34.1 or above
+
+  - [Official Git Installation Walkthrough](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+
+- Virtual Environment (optional)
+
+  - Select and install your preferred virtual environment manager (anaconda, virtualenv, etc.)
+
+### 2. Downloading the appliaction
+
+- Clone or download the source code.
+
+``` bash
+git clone https://github.com/krishnakuruvadi/portfoliomanager.git
+```
+
+### Prepare the application to launch
+
+- Change into the recently clone/downloaded directory.
+
+``` bash
+cd ./portfoliomanager
+```
+
+- Create a virtual environment (optional).
+
+```bash
+python3 -m venv ./venv
+```
+
+- Activate virtual environment.
+
+```bash
+source ./venv/bin/activate
+```
+
+- Install the required packages.
+
+```
+pip install -r requirements.txt
+```
+
+- Edit the environment variables to suite your needs.
+
+  - Open the env_files directory and edit the .pm-env file.
+  - Carefully read the comments through the file as it will provide context.
+  - Edit the parameters as necessary.
+  - **WARNING** - The application is expecting this filename. If you wish to change it please also modify ***environ.Env.read_env(os.path.join(BASE_DIR, 'env_files', '.NEW-FILE-NAME'))*** in ***setting.py***
+
+- Copy or move the entire env_files directory to the src directory. The directory should look as follows:
+
+  - portfoliomanager
+    - src
+      - env_files
+        - .pm-env
+
+- Setup the server.
+
+```bash
+cd src
+python manage.py makemigrations
+python manage.py migrate
+python manage.py collectstatic
+```
+
+- Create a super user in django (optional).
+
+```
+python manage.py createsuperuser
+```
+
+  - You should be prompted to enter the desired username, email and password for this new admin.
+
+- Download, extract, and copy the chromedriver to root of the project (portfoliomanager). You can obtain this driver from here: https://chromedriver.chromium.org/downloads. The directory should look as follows:
+
+  - portfoliomanager
+    - chromedriver
+
+### Launch Portfolio Manager
+
+- Start the server.
+
+```
+python manage.py runserver
+```
+
+- Start the huey process
+
+  - In another terminal activate virtual environment and run background tasks
+
+```bash
+source ./venv/bin/activate
+cd src
+python manage.py run_huey
+```
+
+### Browse to Portfolio Manager
+
+- Open your favorite web browser and go to:
+  
+``` http
+http://<host-ip>:8000/
+```
+
+OR 
+
+``` http
+http://localhost:8000/
+```
+
+- Enjoy Portfolio Manager
+
+---
+
+## Docker Deployment Method
 
 ### 1. Requirements
 
@@ -48,10 +198,10 @@ To build a portfolio manager which can track and provide insights into a individ
 
 ### 2. Downloading the appliaction
 
-- Clone or download this docker source code.
+- Clone or download the source code.
 
 ``` bash
-git clone -b docker-dev https://github.com/krishnakuruvadi/portfoliomanager.git
+git clone https://github.com/krishnakuruvadi/portfoliomanager.git
 ```
 
 ### Prepare the application to launch
@@ -65,7 +215,7 @@ cd ./portfoliomanager
 - Open the docker compose file to edit the application environment.
 
 ``` bash
-nano ./dev-docker-compose.yml
+nano ./docker-compose.yml
 ```
 
 - Edit the application environment as needed. Parameters that can be changed are:
@@ -107,6 +257,8 @@ http://<docker-host-ip>/
 ```
 
 - Enjoy Portfolio Manager
+
+---
   
 ### Help us and support our work
 
@@ -114,6 +266,8 @@ http://<docker-host-ip>/
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kkuruvadi)
 
+---
+
 ##### Disclaimers
 
-- This software is in its pre-alpha stage.
+##### This software is in its pre-alpha stage.
