@@ -91,7 +91,7 @@ cd ./portfoliomanager
 - Create a virtual environment (optional).
 
 ```bash
-python3 -m venv ./venv
+python -m venv ./venv
 ```
 
 - Activate virtual environment.
@@ -108,17 +108,25 @@ pip install -r requirements.txt
 
 - Edit the environment variables to suite your needs.
 
-  - Open the env_files directory and edit the .pm-env file.
-  - Carefully read the comments through the file as it will provide context.
+  - Open the env_files directory and edit the .pm-env.sample file.
+  - Carefully read the comments throughout the file as it will provide additional context.
   - Edit the parameters as necessary.
-  - **WARNING** - The application is expecting this filename. If you wish to change it please also modify ***environ.Env.read_env(os.path.join(BASE_DIR, 'env_files', '.NEW-FILE-NAME'))*** in ***setting.py***
+
+- Rename the environment variables file.
+
+  - Remove .sample from the filename. Ensure the filename is .pm-env before proceeding to the next step.
+    - **WARNING** - The application is expecting .pm-env as the filename. If you wish to change it please also modify ***env_file_path*** in ***setting.py***
+
+- Delete unused environment variables file (optional)
+
+  - Since the postgresql-env.sample file is only used with docker deployments, this file can be safely deleted before proceeding to the next step.
 
 - Copy or move the entire env_files directory to the src directory. The directory should look as follows:
 
   - portfoliomanager
     - src
       - env_files
-        - .pm-env
+        - .pm-env OR .CUSTOM-FILE-NAME set above.
 
 - Setup the server.
 
