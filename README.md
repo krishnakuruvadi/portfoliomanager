@@ -244,7 +244,7 @@ docker compose up -d
 
 - Open your favorite web browser and go to:
   
-``` http
+```
 http://<docker-host-ip>/
 ```
 
