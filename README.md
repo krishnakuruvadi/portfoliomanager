@@ -220,40 +220,24 @@ git clone https://github.com/krishnakuruvadi/portfoliomanager.git
 cd ./portfoliomanager
 ```
 
-- Open the docker compose file to edit the application environment.
+- Edit the environment variables to suite your needs.
 
-``` bash
-nano ./docker-compose.yml
-```
+  - Open the env_files directory and edit both files (.pm-env.sample and postgresql-env.sample).
+  - Carefully read the comments throughout the files as it will provide additional context.
+  - Edit the parameters as necessary.
 
-- Edit the application environment as needed. Parameters that can be changed are:
+- Rename the environment variables files.
 
-  - container_name
-  - DJANGO_SUPERUSER_USERNAME
-  - DJANGO_SUPERUSER_PASSWORD
-  - DJANGO_SUPERUSER_EMAIL
-  - DJANGO_ENABLE_DEBUG (**Caution. This value should only be change to True or False**)
-  - DB_NAME (**Caution. This value should match POSTGRES_DB**)
-  - DB_USER (**Caution. This value should match POSTGRES_USER**)
-  - DB_PASSWORD (**Caution. This value should match POSTGRES_PASSWORD**)
-  - POSTGRES_DB
-  - POSTGRES_PASSWORD
-  - POSTGRES_USER
-
-- **Save the file once you are done editing.**
+  - Remove .sample from the filenames. Ensure the filename is .pm-env and .postgresql-env before proceeding to the next step.
+    - **WARNING** - The application container (pm-app) is expecting .pm-env as the filename. If you wish to change it please also modify ***env_file_path*** in ***setting.py***. 
+    - **WARNING** - The database container (pm-db) is expecting postgresql-env as the filename. If you wish to change it please also modify ***./env_files/.postgresql-env*** in pm-db > env_file section of docker-compose.yml
 
 ### Launch Portfolio Manager
 
 - Within the application folder (i.e. portfoliomanager), run the docker compose file to build the appliaction and launch the docker containers. This step should take approximately *two* minutes.
 
 ``` bash
-docker compose -f dev-docker-compose.yml up -d
-```
-
-- To tear down the app environment, run:
-
-``` bash
-docker compose -f dev-docker-compose.yml down
+docker compose up -d
 ```
 
 ### Browse to Portfolio Manager
@@ -265,6 +249,12 @@ http://<docker-host-ip>/
 ```
 
 - Enjoy Portfolio Manager
+  
+- To tear down the app environment, run:
+
+``` bash
+docker compose down
+```
 
 ---
   
