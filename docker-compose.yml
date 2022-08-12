@@ -5,7 +5,6 @@ services:
     container_name: portfolio-manager-app
     build:
       context: .
-    env_file: ./src/env_files/.pm-env
     restart: unless-stopped
     expose:
       - "8020"
