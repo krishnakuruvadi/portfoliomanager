@@ -172,13 +172,13 @@ python manage.py run_huey
 
 - Open your favorite web browser and go to:
   
-``` http
+```
 http://<host-ip>:8000/
 ```
 
 OR 
 
-``` http
+```
 http://localhost:8000/
 ```
 
