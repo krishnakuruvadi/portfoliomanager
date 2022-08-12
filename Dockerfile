@@ -14,7 +14,7 @@ RUN mkdir -p /opt/app/portfoliomanager
 
 # App environment set up
 COPY src /opt/app/portfoliomanager/
-COPY env_files /opt/app/portfoliomanager/src
+COPY env_files /opt/app/portfoliomanager/src/
 COPY entrypoint.sh /opt/app/portfoliomanager/src/entrypoint.sh
 COPY requirements.txt /opt/app/portfoliomanager/requirements.txt
 
