@@ -11,10 +11,11 @@ RUN apt-get update && apt-get install gcc gfortran ghostscript python3-dev pytho
 
 # Create app directories
 RUN mkdir -p /opt/app/portfoliomanager
+RUN mkdir -p /opt/app/portfoliomanager/env_files
 
 # App environment set up
 COPY src /opt/app/portfoliomanager/
-COPY env_files /opt/app/portfoliomanager/
+COPY env_files /opt/app/portfoliomanager/env_files/
 COPY entrypoint.sh /opt/app/portfoliomanager/entrypoint.sh
 COPY requirements.txt /opt/app/portfoliomanager/requirements.txt
 
