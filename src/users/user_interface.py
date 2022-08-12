@@ -20,6 +20,10 @@ def get_users(ext_user):
 def get_ext_user(id):
     return None
 
+def user_count():
+    count = User.objects.count()
+    return count
+
 class UserInterface:
 
     @classmethod

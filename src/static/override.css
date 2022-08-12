@@ -273,6 +273,12 @@ div {
     padding:0 15px;
 }
 
+.confetti{
+    max-width: 100%;
+    display: block;
+    user-select: none;
+ }
+
 /* Change layout of content based on screen size by querying device for width */
 
 @viewport{
