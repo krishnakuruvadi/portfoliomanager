@@ -21,9 +21,8 @@ DEBUG=on
 
 ALLOWED_HOSTS=127.0.0.1,localhost,example.com
 
-
 # Database configuration
-# If using docker/docker compose, set value to postgresql. Else use sqlite3
+# If using docker compose, set value to postgresql. Else use sqlite3
 
 DB_ENGINE=postgresql-OR-sqlite3
 
@@ -43,7 +42,7 @@ DB_USER=svc_pm
 DB_PASSWORD=secretpassword1!
 DB_PORT=5432
 
-# Automated creation of super user through environment variables for docker/docker compose deployment method.
+# Automated creation of super user through environment variables for docker deployment method.
 DJANGO_SUPERUSER_USERNAME=admin
 DJANGO_SUPERUSER_PASSWORD=secretpassword
 DJANGO_SUPERUSER_EMAIL=admin@example.com
