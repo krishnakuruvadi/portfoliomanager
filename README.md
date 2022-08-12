@@ -160,7 +160,7 @@ python manage.py runserver
 
 - Start the huey process
 
-  - In another terminal activate virtual environment and run background tasks
+  - In another terminal activate virtual environment (if you created one above) and run background tasks
 
 ```bash
 source ./venv/bin/activate
