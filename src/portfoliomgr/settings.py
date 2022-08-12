@@ -10,7 +10,15 @@ env = environ.Env(
 )
 
 # Read environment variables from a file
-environ.Env.read_env(os.path.join(BASE_DIR, 'env_files', '.pm-env'))
+
+env_file_path = os.path.join(BASE_DIR, 'env_files', '.pm-env')
+env_file_exist = os.path.exists(env_file_path)
+
+if env_file_exist:
+    environ.Env.read_env(env_file_path)
+
+else:
+    raise Exception(f'Environment file was not found in {env_file_path}')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = str(env('SECRET_KEY'))
@@ -127,7 +135,7 @@ elif DB_ENGINE == 'postgresql':
     }
 
 else:
-    print('Unsupported database engine. Check the DB_* in the environment variables file and try again.')
+    raise Exception(f'Unsupported database engine. Check DB_ENGINE parameter in {env_file_path}.')
 
 # Password validation
 
@@ -218,7 +226,7 @@ elif DB_ENGINE == 'postgresql':
     } 
 
 else:
-    print('Unsupported configuration. Check the environment variables file and try again.')
+    raise Exception(f'Unsupported Huey configuration. Check DB_ENGINE parameter in {env_file_path}.')
 
 # Channels
 
