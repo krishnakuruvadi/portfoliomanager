@@ -21,7 +21,7 @@ cryptography==3.4.4
 cssselect==1.1.0
 daphne==3.0.1
 dateutils==0.6.8
-Django==4.0.7
+Django==4.1
 django-environ==0.9.0
 django-solo==2.0.0
 djangorestframework==3.13.1

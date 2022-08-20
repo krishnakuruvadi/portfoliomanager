@@ -544,6 +544,8 @@ def shares_insights(request):
     data['curr_module_id'] = 'id_shares_module'
     st_day = ShareInterface.get_start_day()
     today = datetime.date.today()
+    if not st_day:
+        st_day = today
     end_year = today.year+1
     ext_user = get_ext_user(request)
     users = get_users_from_ext_user(ext_user)
