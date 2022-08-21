@@ -1113,6 +1113,13 @@ def pull_and_store_coin_historical_vals(symbol, dt):
     else:
         print(f'failed to add any historical coin price entries for {symbol} starting {dt}')
 
+@db_task()
+def send_weekend_updates_email():
+    from shared.mail import Email
+    from shared.weekend_mail import send_weekend_updates
+    if Email.is_email_setup():
+        html_message = send_weekend_updates()
+        Email.send(subject='Weekend updates', message=f'This is weekend update for {datetime.date.today()}', html_message=html_message)
 '''
 @db_task()
 def reconcile_stock(exchange, symbol, etf, only_if_not_exists=True):
