@@ -218,3 +218,81 @@ class MfInterface:
         for u in get_users(ext_user):
             amt += self.get_amount_for_user(u.id)
         return amt
+    
+    @classmethod
+    def updates_summary(self, ext_user, start_date, end_date):
+        from users.user_interface import get_users
+        from shared.financial import xirr, calc_simple_roi
+
+        diff_days = (end_date - start_date).days
+
+        ret = dict()
+        ret['details'] = list()
+        ids = list()
+        for u in get_users(ext_user):
+            ids.append(u.id)
+        objs = Folio.objects.filter(user__in=ids)
+        start = 0
+        bought = 0
+        sold = 0
+        e = dict()
+        amt = 0
+        for obj in objs:
+            print(f'processing {obj.folio}')
+            start_units = float(obj.units)
+            end_units = float(obj.units)
+            amt += float(obj.latest_value) if obj.latest_value else 0
+            for trans in MutualFundTransaction.objects.filter(folio=obj, trans_date__lte=end_date, trans_date__gte=start_date):
+                if trans.trans_type == 'Buy':
+                    start_units -= float(trans.units)
+                    bought += trans.amount
+                else:
+                    start_units += float(trans.units)
+                    sold += trans.amount
+            if start_units > 0:
+                historical_mf_prices = get_historical_mf_nav(obj.fund.code, start_date+relativedelta(days=-5), start_date)
+                if len(historical_mf_prices) > 0:
+                    print('historical_mf_prices',historical_mf_prices)
+                    for k,v in historical_mf_prices[0].items():
+                        start += float(v)*start_units
+                else:
+                    print(f'failed to get vals for mutual fund {obj.fund.code} {start_date}')
+        
+
+        ret['start'] = round(start, 2)
+        ret['bought'] = round(bought, 2)
+        ret['sold'] = round(sold, 2)
+        ret['balance'] = round(amt, 2)
+        changed = float(start+bought-sold)
+        if changed != float(amt):
+            if diff_days > 7:
+                cash_flows = list()
+                cash_flows.append((start_date, -1*float(changed)))
+                cash_flows.append((end_date, float(amt)))
+                print(f'finding xirr for {cash_flows}')
+                ret['change'] = xirr(cash_flows, 0.1)*100
+            else:
+                ret['change'] = calc_simple_roi(changed , amt)
+        else:
+            ret['change'] = 0
+        ret['details'].append(e)
+        return ret
+
+    @classmethod
+    def updates_email(self, ext_user, start_date, end_date):
+        update = self.updates_summary(ext_user, start_date, end_date)
+        from shared.email_html import get_weekly_update_table
+        ret = dict()
+        col_names = ['Start','Bought','Sold','Balance', 'Change']
+        if update['change'] >= 0:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{update['change']}%"""
+        else:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{update['change']}%"""
+        values = [update['start'], update['bought'], update['sold'], update['balance'], change]
+        ret['content'] = get_weekly_update_table('Mutual Funds', col_names, values)
+        ret['start'] = update['start']
+        ret['credits'] = update['bought']
+        ret['debits'] = update['sold']
+        ret['balance'] = update['balance']
+        print(f'ret {ret}')
+        return ret

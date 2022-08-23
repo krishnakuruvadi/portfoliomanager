@@ -101,7 +101,7 @@ def pull_kuvera(user, email, passwd, pull_user_name):
         print('timeout waiting', t)
         driver.quit()
     except Exception as ex:
-        print('Exception during processing', ex)
+        print(f'Exception during processing {user} with user name {pull_user_name}: {ex}')
         driver.quit()
         return None
 

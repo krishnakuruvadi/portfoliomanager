@@ -204,3 +204,109 @@ class EsppInterface:
         ret[self.get_export_name()]['data'] = data
         print(ret)
         return ret
+    
+    @classmethod
+    def updates_summary(self, ext_user, start_date, end_date):
+        from users.user_interface import get_users
+        from shared.financial import xirr, calc_simple_roi
+
+        diff_days = (end_date - start_date).days
+
+        ret = dict()
+        ret['details'] = list()
+        ids = list()
+        for u in get_users(ext_user):
+            ids.append(u.id)
+        objs = Espp.objects.filter(user__in=ids)
+        start = 0
+        bought = 0
+        sold = 0
+        e = dict()
+        amt = 0
+        for obj in objs:
+            start_units = 0
+            end_units = float(obj.shares_purchased)
+            if obj.purchase_date >= start_date:
+                bought += float(obj.total_purchase_price)
+            else:
+                start_units += float(obj.shares_purchased)
+
+            for st in EsppSellTransactions.objects.filter(espp=obj):
+                end_units -= float(st.units)
+                if st.trans_date >= start_date:
+                    sold += float(st.trans_price)
+                else:
+                    start_units -= float(st.units)
+
+            if start_units > 0:
+                vals = get_historical_stock_price_based_on_symbol(obj.symbol, obj.exchange, start_date+relativedelta(days=-5), start_date)
+                if vals:
+                    conv_rate = 1
+                    if obj.exchange in ['NASDAQ', 'NYSE']:
+                        conv_val = get_in_preferred_currency(1, 'USD', start_date)
+                        if conv_val:
+                            conv_rate = conv_val
+                    elif obj.exchange in ['BSE', 'NSE', 'NSE/BSE']:
+                        conv_val = get_in_preferred_currency(1, 'INR', start_date)
+                        if conv_val:
+                            conv_rate = conv_val
+                    for k,v in vals.items():
+                        start += float(v)*float(conv_rate)*float(start_units)
+                        break
+                else:
+                    print(f'failed to get year end values for {obj.exchange} {obj.symbol} {start_date}')
+            if end_units > 0:
+                vals = get_historical_stock_price_based_on_symbol(obj.symbol, obj.exchange, end_date+relativedelta(days=-5), end_date)
+                if vals:
+                    conv_rate = 1
+                    if obj.exchange in ['NASDAQ', 'NYSE']:
+                        conv_val = get_in_preferred_currency(1, 'USD', end_date)
+                        if conv_val:
+                            conv_rate = conv_val
+                    elif obj.exchange in ['BSE', 'NSE', 'NSE/BSE']:
+                        conv_val = get_in_preferred_currency(1, 'INR', start_date)
+                        if conv_val:
+                            conv_rate = conv_val
+                    for k,v in vals.items():
+                        amt += float(v)*float(conv_rate)*float(end_units)
+                        break
+                else:
+                    print(f'failed to get year end values for {obj.exchange} {obj.symbol} {end_date}')
+
+        ret['start'] = round(start, 2)
+        ret['bought'] = round(bought, 2)
+        ret['sold'] = round(sold, 2)
+        ret['balance'] = round(amt, 2)
+        changed = float(start+bought-sold)
+        if changed != float(amt):
+            if diff_days > 7:
+                cash_flows = list()
+                cash_flows.append((start_date, -1*float(changed)))
+                cash_flows.append((end_date, float(amt)))
+                print(f'finding xirr for {cash_flows}')
+                ret['change'] = xirr(cash_flows, 0.1)*100
+            else:
+                ret['change'] = calc_simple_roi(changed , amt)
+        else:
+            ret['change'] = 0
+        ret['details'].append(e)
+        return ret
+
+    @classmethod
+    def updates_email(self, ext_user, start_date, end_date):
+        update = self.updates_summary(ext_user, start_date, end_date)
+        from shared.email_html import get_weekly_update_table
+        ret = dict()
+        col_names = ['Start','Bought','Sold','Balance', 'Change']
+        if update['change'] >= 0:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{update['change']}%"""
+        else:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{update['change']}%"""
+        values = [update['start'], update['bought'], update['sold'], update['balance'], change]
+        ret['content'] = get_weekly_update_table('Employee Stock Purchase Plan', col_names, values)
+        ret['start'] = update['start']
+        ret['credits'] = update['bought']
+        ret['debits'] = update['sold']
+        ret['balance'] = update['balance']
+        print(f'ret {ret}')
+        return ret
