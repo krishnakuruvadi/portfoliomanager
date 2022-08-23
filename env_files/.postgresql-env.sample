@@ -7,7 +7,7 @@
 ##########################################################################################
 
 # PostgreSQL Configuration
-# Ensure parameters below (POSTGRES_*) match the .pm-env.env file parameters (DB_*).
+# Ensure parameters below (POSTGRES_*) match the .pm-env file parameters (DB_*).
 
 POSTGRES_DB=pmdb
 POSTGRES_PASSWORD=secretpassword1!
