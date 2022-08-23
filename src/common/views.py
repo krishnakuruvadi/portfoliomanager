@@ -21,6 +21,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 import json
+import yaml
 from dateutil import tz
 from pytz import timezone
 from common.helper import get_preferences
@@ -35,8 +36,27 @@ import shutil
 
 
 def common_list_view(request):
+    context = dict()
+    context['curr_module_id'] = dict()
+    context['release_version'] = dict()
     template = 'common/common_list.html'
-    context = {'curr_module_id': 'id_internals_module'}
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    metadata_file = os.path.join(base_dir, 'metadata.json')
+    metadata_file_exist = os.path.exists(metadata_file)
+
+    if metadata_file_exist:
+        with open(metadata_file) as file:
+            metadata = json.load(file)
+            try:
+                context['release_version'] = metadata['release_version']
+            
+            except KeyError:
+                context['release_version'] = 'Unable to retrieve'
+
+    else:
+        context['release_version'] = 'Metadata not found'
+
+    context['curr_module_id'] = 'id_internals_module'
     return render(request, template, context)
 
 def refresh(request):
