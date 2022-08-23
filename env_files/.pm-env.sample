@@ -6,6 +6,7 @@
 ##########################################################################################
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# TIP: You can generate a 50 character random string by using a password generator (BitWarden, KeePass, LastPass, etc.)
 
 SECRET_KEY=USE-A-FIFTY-CHARACTER-RANDOM-SECRET-KEY-HERE
 
@@ -15,14 +16,12 @@ SECRET_KEY=USE-A-FIFTY-CHARACTER-RANDOM-SECRET-KEY-HERE
 DEBUG=on 
 
 # Allow connection from specific hosts or domains. Separate each value with a comma and no space in-between.
-# If using docker, you may need to specify the IP of the container itself or use a wildcard. For example:
-
-#ALLOWED_HOSTS=*
+# If using docker, you may need to specify the IP of the container itself or use a wildcard. For example: ALLOWED_HOSTS=*
 
 ALLOWED_HOSTS=127.0.0.1,localhost,example.com
 
 # Database configuration
-# If using docker compose, set value to postgresql. Else use sqlite3
+# If using docker, set value to postgresql. Else use sqlite3
 
 DB_ENGINE=postgresql-OR-sqlite3
 

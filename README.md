@@ -182,7 +182,14 @@ OR
 http://localhost:8000/
 ```
 
-- Enjoy Portfolio Manager
+- **Enjoy Portfolio Manager!**
+
+### Optional Features
+
+#### Summary Emails
+
+- Create a new [MailJet account](https://app.mailjet.com/signup?lang=en_US) and sign up for their free tier.
+- Go to "Internals" then "Preferences" and provide the details to setup the integration.
 
 ---
 
@@ -240,6 +247,12 @@ cd ./portfoliomanager
 docker compose up -d
 ```
 
+- Should you need to tear down the app environment, run:
+
+``` bash
+docker compose down
+```
+
 ### Browse to Portfolio Manager
 
 - Open your favorite web browser and go to:
@@ -248,13 +261,20 @@ docker compose up -d
 http://<docker-host-ip>/
 ```
 
-- Enjoy Portfolio Manager
-  
-- To tear down the app environment, run:
+OR 
 
-``` bash
-docker compose down
 ```
+http://localhost/
+```
+
+- **Enjoy Portfolio Manager!**
+  
+### Optional Features
+
+#### Summary Emails
+
+- Create a new [MailJet account](https://app.mailjet.com/signup?lang=en_US) and sign up for their free tier.
+- Go to "Internals" then "Preferences" and provide the details to setup the integration.
 
 ---
   
