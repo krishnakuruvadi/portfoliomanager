@@ -268,3 +268,79 @@ class GoldInterface:
         ret[self.get_export_name()]['data'] = data
         print(ret)
         return ret
+
+    @classmethod
+    def updates_summary(self, ext_user, start_date, end_date):
+        from users.user_interface import get_users
+        from shared.financial import xirr, calc_simple_roi
+
+        diff_days = (end_date - start_date).days
+
+        ret = dict()
+        ret['details'] = list()
+        ids = list()
+        for u in get_users(ext_user):
+            ids.append(u.id)
+        objs = Gold.objects.filter(user__in=ids)
+        start = 0
+        bought = 0
+        sold = 0
+        e = dict()
+        amt = 0
+        for obj in objs:
+            #print(f'processing Gold {obj.buy_date}')
+            if obj.buy_date < start_date:
+                start_wt = float(obj.weight)
+            else:
+                start_wt = 0
+                bought += obj.buy_value
+            end_wt = float(obj.unsold_weight)
+            amt += float(obj.latest_value) if obj.latest_value else 0
+            for trans in SellTransaction.objects.filter(buy_trans=obj, trans_date__lte=end_date, trans_date__gte=start_date):
+                start_wt -= float(trans.weight)
+                sold += trans.trans_amount
+            if start_wt > 0:
+                res = get_historical_price(start_date, obj.buy_type, obj.purity)
+                if res:
+                    start += res * start_wt
+                else:
+                    print(f'failed to get vals for gold {obj.purity} {start_date}')
+        
+
+        ret['start'] = round(start, 2)
+        ret['bought'] = round(bought, 2)
+        ret['sold'] = round(sold, 2)
+        ret['balance'] = round(amt, 2)
+        changed = float(start+bought-sold)
+        if changed != float(amt):
+            if diff_days > 7:
+                cash_flows = list()
+                cash_flows.append((start_date, -1*float(changed)))
+                cash_flows.append((end_date, float(amt)))
+                print(f'finding xirr for {cash_flows}')
+                ret['change'] = xirr(cash_flows, 0.1)*100
+            else:
+                ret['change'] = calc_simple_roi(changed , amt)
+        else:
+            ret['change'] = 0
+        ret['details'].append(e)
+        return ret
+
+    @classmethod
+    def updates_email(self, ext_user, start_date, end_date):
+        update = self.updates_summary(ext_user, start_date, end_date)
+        from shared.email_html import get_weekly_update_table
+        ret = dict()
+        col_names = ['Start','Bought','Sold','Balance', 'Change']
+        if update['change'] >= 0:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{update['change']}%"""
+        else:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{update['change']}%"""
+        values = [update['start'], update['bought'], update['sold'], update['balance'], change]
+        ret['content'] = get_weekly_update_table('Gold', col_names, values)
+        ret['start'] = update['start']
+        ret['credits'] = update['bought']
+        ret['debits'] = update['sold']
+        ret['balance'] = update['balance']
+        print(f'ret {ret}')
+        return ret

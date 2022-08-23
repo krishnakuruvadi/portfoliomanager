@@ -18,6 +18,7 @@ from django.template.loader import render_to_string
 from shared.financial import xirr, calc_simple_roi
 from users.user_interface import get_users
 from shared.handle_get import get_user_short_name_or_name_from_id
+from common.helper import get_preferred_currency_symbol
 
 def send_weekend_updates(ext_user=None):
     today = datetime.date.today()
@@ -35,7 +36,7 @@ def send_weekend_updates(ext_user=None):
     credits = 0
     debits = 0
     total = 0
-    for intf in [SsyInterface, PpfInterface, EpfInterface, EsppInterface, FdInterface]:#  MfInterface, R401KInterface, RsuInterface, ShareInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
+    for intf in [SsyInterface, PpfInterface, EpfInterface, EsppInterface, FdInterface, BankAccountInterface, RsuInterface, R401KInterface, MfInterface, ShareInterface, GoldInterface]:#   , InsuranceInterface, GoldInterface, , CryptoInterface]:
         data = intf.updates_email(ext_user, last_week, today)
         print(f'data: {data}')
         if not context['content']:
@@ -70,6 +71,7 @@ def send_weekend_updates(ext_user=None):
             context['change'] = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{round(change, 2)}%"""
     else:
         context['change'] = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>0%"""
+    context['pref_curr'] = get_preferred_currency_symbol()
     mail = render_to_string('email_templates/weekly_email.html', context)
     print(f'{mail}')
     return mail

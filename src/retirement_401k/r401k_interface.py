@@ -3,6 +3,7 @@ import datetime
 from shared.handle_real_time_data import get_conversion_rate, get_in_preferred_currency
 from alerts.alert_helper import create_alert_month_if_not_exist, Severity
 from dateutil.relativedelta import relativedelta
+from .helper import get_nearest_nav
 
 class R401KInterface:
 
@@ -262,3 +263,107 @@ class R401KInterface:
                 else:
                     print(f'found {len(nhos)} transactions between {temp} and {nh_start}')
                 nh_start = nh_start+relativedelta(months=1)
+    
+    @classmethod
+    def updates_summary(self, ext_user, start_date, end_date):
+        from users.user_interface import get_users
+        from shared.financial import xirr, calc_simple_roi
+
+        diff_days = (end_date - start_date).days
+
+        ret = dict()
+        ret['details'] = list()
+        ids = list()
+        for u in get_users(ext_user):
+            ids.append(u.id)
+        objs = Account401K.objects.filter(user__in=ids)
+        start = 0
+        bought = 0
+        sold = 0
+        e = dict()
+        amt = 0
+        for obj in objs:
+            start_units = obj.units
+            end_units = float(obj.units)
+            nav_from_trans = dict()
+
+            for tran in Transaction401K.objects.filter(account=obj, trans_date__gte=start_date):
+                cont = float(tran.employee_contribution+tran.employer_contribution)
+                conv_rate = 1
+                conv_val = get_in_preferred_currency(1, 'USD', tran.trans_date)
+                if conv_val:
+                    conv_rate = conv_val
+                bought += conv_rate*cont
+                start_units -= tran.units
+                nav_from_trans[tran.trans_date] = float((tran.employee_contribution+tran.employer_contribution)/tran.units)
+
+            if start_units > 0:
+                dt, val = get_nearest_nav(obj, start_date)
+                if dt:
+                    conv_rate = 1
+                    conv_val = get_in_preferred_currency(1, 'USD', start_date)
+                    if conv_val:
+                        conv_rate = conv_val
+                    start += float(val)*float(conv_rate)*float(start_units)
+                elif start_date in nav_from_trans:
+                    conv_rate = 1
+                    conv_val = get_in_preferred_currency(1, 'USD', start_date)
+                    if conv_val:
+                        conv_rate = conv_val
+                    start += nav_from_trans[start_date]*float(conv_rate)*float(start_units)
+                else:
+                    print(f'failed to get nav for {obj.company} {start_date}')
+            if end_units > 0:
+                dt, val = get_nearest_nav(obj, end_date)
+                if dt:
+                    conv_rate = 1
+                    conv_val = get_in_preferred_currency(1, 'USD', end_date)
+                    if conv_val:
+                        conv_rate = conv_val
+                    start += float(val)*float(conv_rate)*float(end_units)
+                elif end_date in nav_from_trans:
+                    conv_rate = 1
+                    conv_val = get_in_preferred_currency(1, 'USD', end_date)
+                    if conv_val:
+                        conv_rate = conv_val
+                    start += nav_from_trans[end_date]*float(conv_rate)*float(end_units)
+                else:
+                    print(f'failed to get nav for {obj.company} {end_date}')
+        ret['start'] = round(start, 2)
+        ret['bought'] = round(bought, 2)
+        ret['sold'] = round(sold, 2)
+        ret['balance'] = round(amt, 2)
+        if start!= 0 and amt != 0:
+            changed = float(start+bought-sold)
+            if changed != float(amt):
+                if diff_days > 7:
+                    cash_flows = list()
+                    cash_flows.append((start_date, -1*float(changed)))
+                    cash_flows.append((end_date, float(amt)))
+                    print(f'finding xirr for {cash_flows}')
+                    ret['change'] = xirr(cash_flows, 0.1)*100
+                else:
+                    ret['change'] = calc_simple_roi(changed , amt)
+        if not 'change' in ret:
+            ret['change'] = 0
+        ret['details'].append(e)
+        return ret
+
+    @classmethod
+    def updates_email(self, ext_user, start_date, end_date):
+        update = self.updates_summary(ext_user, start_date, end_date)
+        from shared.email_html import get_weekly_update_table
+        ret = dict()
+        col_names = ['Start','New Contribution','Balance', 'Change']
+        if update['change'] >= 0:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{update['change']}%"""
+        else:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{update['change']}%"""
+        values = [update['start'] if update['start'] != 0 else 'Unknown', update['bought'],  update['balance'] if update['balance'] != 0 else 'Unknown', change]
+        ret['content'] = get_weekly_update_table('401K', col_names, values)
+        ret['start'] = update['start']
+        ret['credits'] = update['bought']
+        ret['debits'] = update['sold']
+        ret['balance'] = update['balance']
+        print(f'ret {ret}')
+        return ret
