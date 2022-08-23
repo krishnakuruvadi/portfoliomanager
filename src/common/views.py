@@ -35,8 +35,26 @@ import shutil
 
 
 def common_list_view(request):
+    context = dict()
+    context['release_version'] = dict()
     template = 'common/common_list.html'
-    context = {'curr_module_id': 'id_internals_module'}
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    metadata_file = os.path.join(base_dir, 'metadata.json')
+    metadata_file_exist = os.path.exists(metadata_file)
+
+    if metadata_file_exist:
+        with open(metadata_file) as file:
+            metadata = json.load(file)
+            try:
+                context['release_version'] = metadata['release_version']
+            
+            except KeyError:
+                context['release_version'] = 'Unable to retrieve'
+
+    else:
+        context['release_version'] = '0.0.1'
+
+    context['curr_module_id'] = 'id_internals_module'
     return render(request, template, context)
 
 def refresh(request):
