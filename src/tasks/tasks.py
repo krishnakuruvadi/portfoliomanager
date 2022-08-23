@@ -1113,7 +1113,7 @@ def pull_and_store_coin_historical_vals(symbol, dt):
     else:
         print(f'failed to add any historical coin price entries for {symbol} starting {dt}')
 
-@db_task()
+@db_periodic_task(crontab(minute='5', hour='*/4', day_of_week=0))
 def send_weekend_updates_email():
     from shared.mail import Email
     from shared.weekend_mail import send_weekend_updates

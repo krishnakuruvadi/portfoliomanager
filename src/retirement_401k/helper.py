@@ -164,3 +164,17 @@ def get_yearly_contribution(id, currency='INR'):
     except Account401K.DoesNotExist:
         print(f'no object with id {str(id)}) found')
     return data
+
+def get_nearest_nav(account, start_date, diff=-5):
+    if diff < 0:
+        st_dt = start_date+relativedelta(days=diff)
+        end_dt = start_date
+        nh = NAVHistory.objects.filter(account=account, nav_date__gte=st_dt, nav_date__lte=end_dt).order_by("-nav_date")
+    else:
+        end_dt = start_date+relativedelta(days=diff)
+        st_dt = start_date
+        nh = NAVHistory.objects.filter(account=account, nav_date__gte=st_dt, nav_date__lte=end_dt).order_by("nav_date")
+
+    if len(nh) > 0:
+        return nh[0].nav_date, nh[0].nav_value
+    return None, None    

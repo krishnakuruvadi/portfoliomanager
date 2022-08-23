@@ -181,3 +181,66 @@ class EpfInterface:
         ret[self.get_export_name()]['data'] = data
         print(ret)
         return ret
+    
+    @classmethod
+    def updates_summary(self, ext_user, start_date, end_date):
+        from users.user_interface import get_users
+        from shared.financial import xirr
+
+        ret = dict()
+        ret['details'] = list()
+        ids = list()
+        for u in get_users(ext_user):
+            ids.append(u.id)
+        epf_objs = Epf.objects.filter(user__in=ids)
+        start = 0
+        credits = 0
+        debits = 0
+        interest = 0
+        e = dict()
+        amt = 0
+        epf_trans = EpfEntry.objects.filter(epf_id__in=epf_objs).order_by("trans_date")
+        for entry in epf_trans:
+            if entry.trans_date >= start_date:
+                credits += float(entry.employer_contribution + entry.employee_contribution)
+                debits += float(entry.withdrawl)
+                interest += float(entry.interest_contribution)
+            else:
+                start += float(entry.employer_contribution + entry.employee_contribution+ entry.interest_contribution)-1*float(entry.withdrawl)
+            amt += float(entry.employer_contribution + entry.employee_contribution+ entry.interest_contribution)-1*float(entry.withdrawl)
+
+        ret['start'] = start
+        ret['credits'] = credits
+        ret['debits'] = debits
+        ret['balance'] = amt
+        ret['interest'] = interest
+        balance = float(start+credits-debits)
+        if balance != float(amt):
+            cash_flows = list()
+            cash_flows.append((start_date, -1*float(balance)))
+            cash_flows.append((end_date, float(amt)))
+            print(f'finding xirr for {cash_flows}')
+            ret['change'] = xirr(cash_flows, 0.1)*100
+        else:
+            ret['change'] = 0
+        ret['details'].append(e)
+        return ret
+
+    @classmethod
+    def updates_email(self, ext_user, start_date, end_date):
+        update = self.updates_summary(ext_user, start_date, end_date)
+        from shared.email_html import get_weekly_update_table
+        ret = dict()
+        col_names = ['Start','Credits','Debits','Interest','Balance', 'Change']
+        if update['change'] >= 0:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{round(update['change'], 2)}%"""
+        else:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{round(update['change'], 2)}%"""
+        values = [update['start'], update['credits'], update['debits'], update['interest'], update['balance'], change]
+        ret['content'] = get_weekly_update_table('Employee Provident Fund', col_names, values)
+        ret['start'] = round(update['start'], 2)
+        ret['credits'] = round(update['credits'], 2)
+        ret['debits'] = round(update['debits'], 2)
+        ret['balance'] = round(update['balance'], 2)
+        print(f'ret {ret}')
+        return ret
