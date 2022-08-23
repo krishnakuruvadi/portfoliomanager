@@ -111,6 +111,7 @@ pip install -r requirements.txt
   - Open the env_files directory and edit the .pm-env.sample file.
   - Carefully read the comments throughout the file as it will provide additional context.
   - Edit the parameters as necessary.
+  - **TIP**: you may need to run ***ls -a*** or ensure "Show hidden files" is enabled to view the files.
 
 - Rename the environment variables file.
 
@@ -232,6 +233,7 @@ cd ./portfoliomanager
   - Open the env_files directory and edit both files (.pm-env.sample and postgresql-env.sample).
   - Carefully read the comments throughout the files as it will provide additional context.
   - Edit the parameters as necessary.
+  - **TIP**: you may need to run ***ls -a*** or ensure "Show hidden files" is enabled to view the files.
 
 - Rename the environment variables files.
 
