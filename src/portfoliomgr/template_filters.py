@@ -33,5 +33,5 @@ def getinternals(comp, ignore):
                 return release_version
 
     else:
-        release_version = 'Metadata not found'
+        release_version = '0.0.1'
         return release_version

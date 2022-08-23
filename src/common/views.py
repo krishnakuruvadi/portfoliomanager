@@ -36,7 +36,6 @@ import shutil
 
 def common_list_view(request):
     context = dict()
-    context['curr_module_id'] = dict()
     context['release_version'] = dict()
     template = 'common/common_list.html'
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -53,7 +52,7 @@ def common_list_view(request):
                 context['release_version'] = 'Unable to retrieve'
 
     else:
-        context['release_version'] = 'Metadata not found'
+        context['release_version'] = '0.0.1'
 
     context['curr_module_id'] = 'id_internals_module'
     return render(request, template, context)
