@@ -204,8 +204,8 @@ class CryptoInterface:
                 try:
                     coin = Coin.objects.get(symbol=crypto.symbol)
                     try:
-                        price = HistoricalCoinPrice.objects.get(coin=coin, date=end_date)
-                        amt += get_in_preferred_currency(float(price*qty), 'USD', end_date)
+                        hcp = HistoricalCoinPrice.objects.get(coin=coin, date=end_date)
+                        amt += get_in_preferred_currency(float(hcp.price)*float(qty), 'USD', end_date)
                     except HistoricalCoinPrice.DoesNotExist:
                         pull_and_store_coin_historical_vals(crypto.symbol, end_date)
                 except Coin.DoesNotExist:  
