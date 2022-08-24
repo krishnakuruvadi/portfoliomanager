@@ -81,7 +81,7 @@
             <div class="card bg-light">
               <div class="card-body">
                   <h6 class="card-title">Total Investment</h5>
-                  <p class="card-text">{{total_investment}}</p>
+                  <p class="card-text">{{preferred_currency}} {{total_investment}}</p>
               </div>
             </div>
           </div>
@@ -89,7 +89,7 @@
             <div class="card bg-light">
               <div class="card-body">
                   <h6 class="card-title">Current Investment</h5>
-                  <p class="card-text">{{current_investment}}</p>
+                  <p class="card-text">{{preferred_currency}} {{current_investment}}</p>
               </div>
             </div>
           </div>
@@ -97,7 +97,7 @@
             <div class="card bg-light">
               <div class="card-body">
                   <h6 class="card-title">Current Value</h5>
-                  <p class="card-text">{{latest_value}}</p>
+                  <p class="card-text">{{preferred_currency}} {{latest_value}}</p>
               </div>
             </div>
           </div>
@@ -105,7 +105,7 @@
             <div class="card bg-light">
               <div class="card-body">
                   <h6 class="card-title">Unrealised Gain</h5>
-                  <p class="card-text">{{unrealised_gain}} </p>
+                  <p class="card-text">{{preferred_currency}} {{unrealised_gain}} </p>
               </div>
             </div>
           </div>
@@ -113,7 +113,7 @@
             <div class="card bg-light">
               <div class="card-body">
                   <h6 class="card-title">Realised Gain</h5>
-                  <p class="card-text">{{realised_gain}} </p>
+                  <p class="card-text">{{preferred_currency}} {{realised_gain}} </p>
               </div>
             </div>
           </div>
@@ -158,9 +158,9 @@
         <td>{{ instance.unrealised_gain }}</td>
         <td>{{ instance.xirr }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}transactions" style="padding-left:10px;" ><i class="far fa-file-alt" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete"><i class="fa fa-trash" title="Delete Crypto" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" title="Update Crypto" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}transactions" style="padding-left:10px;" ><i class="far fa-file-alt" title="Edit Transactions" aria-hidden="true"></i> </a>
         </td>
       </tr>
       {% endfor %}

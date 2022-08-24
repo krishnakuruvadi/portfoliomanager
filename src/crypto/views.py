@@ -203,7 +203,7 @@ def add_transaction(request):
             return render(request, template, context)
     coins = get_crypto_coins()
     context = {'users':users, 'currencies':currencies, 'operation': 'Add Transaction', 'conversion_rate':1, 'curr_module_id': CryptoInterface.get_module_id(),
-                'preferred_currency':preferred_currency, 'coins':coins}
+                'preferred_currency':preferred_currency, 'currency':preferred_currency, 'coins':coins}
     print(f'view context: {context}')
     return render(request, template, context)
 
