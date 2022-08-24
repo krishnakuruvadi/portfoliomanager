@@ -55,8 +55,8 @@
         <td>{{ user_name_mapping |lookup:instance.crypto.user }}</td>
         <td>{{ instance.notes }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}/delete" class="confirm-delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}/update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}/delete" class="confirm-delete"><i class="fa fa-trash" title="Delete Transaction" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}/update" style="padding-left:10px;" ><i class="far fa-edit" title="Edit Transaction" aria-hidden="true"></i> </a>
         </td>
       </tr>
       {% endfor %}
