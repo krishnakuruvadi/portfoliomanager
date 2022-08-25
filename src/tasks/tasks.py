@@ -1085,7 +1085,23 @@ def pull_and_store_coin_historical_vals(symbol, dt):
         coin = Coin.objects.create(symbol=symbol, collection_start_date=dt)
     added = 0
     exists = 0
-    for yr in range(dt.year, datetime.date.today().year+1):
+    today = datetime.date.today()
+    if abs((dt-today).days) < 20:
+        val = get_historical_price(symbol, dt)
+        try:
+            HistoricalCoinPrice.objects.create(coin=coin, date=dt, price=val)
+            added += 1
+        except IntegrityError:
+            exists += 1
+        if added > 0:
+            print(f'added {added}, retained {exists} historical coin price entries for {symbol}')
+        elif exists > 0:
+            print(f'retained {exists} historical coin price entries for {symbol}')
+        else:
+            print(f'failed to add any historical coin price entries for {symbol} starting {dt}')
+        return
+        
+    for yr in range(dt.year, today.year+1):
         for month in range(1,12):
             cdt = datetime.date(year=yr, month=month+1, day=1)
             cdt = cdt+relativedelta(days=-1)

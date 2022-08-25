@@ -36,7 +36,7 @@ def send_weekend_updates(ext_user=None):
     credits = 0
     debits = 0
     total = 0
-    for intf in [SsyInterface, PpfInterface, EpfInterface, EsppInterface, FdInterface, BankAccountInterface, RsuInterface, R401KInterface, MfInterface, ShareInterface, GoldInterface]:#   , InsuranceInterface, GoldInterface, , CryptoInterface]:
+    for intf in [SsyInterface, PpfInterface, EpfInterface, EsppInterface, FdInterface, BankAccountInterface, RsuInterface, R401KInterface, MfInterface, ShareInterface, GoldInterface, CryptoInterface]:#   , InsuranceInterface,]:
         data = intf.updates_email(ext_user, last_week, today)
         print(f'data: {data}')
         if not context['content']:
