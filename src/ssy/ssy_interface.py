@@ -192,3 +192,77 @@ class SsyInterface:
         ret[self.get_export_name()]['data'] = data
         print(ret)
         return ret
+
+    @classmethod
+    def updates_summary(self, ext_user, start_date, end_date):
+        from users.user_interface import get_users
+        from shared.financial import xirr
+
+        ret = dict()
+        ret['details'] = list()
+        ids = list()
+        for u in get_users(ext_user):
+            ids.append(u.id)
+        ssy_objs = Ssy.objects.filter(user__in=ids)
+        start = 0
+        credits = 0
+        debits = 0
+        interest = 0
+        e = dict()
+        amt = 0
+        ssy_trans = SsyEntry.objects.filter(number__in=ssy_objs).order_by("trans_date")
+        for entry in ssy_trans:
+            if entry.entry_type.lower() == 'cr' or entry.entry_type.lower() == 'credit':
+                if entry.trans_date < start_date:
+                    start += entry.amount
+                else:
+                    if entry.interest_component:
+                        interest += entry.amount
+                    else:
+                        credits += entry.amount
+                amt += entry.amount
+            else:
+                amt -= entry.amount
+                if entry.trans_date < start_date:
+                    start -= entry.amount
+                else:
+                    if entry.interest_component:
+                        interest -= entry.amount
+                    else:
+                        debits += entry.amount
+        ret['start'] = start
+        ret['credits'] = credits
+        ret['debits'] = debits
+        ret['balance'] = amt
+        ret['interest'] = interest
+        changed = float(start+credits-debits)
+        if changed != float(amt):
+            cash_flows = list()
+            cash_flows.append((start_date, -1*float(start+credits-debits)))
+            cash_flows.append((end_date, float(amt)))
+            print(f'finding xirr for {cash_flows}')
+            ret['change'] = xirr(cash_flows, 0.1)*100
+        else:
+            ret['change'] = 0
+        ret['details'].append(e)
+        return ret
+
+    @classmethod
+    def updates_email(self, ext_user, start_date, end_date):
+        update = self.updates_summary(ext_user, start_date, end_date)
+        from shared.email_html import get_email_html, get_weekly_update_table
+        ret = dict()
+        col_names = ['Start','Credits','Debits','Interest','Balance', 'Change']
+        if update['change'] >= 0:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{update['change']}%"""
+        else:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{update['change']}%"""
+        values = [update['start'], update['credits'], update['debits'], update['interest'], update['balance'], change]
+        ret['content'] = get_weekly_update_table('Sukanya Samridhi Yojana', col_names, values)
+        ret['start'] = update['start']
+        ret['credits'] = update['credits']
+        ret['debits'] = update['debits']
+        ret['balance'] = update['balance']
+        print(f'ret {ret}')
+        return ret
+ 
