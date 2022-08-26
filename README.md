@@ -323,7 +323,7 @@ docker compose down
 git pull
 ```
 
-- Build the new application docker image
+- Build a new docker image with the updated application version
 
 ```bash
 docker compose build --no-cache
