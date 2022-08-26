@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block viewname %}
+
+<!--ul class="breadcrumb">
+    <li> <a href="#"> Welcome </a></li>
+</ul-->
+
+{% endblock viewname%}
+
+{% block content %}
+
+{% load static %}
+
+<div class="modal fade" id="checkUpdatesModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <img src="{% static 'PortfolioManager.png' %}" height="100" width="260" alt="PortfolioManager">
+                <br>
+                {% if compared_versions == -1 %}
+                    <h6 class="text-center" style="color: blue;"> Your application needs an update! </h6>
+                    <small> Current Version: {{current_app_version}}</small>
+                    <br>
+                    <small style="color: green;"> New version: {{new_app_version}}</small>
+                    <br>
+                    <small><a href="https://github.com/krishnakuruvadi/portfoliomanager" target="_blank"> Follow these steps to upgrade </a></small>
+                {% elif compared_versions == 1 %}
+                    <h6 class="text-center"> Your version is ahead </h6>
+                    <small> Your version is ahead </small>
+                {% elif compared_versions == 0 %}
+                    <h6 class="text-center" style="color: green;"> Your application is up-to-date! </h6>
+                {% else %}
+                    <h6 class="text-center" style="color: red;"> {{compared_versions}} </h6>
+                {% endif %}
+                <br>
+                <a href="/common" class="btn btn-danger btn-sm float-right" role="button">Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascript %}
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#checkUpdatesModal").modal('show');
+    });
+</script>
+
+{% endblock javascript %}

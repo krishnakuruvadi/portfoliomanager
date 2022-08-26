@@ -1,6 +1,5 @@
 from django.template.defaulttags import register
-import json
-import os
+from common.helper import get_current_app_version
 
 
 @register.filter(name='lookup')
@@ -17,21 +16,6 @@ def indexone(indexable, i):
 
 @register.filter(name='getinternals')
 def getinternals(comp, ignore):
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    metadata_file = os.path.join(base_dir, 'metadata.json')
-    metadata_file_exist = os.path.exists(metadata_file)
+    release_version = get_current_app_version()
+    return release_version
 
-    if metadata_file_exist:
-        with open(metadata_file) as file:
-            metadata = json.load(file)
-            try:
-                release_version = metadata['release_version']
-                return release_version
-
-            except KeyError:
-                release_version = 'Unable to retrieve'
-                return release_version
-
-    else:
-        release_version = '0.0.1'
-        return release_version

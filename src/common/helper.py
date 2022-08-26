@@ -416,3 +416,24 @@ def get_mf_passwords():
             pw['additional_field'] = po.additional_input
             passwords.append(pw)
     return passwords
+
+def get_current_app_version():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    metadata_file = os.path.join(base_dir, 'metadata.json')
+    metadata_file_exist = os.path.exists(metadata_file)
+
+    if metadata_file_exist:
+        with open(metadata_file) as file:
+            metadata = json.load(file)
+            try:
+                current_app_version = metadata['release_version']
+                return current_app_version
+            
+            except KeyError:
+                current_app_version = 'Unable to retrieve'
+                return current_app_version
+
+    else:
+        current_app_version = 'Unable to retrieve metadata file'
+
+    return current_app_version
