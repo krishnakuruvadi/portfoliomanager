@@ -300,3 +300,6 @@ class HistoricalCoinPrice(models.Model):
     coin = models.ForeignKey('Coin', on_delete=models.CASCADE)
     date = models.DateField(_('Date'), )
     price = models.DecimalField(_('Price'), max_digits=30, decimal_places=10, null=False)
+
+    def __str__(self):
+        return str(self.coin.symbol) + " : " + str(self.date) + ", " + str(self.price)

@@ -252,9 +252,9 @@ class PpfInterface:
         ret = dict()
         col_names = ['Start','Credits','Debits','Interest','Balance', 'Change']
         if update['change'] >= 0:
-            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{change}%"""
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{update['change']}%"""
         else:
-            update['change'] = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{change}%"""
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{update['change']}%"""
         values = [update['start'], update['credits'], update['debits'], update['interest'], update['balance'], change]
         ret['content'] = get_weekly_update_table('Provident Fund', col_names, values)
         ret['start'] = update['start']

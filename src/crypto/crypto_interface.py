@@ -204,12 +204,12 @@ class CryptoInterface:
                 try:
                     coin = Coin.objects.get(symbol=crypto.symbol)
                     try:
-                        price = HistoricalCoinPrice.objects.get(coin=coin, date=end_date)
-                        amt += get_in_preferred_currency(float(price*qty), 'USD', end_date)
+                        hcp = HistoricalCoinPrice.objects.get(coin=coin, date=end_date)
+                        amt += get_in_preferred_currency(float(hcp.price)*float(qty), 'USD', end_date)
                     except HistoricalCoinPrice.DoesNotExist:
                         pull_and_store_coin_historical_vals(crypto.symbol, end_date)
                 except Coin.DoesNotExist:  
-                    pull_and_store_coin_historical_vals(crypto.symbol, end_date)                
+                    pull_and_store_coin_historical_vals(crypto.symbol, end_date)
         return round(amt, 2)
 
     @classmethod
@@ -246,4 +246,85 @@ class CryptoInterface:
         
         ret[self.get_export_name()]['data'] = data
         print(ret)
+        return ret
+    
+    @classmethod
+    def updates_summary(self, ext_user, start_date, end_date):
+        from users.user_interface import get_users
+        from shared.financial import xirr, calc_simple_roi
+        from .crypto_helper import reconcile_event_based
+        from common.models import Coin, HistoricalCoinPrice
+        from tasks.tasks import pull_and_store_coin_historical_vals
+        diff_days = (end_date - start_date).days
+
+        ret = dict()
+        ret['details'] = list()
+        ids = list()
+        for u in get_users(ext_user):
+            ids.append(u.id)
+        objs = Crypto.objects.filter(user__in=ids)
+        start = 0
+        bought = 0
+        sold = 0
+        e = dict()
+        amt = 0
+        for obj in objs:
+            amt += float(obj.latest_value) if obj.latest_value else 0
+            transactions = Transaction.objects.filter(crypto=obj, trans_date__lte=start_date)
+            qty, buy_value, buy_price, realised_gain, unrealised_gain = reconcile_event_based(transactions)
+            if qty > 0:
+                try:
+                    coin = Coin.objects.get(symbol=obj.symbol)
+                    try:
+                        hcp = HistoricalCoinPrice.objects.get(coin=coin, date=start_date)
+                        start += get_in_preferred_currency(float(hcp.price)*float(qty), 'USD', end_date)
+                    except HistoricalCoinPrice.DoesNotExist:
+                        pull_and_store_coin_historical_vals(obj.symbol, start_date)
+                except Coin.DoesNotExist:
+                    pull_and_store_coin_historical_vals(obj.symbol, start_date)
+            
+            
+            for trans in Transaction.objects.filter(crypto=obj, trans_date__lte=end_date, trans_date__gte=start_date):
+                if trans.trans_type == 'Buy' or t.trans_type == 'Receive':
+                    bought += float(trans.trans_price)
+                else:
+                    sold += float(trans.trans_price)
+
+        ret['start'] = round(start, 2)
+        ret['bought'] = round(bought, 2)
+        ret['sold'] = round(sold, 2)
+        ret['balance'] = round(amt, 2)
+        print(f'start {start} bought {bought} sold {sold}')
+        changed = float(start+bought-sold)
+        if changed != float(amt):
+            if diff_days > 7:
+                cash_flows = list()
+                cash_flows.append((start_date, -1*float(changed)))
+                cash_flows.append((end_date, float(amt)))
+                print(f'finding xirr for {cash_flows}')
+                ret['change'] = xirr(cash_flows, 0.1)*100
+            else:
+                ret['change'] = calc_simple_roi(changed , amt)
+        else:
+            ret['change'] = 0
+        ret['details'].append(e)
+        return ret
+
+    @classmethod
+    def updates_email(self, ext_user, start_date, end_date):
+        update = self.updates_summary(ext_user, start_date, end_date)
+        from shared.email_html import get_weekly_update_table
+        ret = dict()
+        col_names = ['Start','Bought','Sold','Balance', 'Change']
+        if update['change'] >= 0:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{update['change']}%"""
+        else:
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{update['change']}%"""
+        values = [update['start'], update['bought'], update['sold'], update['balance'], change]
+        ret['content'] = get_weekly_update_table('Crypto', col_names, values)
+        ret['start'] = update['start']
+        ret['credits'] = update['bought']
+        ret['debits'] = update['sold']
+        ret['balance'] = update['balance']
+        print(f'ret {ret}')
         return ret

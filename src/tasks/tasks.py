@@ -1085,7 +1085,23 @@ def pull_and_store_coin_historical_vals(symbol, dt):
         coin = Coin.objects.create(symbol=symbol, collection_start_date=dt)
     added = 0
     exists = 0
-    for yr in range(dt.year, datetime.date.today().year+1):
+    today = datetime.date.today()
+    if abs((dt-today).days) < 20:
+        val = get_historical_price(symbol, dt)
+        try:
+            HistoricalCoinPrice.objects.create(coin=coin, date=dt, price=val)
+            added += 1
+        except IntegrityError:
+            exists += 1
+        if added > 0:
+            print(f'added {added}, retained {exists} historical coin price entries for {symbol}')
+        elif exists > 0:
+            print(f'retained {exists} historical coin price entries for {symbol}')
+        else:
+            print(f'failed to add any historical coin price entries for {symbol} starting {dt}')
+        return
+        
+    for yr in range(dt.year, today.year+1):
         for month in range(1,12):
             cdt = datetime.date(year=yr, month=month+1, day=1)
             cdt = cdt+relativedelta(days=-1)
@@ -1113,6 +1129,13 @@ def pull_and_store_coin_historical_vals(symbol, dt):
     else:
         print(f'failed to add any historical coin price entries for {symbol} starting {dt}')
 
+@db_periodic_task(crontab(minute='5', hour='*/4', day_of_week=0))
+def send_weekend_updates_email():
+    from shared.mail import Email
+    from shared.weekend_mail import send_weekend_updates
+    if Email.is_email_setup():
+        html_message = send_weekend_updates()
+        Email.send(subject='Weekend updates', message=f'This is weekend update for {datetime.date.today()}', html_message=html_message)
 '''
 @db_task()
 def reconcile_stock(exchange, symbol, etf, only_if_not_exists=True):

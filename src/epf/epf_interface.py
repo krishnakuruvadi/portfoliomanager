@@ -233,14 +233,14 @@ class EpfInterface:
         ret = dict()
         col_names = ['Start','Credits','Debits','Interest','Balance', 'Change']
         if update['change'] >= 0:
-            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{update['change']}%"""
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{round(update['change'], 2)}%"""
         else:
-            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{update['change']}%"""
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{round(update['change'], 2)}%"""
         values = [update['start'], update['credits'], update['debits'], update['interest'], update['balance'], change]
         ret['content'] = get_weekly_update_table('Employee Provident Fund', col_names, values)
-        ret['start'] = update['start']
-        ret['credits'] = update['credits']
-        ret['debits'] = update['debits']
-        ret['balance'] = update['balance']
+        ret['start'] = round(update['start'], 2)
+        ret['credits'] = round(update['credits'], 2)
+        ret['debits'] = round(update['debits'], 2)
+        ret['balance'] = round(update['balance'], 2)
         print(f'ret {ret}')
         return ret

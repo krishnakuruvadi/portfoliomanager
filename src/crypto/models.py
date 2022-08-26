@@ -49,3 +49,6 @@ class Transaction(models.Model):
 
     def get_absolute_url(self):
         return reverse('crypto:transaction-detail', args=[str(self.crypto.id),str(self.id)])
+
+    def __str__(self):
+        return str(self.crypto.symbol) + " : " + str(self.trans_date) + ", " + str(self.trans_price)

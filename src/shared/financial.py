@@ -54,7 +54,7 @@ def xnpv(rate,cashflows):
 
     return sum([cf/(1+rate)**((t-t0).days/365.0) for (t,cf) in chron_order])
 
-def xirr(cashflows,guess=0.1):
+def xirr(cashflows,guess=0.1, precision=2):
     """
     Calculate the Internal Rate of Return of a series of cashflows at irregular intervals.
 
@@ -102,7 +102,7 @@ def xirr(cashflows,guess=0.1):
             if outc > 10000000:
                 print(f'unreasonable returns {outc}.  returning 0 instead')
                 return 0
-            return outc
+            return round(outc, precision)
         else:
             raise
     except (RuntimeError, OverflowError):
@@ -113,7 +113,7 @@ def xirr(cashflows,guess=0.1):
                 if outc > 10000000:
                     print(f'unreasonable returns {outc}.  returning 0 instead')
                     return 0
-                return outc
+                return round(outc, precision)
             else:
                 raise
         except (RuntimeError, OverflowError):
@@ -279,6 +279,10 @@ def get_fv_from_cashflows(cash_flows, roi, debug=False):
     if debug:
         print(f'total for goal {total}')
     return total, fvs
+
+def calc_simple_roi(principal, final_value, precision=2):
+    interest = float(final_value) -float(principal)
+    return round((interest/float(principal))*100, precision)
 
 '''
 initial_amt = 0
