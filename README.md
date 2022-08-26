@@ -34,14 +34,21 @@ To build a portfolio manager which can track and provide insights into a individ
 
 ---
 
-## Getting started with Portfolio Manager
-
-### Deployment methods
+## Installation
 
 - Baremetal (Laptop/Desktop/Server) and Virtual Machine
   - [Install Walkthrough](#baremetal-and-virtual-machine-deployment-method)
 - Docker
   - [Install Walkthrough](#docker-deployment-method)
+
+---
+
+## Upgrades
+
+- Baremetal (Laptop/Desktop/Server) and Virtual Machine
+  - [Upgrade Walkthrough](#baremetal-and-virtual-machine-upgrade-steps)
+- Docker
+  - [Upgrade Walkthrough](#docker-upgrade-steps)
 
 ---
 
@@ -55,12 +62,12 @@ To build a portfolio manager which can track and provide insights into a individ
 
   - macOS:
 
-``` bash
+```bash
 brew install ghostscript tcl-tk
 ```
   - Ubuntu
 
-``` bash
+```bash
 apt install ghostscript python3-tk
 ```
 
@@ -76,7 +83,7 @@ apt install ghostscript python3-tk
 
 - Clone or download the source code.
 
-``` bash
+```bash
 git clone https://github.com/krishnakuruvadi/portfoliomanager.git
 ```
 
@@ -84,7 +91,7 @@ git clone https://github.com/krishnakuruvadi/portfoliomanager.git
 
 - Change into the recently clone/downloaded directory.
 
-``` bash
+```bash
 cd ./portfoliomanager
 ```
 
@@ -102,7 +109,7 @@ source ./venv/bin/activate
 
 - Install the required packages.
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
@@ -139,7 +146,7 @@ python manage.py collectstatic
 
 - Create a super user in django (optional).
 
-```
+```bash
 python manage.py createsuperuser
 ```
 
@@ -150,11 +157,11 @@ python manage.py createsuperuser
   - portfoliomanager
     - chromedriver
 
-### Launch Portfolio Manager
+### Launch PortfolioManager
 
 - Start the server.
 
-```
+```bash
 python manage.py runserver
 ```
 
@@ -176,7 +183,7 @@ python manage.py run_huey
 http://<host-ip>:8000/
 ```
 
-OR 
+OR
 
 ```
 http://localhost:8000/
@@ -192,6 +199,29 @@ http://localhost:8000/
 - Go to "Internals" then "Preferences" and provide the details to setup the integration.
 
 ---
+
+## Baremetal and Virtual Machine Upgrade Steps
+
+- Stop the server
+
+``` bash
+cd ./portfoliomanager/src
+CTRL + C
+deactivate
+```
+
+- Download the new app version and install any new packages
+
+```bash
+cd ./portfoliomanager
+git pull
+source ./venv/bin/activate
+pip install -r requirements.txt
+```
+
+- Re-launch PortfolioManager
+
+  - [Follow these steps](#launch-portfoliomanager)
 
 ## Docker Deployment Method
 
@@ -215,7 +245,7 @@ http://localhost:8000/
 
 - Clone or download the source code.
 
-``` bash
+```bash
 git clone https://github.com/krishnakuruvadi/portfoliomanager.git
 ```
 
@@ -223,7 +253,7 @@ git clone https://github.com/krishnakuruvadi/portfoliomanager.git
 
 - Change into the recently clone/downloaded directory.
 
-``` bash
+```bash
 cd ./portfoliomanager
 ```
 
@@ -243,13 +273,13 @@ cd ./portfoliomanager
 
 - Within the application folder (i.e. portfoliomanager), run the docker compose file to build the appliaction and launch the docker containers. This step should take approximately *two* minutes.
 
-``` bash
+```bash
 docker compose up -d
 ```
 
 - Should you need to tear down the app environment, run:
 
-``` bash
+```bash
 docker compose down
 ```
 
@@ -277,6 +307,39 @@ http://localhost/
 - Go to "Internals" then "Preferences" and provide the details to setup the integration.
 
 ---
+
+## Docker Upgrade Steps
+
+- Stop the containers
+
+``` bash
+cd ./portfoliomanager
+docker compose down
+```
+
+- Download the new app version
+
+```bash
+git pull
+```
+
+- Build a new docker image with the updated application version
+
+```bash
+docker compose build --no-cache
+```
+
+- Restart the containers
+
+```bash
+docker compose up -d
+```
+
+- Delete the old images (optional but recommended)
+
+```bash
+docker image prune
+```
   
 ### Help us and support our work
 
