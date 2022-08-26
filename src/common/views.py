@@ -32,12 +32,18 @@ from .bsestar import update_bsestar_schemes
 from shared.handle_get import *
 import os
 import shutil
+import requests
+import semver
 
 
 def common_list_view(request):
     context = dict()
-    context['release_version'] = dict()
     template = 'common/common_list.html'
+    context['current_app_version'] = current_app_version()
+    context['curr_module_id'] = 'id_internals_module'
+    return render(request, template, context)
+
+def current_app_version():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     metadata_file = os.path.join(base_dir, 'metadata.json')
     metadata_file_exist = os.path.exists(metadata_file)
@@ -46,15 +52,47 @@ def common_list_view(request):
         with open(metadata_file) as file:
             metadata = json.load(file)
             try:
-                context['release_version'] = metadata['release_version']
+                current_app_version = metadata['release_version']
+                return current_app_version
             
             except KeyError:
-                context['release_version'] = 'Unable to retrieve'
+                current_app_version = 'Unable to retrieve'
+                return current_app_version
 
     else:
-        context['release_version'] = '0.0.1'
+        current_app_version = 'Unable to retrieve metadata file'
 
-    context['curr_module_id'] = 'id_internals_module'
+    return current_app_version
+
+def check_app_updates(request):
+    template = 'common/check_app_updates.html'
+    context = dict()
+    current_version = current_app_version()
+    url = 'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager/main/src/metadata.json'
+
+    try:
+        request = requests.get(url)
+        request.raise_for_status()
+        data = request.json()
+        try:
+            new_version = data['release_version']
+                
+        except KeyError:
+            new_version = 'Unable to retrieve metadata key'
+        
+    except requests.exceptions.RequestException:
+        new_version = 'An error has occurred'
+
+    try:
+        ver_comparison = semver.compare(current_version, new_version)
+        
+    except Exception:
+        ver_comparison = 'Unable to check for updates'
+    
+    context['new_app_version'] = new_version
+    context['current_app_version'] = current_version
+    context['compared_versions'] = ver_comparison
+
     return render(request, template, context)
 
 def refresh(request):

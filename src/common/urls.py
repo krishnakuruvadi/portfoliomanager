@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     common_list_view,
+    check_app_updates,
     refresh,
     StockListView,
     StockDetailView,
@@ -31,6 +32,7 @@ from .views import (
 app_name = 'common'
 urlpatterns = [
     path('', common_list_view, name='common-list'),
+    path('check-update/', check_app_updates, name='check-app-updates'),
     path('stocks', StockListView.as_view(), name='stocks-list'),
     path('stocks/<id>/', StockDetailView.as_view(), name='stock-detail'),
     path('indices', IndexListView.as_view(), name='index-list'),

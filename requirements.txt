@@ -81,6 +81,7 @@ robin-stocks==2.0.3
 rope==0.18.0
 scipy==1.8.1
 selenium==3.141.0
+semver==2.13.0
 service-identity==18.1.0
 sgmllib3k==1.0.0
 six==1.14.0
