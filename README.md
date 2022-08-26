@@ -4,6 +4,41 @@ Example live server hosted at https://india-portfolio-manager.herokuapp.com/. No
 ```diff
 ! Please be kind enough and not do any delete operations
 ```
+
+## Important Update
+*master* branch is deprecated and *main* will be the actively developed branch from now on
+  
+*main* branch supports standalone (similar to *master* branch) runtime as well as docker compose based runtime
+
+We recommend using the standalone runtime since there is no automatic way of migrating data to docker runtime.  All data will be lost and user has to re-enter all data if user goes ahead with docker based runtime.
+
+Please follow these steps to move to *main* branch while retaining data from *master* branch and continue with standalone runtime.
+
+```
+git fetch origin
+git checkout main
+git pull --rebase origin main
+pip install -r requirements.txt
+cp -r env_files src
+cd src/env_files
+cp .pm-env.sample .pm-env
+```
+Edit the following fields in .pm-env using vi or your favorite editor
+SECRET_KEY - generate a secret and replace the string 
+DB_ENGINE - choose sqlite3 to get the data from existing db.  Leave the other fields unchanged
+
+```
+cd ..
+python manage.py makemigrations
+python manage.py migrate
+python manage.py collectstatic
+```
+Clear browser cache
+
+<img width="538" alt="Screen Shot 2022-08-26 at 10 17 01 AM" src="https://user-images.githubusercontent.com/26920497/186977087-7689d572-92c1-4f1d-9d21-1f0e1c8881d6.png">
+
+Start the portfolio manager application and huey task queue and continue to access Portfolio Manager in your browser
+
 ## Intent
 
 To build a portfolio manager which can track and provide insights into a individual or family's financial interests
