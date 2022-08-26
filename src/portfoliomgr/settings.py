@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'gold',
     'bankaccounts',
     "crypto",
+    "anymail",
 ]
 
 MIDDLEWARE = [

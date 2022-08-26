@@ -246,6 +246,10 @@ def get_fv_from_cashflows(cash_flows, roi, debug=False):
         print(f'total for goal {total}')
     return total, fvs
 
+def calc_simple_roi(principal, final_value, precision=2):
+    interest = float(final_value) -float(principal)
+    return round((interest/float(principal))*100, precision)
+
 '''
 initial_amt = 0
 xir = 6.5

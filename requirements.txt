@@ -3,6 +3,7 @@ astroid==2.4.2
 attrs==20.3.0
 autobahn==20.12.3
 Automat==20.2.0
+backports.zoneinfo==0.2.1
 beautifulsoup4==4.9.3
 bs4==0.0.1
 bsedata==0.4.0
@@ -22,6 +23,7 @@ cssselect==1.1.0
 daphne==3.0.1
 dateutils==0.6.8
 Django==4.1
+django-anymail==8.6
 django-environ==0.9.0
 django-solo==2.0.0
 djangorestframework==3.13.1

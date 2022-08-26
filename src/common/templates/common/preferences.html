@@ -19,7 +19,7 @@
             <div class='col-sm-10'>
 
                 <div class="form-group row">
-                    <label for="tz" class="col-sm-2 col-form-label">Timezone</label>
+                    <label for="tz" class="col-sm-3 col-form-label">Timezone</label>
                     <div class="col-sm-8">
                         <div class="md-form mt-1">
                             <input list="timezones" name="timezone" value="{{tz}}" size="47">
@@ -32,7 +32,7 @@
                 </div>
 
                 <div class="form-group row">
-                    <label for="currency" class="col-sm-2 col-form-label">Currency</label>
+                    <label for="currency" class="col-sm-3 col-form-label">Currency</label>
                     <div class="col-sm-8">
                         <div class="md-form mt-1">
                             <input name="currency" value="{{currency}}" size="3" maxlength="3">
@@ -41,7 +41,7 @@
                 </div>
 
                 <div class="form-group row">
-                    <label for="indexes" class="col-sm-2 col-form-label">Indexes To Scroll</label>
+                    <label for="indexes" class="col-sm-3 col-form-label">Indexes To Scroll</label>
 
                     <div class="col-sm-8">
                         <select class="form-select col-sm-6" multiple data-live-search="true" name="index_scroll" id="index_scroll">
@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="form-group row">
-                    <label for="backup" class="col-sm-2 col-form-label">Document Backup Directory</label>
+                    <label for="backup" class="col-sm-3 col-form-label">Document Backup Directory</label>
                     <div class="col-sm-8">
                         <div class="md-form mt-1">
                             <input name="doc_backup" value="{{document_backup_locn}}" size="47">
@@ -59,7 +59,7 @@
                 </div>
 
                 <div class="form-group row">
-                    <label for="backup" class="col-sm-2 col-form-label">Show zero value shares</label>
+                    <label for="backup" class="col-sm-3 col-form-label">Show zero value shares</label>
                     <div class="col-sm-8">
                         <div class="md-form mt-1">
                             <input type="checkbox" name="show_zero_val_shares" id="show_zero_val_shares" value="{{show_zero_val_shares}}">
@@ -68,7 +68,7 @@
                 </div>
 
                 <div class="form-group row">
-                    <label for="backup" class="col-sm-2 col-form-label">Show zero value MFs</label>
+                    <label for="backup" class="col-sm-3 col-form-label">Show zero value MFs</label>
                     <div class="col-sm-8">
                         <div class="md-form mt-1">
                             <input type="checkbox" name="show_zero_val_mfs" id="show_zero_val_mfs" value="{{show_zero_val_mfs}}">
@@ -76,10 +76,51 @@
                     </div>
                 </div>
 
+                <div class="form-group row">   
+                    <label class="control-label col-sm-3 col-form-label" for="id_email_backend">Email Backend</label>
+                    <div class="col-sm-3">
+                      <div class="md-form mt-0">
+                        <select name="email_backend" required="true" id="id_email_backend">
+                          <option value="---------">---------</option>
+                          <option value="Mailjet">Mailjet</option>
+                        </select>
+                      </div>
+                    </div> 
+                </div>
+
+                <div id="email_section">
+                    <div class="form-group row">
+                        <label for="sender_email" class="col-sm-3 col-form-label">Sender Email<span style="color:red;">*</span></label>
+                        <div class="col-sm-8">
+                            <div class="md-form mt-1">
+                                <input name="sender_email" value="{{sender_email|default_if_none:''}}" size="47" id="id_sender_email">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="email_api_key" class="col-sm-3 col-form-label">Email API Key<span style="color:red;">*</span></label>
+                        <div class="col-sm-8">
+                            <div class="md-form mt-1">
+                                <input name="email_api_key" value="{{email_api_key|default_if_none:''}}" size="47" id="id_email_api_key">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="email_api_secret" class="col-sm-3 col-form-label">Email API Secret<span style="color:red;">*</span></label>
+                        <div class="col-sm-8">
+                            <div class="md-form mt-1">
+                                <input name="email_api_secret" value="{{email_api_secret|default_if_none:''}}" size="47" id="id_email_api_secret">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group row">
                     <div class="col-sm-6">
                         <div class="md-form mt-0">
-                            <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                            <button type="submit" class="btn btn-primary" name="submit" id="submit_button">Submit</button>
                             <a href="../common" class="btn btn-danger" role="button">Cancel</a>
                         </div>
                     </div>
@@ -139,5 +180,59 @@
     } else {
       e.checked = false;
     }
+
+    set_email_backend('{{email_backend|default_if_none:""}}');
+    // on change call set_email_backend()
+    $('#id_email_backend').change(function() {
+        set_email_backend($(this).val());
+    });
+    $('#id_sender_email').change(function() {
+        set_submit_button();
+    });
+    $('#id_email_api').change(function() {
+        set_submit_button();
+    });
+    $('#id_email_api_secret').change(function() {
+        set_submit_button();
+    });
+    function set_email_backend(backend) {
+      Array.from(document.querySelector("#id_email_backend").options).forEach(function(option_element) {
+        let option_text = option_element.text;
+        let option_value = option_element.value;
+        if (backend == option_value) {
+          option_element.selected = true;
+        } else {
+          console.log(option_value)
+          console.log(backend)
+        }
+      });
+      console.log('backend is ' + backend);
+      if (backend != "" && backend != "---------") {
+        $('#email_section').show();
+      } else {
+        $('#email_section').hide();
+      }
+      set_submit_button();
+    }
+    function set_submit_button() {
+        var email_backend = document.getElementById('id_email_backend').value;
+        console.log('email_backend is' + email_backend);
+        if (email_backend != "" && email_backend != "---------") {
+            var sender_email = document.getElementById('id_sender_email').value;
+            var email_api_key = document.getElementById('id_email_api_key').value;
+            var email_api_secret = document.getElementById('id_email_api_secret').value;
+            console.log('sender_email is' + sender_email);
+            console.log('email_api_key is' + email_api_key);
+            console.log('email_api_secret is' + email_api_secret);
+            if (sender_email != "" && email_api_key != "" && email_api_secret != "") {
+                document.getElementById('submit_button').disabled = false;
+            } else {
+                document.getElementById('submit_button').disabled = true;
+            }
+        } else {
+            document.getElementById('submit_button').disabled = false;
+        }
+    }
+
   </script>
 {% endblock javascript %}

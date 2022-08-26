@@ -280,8 +280,8 @@ class CryptoInterface:
                         start += get_in_preferred_currency(float(hcp.price)*float(qty), 'USD', end_date)
                     except HistoricalCoinPrice.DoesNotExist:
                         pull_and_store_coin_historical_vals(obj.symbol, start_date)
-                except Coin.DoesNotExist:  
-                    pull_and_store_coin_historical_vals(obj.symbol, start_date)                
+                except Coin.DoesNotExist:
+                    pull_and_store_coin_historical_vals(obj.symbol, start_date)
             
             
             for trans in Transaction.objects.filter(crypto=obj, trans_date__lte=end_date, trans_date__gte=start_date):

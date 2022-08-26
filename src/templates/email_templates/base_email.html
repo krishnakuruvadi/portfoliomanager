@@ -1,0 +1,67 @@
+    <table width="600" cellspacing="0" cellpadding="0" border="0" align="center">
+      <tbody>
+        <tr>
+          <td width="600">
+            <table style="border:1px solid #eaeaea;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:normal;color:#505050" width="600" cellspacing="0" cellpadding="0" border="0" align="center">
+              <tbody>
+                <tr>
+                  <td valign="top" align="center">
+                    <table width="94%" cellspacing="0" cellpadding="0" border="0" align="center">
+                      <tbody>
+                        <tr>
+                          <td align="left">&nbsp;</td>
+                          <td style="font-size:22px;font-weight:bold" align="right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                          <td valign="bottom" align="left">
+                            <img src="https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager/master/src/static/PortfolioManager.png" alt="PORTFOLIOMANAGER" style="border:none;width:140px">
+                          </td>
+                          <td style="font-size:18px;font-weight:500;color:#2db468" align="right"> {% block title %}{% endblock %}</td>
+                        </tr>
+                        <tr>
+                          <td colspan="2">
+                            <hr style="border-top:1px solid #000">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td colspan="2" style="font-size:12px;text-align:right;padding:0px 0 10px;color:#355d8e;font-weight:normal" align="right">
+                            {% block subject %}{% endblock %}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table width="93%" cellspacing="0" cellpadding="0" border="0" align="center">	
+                        <tbody>	
+                            <tr>	
+                                <td valign="top" align="left"></td>	
+                            </tr>	
+                            <tr>	
+                                <td colspan="5" style="padding:5px;background-color:#355d8e;color:#fff;font-size:12px;font-weight:bold" align="left">	CHANGE IN YOUR PORTFOLIO VALUE	({{pref_curr}})</td>	
+                            </tr>	
+                            <tr>
+                                <td colspan="4" style="margin-top:10px">
+                                    <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+                                        <tbody>
+                                            <tr>
+                                                <td>&nbsp;</td>
+                                            </tr>
+                                            <tr style="background:#e9f0f8">
+                                                <td style="color:#336d9f;padding:10px;border-top:1px solid #bfc8cf;border-bottom:1px solid #bfc8cf;font-size:14px" width="70%" align="left">{{name}} Portfolio</td>
+                                                <td style="color:#000;padding:10px;border-top:1px solid #bfc8cf;border-bottom:1px solid #bfc8cf;font-size:14px" width="30%" align="left">{% autoescape off %}{{change}}{% endautoescape %}</td>
+                                                <td style="color:#000;padding:10px;font-size:14px;font-weight:bold;border-bottom:1px solid #bfc8cf;border-top:1px solid #bfc8cf" width="30%" align="left"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>	
+                    </table>
+                    {% block body %}{% endblock %}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>

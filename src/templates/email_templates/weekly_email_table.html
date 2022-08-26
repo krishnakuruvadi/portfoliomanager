@@ -1,0 +1,25 @@
+<table style="margin:15px 0px" width="93%" cellspacing="0" cellpadding="0" border="0" align="center">	
+    <tbody>	
+        <tr>	
+            <td style="padding:5px;background-color:#28b66a;font-weight:bold;color:#fff;font-size:14px">	{{table_header}}	</td>	
+        </tr>	
+        <tr>	
+            <td>	
+                <table style="margin-top:5px" width="100%" cellspacing="0" cellpadding="0" border="0">	
+                    <tbody>
+                        <tr>
+                        {% for item in col_names %}
+                            <td style="font-weight:bold;padding:7px 0;border-bottom:1px solid #28b66a;vertical-align:bottom" valign="top" align="center">{{item}}</td>
+                        {% endfor %}
+                        </tr>
+                        <tr>
+                        {% for item in col_values %}
+                            <td style="padding:5px 0;border-bottom:1px solid #28b66a" align="center">{% autoescape off %}{{item}}{% endautoescape %}</td>
+                        {% endfor %}
+                        </tr>
+                    </tbody>	
+                </table>	
+            </td>	
+        </tr>	
+    </tbody>
+</table>
