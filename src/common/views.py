@@ -23,7 +23,7 @@ from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 import json
 from dateutil import tz
 from pytz import timezone
-from common.helper import get_preferences
+from common.helper import get_preferences, get_current_app_version
 from pytz import common_timezones
 from shared.nasdaq import Nasdaq
 from common.nse import NSE
@@ -35,43 +35,21 @@ import shutil
 import requests
 import semver
 
-
 def common_list_view(request):
     context = dict()
     template = 'common/common_list.html'
-    context['current_app_version'] = current_app_version()
+    context['current_app_version'] = get_current_app_version()
     context['curr_module_id'] = 'id_internals_module'
     return render(request, template, context)
-
-def current_app_version():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    metadata_file = os.path.join(base_dir, 'metadata.json')
-    metadata_file_exist = os.path.exists(metadata_file)
-
-    if metadata_file_exist:
-        with open(metadata_file) as file:
-            metadata = json.load(file)
-            try:
-                current_app_version = metadata['release_version']
-                return current_app_version
-            
-            except KeyError:
-                current_app_version = 'Unable to retrieve'
-                return current_app_version
-
-    else:
-        current_app_version = 'Unable to retrieve metadata file'
-
-    return current_app_version
 
 def check_app_updates(request):
     template = 'common/check_app_updates.html'
     context = dict()
-    current_version = current_app_version()
+    current_version = get_current_app_version()
     url = 'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager/main/src/metadata.json'
 
     try:
-        request = requests.get(url)
+        request = requests.get(url, timeout=15)
         request.raise_for_status()
         data = request.json()
         try:
@@ -80,6 +58,12 @@ def check_app_updates(request):
         except KeyError:
             new_version = 'Unable to retrieve metadata key'
         
+    except requests.exceptions.Timeout:
+        new_version = 'Connection has timed out'
+    except requests.exceptions.HTTPError:
+        new_version = 'An HTTP error has occurred'
+    except requests.exceptions.ConnectionError:
+        new_version = 'Connection error'
     except requests.exceptions.RequestException:
         new_version = 'An error has occurred'
 

@@ -1,5 +1,5 @@
 from django.template.defaulttags import register
-from common.views import current_app_version
+from common.helper import get_current_app_version
 
 
 @register.filter(name='lookup')
@@ -16,6 +16,6 @@ def indexone(indexable, i):
 
 @register.filter(name='getinternals')
 def getinternals(comp, ignore):
-    release_version = current_app_version()
+    release_version = get_current_app_version()
     return release_version
 
