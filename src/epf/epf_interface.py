@@ -185,8 +185,10 @@ class EpfInterface:
     @classmethod
     def updates_summary(self, ext_user, start_date, end_date):
         from users.user_interface import get_users
-        from shared.financial import xirr
-
+        from shared.financial import xirr, calc_simple_roi
+        
+        diff_days = (end_date - start_date).days
+        
         ret = dict()
         ret['details'] = list()
         ids = list()
@@ -209,18 +211,21 @@ class EpfInterface:
                 start += float(entry.employer_contribution + entry.employee_contribution+ entry.interest_contribution)-1*float(entry.withdrawl)
             amt += float(entry.employer_contribution + entry.employee_contribution+ entry.interest_contribution)-1*float(entry.withdrawl)
 
-        ret['start'] = start
-        ret['credits'] = credits
-        ret['debits'] = debits
-        ret['balance'] = amt
-        ret['interest'] = interest
+        ret['start'] = round(start,2)
+        ret['credits'] = round(credits,2)
+        ret['debits'] = round(debits,2)
+        ret['balance'] = round(amt,2)
+        ret['interest'] = round(interest,2)
         balance = float(start+credits-debits)
         if balance != float(amt):
-            cash_flows = list()
-            cash_flows.append((start_date, -1*float(balance)))
-            cash_flows.append((end_date, float(amt)))
-            print(f'finding xirr for {cash_flows}')
-            ret['change'] = xirr(cash_flows, 0.1)*100
+            if diff_days > 365:
+                cash_flows = list()
+                cash_flows.append((start_date, -1*float(balance)))
+                cash_flows.append((end_date, float(amt)))
+                print(f'finding xirr for {cash_flows}')
+                ret['change'] = xirr(cash_flows, 0.1)*100
+            else:
+                ret['change'] = calc_simple_roi(balance , amt)
         else:
             ret['change'] = 0
         ret['details'].append(e)

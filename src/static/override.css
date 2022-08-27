@@ -17,7 +17,7 @@ body
 .navigation
 {
     position: fixed;
-    width: 250px;
+    width: 100px;
     height: 100%;
     background: #593f75;
     transition: 0.5s;
@@ -44,17 +44,17 @@ body
 
 .navigation.active
 {
-    width: 65px;
+    width: 50px;
 }
 
 .main.deactive
 {
-    margin-left: 70px;   
+    margin-left: 60px;   
 }
 
 .logo.deactive
 {
-    margin-left: 70px;   
+    margin-left: 60px;   
 }
 
 .navigation ul
@@ -338,7 +338,6 @@ div {
         justify-content: left;
         align-items: center;
         padding: 10px;
-}
     }
     .brand-name{
         padding-left: 10px;

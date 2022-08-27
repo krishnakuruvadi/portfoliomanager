@@ -230,11 +230,11 @@ class SsyInterface:
                         interest -= entry.amount
                     else:
                         debits += entry.amount
-        ret['start'] = start
-        ret['credits'] = credits
-        ret['debits'] = debits
-        ret['balance'] = amt
-        ret['interest'] = interest
+        ret['start'] = round(start,2)
+        ret['credits'] = round(credits,2)
+        ret['debits'] = round(debits,2)
+        ret['balance'] = round(amt,2)
+        ret['interest'] = round(interest,2)
         changed = float(start+credits-debits)
         if changed != float(amt):
             cash_flows = list()
@@ -254,9 +254,9 @@ class SsyInterface:
         ret = dict()
         col_names = ['Start','Credits','Debits','Interest','Balance', 'Change']
         if update['change'] >= 0:
-            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{update['change']}%"""
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{round(update['change'],2)}%"""
         else:
-            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{update['change']}%"""
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{round(update['change'],2)}%"""
         values = [update['start'], update['credits'], update['debits'], update['interest'], update['balance'], change]
         ret['content'] = get_weekly_update_table('Sukanya Samridhi Yojana', col_names, values)
         ret['start'] = update['start']

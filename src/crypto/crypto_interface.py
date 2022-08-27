@@ -297,7 +297,7 @@ class CryptoInterface:
         print(f'start {start} bought {bought} sold {sold}')
         changed = float(start+bought-sold)
         if changed != float(amt):
-            if diff_days > 7:
+            if diff_days > 365:
                 cash_flows = list()
                 cash_flows.append((start_date, -1*float(changed)))
                 cash_flows.append((end_date, float(amt)))
@@ -317,9 +317,9 @@ class CryptoInterface:
         ret = dict()
         col_names = ['Start','Bought','Sold','Balance', 'Change']
         if update['change'] >= 0:
-            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{update['change']}%"""
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{round(update['change'],2)}%"""
         else:
-            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{update['change']}%"""
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{round(update['change'],2)}%"""
         values = [update['start'], update['bought'], update['sold'], update['balance'], change]
         ret['content'] = get_weekly_update_table('Crypto', col_names, values)
         ret['start'] = update['start']

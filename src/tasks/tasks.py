@@ -1136,6 +1136,15 @@ def send_weekend_updates_email():
     if Email.is_email_setup():
         html_message = send_weekend_updates()
         Email.send(subject='Weekend updates', message=f'This is weekend update for {datetime.date.today()}', html_message=html_message)
+
+@db_periodic_task(crontab(minute='5', hour='*/4', day=1))
+def send_monthend_updates_email():
+    from shared.mail import Email
+    from shared.monthend_mail import send_monthend_updates
+    if Email.is_email_setup():
+        html_message = send_monthend_updates()
+        Email.send(subject='Monthend updates', message=f'This is monthend update for {datetime.date.today()}', html_message=html_message)
+
 '''
 @db_task()
 def reconcile_stock(exchange, symbol, etf, only_if_not_exists=True):

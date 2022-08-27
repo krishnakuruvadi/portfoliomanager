@@ -245,10 +245,10 @@ class MfInterface:
             for trans in MutualFundTransaction.objects.filter(folio=obj, trans_date__lte=end_date, trans_date__gte=start_date):
                 if trans.trans_type == 'Buy':
                     start_units -= float(trans.units)
-                    bought += trans.amount
+                    bought += trans.trans_price
                 else:
                     start_units += float(trans.units)
-                    sold += trans.amount
+                    sold += trans.trans_price
             if start_units > 0:
                 historical_mf_prices = get_historical_mf_nav(obj.fund.code, start_date+relativedelta(days=-5), start_date)
                 if len(historical_mf_prices) > 0:
@@ -263,9 +263,9 @@ class MfInterface:
         ret['bought'] = round(bought, 2)
         ret['sold'] = round(sold, 2)
         ret['balance'] = round(amt, 2)
-        changed = float(start+bought-sold)
+        changed = float(start)+float(bought)-float(sold)
         if changed != float(amt):
-            if diff_days > 7:
+            if diff_days > 365:
                 cash_flows = list()
                 cash_flows.append((start_date, -1*float(changed)))
                 cash_flows.append((end_date, float(amt)))
@@ -285,9 +285,9 @@ class MfInterface:
         ret = dict()
         col_names = ['Start','Bought','Sold','Balance', 'Change']
         if update['change'] >= 0:
-            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{update['change']}%"""
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{round(update['change'],2)}%"""
         else:
-            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{update['change']}%"""
+            change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{round(update['change'],2)}%"""
         values = [update['start'], update['bought'], update['sold'], update['balance'], change]
         ret['content'] = get_weekly_update_table('Mutual Funds', col_names, values)
         ret['start'] = update['start']

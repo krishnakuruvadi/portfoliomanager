@@ -221,11 +221,11 @@ class FdInterface:
                 debits += float(entry.principal)
                 interest += float(entry.final_val - entry.principal)
 
-        ret['start'] = start
-        ret['credits'] = credits
-        ret['debits'] = debits
-        ret['balance'] = amt
-        ret['interest'] = interest
+        ret['start'] = round(start,2)
+        ret['credits'] = round(credits,2)
+        ret['debits'] = round(debits,2)
+        ret['balance'] = round(amt,2)
+        ret['interest'] = round(interest,2)
         balance = float(start+credits-debits)
         if balance != float(amt):
             cash_flows = list()
