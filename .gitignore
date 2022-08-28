@@ -8,7 +8,6 @@ src/env_files
 src/collected_files
 venv
 __pycache__
-*_initial.py
 .env
 .pm-env
 .postgresql-env
