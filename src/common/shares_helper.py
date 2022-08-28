@@ -11,6 +11,10 @@ from shares.models import Share
 from espp.models import Espp
 from rsu.models import RSUAward
 import pytz
+from operator import or_
+from functools import reduce
+from django.db.models import Q
+from shared.handle_get import *
 
 def pull_corporate_actions(symbol, exchange, from_date, to_date):
     dest_path = os.path.join(settings.MEDIA_ROOT, 'corporateActions')
@@ -515,9 +519,6 @@ def update_tracked_stocks():
 
 
 def update_stock_status():
-    from operator import or_
-    from functools import reduce
-    from django.db.models import Q
     url = 'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager-data/main/India/nse_bse_eq.json'
     print(f'fetching from url {url}')
     r = requests.get(url, timeout=15)
@@ -536,8 +537,7 @@ def update_stock_status():
                         stock.save()
                     except Exception as ex:
                         print(f'exception {ex} when updating status for {stock.symbol} {stock.exchange}')  
-                else:
-                    if val['bse_security_id'] == stock.symbol or val['nse_symbol'] == stock.symbol:
+                elif val['bse_security_id'] == stock.symbol or val['nse_symbol'] == stock.symbol:
                         try:
                             if 'delisting_date' in val and val['delisting_date'] != '':
                                 stock.delisting_date = get_date_or_none_from_string(val['delisting_date'], '%d-%b-%Y')
@@ -547,7 +547,50 @@ def update_stock_status():
                             stock.isin = entry
                             stock.save()
                         except Exception as ex:
-                            print(f'exception {ex} when updating status for {stock.symbol} {stock.exchange}')  
+                            print(f'exception {ex} when updating status for {stock.symbol} {stock.exchange}')
+                elif stock.isin == '' and stock.symbol in val['old_nse_symbol'].split(','):
+                    # first check if no other stock exists with this isin
+                    new_symbol = val['nse_symbol'] if val['nse_symbol'] != '' else val['bse_security_id']
+                    new_exchanges = list()
+                    add = 0
+                    if val['bse_security_id'] != "":
+                        new_exchanges.append('BSE')
+                        add +=1
+                    if val['nse_symbol'] != '':
+                        new_exchanges.append('NSE')
+                        add +=1
+                    if add == 2:
+                        new_exchanges.append('NSE/BSE')
+                    handle_symbol_change(stock.symbol, li, new_symbol, new_exchanges, entry, val)
+
+
+def handle_symbol_change(old_symbol, old_exchanges, new_symbol, new_exchanges, isin, new_data):
+    li = ['NSE', 'BSE', 'NSE/BSE']
+    old_stock = None
+    for stock in Stock.objects.filter(reduce(or_, [Q(exchange__icontains=q) for q in old_exchanges]), symbol=old_symbol):
+        old_stock = stock
+        break
+    new_stock = None
+    for stock in Stock.objects.filter(reduce(or_, [Q(exchange__icontains=q) for q in new_exchanges]), symbol=new_symbol):
+        new_stock = stock
+        break
+    if not old_stock:
+        print(f'failed to find stock with symbol {old_symbol} {old_exchanges}')
+        return
+    if not new_stock:
+        #we are not tracking the new stock.  we can just change the symbol 
+        old_stock.symbol = new_symbol
+        old_stock.save()
+    else:
+        #we have both the stocks.  merge transactions for each user
+        #shares
+
+        #rsus
+        #espp
+
+        # delete the old stock
+        old_stock.delete()
+
 
 def is_exchange_open(exchange):
     tz = 'Asia/Kolkata'

@@ -43,11 +43,11 @@ def get_crypto(request):
         if not as_on:
             as_on = co.as_on_date
         
-    context['total_investment'] = total_investment
+    context['total_investment'] = round(total_investment,2)
     context['current_investment'] = round(current_investment, 2)
-    context['latest_value'] = latest_value
-    context['unrealised_gain'] = unrealised_gain
-    context['realised_gain'] = realised_gain
+    context['latest_value'] = round(latest_value, 2)
+    context['unrealised_gain'] = round(unrealised_gain, 2)
+    context['realised_gain'] = round(realised_gain, 2)
     context['curr_module_id'] = CryptoInterface.get_module_id()
     if as_on:
         context['as_on_date'] = as_on
