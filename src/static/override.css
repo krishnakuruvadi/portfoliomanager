@@ -17,7 +17,7 @@ body
 .navigation
 {
     position: fixed;
-    width: 100px;
+    width: 250px;
     height: 100%;
     background: #593f75;
     transition: 0.5s;
@@ -44,17 +44,17 @@ body
 
 .navigation.active
 {
-    width: 50px;
+    width: 65px;
 }
 
 .main.deactive
 {
-    margin-left: 60px;   
+    margin-left: 70px;
 }
 
 .logo.deactive
 {
-    margin-left: 60px;   
+    margin-left: 70px;
 }
 
 .navigation ul
