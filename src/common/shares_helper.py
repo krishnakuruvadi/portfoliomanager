@@ -326,8 +326,7 @@ def store_corp_action_for_stock(file_name, processed_file):
 
 
 def get_nse_bse_map_from_gist():
-    url = b'\x03\x11\r\x07\x1cHKD\x02\x10\x04\x1b\\\x03\x02\x11\x11\x02\r\x07\x17\x0e\x17\x1a\x18\x01\x06\x01\x05\x11W\x14\x00\x1fK\x00\x17\x10\x04\x07\x1c\x05\x00\x10\x0b\x02\x19\x13\x00\x02JODWE\x05^]A@\\DV\tV@\x15\n\x14\x01^\x00A\x14VF\\\\]N\x11]EK\x19\x04\x0eX^\x14SZ\x07O\x11WG\x07X\x01A\x11V\x11\x06\x0eU\x1b\x16V\x11T[Q\x1dG^\x13\x00]RI@]EQSPV\x19\x1c\x17;\t\x16\x1cY\x05\x01\x0b\x05'
-    url = k_decode(url)
+    url = 'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager-data/main/India/nse_bse_eq.json'
     data = get_json_gist(url)
     return data
 
@@ -532,6 +531,8 @@ def update_stock_status():
                         if 'delisting_date' in val and val['delisting_date'] != '':
                             stock.delisting_date = get_date_or_none_from_string(val['delisting_date'], '%d-%b-%Y')
                             stock.trading_status = 'Delisted'
+                        if 'suspension_date' in val and val['suspension_date'] != '':
+                            stock.suspension_date = get_date_or_none_from_string(val['suspension_date'], '%d-%b-%Y')
                         if 'listing_date' in val and val['listing_date'] != '':
                             stock.listing_date = get_date_or_none_from_string(val['listing_date'], '%d-%b-%Y')
                         stock.save()
@@ -542,6 +543,8 @@ def update_stock_status():
                             if 'delisting_date' in val and val['delisting_date'] != '':
                                 stock.delisting_date = get_date_or_none_from_string(val['delisting_date'], '%d-%b-%Y')
                                 stock.trading_status = 'Delisted'
+                            if 'suspension_date' in val and val['suspension_date'] != '':
+                                stock.suspension_date = get_date_or_none_from_string(val['suspension_date'], '%d-%b-%Y')
                             if 'listing_date' in val and val['listing_date'] != '':
                                 stock.listing_date = get_date_or_none_from_string(val['listing_date'], '%d-%b-%Y')
                             stock.isin = entry
@@ -577,17 +580,22 @@ def handle_symbol_change(old_symbol, old_exchanges, new_symbol, new_exchanges, i
     if not old_stock:
         print(f'failed to find stock with symbol {old_symbol} {old_exchanges}')
         return
+    
+    #shares
+    from shares.shares_helper import handle_symbol_change as hscs
+    hscs(old_symbol, old_stock.exchange, new_symbol, new_stock.exchange if new_stock else old_stock.exchange)
+    #rsus
+    from rsu.rsu_helper import handle_symbol_change as hscr
+    hscr(old_symbol, old_stock.exchange, new_symbol, new_stock.exchange if new_stock else old_stock.exchange)
+    #espps
+    from espp.espp_helper import handle_symbol_change as hsce
+    hsce(old_symbol, old_stock.exchange, new_symbol, new_stock.exchange if new_stock else old_stock.exchange)
+
     if not new_stock:
         #we are not tracking the new stock.  we can just change the symbol 
         old_stock.symbol = new_symbol
         old_stock.save()
     else:
-        #we have both the stocks.  merge transactions for each user
-        #shares
-
-        #rsus
-        #espp
-
         # delete the old stock
         old_stock.delete()
 

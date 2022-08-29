@@ -90,7 +90,6 @@
   {% load static %}
   <script src="{% static 'common.js' %}"></script>
   <script>
-    set_user_list({{users|safe}}, '{{user|safe}}');
     e = document.getElementById('etf');
     var etf = "{{etf|safe}}"
     console.log(e.checked);

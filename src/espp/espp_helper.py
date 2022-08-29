@@ -58,3 +58,19 @@ def update_latest_vals(espp_obj):
     espp_obj.save()
     print('done with update request')
 
+def handle_symbol_change(old_symbol, old_exchange, new_symbol, new_exchange):
+    for old_espp in Espp.objects.filter(exchange=old_exchange, symbol=old_symbol):
+        try:
+            new_espp = Espp.objects.get(exchange=new_exchange, symbol=new_symbol, purchase_date=old_espp.purchase_date, user=old_espp.user)
+            for old_espp_sell_trans in EsppSellTransactions.objects.filter(espp=old_espp):
+                try:
+                    new_espp_sell_trans = EsppSellTransactions.objects.filter(espp=new_espp, trans_date=old_espp_sell_trans.trans_date)
+                    old_espp_sell_trans.delete()
+                except EsppSellTransactions.DoesNotExist:
+                    old_espp_sell_trans.espp = new_espp
+                    old_espp_sell_trans.save()
+            old_espp.delete()
+        except Espp.DoesNotExist:
+            old_espp.symbol = new_symbol
+            old_espp.exchange = new_exchange
+            old_espp.save()
