@@ -433,6 +433,11 @@ def reconcile_share(share_obj):
         share_obj.buy_price = buy_price
         share_obj.realised_gain = realised_gain
         share_obj.gain = unrealised_gain
+        if qty > 0:
+            share_obj.latest_value = share_obj.latest_price * share_obj.quantity*share_obj.conversion_rate
+        else:
+            share_obj.latest_value = 0
+            share_obj.conversion_rate = 0
         share_obj.save()
         roi = 0
         if qty > 0:
@@ -698,8 +703,10 @@ def update_share_latest_val(share_obj):
                                         break
             if latest_date and latest_val:
                 share_obj.as_on_date = latest_date
-                if share_obj.exchange == 'NASDAQ':
+                if share_obj.exchange in ['NASDAQ', 'NYSE']:
                     share_obj.conversion_rate = get_in_preferred_currency(1, 'USD', k)
+                elif share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                    share_obj.conversion_rate = get_in_preferred_currency(1, 'INR', k)
                 else:
                     share_obj.conversion_rate = 1
                 share_obj.latest_value = float(latest_val) * float(share_obj.conversion_rate) * float(share_obj.quantity)
@@ -750,7 +757,7 @@ def add_untracked_transactions():
                                 else:
                                     notes = notes + '. order id:' + row['order_id'] 
                                 
-                            if exchange in ['NSE', 'BSE']:
+                            if exchange in ['NSE', 'BSE', 'NSE/BSE']:
                                 conversion_rate = get_in_preferred_currency(1, 'INR', date)
                             elif exchange in ['NASDAQ', 'NYSE']:
                                 conversion_rate = get_in_preferred_currency(1, 'USD', date)
@@ -789,3 +796,12 @@ def pull_and_store_corporate_actions():
     process_corporate_actions()
     store_corporate_actions()
 
+def handle_symbol_change(old_symbol, old_exchange, new_symbol, new_exchange):
+    for share in Share.objects.filter(exchange=old_exchange, symbol=old_symbol):
+        try:
+            new_share = Share.objects.get(exchange=new_exchange, symbol=new_symbol, user=share.user)
+            move_trans(share, new_share, True)
+        except Share.DoesNotExist:
+            share.exchange = new_exchange
+            share.symbol = new_symbol
+            share.save()

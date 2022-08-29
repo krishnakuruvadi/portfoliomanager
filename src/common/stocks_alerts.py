@@ -6,7 +6,7 @@ from common.shares_helper import is_exchange_open, get_start_time, get_end_time
 
 def check_stock_price_change_alerts():
     ss = dict()
-    for stock in Stock.objects.exclude(trading_status='Delisted'):
+    for stock in Stock.objects.exclude(trading_status='Delisted').exclude(trading_status='Suspended'):
         symbol = stock.symbol
         if stock.exchange in ss:
             if not ss[stock.exchange]:

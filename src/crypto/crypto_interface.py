@@ -297,7 +297,7 @@ class CryptoInterface:
         print(f'start {start} bought {bought} sold {sold}')
         changed = float(start+bought-sold)
         if changed != float(amt):
-            if diff_days > 365:
+            if diff_days >= 365:
                 cash_flows = list()
                 cash_flows.append((start_date, -1*float(changed)))
                 cash_flows.append((end_date, float(amt)))

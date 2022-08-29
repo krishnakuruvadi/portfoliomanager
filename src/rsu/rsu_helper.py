@@ -97,3 +97,27 @@ def get_rsu_award_latest_vals():
             ret[rsu_award.id]['shares_vested'] = shares_vested
             ret[rsu_award.id]['aquisition_price'] = aquisition_price
     return ret
+
+def handle_symbol_change(old_symbol, old_exchange, new_symbol, new_exchange):
+    for old_rsu_award in RSUAward.objects.filter(exchange=old_exchange, symbol=old_symbol):
+        try:
+            new_award = RSUAward.objects.get(exchange=new_exchange, symbol=new_symbol, award_id=old_rsu_award.award_id, user=old_rsu_award.user)
+            for old_rsu in RestrictedStockUnits.objects.filter(award=old_rsu_award):
+                try:
+                    new_rsu = RestrictedStockUnits.objects.get(award=new_award, vest_date=old_rsu.vest_date)
+                    for old_rsu_sell_trans in RSUSellTransactions.objects.filter(rsu_vest=old_rsu):
+                        try:
+                            new_rsu_sell_trans = RSUSellTransactions.objects.filter(rsu_vest=new_rsu, trans_date=old_rsu_sell_trans.trans_date)
+                            old_rsu_sell_trans.delete()
+                        except RSUSellTransactions.DoesNotExist:
+                            old_rsu_sell_trans.rsu_vest = new_rsu
+                            old_rsu_sell_trans.save()
+                except RestrictedStockUnits.DoesNotExist:
+                    old_rsu.award = new_award
+                    old_rsu.save()
+            old_rsu_award.delete()
+
+        except RSUAward.DoesNotExist:
+            old_rsu_award.symbol = new_symbol
+            old_rsu_award.exchange = new_exchange
+            old_rsu_award.save()
