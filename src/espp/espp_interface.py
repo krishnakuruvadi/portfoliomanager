@@ -279,7 +279,7 @@ class EsppInterface:
         ret['balance'] = round(amt, 2)
         changed = float(start+bought-sold)
         if changed != float(amt):
-            if diff_days > 365:
+            if diff_days >= 365:
                 cash_flows = list()
                 cash_flows.append((start_date, -1*float(changed)))
                 cash_flows.append((end_date, float(amt)))

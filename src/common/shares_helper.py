@@ -319,8 +319,7 @@ def store_corporate_actions():
         print(f'directory {dest_path} not present to process corporate actions')
 
 def get_nse_bse_map_from_gist():
-    url = b'\x03\x11\r\x07\x1cHKD\x02\x10\x04\x1b\\\x03\x02\x11\x11\x02\r\x07\x17\x0e\x17\x1a\x18\x01\x06\x01\x05\x11W\x14\x00\x1fK\x00\x17\x10\x04\x07\x1c\x05\x00\x10\x0b\x02\x19\x13\x00\x02JODWE\x05^]A@\\DV\tV@\x15\n\x14\x01^\x00A\x14VF\\\\]N\x11]EK\x19\x04\x0eX^\x14SZ\x07O\x11WG\x07X\x01A\x11V\x11\x06\x0eU\x1b\x16V\x11T[Q\x1dG^\x13\x00]RI@]EQSPV\x19\x1c\x17;\t\x16\x1cY\x05\x01\x0b\x05'
-    url = k_decode(url)
+    url = 'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager-data/main/India/nse_bse_eq.json'
     data = get_json_gist(url)
     return data
 
@@ -528,6 +527,8 @@ def update_stock_status():
                         if 'delisting_date' in val and val['delisting_date'] != '':
                             stock.delisting_date = get_date_or_none_from_string(val['delisting_date'], '%d-%b-%Y')
                             stock.trading_status = 'Delisted'
+                        if 'suspension_date' in val and val['suspension_date'] != '':
+                            stock.suspension_date = get_date_or_none_from_string(val['suspension_date'], '%d-%b-%Y')
                         if 'listing_date' in val and val['listing_date'] != '':
                             stock.listing_date = get_date_or_none_from_string(val['listing_date'], '%d-%b-%Y')
                         stock.save()
@@ -539,12 +540,61 @@ def update_stock_status():
                             if 'delisting_date' in val and val['delisting_date'] != '':
                                 stock.delisting_date = get_date_or_none_from_string(val['delisting_date'], '%d-%b-%Y')
                                 stock.trading_status = 'Delisted'
+                            if 'suspension_date' in val and val['suspension_date'] != '':
+                                stock.suspension_date = get_date_or_none_from_string(val['suspension_date'], '%d-%b-%Y')
                             if 'listing_date' in val and val['listing_date'] != '':
                                 stock.listing_date = get_date_or_none_from_string(val['listing_date'], '%d-%b-%Y')
                             stock.isin = entry
                             stock.save()
                         except Exception as ex:
-                            print(f'exception {ex} when updating status for {stock.symbol} {stock.exchange}')  
+                            print(f'exception {ex} when updating status for {stock.symbol} {stock.exchange}')
+                elif stock.isin == '' and stock.symbol in val['old_nse_symbol'].split(','):
+                    # first check if no other stock exists with this isin
+                    new_symbol = val['nse_symbol'] if val['nse_symbol'] != '' else val['bse_security_id']
+                    new_exchanges = list()
+                    add = 0
+                    if val['bse_security_id'] != "":
+                        new_exchanges.append('BSE')
+                        add +=1
+                    if val['nse_symbol'] != '':
+                        new_exchanges.append('NSE')
+                        add +=1
+                    if add == 2:
+                        new_exchanges.append('NSE/BSE')
+                    handle_symbol_change(stock.symbol, li, new_symbol, new_exchanges, entry, val)
+
+
+def handle_symbol_change(old_symbol, old_exchanges, new_symbol, new_exchanges, isin, new_data):
+    li = ['NSE', 'BSE', 'NSE/BSE']
+    old_stock = None
+    for stock in Stock.objects.filter(reduce(or_, [Q(exchange__icontains=q) for q in old_exchanges]), symbol=old_symbol):
+        old_stock = stock
+        break
+    new_stock = None
+    for stock in Stock.objects.filter(reduce(or_, [Q(exchange__icontains=q) for q in new_exchanges]), symbol=new_symbol):
+        new_stock = stock
+        break
+    if not old_stock:
+        print(f'failed to find stock with symbol {old_symbol} {old_exchanges}')
+        return
+    
+    #shares
+    from shares.shares_helper import handle_symbol_change as hscs
+    hscs(old_symbol, old_stock.exchange, new_symbol, new_stock.exchange if new_stock else old_stock.exchange)
+    #rsus
+    from rsu.rsu_helper import handle_symbol_change as hscr
+    hscr(old_symbol, old_stock.exchange, new_symbol, new_stock.exchange if new_stock else old_stock.exchange)
+    #espps
+    from espp.espp_helper import handle_symbol_change as hsce
+    hsce(old_symbol, old_stock.exchange, new_symbol, new_stock.exchange if new_stock else old_stock.exchange)
+
+    if not new_stock:
+        #we are not tracking the new stock.  we can just change the symbol 
+        old_stock.symbol = new_symbol
+        old_stock.save()
+    else:
+        # delete the old stock
+        old_stock.delete()
 
 def is_exchange_open(exchange):
     tz = 'Asia/Kolkata'

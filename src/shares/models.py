@@ -40,6 +40,8 @@ class Share(models.Model):
     def get_absolute_url(self):
         return reverse('shares:share-detail', args=[str(self.id)])
 
+    def __str__(self):
+        return str(self.id) + ":" + self.exchange + ":" + self.symbol
 
 class Transactions(models.Model):
     class Meta:
