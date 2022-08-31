@@ -1,7 +1,6 @@
 import requests
 from os.path import isfile
 import csv
-#from shared.utils import *
 import os
 import pathlib
 import time

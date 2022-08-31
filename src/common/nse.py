@@ -1,8 +1,6 @@
-from shared.utils import convert_date_to_string
 import os
 import requests
 from django.conf import settings
-import zipfile
 import csv
 import json
 from nsetools.utils import byte_adaptor

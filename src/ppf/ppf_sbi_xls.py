@@ -1,7 +1,4 @@
-from os import listdir
 from os.path import isfile, join
-#import xlrd
-import os
 import csv
 from datetime import datetime
 

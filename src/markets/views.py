@@ -2,7 +2,6 @@ from django.shortcuts import render
 from .models import IndexRollingReturns, IndexYearlyReturns, IndexQuarterlyReturns, IndexMonthlyReturns, PEMonthy, PBMonthy, News
 from common.models import Preferences
 from shared.utils import get_float_or_zero_from_string, convert_date_to_string
-from newspaper import Article
 import requests
 from functools import cmp_to_key
 from shared.yahoo_finance_2 import YahooFinance2

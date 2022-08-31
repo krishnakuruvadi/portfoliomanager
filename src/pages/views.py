@@ -1,5 +1,3 @@
-
-from django.http import HttpResponse
 from django.shortcuts import render
 from shared.handle_get import *
 from shared.handle_chart_data import get_user_contributions, get_goal_contributions, get_investment_data

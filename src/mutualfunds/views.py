@@ -1,9 +1,5 @@
-from django.shortcuts import render
 from django.views.generic import (
-    CreateView,
     DetailView,
-    ListView,
-    UpdateView,
     ListView,
     DeleteView
 )
@@ -12,15 +8,11 @@ from dateutil.relativedelta import relativedelta
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import render, get_object_or_404
-from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from shared.utils import *
 from shared.handle_get import *
 from shared.handle_real_time_data import get_historical_mf_nav
-from django.db import IntegrityError
-from .models import Folio, MutualFundTransaction, Sip
 from common.models import MutualFund, MFYearlyReturns, MFCategoryReturns
-from .kuvera import Kuvera
 from .pull_coin import pull_coin
 from rest_framework.views import APIView
 from rest_framework.response import Response

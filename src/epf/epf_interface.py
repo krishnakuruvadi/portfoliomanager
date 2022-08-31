@@ -1,6 +1,5 @@
 from .models import Epf, EpfEntry
 import datetime
-from dateutil.relativedelta import relativedelta
 
 class EpfInterface:
     @classmethod

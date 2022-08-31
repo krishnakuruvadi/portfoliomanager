@@ -5,7 +5,6 @@ from django.conf import settings
 from django.db import IntegrityError
 from shared.utils import *
 from .models import Dividendv2, Bonusv2, Splitv2, Stock
-from .nse_bse import get_nse_bse
 import traceback
 from shares.models import Share
 from espp.models import Espp
@@ -534,8 +533,7 @@ def update_stock_status():
                         stock.save()
                     except Exception as ex:
                         print(f'exception {ex} when updating status for {stock.symbol} {stock.exchange}')  
-                else:
-                    if val['bse_security_id'] == stock.symbol or val['nse_symbol'] == stock.symbol:
+                elif val['bse_security_id'] == stock.symbol or val['nse_symbol'] == stock.symbol:
                         try:
                             if 'delisting_date' in val and val['delisting_date'] != '':
                                 stock.delisting_date = get_date_or_none_from_string(val['delisting_date'], '%d-%b-%Y')

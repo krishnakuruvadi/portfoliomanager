@@ -1,6 +1,5 @@
 import requests
 import bs4
-import pytz
 from shared.utils import get_date_or_none_from_string
 
 SEARCH_URL = "https://www.moneycontrol.com/stocks/cptmarket/compsearchnew.php?search_data=&cid=&mbsearch_str=&topsearch_type=1&search_str="

@@ -2,10 +2,8 @@ import csv
 from os.path import isfile
 from shared.utils import *
 from common.models import MutualFund
-from .models import Folio
 import enum
 from alerts.alert_helper import create_alert, Severity
-from shared.handle_real_time_data import get_mf_vals
 from common.helper import get_or_add_mf_obj
 import requests
 

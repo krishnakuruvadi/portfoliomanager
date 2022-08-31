@@ -1,9 +1,6 @@
 import requests
 from dateutil.relativedelta import relativedelta
 import datetime
-import csv
-import codecs
-from contextlib import closing
 from shared.handle_real_time_data import get_latest_vals, get_conversion_rate, get_in_preferred_currency
 from .models import Espp, EsppSellTransactions
 from common.models import Stock

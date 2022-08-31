@@ -1,11 +1,7 @@
 from .models import Account401K, Transaction401K, NAVHistory
 from shared.handle_real_time_data import get_conversion_rate, get_in_preferred_currency
 from shared.financial import xirr
-from django.conf import settings
-import csv
-import os
 from shared.utils import *
-from django.db import IntegrityError
 
 def reconcile_401k():
     accounts = Account401K.objects.all()

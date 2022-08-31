@@ -1,27 +1,17 @@
 from django.shortcuts import render
 from django.views.generic import (
-    CreateView,
     DetailView,
-    ListView,
-    UpdateView,
     ListView,
     DeleteView
 )
-import datetime
-from dateutil.relativedelta import relativedelta
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import render, get_object_or_404
 from django.core.files.storage import FileSystemStorage
-from django.conf import settings
-from .models import Share, Transactions
 from common.models import Dividendv2, Bonusv2, Splitv2, Stock
 from .shares_helper import *
 from shared.utils import *
 from shared.handle_get import *
-from shared.handle_real_time_data import get_latest_vals, get_conversion_rate
-from .zerodha import Zerodha
-from django.db import IntegrityError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from tasks.tasks import pull_share_trans_from_broker, pull_share_trans_from_rh

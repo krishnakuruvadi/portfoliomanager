@@ -1,13 +1,10 @@
 from huey.contrib.djhuey import task, periodic_task, db_task, db_periodic_task, on_startup
 from huey import crontab
-from mutualfunds.models import Folio, MutualFundTransaction
 from common.models import HistoricalStockPrice, MutualFund, HistoricalMFPrice, MFYearlyReturns, Stock
 from espp.models import Espp
 from espp.espp_helper import update_latest_vals
 from shared.handle_real_time_data import get_historical_year_mf_vals
 from dateutil.relativedelta import relativedelta
-import datetime
-import time
 from django.db.models import Q
 from mftool import Mftool
 from common.helper import update_mf_scheme_codes, update_category_returns, update_mf_details
@@ -21,9 +18,7 @@ from mutualfunds.mf_helper import mf_add_transactions, clean_mutual_fund_table
 import os
 import json
 from mutualfunds.mf_analyse import pull_ms, pull_category_returns, pull_blend, get_ms_code
-from django.db import IntegrityError
 from goal.goal_helper import update_all_goals_contributions
-from .models import Task, TaskState
 from alerts.alert_helper import create_alert, Severity
 from shares.pull_zerodha import pull_zerodha
 from shares.shares_helper import shares_add_transactions, update_shares_latest_val, check_discrepancies, reconcile_shares, add_untracked_transactions

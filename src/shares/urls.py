@@ -16,7 +16,6 @@ from .views import (
     CurrentShares,
     delete_shares,
     shares_insights
-    #ChartData
 )
 
 app_name = 'shares'
@@ -38,7 +37,4 @@ urlpatterns = [
     path('transaction/<id>', TransactionDetailView.as_view(), name='transaction-detail'),
     path('api/get/current/<user_id>', CurrentShares.as_view()),
     path('api/get/current/', CurrentShares.as_view())
-    #path('transaction/<id>/edit', edit_transaction, name='transaction-edit'),
-    #path('api/chart/data/<id>', ChartData.as_view()),
-
 ]

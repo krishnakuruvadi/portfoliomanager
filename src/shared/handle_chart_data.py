@@ -7,7 +7,6 @@ from rsu.models import RSUAward, RestrictedStockUnits, RSUSellTransactions
 from epf.models import Epf, EpfEntry
 from goal.models import Goal
 from shares.models import Share, Transactions
-from mutualfunds.models import Folio, MutualFundTransaction
 from users.models import User
 import datetime
 from dateutil.relativedelta import relativedelta

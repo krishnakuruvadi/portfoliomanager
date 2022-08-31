@@ -3,7 +3,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, ElementNotInteractableException
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import os
 import pathlib
 import time
@@ -12,8 +11,6 @@ from tasks.tasks import add_mf_transactions
 from .mf_helper import mf_add_or_update_sip_coin
 import re
 import datetime
-from selenium.webdriver.common.keys import Keys
-from alerts.alert_helper import create_alert, Severity
 from django.conf import settings
 
 def get_path_to_chrome_driver():

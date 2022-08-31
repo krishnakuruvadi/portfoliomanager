@@ -7,7 +7,6 @@ from django.views.generic import (
 )
 from dateutil.relativedelta import relativedelta
 from django.http import HttpResponseRedirect
-from django.template import Context
 from decimal import Decimal
 from .models import FixedDeposit
 from .fixed_deposit_helper import add_fd_entry, get_maturity_value

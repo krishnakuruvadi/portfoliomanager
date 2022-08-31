@@ -8,7 +8,6 @@ from django.views.generic import (
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponseRedirect
-from django.template import Context
 from shared.handle_delete import delete_user
 from shared.handle_chart_data import get_user_contributions
 from .models import User

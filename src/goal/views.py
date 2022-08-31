@@ -5,13 +5,11 @@ from django.views.generic import (
     DetailView,
     DeleteView
 )
-from django.template import Context
 from django.http import HttpResponseRedirect
 from decimal import Decimal
 from .models import Goal
 from .goal_helper import one_time_pay_final_val, add_goal_entry, get_corpus_to_be_saved, get_depletion_vals, get_unallocated_amount
 from dateutil.relativedelta import relativedelta
-from ppf.models import Ppf, PpfEntry
 
 from rest_framework.views import APIView
 from rest_framework.response import Response

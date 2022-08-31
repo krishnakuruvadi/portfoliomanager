@@ -1,19 +1,14 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import (
-    CreateView,
     DetailView,
-    ListView,
-    UpdateView,
     ListView,
     DeleteView
 )
-from .forms import RsuModelForm
 from .models import RSUAward, RestrictedStockUnits, RSUSellTransactions
 from .rsu_helper import update_latest_vals, get_rsu_award_latest_vals
 from django.http import HttpResponseRedirect
 from shared.handle_get import *
-from shared.handle_create import add_common_stock
 from django.shortcuts import redirect
 from shared.utils import *
 from rest_framework.views import APIView

@@ -10,12 +10,9 @@ from django.views.generic import (
 )
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
-from rest_framework.views import APIView
-from rest_framework.response import Response
 
 from dateutil.relativedelta import relativedelta
 import datetime
-from .forms import PpfModelForm, PpfEntryModelForm
 from .models import Ppf, PpfEntry
 from .ppf_helper import ppf_add_transactions, get_ppf_details, insert_ppf_trans_entry
 from decimal import Decimal

@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from decimal import Decimal
-from dateutil.relativedelta import relativedelta
 from django.db import IntegrityError
 from .models import InsurancePolicy, NAVHistory, Transaction, Fund
 from shared.utils import *

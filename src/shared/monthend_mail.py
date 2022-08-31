@@ -1,6 +1,5 @@
 from numpy import short
 from ssy.ssy_interface import SsyInterface
-from ppf.ppf_interface import PpfInterface
 from epf.epf_interface import EpfInterface
 from espp.espp_interface import EsppInterface
 from fixed_deposit.fd_interface import FdInterface

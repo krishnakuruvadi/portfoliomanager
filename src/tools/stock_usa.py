@@ -4,7 +4,6 @@ import json
 import os
 import pathlib
 import requests
-import yfinance as yf
 
 DEFAULT_DOWNLOAD_DIR = str(pathlib.Path(__file__).parent.parent.parent.absolute())
 VERSION = 1

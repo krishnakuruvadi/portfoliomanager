@@ -4,15 +4,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, ElementNotInteractableException, ElementClickInterceptedException
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import os
 import pathlib
 import time
-import datetime
-import pprint
-import json
-from dateutil.relativedelta import relativedelta
-from selenium.webdriver.common.keys import Keys
 from tasks.tasks import add_mf_transactions
 from .mf_helper import mf_add_or_update_sip_kuvera
 

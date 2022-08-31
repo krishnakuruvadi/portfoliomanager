@@ -1,12 +1,7 @@
-from django.shortcuts import render
-
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import (
-    CreateView,
     DetailView,
-    ListView,
-    UpdateView,
     ListView,
     DeleteView
 )
@@ -17,7 +12,6 @@ from rest_framework.response import Response
 
 from dateutil.relativedelta import relativedelta
 import datetime
-from .forms import SsyEntryModelForm
 from .models import Ssy, SsyEntry
 from .ssy_helper import ssy_add_transactions, get_ssy_details, insert_ssy_trans_entry
 from decimal import Decimal

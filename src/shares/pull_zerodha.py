@@ -2,15 +2,11 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, ElementNotInteractableException
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.common.exceptions import TimeoutException
 import os
 import pathlib
 import time
 import datetime
-import pprint
-import json
-from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.keys import Keys
 import re
 from alerts.alert_helper import create_alert, Severity

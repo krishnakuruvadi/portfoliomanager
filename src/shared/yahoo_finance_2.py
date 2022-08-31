@@ -1,14 +1,10 @@
 import requests
-#import pandas as pd
 from .exchange import Exchange
 import re
 from io import StringIO
 import datetime
 import csv
-import codecs
-import time
-#import pytz
-#from dateutil import tz
+
 
 class YahooFinance2(Exchange):
     timeout = 5

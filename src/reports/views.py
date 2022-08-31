@@ -1,6 +1,4 @@
 from django.shortcuts import render
-import datetime
-from dateutil.relativedelta import relativedelta
 from shared.handle_get import *
 
 # Create your views here.

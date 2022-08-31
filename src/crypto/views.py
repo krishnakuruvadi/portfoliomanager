@@ -10,7 +10,6 @@ from common.currency_helper import supported_currencies_as_list
 from .crypto_interface import CryptoInterface
 from django.http import HttpResponseRedirect
 import json
-import requests
 from .crypto_helper import insert_trans_entry, get_crypto_coins, reconcile_event_based, get_price
 from common.models import Coin, HistoricalCoinPrice
 from tasks.tasks import pull_and_store_coin_historical_vals, update_crypto_for_user

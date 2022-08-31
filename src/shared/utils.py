@@ -2,7 +2,6 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from dateutil import tz
 from pytz import timezone
-from pytz import common_timezones
 
 def get_float_or_zero_from_string(input):
     if input != None and input != '':

@@ -19,7 +19,6 @@ from .views import (
     fund_insights,
     delete_folios,
     sip_list
-    #ChartData
 )
 
 app_name = 'mutualfund'
@@ -43,7 +42,6 @@ urlpatterns = [
     path('transaction/<id>', TransactionDetailView.as_view(), name='transaction-detail'),
 
     path('transaction/<id>/update', update_transaction, name='transaction-update'),
-    #path('api/chart/data/<id>', ChartData.as_view()),
     path('api/get/current/<user_id>', CurrentMfs.as_view()),
     path('api/get/current/', CurrentMfs.as_view())
 ]
