@@ -18,18 +18,18 @@ from shared.financial import xirr, calc_simple_roi
 from users.user_interface import get_users
 from shared.handle_get import get_user_short_name_or_name_from_id
 from common.helper import get_preferred_currency_symbol
-from dateutil.relativedelta import relativedelta
 
 
 def send_monthend_updates(ext_user=None):
     today = datetime.date.today()
-    last_month = today + relativedelta(months=-1)
+    end_dt = today - datetime.timedelta(days=2)
+    start_dt = end_dt.replace(day=1)
     short_names = list()
     for u in get_users(ext_user):
         short_names.append(get_user_short_name_or_name_from_id(u.id))
     context = dict()
-    context['from_date'] = last_month.strftime('%b %Y')
-    context['to_date'] = today.strftime('%Y-%m-%d')
+    context['month'] = start_dt.strftime('%b')
+    context['year'] = end_dt.year
     # list to comma separated string
     context['name'] = ', '.join(short_names)
     context['content'] = None
@@ -38,7 +38,7 @@ def send_monthend_updates(ext_user=None):
     debits = 0
     total = 0
     for intf in [SsyInterface, PpfInterface, EpfInterface, EsppInterface, FdInterface, BankAccountInterface, RsuInterface, R401KInterface, MfInterface, ShareInterface, GoldInterface, CryptoInterface]:#   , InsuranceInterface,]:
-        data = intf.updates_email(ext_user, last_month, today)
+        data = intf.updates_email(ext_user, start_dt, end_dt)
         print(f'data: {data}')
         if not context['content']:
             context['content'] = data['content']
@@ -48,23 +48,9 @@ def send_monthend_updates(ext_user=None):
         credits += float(data['credits'])
         debits += float(data['debits'])
         total += float(data['balance'])
-    '''
-    ssy = SsyInterface.weekly_update_email(ext_user)
-    context['content'] = ssy['content']
-    start += ssy['start']
-    credits += ssy['credits']
-    debits += ssy['debits']
-    total += ssy['balance']
-    '''
+
     changed = float(start+credits-debits)
     if changed != float(total):
-        '''
-        cash_flows = list()
-        cash_flows.append((last_week, -1*float(start+credits-debits)))
-        cash_flows.append((today, float(total)))
-        print(f'finding xirr for {cash_flows}')
-        change = xirr(cash_flows, 0.1)*100
-        '''
         change = calc_simple_roi(changed , total)
         if change >= 0:
             context['change'] = f"""<span style="margin-right:15px;font-size:18px;color:#56b454">▲</span>{round(change, 2)}%"""
