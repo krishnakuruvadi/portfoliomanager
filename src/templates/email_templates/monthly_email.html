@@ -1,0 +1,14 @@
+{% extends 'email_templates/base_email.html' %}
+
+{% block title %}
+PORTFOLIO ALERT
+{% endblock %}
+
+{% block subject %}
+<strong>For the Month:</strong> {{month}} {{year}}
+{% endblock %}
+
+{% block body %}
+{{content}}
+
+{% endblock %}
