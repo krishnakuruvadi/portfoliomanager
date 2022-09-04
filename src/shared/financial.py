@@ -2,6 +2,7 @@ import datetime
 from pyxirr import xirr as py_xirr
 from dateutil.relativedelta import relativedelta
 
+'''
 def secant_method(tol, f, x0):
     """
     Solve for x where f(x)=0, given starting x0 and tolerance.
@@ -28,6 +29,7 @@ def secant_method(tol, f, x0):
     while (abs(x1-x0)/abs(x1) > tol):
         x0, x1 = x1, x1-f(x1)*(x1-x0)/(f(x1)-f(x0))
     return x1
+'''
 
 def xnpv(rate,cashflows):
     """
@@ -59,7 +61,7 @@ def xirr(cashflows, guess=0.1):
     # guess param not used in pyxirr, but it is passed to the function by the invoking code due to previous scipy library requirements.
     try:
         val = py_xirr(cashflows)
-        print(f' got {val} for {cashflows}')
+        #print(f' got {val} for {cashflows}')
         if val > 10000000:
             print(f'unreasonable returns {val}.  returning 0 instead')
             return 0
