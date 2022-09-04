@@ -54,7 +54,7 @@ def xnpv(rate,cashflows):
 
     return sum([cf/(1+rate)**((t-t0).days/365.0) for (t,cf) in chron_order])
 
-def xirr(cashflows, guess):
+def xirr(cashflows, guess=0.1):
 
     # guess param not used in pyxirr, but it is passed to the function by the invoking code due to previous scipy library requirements.
     try:
