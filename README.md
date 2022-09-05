@@ -95,6 +95,12 @@ git clone https://github.com/krishnakuruvadi/portfoliomanager.git
 cd ./portfoliomanager
 ```
 
+- Set git configuration (optional).
+```bash
+git config user.name "Your Name"
+git config user.email "youremail@provider.com"
+```
+
 - Create a virtual environment (optional).
 
 ```bash
