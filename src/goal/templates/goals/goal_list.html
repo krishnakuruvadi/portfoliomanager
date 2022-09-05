@@ -104,8 +104,8 @@
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ instance.notes }}</td>
         <td>
-          <a href="{% url 'goals:goal-delete' instance.id %}"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
-          <a href="{% url 'goals:goal-update' instance.id %}" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{% url 'goals:goal-delete' instance.id %}"><i class="fa fa-trash" aria-hidden="true" title="Delete Goal"></i> </a>
+          <a href="{% url 'goals:goal-update' instance.id %}" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Update Goal"></i> </a>
         </td>
       </tr>
       {% endfor %}

@@ -52,8 +52,8 @@
         <td>{{ instance.broker }}</td>
         <td>{{ instance.notes|default_if_none:""}}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}/delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}/update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}/delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Transaction"></i> </a>
+          <a href="{{ instance.get_absolute_url }}/update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Edit Transaction"></i> </a>
         </td>
       </tr>
       {% endfor %}

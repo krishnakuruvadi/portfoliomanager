@@ -4,6 +4,19 @@ import datetime
 from .utils import * 
 from selenium.webdriver.common.by import By
 
+def get_user(id):
+    users = [{
+        "name": "Andrew Kal",
+        "short_name": "Akal",
+        "dob": datetime.date(day=2, month=10, year=1993)
+    },
+    {
+        "name": "Ching Hao",
+        "short_name": "Chao",
+        "dob": datetime.date(day=12, month=9, year=1994)
+    }]
+    return users[id]
+    
 
 def add_new_user(driver, name, short_name, dob):
     #driver.get(("%s%s" % (live_server.url, "/user/")))
@@ -31,12 +44,14 @@ class Test_User:
         assert count == 0
     
     def test_add_new_user(self):
-        add_new_user(self.driver,  "Andrew Kal", "Akal", datetime.date(day=2, month=10, year=1993))
+        u = get_user(0)
+        add_new_user(self.driver,  u["name"], u["short_name"], u["dob"])
         count, _ = get_rows_of_table(self.driver, 'user-table')
         assert count == 1
     
     def test_add_another_user(self):
-        add_new_user(self.driver,  "Ching Hao", "Chao", datetime.date(day=2, month=10, year=1993))
+        u = get_user(1)
+        add_new_user(self.driver,  u["name"], u["short_name"], u["dob"])
         count, _ = get_rows_of_table(self.driver, 'user-table')
         assert count == 2
 

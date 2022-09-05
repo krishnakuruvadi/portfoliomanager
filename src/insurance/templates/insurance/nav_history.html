@@ -46,7 +46,7 @@
         <td>{{ instance.date }}</td>
         <td>{{ instance.nav }}</td>
         <td>
-          <a href="{% url 'insurance:delete-nav' policy_id fund_id instance.id %}" class="confirm-delete-nav"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          <a href="{% url 'insurance:delete-nav' policy_id fund_id instance.id %}" class="confirm-delete-nav"><i class="fa fa-trash" aria-hidden="true" title="Delete NAV"></i> </a>
         </td>
       </tr>
       {% endfor %}

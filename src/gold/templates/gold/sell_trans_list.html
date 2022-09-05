@@ -39,7 +39,7 @@
         <td>{{ instance.notes }}</td>
         <!--td>{{ instance.gain }}{% if instance.gain > 0 %}<i class="fa fa-caret-up" aria-hidden="true" style="color:green"></i>{% else %}<i class="fa fa-caret-down" aria-hidden="true" style="color:red"></i>{% endif %}></td!-->
         <td>
-          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-trans"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-trans"><i class="fa fa-trash" aria-hidden="true" title="Delete Sell Transaction"></i> </a>
         </td>
       </tr>
       {% endfor %}
