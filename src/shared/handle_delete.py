@@ -16,7 +16,7 @@ from bankaccounts.models import BankAccount
 def delete_user(id):
     try:
         name = User.objects.get(id=id).name
-        print('name is', name)
+        print(f'deleting user {id}: {name}')
         Epf.objects.filter(user=id).delete()
         Ppf.objects.filter(user=id).delete()
         Ssy.objects.filter(user=id).delete()

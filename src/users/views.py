@@ -82,8 +82,8 @@ class UserDetailView(DetailView):
         start_day = get_start_day_for_user(id_)
 
         #new_start_day = datetime.date(start_day.year, start_day.month, 1)
-        
-        curr_yr = datetime.date.today().year
+        today = datetime.date.today()
+        curr_yr = today.year
         investment_types = list()
         yrly = dict()
         for yr in range(start_day.year, curr_yr+1):
@@ -193,30 +193,26 @@ class UserDetailView(DetailView):
         data['investment_types'] = investment_types
         data['curr_module_id'] = 'id_user_module'
         utc = self.get_object().as_on
-        from_zone = tz.tzutc()
-        utc = utc.replace(tzinfo=from_zone)
-        preferred_tz = get_preferences('timezone')
-        if not preferred_tz:
-            preferred_tz = 'Asia/Kolkata'
-        data['last_updated'] = utc.astimezone(timezone(preferred_tz)).strftime("%Y-%m-%d %H:%M:%S")
+        if utc:
+            from_zone = tz.tzutc()
+            utc = utc.replace(tzinfo=from_zone)
+            preferred_tz = get_preferences('timezone')
+            if not preferred_tz:
+                preferred_tz = 'Asia/Kolkata'
+            data['last_updated'] = utc.astimezone(timezone(preferred_tz)).strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            data['last_updated'] = today.strftime("%Y-%m-%d")
         print(f'user detail view data {data}')
         return data
 
-
-class UserDeleteView(DeleteView):
-    template_name = 'users/user_delete.html'
-    
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(User, id=id_)
-
-    def get_success_url(self):
-        return reverse('users:user-list')
-    
-    def delete(self, request, *args, **kwargs):
-        print(request)
-        delete_user(kwargs['id'])
-        return super(DeleteView, self).delete(request, *args, **kwargs)
+def user_delete(request, id):
+    try:
+        u = User.objects.get(id=id)
+        delete_user(id)
+        u.delete()
+    except User.DoesNotExist:
+        print(f'User with id does not exist {id}')
+    return HttpResponseRedirect(reverse('users:user-list'))
 
 def add_user(request):
     template = 'users/add_user.html'

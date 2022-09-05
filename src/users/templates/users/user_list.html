@@ -76,8 +76,8 @@
         <td>{{ instance.total_networth }}</td>
         <td>{{ instance.notes }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-user"><i class="fa fa-trash"  aria-hidden="true" title="Delete User"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Update User"></i> </a>
         </td>
       </tr>
       {% endfor %}
@@ -90,3 +90,16 @@
   $('#user-table').DataTable();
   {% endblock jquery %}
 </script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all users?');
+    })
+    $(document).on('click', '.confirm-delete-user', function(){
+      return confirm('Are you sure you want to delete the user?');
+    })
+  </script>
+{% endblock javascript %}

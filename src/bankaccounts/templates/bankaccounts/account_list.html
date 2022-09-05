@@ -147,9 +147,9 @@
         <td>{{ instance.last_trans_dt }}</td>
         <td>{{ instance.notes }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-account"><i class="fa fa-trash" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}transactions" style="padding-left:10px;" ><i class="far fa-file-alt" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-account"><i class="fa fa-trash" aria-hidden="true" title="Delete Account"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Update Account"></i> </a>
+          <a href="{{ instance.get_absolute_url }}transactions" style="padding-left:10px;" ><i class="far fa-file-alt" aria-hidden="true" title="View Transactions"></i> </a>
         </td> 
       </tr>
       {% endfor %}

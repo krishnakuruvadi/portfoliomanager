@@ -320,13 +320,13 @@ class R401KInterface:
                     conv_val = get_in_preferred_currency(1, 'USD', end_date)
                     if conv_val:
                         conv_rate = conv_val
-                    start += float(val)*float(conv_rate)*float(end_units)
+                    amt += float(val)*float(conv_rate)*float(end_units)
                 elif end_date in nav_from_trans:
                     conv_rate = 1
                     conv_val = get_in_preferred_currency(1, 'USD', end_date)
                     if conv_val:
                         conv_rate = conv_val
-                    start += nav_from_trans[end_date]*float(conv_rate)*float(end_units)
+                    amt += nav_from_trans[end_date]*float(conv_rate)*float(end_units)
                 else:
                     print(f'failed to get nav for {obj.company} {end_date}')
         ret['start'] = round(start, 2)
