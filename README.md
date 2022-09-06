@@ -56,7 +56,7 @@ To build a portfolio manager which can track and provide insights into a individ
 
 ### 1. Requirements
 
-- Python v3.8 or above.
+- Python v3.  Tested with v3.9
 
 - Libraries
 
