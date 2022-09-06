@@ -215,6 +215,8 @@ def user_delete(request, id):
 
 def add_user(request):
     template = 'users/add_user.html'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         name = request.POST['name']
         short_name = request.POST['short_name']
@@ -222,7 +224,11 @@ def add_user(request):
         email = request.POST['email']
         notes = request.POST['notes']
         User.objects.create(name=name, dob=dob, notes=notes, email=email, short_name=short_name)
-    context = {'curr_module_id': 'id_user_module'}
+        message_color = 'green'
+        message = 'New user addition successful'
+        #message = f'Failed to add user with name {name}.  User not added.'
+        #message_color = 'red'
+    context = {'curr_module_id': 'id_user_module', 'message':message, 'message_color':message_color}
     return render(request, template, context=context)
 
 def update_user(request, id):

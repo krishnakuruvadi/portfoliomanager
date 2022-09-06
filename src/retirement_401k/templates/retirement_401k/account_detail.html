@@ -94,7 +94,7 @@
               <tr>
                 <td>{{instance.nav_date}}</td>
                 <td>{{instance.nav_value}}</td>
-                <td><a href="{% url 'retirement_401k:nav-delete' id instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+                <td><a href="{% url 'retirement_401k:nav-delete' id instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete NAV"></i> </a>
                 </td>
               </tr>
               {% endfor %}

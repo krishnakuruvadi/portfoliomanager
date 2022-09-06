@@ -103,9 +103,9 @@
         <td>{{ instance.total }}</td>
         <td>{{ instance.roi }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}transactions"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-epf"><i class="fa fa-trash" aria-hidden="true" title="Delete Account"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true" title="Edit Account"></i> </a>
+          <a href="{{ instance.get_absolute_url }}transactions"><i class="far fa-file-alt" aria-hidden="true" title="View Transactions"></i></a>
         </td>
       </tr>
       {% endfor %}
@@ -118,3 +118,16 @@
   $('#epf-table').DataTable();
   {% endblock jquery %}
 </script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all EPFs?');
+    })
+    $(document).on('click', '.confirm-delete-epf', function(){
+      return confirm('Are you sure you want to delete the EPF?');
+    })
+  </script>
+{% endblock javascript %}

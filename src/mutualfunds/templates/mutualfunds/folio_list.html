@@ -153,9 +153,9 @@
         <td>{{ instance.xirr }}</td>
         <!--td>{{ instance.gain }}{% if instance.gain > 0 %}<i class="fa fa-caret-up" aria-hidden="true" style="color:green"></i>{% else %}<i class="fa fa-caret-down" aria-hidden="true" style="color:red"></i>{% endif %}></td!-->
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash"  aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true"></i> </a>
-          <a href="{{ instance.get_absolute_url }}transactions" style="padding-left:10px;"><i class="far fa-file-alt" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Folio"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Edit Folio"></i> </a>
+          <a href="{{ instance.get_absolute_url }}transactions" style="padding-left:10px;"><i class="far fa-file-alt" aria-hidden="true" title="View Transactions"></i> </a>
         </td>
       </tr>
       {% endfor %}
