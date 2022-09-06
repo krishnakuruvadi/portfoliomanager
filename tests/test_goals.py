@@ -72,6 +72,7 @@ def delete_goal_with_row_id(driver, id):
 
             #use the accept() method to accept the alert
             obj.accept()
+            break
 
 def set_prerequisites(driver):
     driver.find_element(By.XPATH, "//a[@href='/user']").click()

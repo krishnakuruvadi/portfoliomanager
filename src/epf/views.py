@@ -23,6 +23,8 @@ from common.helper import get_preferred_currency_symbol
 
 def create_epf(request):
     template_name = 'epfs/epf_create.html'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
         number = request.POST['number']
@@ -50,10 +52,14 @@ def create_epf(request):
                 uan=uan,
                 eps=eps
             )
+            message_color = 'green'
+            message = 'New EPF account addition successful'
         except IntegrityError:
             print('EPF already exists')
+            message_color = 'red'
+            message = 'EPF account already exists'
     users = get_all_users()
-    context = {'users':users, 'operation': 'Create EPF', 'curr_module_id': 'id_epf_module'}
+    context = {'users':users, 'operation': 'Create EPF', 'curr_module_id': 'id_epf_module', 'message':message, 'message_color':message_color}
     return render(request, template_name, context)
 
 class EpfListView(ListView):
@@ -89,15 +95,13 @@ class EpfListView(ListView):
         data['preferred_currency'] = get_preferred_currency_symbol()
         return data
 
-class EpfDeleteView(DeleteView):
-    template_name = 'epfs/epf_delete.html'
-    
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Epf, id=id_)
-
-    def get_success_url(self):
-        return reverse('epfs:epf-list')
+def epf_delete(request, id):
+    try:
+        e = Epf.objects.get(id=id)
+        e.delete()
+    except Epf.DoesNotExist:
+        print(f'Epf with id {id} does not exist')
+    return HttpResponseRedirect(reverse('epfs:epf-list'))
 
 class EpfDetailView(DetailView):
     template_name = 'epfs/epf_detail.html'

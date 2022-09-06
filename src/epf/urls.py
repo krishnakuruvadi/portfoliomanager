@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import (
     create_epf,
-    EpfDeleteView,
+    epf_delete,
     EpfListView,
     EpfDetailView,
     update_epf,
@@ -17,7 +17,7 @@ urlpatterns = [
     path('create/', create_epf, name='epf-create'),
     path('<id>/', EpfDetailView.as_view(), name='epf-detail'),
     path('<id>/update/', update_epf, name='epf-update'),
-    path('<id>/delete/', EpfDeleteView.as_view(), name='epf-delete'),
+    path('<id>/delete/', epf_delete, name='epf-delete'),
     path('<id>/transactions/', show_contributions, name='epf-entry-list'),
     path('<id>/transactions/<year>', show_contributions, name='epf-entry-list'),
     #path('<id>/upload-transactions/', upload_epf_trans, name='epf-upload-trans'),
