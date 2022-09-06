@@ -505,24 +505,21 @@ class GoalDetailView(DetailView):
         print(data)
         return data
 
-class GoalDeleteView(DeleteView):
-    template_name = 'goals/goal_delete.html'
-    
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Goal, id=id_)
+def goal_delete(request, id):
+    try:
+        g = Goal.objects.get(id=id)
+        delete_goal(id)
+        g.delete()
+    except Goal.DoesNotExist:
+        print(f'Goal with id does not exist {id}')
+    return HttpResponseRedirect(reverse('goals:goal-list'))
 
-    def get_success_url(self):
-        return reverse('goals:goal-list')
-
-    def form_valid(self, form):
-        obj = self.get_object()
-        delete_goal(obj.id)
-        return super().form_valid(form)
 
 def add_goal(request):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
     template = 'goals/add_goal.html'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
         if "submit" in request.POST:
@@ -541,6 +538,8 @@ def add_goal(request):
             add_goal_entry(name, start_date, curr_val, time_period, inflation,
                 final_val, user_id, recurring_pay_goal, expense_period,
                 post_returns, notes)
+            message_color = 'green'
+            message = 'New goal addition successful'
         else:
             print("calculate button pressed")
             name = request.POST['name']
@@ -559,7 +558,7 @@ def add_goal(request):
                 'curr_module_id':'id_goal_module'}
             return render(request, template, context=context)
     users = get_all_users()
-    context = {'users':users, 'curr_module_id': 'id_goal_module'}
+    context = {'users':users, 'curr_module_id': 'id_goal_module', 'message':message, 'message_color':message_color}
     return render(request, template, context=context)
 
 def add_retirement_goal(request):

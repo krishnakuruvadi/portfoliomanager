@@ -90,7 +90,7 @@
     <tbody>
       {% for instance in object_list %}
       <tr>
-        <td>{{ forloop.counter }}</td>
+        <th>{{ forloop.counter }}</th>
 
         <td>
           <a href="{% url 'goals:goal-detail' instance.id %}">{{ instance.name }}</a>
@@ -104,7 +104,7 @@
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ instance.notes }}</td>
         <td>
-          <a href="{% url 'goals:goal-delete' instance.id %}"><i class="fa fa-trash" aria-hidden="true" title="Delete Goal"></i> </a>
+          <a href="{% url 'goals:goal-delete' instance.id %}" class="confirm-delete-goal"><i class="fa fa-trash" aria-hidden="true" title="Delete Goal"></i> </a>
           <a href="{% url 'goals:goal-update' instance.id %}" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Update Goal"></i> </a>
         </td>
       </tr>
@@ -123,3 +123,16 @@
   });
   {% endblock jquery %}
 </script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all goals?');
+    })
+    $(document).on('click', '.confirm-delete-goal', function(){
+      return confirm('Are you sure you want to delete the goal?');
+    })
+  </script>
+{% endblock javascript %}
