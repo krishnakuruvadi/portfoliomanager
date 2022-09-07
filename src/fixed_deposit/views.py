@@ -57,15 +57,13 @@ class FixedDepositDetailView(DetailView):
         data['curr_module_id'] = 'id_fd_module'
         return data
 
-class FixedDepositDeleteView(DeleteView):
-    template_name = 'fixed-deposits/fixed_deposit_delete.html'
-    
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(FixedDeposit, id=id_)
-
-    def get_success_url(self):
-        return reverse('fixed-deposits:fixed-deposit-list')
+def delete_fd(request, id):
+    try:
+        f = FixedDeposit.objects.get(id=id)
+        f.delete()
+    except FixedDeposit.DoesNotExist:
+        print(f'FD with number {id} does not exist')
+    return HttpResponseRedirect(reverse('fixed-deposits:fixed-deposit-list'))
 
 def add_fixed_deposit(request):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
