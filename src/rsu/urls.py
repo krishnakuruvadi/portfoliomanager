@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (
-    RsuDeleteView,
+    delete_award,
     RsuListView,
     RsuDetailView,
     delete_vest,
@@ -28,7 +28,7 @@ urlpatterns = [
     path('insights/', rsu_insights, name='rsu-insights'),
     path('<id>/', RsuDetailView.as_view(), name='rsu-detail'),
     path('<id>/update/', view_update_rsu, name='rsu-update'),
-    path('<id>/delete/', RsuDeleteView.as_view(), name='rsu-delete'),
+    path('<id>/delete/', delete_award, name='rsu-delete'),
     path('<id>/vest/', show_vest_list, name='rsu-vest-list'),
     path('<id>/vest/create', add_vest, name='rsu-add-vest'),
     path('<id>/vest/<vestid>/update', update_vest, name='rsu-update-vest'),
