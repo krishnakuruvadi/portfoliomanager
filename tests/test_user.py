@@ -4,18 +4,23 @@ import datetime
 from .utils import * 
 from selenium.webdriver.common.by import By
 
-def get_user(id):
+def get_user(row_id):
     users = [{
+        "row_id": 1,
         "name": "Andrew Kal",
         "short_name": "Akal",
         "dob": datetime.date(day=2, month=10, year=1993)
     },
     {
+        "row_id": 2,
         "name": "Ching Hao",
         "short_name": "Chao",
         "dob": datetime.date(day=12, month=9, year=1994)
     }]
-    return users[id]
+    for u in users:
+        if u["row_id"] == row_id:
+            return u
+    return None
     
 
 def add_new_user(driver, user):
@@ -33,11 +38,11 @@ def add_new_user(driver, user):
     driver.find_element(By.LINK_TEXT, "Cancel").click()
     time.sleep(5)
 
-def delete_user(driver, id):
+def delete_user(driver, row_id):
     count, rows = get_rows_of_table(driver, 'user-table')
     for row in rows:
         th = row.find_element(By.TAG_NAME, 'th')
-        if th.text == str(id):
+        if th.text == str(row_id):
             cols = row.find_elements(By.TAG_NAME, 'td')
             cols[len(cols)-1].find_element(By.CSS_SELECTOR, "a[href*='delete']").click()
             time.sleep(2)
@@ -62,13 +67,13 @@ class Test_User:
         assert count == 0
     
     def test_add_new_user(self):
-        u = get_user(0)
+        u = get_user(1)
         add_new_user(self.driver,  u)
         count, _ = get_rows_of_table(self.driver, 'user-table')
         assert count == 1
     
     def test_add_another_user(self):
-        u = get_user(1)
+        u = get_user(2)
         add_new_user(self.driver,  u)
         count, _ = get_rows_of_table(self.driver, 'user-table')
         assert count == 2

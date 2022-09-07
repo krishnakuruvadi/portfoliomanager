@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import (
     add_ppf,
-    PpfDeleteView,
+    delete_ppf,
     PpfDetailView,
     PpfListView,
     update_ppf,
@@ -20,7 +20,7 @@ urlpatterns = [
     path('create/', add_ppf, name='ppf-create'),
     path('<id>/', PpfDetailView.as_view(), name='ppf-detail'),
     path('<id>/update/', update_ppf, name='ppf-update'),
-    path('<id>/delete/', PpfDeleteView.as_view(), name='ppf-delete'),
+    path('<id>/delete/', delete_ppf, name='ppf-delete'),
     path('<id>/transactions/', PpfEntryListView.as_view(), name='ppf-entry-list'),
     path('<id>/upload-transactions/', upload_ppf_trans, name='ppf-upload-trans'),
     path('<id>/add-transaction/', add_trans, name='ppf-add-trans'),
