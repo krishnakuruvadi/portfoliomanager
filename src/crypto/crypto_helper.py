@@ -12,6 +12,7 @@ from shared.financial import xirr
 import os
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+import time
 
 
 def insert_trans_entry(symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate=1, fees=0, currency='USD', trans_price=None):
@@ -335,14 +336,24 @@ def get_historical_price(symbol, date):
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/history?date={date.strftime('%d-%m-%Y')}"
 
     try:
-        price_request = json.loads(requests.get(url=url).text)
-        print(price_request)
-        price_output = price_request['market_data']['current_price']
-        price = price_output["usd"]
-        
-        return price
-    except Exception as ex:
-        print(f'exception {ex} while getting historical price for {symbol} on {date} using url {url}')
+        print(f'Getting crypto coin historical data from {url}')
+        price_request = requests.get(url, timeout=30)
+        price_request.raise_for_status()
+        data = price_request.json()
+        price_data = data['market_data']['current_price']['usd']
+        print(f'Pricing data for {symbol} is {price_data} on {date}')
+        # CoinGecko has a small rate limit (10-50 calls per minute). Slowing down requests helps avoid hitting this limit.
+        time.sleep(20)
+        return price_data
+
+    except requests.exceptions.Timeout:
+        print(f'Connection has timed out while getting historical price for {symbol} on {date} using url {url}')
+    except requests.exceptions.HTTPError:
+        print(f'An HTTP error has occurred while getting historical price for {symbol} on {date} using url {url}')
+    except requests.exceptions.ConnectionError:
+        print(f'Connection error while getting historical price for {symbol} on {date} using url {url}')
+    except requests.exceptions.RequestException:
+        print(f'An error has occurred while getting historical price for {symbol} on {date} using url {url}')
     return None
 
 def store_returns():
