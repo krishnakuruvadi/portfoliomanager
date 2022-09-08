@@ -2,8 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import (
     DetailView,
-    ListView,
-    DeleteView
+    ListView
 )
 from .models import Epf, EpfEntry
 import datetime

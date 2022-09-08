@@ -1,12 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import (
-    CreateView,
     DetailView,
-    ListView,
-    UpdateView,
-    ListView,
-    DeleteView
+    ListView
 )
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
@@ -23,10 +19,13 @@ from django.http import HttpResponseRedirect
 from goal.goal_helper import get_goal_id_name_mapping_for_user
 from tasks.tasks import pull_ppf_trans_from_bank
 from common.helper import get_preferred_currency_symbol
+from django.db import IntegrityError
 
 
 def add_ppf(request):
     template_name = 'ppfs/ppf_create.html'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
         number = request.POST['number']
@@ -37,15 +36,21 @@ def add_ppf(request):
             goal_id = Decimal(goal)
         else:
             goal_id = None
-        Ppf.objects.create(
-            number=number,
-            start_date=start_date,
-            user=user,
-            goal=goal_id
-        )
-
+        try:
+            Ppf.objects.create(
+                number=number,
+                start_date=start_date,
+                user=user,
+                goal=goal_id
+            )
+            message_color = 'green'
+            message = 'New PPF account addition successful'
+        except IntegrityError:
+            print('PPF already exists')
+            message_color = 'red'
+            message = 'PPF account already exists'
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add PPF', 'curr_module_id': 'id_ppf_module'}
+    context = {'users':users, 'operation': 'Add PPF', 'curr_module_id': 'id_ppf_module', 'message':message, 'message_color':message_color}
     return render(request, template_name, context)
 
 class PpfListView(ListView):
@@ -135,16 +140,13 @@ def update_ppf(request, id):
     print(context)
     return render(request, template_name, context)
 
-
-class PpfDeleteView(DeleteView):
-    template_name = 'ppfs/ppf_delete.html'
-    
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Ppf, number=id_)
-
-    def get_success_url(self):
-        return reverse('ppfs:ppf-list')
+def delete_ppf(request, id):
+    try:
+        p = Ppf.objects.get(number=id)
+        p.delete()
+    except Ppf.DoesNotExist:
+        print(f'Ppf with number {id} does not exist')
+    return HttpResponseRedirect(reverse('ppfs:ppf-list'))
 
 class PpfEntryListView(ListView):
     template_name = 'ppfs/ppf_entry_list.html'

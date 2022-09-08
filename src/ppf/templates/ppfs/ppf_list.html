@@ -75,7 +75,7 @@
         <td>{{ instance.total }}</td>
         <td>{{ roi|lookup:instance.number }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Account"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-ppf"><i class="fa fa-trash" aria-hidden="true" title="Delete Account"></i> </a>
           <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true" title="Update Account"></i> </a>
           <a href="{{ instance.get_absolute_url }}transactions"><i class="far fa-file-alt" aria-hidden="true" title="View Transactions"></i></a>
         </td>
@@ -90,3 +90,16 @@
   $('#ppf-table').DataTable();
   {% endblock jquery %}
 </script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all PPFs?');
+    })
+    $(document).on('click', '.confirm-delete-ppf', function(){
+      return confirm('Are you sure you want to delete the PPF?');
+    })
+  </script>
+{% endblock javascript %}

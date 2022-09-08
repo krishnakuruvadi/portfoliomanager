@@ -8,8 +8,10 @@ from .utils import *
 from .test_user import get_user, add_new_user, delete_user
 
 
-def get_goal(id):
+def get_goal(row_id):
+    #user is row id
     goals = [{
+        "row_id": 1,
         "user": 1,
         "name": "Kids education",
         "start_dt": datetime.date(day=10, month=12, year=2021),
@@ -18,14 +20,18 @@ def get_goal(id):
         "inflation": 4
     },
     {
-        "user": 1,
+        "row_id": 2,
+        "user": 2,
         "name": "Home downpayment",
         "start_dt": datetime.date(day=13, month=1, year=2021),
         "time_period": 60,
         "current_val": 250000,
         "inflation": 5
     }]
-    return goals[id]
+    for g in goals:
+        if g["row_id"] == row_id:
+            return g
+    return None
 
 def add_new_goal(driver, goal):
     time.sleep(3)
@@ -39,13 +45,17 @@ def add_new_goal(driver, goal):
     driver.find_element(By.ID, "curr_val").send_keys(goal["current_val"])
     driver.find_element(By.ID, "inflation").send_keys(goal["inflation"])
     driver.find_element(By.ID, "time_period").send_keys(goal["time_period"])
-    time.sleep(3)
+    time.sleep(5)
     select = Select(driver.find_element(By.ID, 'user'))
     # select by visible text
-    #select.select_by_visible_text('Banana')
+    u = get_user(goal["user"])
+    name = u.get("short_name", "")
+    if name == "":
+        name = u["name"]
+    select.select_by_visible_text(name)
 
     # select by value 
-    select.select_by_value(str(goal["user"]))
+    #select.select_by_value(str(goal["user"]))
     driver.find_element(By.NAME, "calculate").click()
     time.sleep(5)
     driver.find_element(By.NAME, "submit").click()
@@ -76,7 +86,7 @@ def delete_goal_with_row_id(driver, id):
 
 def set_prerequisites(driver):
     driver.find_element(By.XPATH, "//a[@href='/user']").click()
-    i = 0
+    i = 1
     while True:
         try:
             u = get_user(i)
@@ -108,13 +118,13 @@ class Test_Goal:
         assert count == 0
     
     def add_new_goal(self):
-        u = get_goal(0)
+        u = get_goal(1)
         add_new_goal(self.driver,  u)
         count, _ = get_rows_of_table(self.driver, 'goal-table')
         assert count == 1
     
     def add_another_goal(self):
-        u = get_goal(1)
+        u = get_goal(2)
         add_new_goal(self.driver,  u)
         count, _ = get_rows_of_table(self.driver, 'goal-table')
         assert count == 2
@@ -128,7 +138,7 @@ class Test_Goal:
         assert count == expected_count-1
         # instead of deleting the remaining goal, delete its user and make sure that the goal is gone
         # when user is deleted
-        remaining_goal = get_goal(1)
+        remaining_goal = get_goal(2)
         self.driver.find_element(By.XPATH, "//a[@href='/user']").click()
         time.sleep(3)
         delete_user(self.driver, remaining_goal['user'])

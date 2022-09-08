@@ -2,8 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import (
     DetailView,
-    ListView,
-    DeleteView
+    ListView
 )
 from .models import RSUAward, RestrictedStockUnits, RSUSellTransactions
 from .rsu_helper import update_latest_vals, get_rsu_award_latest_vals
@@ -23,6 +22,8 @@ from common.helper import get_currency_symbol, get_preferred_currency_symbol
 
 def create_rsu(request):
     template = "rsus/rsu_create.html"
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
         #'award_date': ['2019-06-05'], 'exchange': ['NASDAQ'], 'symbol': ['CSCO'], 'award_id': ['1434877'], 'user': ['1'], 'goal': ['2'], 'shares_awarded': ['279']
@@ -43,8 +44,10 @@ def create_rsu(request):
             goal=goal,
             shares_awarded=shares_awarded
         )
+        message_color = 'green'
+        message = 'New RSU award addition successful'
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add RSU Award', 'curr_module_id': 'id_rsu_module'}
+    context = {'users':users, 'operation': 'Add RSU Award', 'curr_module_id': 'id_rsu_module', 'message':message, 'message_color':message_color}
     return render(request, template, context)
 
 
@@ -127,19 +130,16 @@ class RsuListView(ListView):
         print(data)
         return data
 
-class RsuDeleteView(DeleteView):
-    template_name = 'rsus/rsu_delete.html'
-    
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(RSUAward, id=id_)
-
-    def get_success_url(self):
-        return reverse('rsus:rsu-list')
+def delete_award(request, id):
+    try:
+        a = RSUAward.objects.get(id=id)
+        a.delete()
+    except RSUAward.DoesNotExist:
+        print(f'RSUAward with id {id} does not exist')
+    return HttpResponseRedirect(reverse('rsus:rsu-list'))
 
 class RsuDetailView(DetailView):
     template_name = 'rsus/rsu_detail.html'
-    #queryset = Ppf.objects.all()
 
     def get_object(self):
         id_ = self.kwargs.get("id")
@@ -243,13 +243,20 @@ class RsuDetailView(DetailView):
                     aq_price_incl_tax -= float(st.units*rsu.aquisition_price*rsu.conversion_rate)
             q, _,_,_,_ = reconcile_event_based(trans, list(), list())
             if q > 0:
-                lv = get_historical_stock_price_based_on_symbol(rsu.award.symbol, rsu.award.exchange, end_dt+relativedelta(days=-5), end_dt)
+                lv = get_historical_stock_price_based_on_symbol(award.symbol, award.exchange, end_dt+relativedelta(days=-5), end_dt)
                 val = 0
                 if lv:
                     print(lv)
                     conv_rate = 1
-                    if rsu.award.exchange == 'NASDAQ' or rsu.award.exchange == 'NYSE':
+                    if award.exchange == 'NASDAQ' or award.exchange == 'NYSE':
                         conv_val = get_in_preferred_currency(1, 'USD', end_dt)
+                        if conv_val:
+                            conv_rate = conv_val
+                        for k,v in lv.items():
+                            val += float(v)*float(conv_rate)*float(q)
+                            break
+                    elif award.exchange == 'NSE' or award.exchange == 'BSE' or award.exchange == 'NSE/BSE':
+                        conv_val = get_in_preferred_currency(1, 'INR', end_dt)
                         if conv_val:
                             conv_rate = conv_val
                         for k,v in lv.items():
@@ -266,7 +273,7 @@ class RsuDetailView(DetailView):
         
         data['progress_data'] = ret
         try:
-            s = Stock.objects.get(symbol=rsu.award.symbol, exchange=rsu.award.exchange)
+            s = Stock.objects.get(symbol=award.symbol, exchange=award.exchange)
             if st_dt > today:
                 st_dt = datetime.date.today()
             res = get_comp_index_values(s, award.award_date.replace(day=1), st_dt)
@@ -274,7 +281,7 @@ class RsuDetailView(DetailView):
                 for k, v in res.items():
                     data[k] = v 
         except Stock.DoesNotExist:
-            print(f'trying to get stock that does not exist {rsu.award.symbol} {rsu.award.exchange}')
+            print(f'trying to get stock that does not exist {award.symbol} {award.exchange}')
         print(f'returning data {data}')
         return data
 
@@ -428,21 +435,36 @@ def show_vest_sell_trans(request, id, vestid):
 
 def delete_vest_sell_trans(request, id, vestid, selltransid):
     try:
-        trans = RSUSellTransactions.objects.get(id=selltransid)
-        trans.delete()
-        update_rsu()
-    except RSUSellTransactions.DoesNotExist:
-        print(f'{selltransid} RSUSellTransaction does not exist')
-    return HttpResponseRedirect(reverse('rsus:rsu-sell-vest',kwargs={'id':id,'vestid':vestid}))
+        award_obj = RSUAward.objects.get(id)
+        try:
+            vest = RestrictedStockUnits.objects.get(award=award_obj, id=vestid)
+            try:
+                trans = RSUSellTransactions.objects.get(rsu_vest=vest, id=selltransid)
+                trans.delete()
+                update_rsu()
+            except RSUSellTransactions.DoesNotExist:
+                print(f'{selltransid} RSUSellTransaction does not exist')
+            return HttpResponseRedirect(reverse('rsus:rsu-sell-vest',kwargs={'id':id,'vestid':vestid}))
+        except RestrictedStockUnits.DoesNotExist:
+            print(f'{vestid} RestrictedStockUnits does not exist')
+        return HttpResponseRedirect(reverse('rsus:rsu-vest-list',kwargs={'id':id}))
+    except RSUAward.DoesNotExist:
+        print(f'{id} RSUAward does not exist')
+        return HttpResponseRedirect(reverse('rsus:rsu-list'))
 
 def delete_vest(request, id, vestid):
     try:
-        vest = RestrictedStockUnits.objects.get(id=vestid)
-        vest.delete()
-        update_rsu()
-    except RestrictedStockUnits.DoesNotExist:
-        print(f'{vestid} RestrictedStockUnits does not exist')
-    return HttpResponseRedirect(reverse('rsus:rsu-vest-list',kwargs={'id':id}))
+        award_obj = RSUAward.objects.get(id)
+        try:
+            vest = RestrictedStockUnits.objects.get(award=award_obj, id=vestid)
+            vest.delete()
+            update_rsu()
+        except RestrictedStockUnits.DoesNotExist:
+            print(f'{vestid} RestrictedStockUnits does not exist')
+        return HttpResponseRedirect(reverse('rsus:rsu-vest-list',kwargs={'id':id}))
+    except RSUAward.DoesNotExist:
+        print(f'{id} RSUAward does not exist')
+        return HttpResponseRedirect(reverse('rsus:rsu-list'))
 
 def add_vest_sell_trans(request, id, vestid):
     template = 'rsus/rsu_add_sell_trans.html'

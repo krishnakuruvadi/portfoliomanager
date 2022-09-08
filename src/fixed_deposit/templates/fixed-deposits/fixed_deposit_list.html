@@ -81,7 +81,7 @@
         <td>{{ user_name_mapping|lookup:instance.user }}</td>
         <td>{{ instance.notes }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Deposit"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-fd"><i class="fa fa-trash" aria-hidden="true" title="Delete Deposit"></i> </a>
           <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Edit Deposit"></i> </a>
         </td> 
       </tr>
@@ -101,3 +101,16 @@
   });
   {% endblock jquery %}
 </script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all deposits?');
+    })
+    $(document).on('click', '.confirm-delete-fd', function(){
+      return confirm('Are you sure you want to delete the deposit?');
+    })
+  </script>
+{% endblock javascript %}
