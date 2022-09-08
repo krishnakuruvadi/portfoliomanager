@@ -2,14 +2,12 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import (
     CreateView,
-    DetailView,
-    UpdateView,
     ListView,
-    DeleteView
+    DetailView,
+    UpdateView
 )
 
 from shared.utils import get_date_or_none_from_string, get_float_or_none_from_string
-from .forms import EsppModelForm
 from .models import Espp, EsppSellTransactions
 from .espp_helper import update_latest_vals
 from django.http import HttpResponseRedirect
@@ -26,31 +24,58 @@ from dateutil.relativedelta import relativedelta
 from common.index_helpers import get_comp_index_values
 from common.models import Stock
 from common.helper import get_preferred_currency_symbol
+from decimal import Decimal
+from goal.goal_helper import get_goal_id_name_mapping_for_user
 
 
-class EsppCreateView(CreateView):
-    template_name = 'espps/espp_create.html'
-    form_class = EsppModelForm
-    queryset = Espp.objects.all() # <blog>/<modelname>_list.html
-    #success_url = '/'
-
-    '''
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
-    '''
-
-    def get_success_url(self):
-        return reverse('espps:espp-list')
-    
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
-        self.object.shares_avail_for_sale = self.object.shares_purchased
-        self.object.save()
-        form.save_m2m()
-        add_common_stock(self.object.exchange, self.object.symbol, self.object.purchase_date)
-        return HttpResponseRedirect(self.get_success_url())
+def add_espp(request):
+    template = 'espps/espp_create.html'
+    message = ''
+    message_color = 'ignore'
+    if request.method == 'POST':
+        try:
+            purchase_date = request.POST['purchase_date']
+            user = request.POST['user']
+            goal = request.POST.get('goal', '')
+            if goal != '':
+                goal_id = Decimal(goal)
+            else:
+                goal_id = None
+            #notes = request.POST['notes']
+            purchase_price = Decimal(request.POST['purchase_price'])
+            shares_purchased = Decimal(request.POST['shares_purchased'])
+            purchase_conversion_rate = Decimal(request.POST['purchase_conversion_rate'])
+            exchange = request.POST['exchange']
+            symbol = request.POST['symbol']
+            total_purchase_price = float(purchase_price*shares_purchased*purchase_conversion_rate)
+            shares_avail_for_sale = shares_purchased
+            purchase_fmv = Decimal(request.POST['purchase_fmv'])
+            subscription_fmv = Decimal(request.POST['subscription_fmv'])
+            
+            Espp.objects.create(
+                exchange=exchange,
+                symbol=symbol,
+                purchase_date=purchase_date,
+                shares_avail_for_sale=shares_avail_for_sale,
+                total_purchase_price=total_purchase_price,
+                subscription_fmv=subscription_fmv,
+                purchase_fmv=purchase_fmv,
+                purchase_price=purchase_price,
+                shares_purchased=shares_purchased,
+                purchase_conversion_rate=purchase_conversion_rate,
+                user=user,
+                goal=goal_id
+            )
+            add_common_stock(exchange, symbol, purchase_date)
+            message_color = 'green'
+            message = 'New ESPP addition successful'
+        except Exception as ex:
+            print(f'exception {ex} when adding ESPP')
+            message_color = 'red'
+            message = 'New ESPP addition failed'
+    users = get_all_users()
+    context = {'users':users, 'operation': 'Add ESPP', 'curr_module_id': 'id_espp_module', 'message':message, 'message_color':message_color}
+    return render(request, template, context)
 
 class EsppListView(ListView):
     template_name = 'espps/espp_list.html'
@@ -83,15 +108,13 @@ class EsppListView(ListView):
         print(data)
         return data
 
-class EsppDeleteView(DeleteView):
-    template_name = 'espps/espp_delete.html'
-    
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Espp, id=id_)
-
-    def get_success_url(self):
-        return reverse('espps:espp-list')
+def delete_espp(request, id):
+    try:
+        e = Espp.objects.get(id=id)
+        e.delete()
+    except Espp.DoesNotExist:
+        print(f'ESPP with id {id} does not exist')
+    return HttpResponseRedirect(reverse('espps:espp-list'))
 
 class EsppDetailView(DetailView):
     template_name = 'espps/espp_detail.html'
@@ -211,29 +234,66 @@ class EsppDetailView(DetailView):
         
         return data
 
-class EsppUpdateView(UpdateView):
-    template_name = 'espps/espp_create.html'
-    form_class = EsppModelForm
+def update_espp(request, id):
+    template = "espps/espp_update.html"
+    context = dict()
+    context['curr_module_id'] = 'id_espp_module'
+    message = ''
+    message_color = 'ignore'
+    try:
+        espp = Espp.objects.get(id=id)
+        if request.method == 'POST':
+            try:
+                goal = request.POST.get('goal', '')
+                if goal != '':
+                    goal_id = Decimal(goal)
+                else:
+                    goal_id = None
+                #notes = request.POST['notes']
+                purchase_price = Decimal(request.POST['purchase_price'])
+                shares_purchased = Decimal(request.POST['shares_purchased'])
+                purchase_conversion_rate = Decimal(request.POST['purchase_conversion_rate'])
+                total_purchase_price = float(purchase_price*shares_purchased*purchase_conversion_rate)
+                shares_avail_for_sale = shares_purchased
+                purchase_fmv = Decimal(request.POST['purchase_fmv'])
+                subscription_fmv = Decimal(request.POST['subscription_fmv'])
 
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Espp, id=id_)
-    '''
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super().form_valid(form)
-    '''
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['curr_module_id'] = 'id_espp_module'
-        return data
-
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.total_purchase_price = self.object.purchase_price*self.object.shares_purchased*self.object.purchase_conversion_rate
-        self.object.save()
-        form.save_m2m()
-        return HttpResponseRedirect(self.get_success_url())
+                espp.goal = goal_id
+                espp.shares_avail_for_sale = shares_avail_for_sale
+                espp.subscription_fmv = subscription_fmv
+                espp.purchase_fmv = purchase_fmv
+                espp.purchase_price = purchase_price
+                espp.shares_purchased = shares_purchased
+                espp.purchase_conversion_rate = purchase_conversion_rate
+                espp.total_purchase_price = total_purchase_price
+                espp.save()
+                message = 'ESPP update successful'
+                message_color = 'green'
+            except Exception as ex:
+                print(f'{ex} when updating ESPP {id}')
+                message = 'ESPP update failed'
+                message_color = 'red'
+        context['exchange'] = espp.exchange
+        context['symbol'] = espp.symbol
+        context['user_str'] = get_user_name_from_id(espp.user)
+        context['user'] = espp.user
+        context['goal'] = espp.goal
+        context['goals'] = {'goal_list':get_goal_id_name_mapping_for_user(espp.user)}
+        context['purchase_date'] = espp.purchase_date
+        context['shares_avail_for_sale'] = espp.shares_avail_for_sale
+        context['subscription_fmv'] = espp.subscription_fmv
+        context['purchase_price'] = espp.purchase_price
+        context['shares_purchased'] = espp.shares_purchased
+        context['purchase_fmv'] = espp.purchase_fmv
+        context['purchase_conversion_rate'] = espp.purchase_conversion_rate
+        context['total_purchase_price'] = espp.total_purchase_price
+        context['users'] = get_all_users()
+        context['message'] = message
+        context['message_color'] = message_color
+        return render(request, template, context)
+    except Espp.DoesNotExist:
+        print(f"ESPP with id {id} does not exist")
+        return HttpResponseRedirect(reverse('espps:espp-list'))
 
 def refresh_espp_trans(request):
     template = '../../espp/'

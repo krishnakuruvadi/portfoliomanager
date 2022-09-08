@@ -62,7 +62,7 @@ def delete_fd(request, id):
         f = FixedDeposit.objects.get(id=id)
         f.delete()
     except FixedDeposit.DoesNotExist:
-        print(f'FD with number {id} does not exist')
+        print(f'FD with id {id} does not exist')
     return HttpResponseRedirect(reverse('fixed-deposits:fixed-deposit-list'))
 
 def add_fixed_deposit(request):

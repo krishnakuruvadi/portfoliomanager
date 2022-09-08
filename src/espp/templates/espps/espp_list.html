@@ -116,8 +116,8 @@
         <td>{{ instance.unrealised_gain }}</td>
         <td>{{ instance.xirr }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete" title="Delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Purchase"></i> </a>
-          <a href="{{ instance.get_absolute_url }}update" title="Update"><i class="far fa-edit" aria-hidden="true" title="Edit Purchase"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete" title="Delete ESPP" class="confirm-delete-espp"><i class="fa fa-trash" aria-hidden="true" title="Delete Purchase"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update" title="Update ESPP"><i class="far fa-edit" aria-hidden="true" title="Edit Purchase"></i> </a>
           <a href="{{ instance.get_absolute_url }}sell" title="View Sell Transactions"><i class="far fa-file-alt" aria-hidden="true"></i></a>
         </td>
       </tr>
@@ -137,3 +137,16 @@
       });
 {% endblock jquery %}
 </script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all ESPPs?');
+    })
+    $(document).on('click', '.confirm-delete-espp', function(){
+      return confirm('Are you sure you want to delete the ESPP?');
+    })
+  </script>
+{% endblock javascript %}

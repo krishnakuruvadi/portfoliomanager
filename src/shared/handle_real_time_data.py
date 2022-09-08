@@ -124,16 +124,16 @@ def get_forex_rate(date, from_cur, to_cur):
             if not ret:
                 print(f'no result for {date} {from_cur} {to_cur} using {url}')
             else:
-                return ret
+                return round(ret, 2)
         except Exception as ex:
             print(f'exception while getting forex rate for: date {date}, from_cur {from_cur}, to_cur {to_cur} using {url}')
             time.sleep(5)
     if date == datetime.date.today():
         r = get_forex_goog(from_cur, to_cur)
         if r:
-            return r
+            return round(r, 2)
     r = get_forex_xe(date, from_cur, to_cur)
-    return r
+    return round(r, 2)
 
 def get_forex_goog(from_cur, to_cur):
     from google_currency import convert
