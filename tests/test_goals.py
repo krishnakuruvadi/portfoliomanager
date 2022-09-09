@@ -45,7 +45,6 @@ def add_new_goal(driver, goal):
     driver.find_element(By.ID, "curr_val").send_keys(goal["current_val"])
     driver.find_element(By.ID, "inflation").send_keys(goal["inflation"])
     driver.find_element(By.ID, "time_period").send_keys(goal["time_period"])
-    time.sleep(5)
     select = Select(driver.find_element(By.ID, 'user'))
     # select by visible text
     u = get_user(goal["user"])
@@ -57,11 +56,11 @@ def add_new_goal(driver, goal):
     # select by value 
     #select.select_by_value(str(goal["user"]))
     driver.find_element(By.NAME, "calculate").click()
-    time.sleep(5)
+    time.sleep(3)
     driver.find_element(By.NAME, "submit").click()
-    time.sleep(5)
+    time.sleep(3)
     driver.find_element(By.LINK_TEXT, "Cancel").click()
-    time.sleep(5)
+    time.sleep(3)
 
 def delete_goal_with_row_id(driver, id):
     count, rows = get_rows_of_table(driver, 'goal-table')

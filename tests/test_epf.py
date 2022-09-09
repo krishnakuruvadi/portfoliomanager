@@ -95,7 +95,6 @@ def add_epf(driver, epf):
     driver.find_element(By.ID, "company").send_keys(epf["company"])
     driver.find_element(By.ID, "start_date").send_keys(epf["start_dt"].strftime('%m/%d/%Y'))
     
-    time.sleep(3)
     select = Select(driver.find_element(By.ID, 'id_user'))
     # select by visible text
     u = get_user(epf["user"])

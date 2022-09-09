@@ -89,7 +89,6 @@ def add_ppf(driver, ppf):
     driver.find_element(By.ID, "number").send_keys(ppf["number"])
     driver.find_element(By.ID, "start_date").send_keys(ppf["start_dt"].strftime('%m/%d/%Y'))
     
-    time.sleep(3)
     select = Select(driver.find_element(By.ID, 'id_user'))
     # select by visible text
     u = get_user(ppf["user"])

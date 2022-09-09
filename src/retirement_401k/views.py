@@ -54,6 +54,8 @@ def add_nav(request, id):
 
 def add_account(request):
     template_name = 'retirement_401k/account_create.html'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
         company = request.POST['company']
@@ -74,9 +76,10 @@ def add_account(request):
                 goal=goal_id,
                 notes=notes
             )
-
+        message = 'Account addition successful'
+        message_color = 'green'
     users = get_all_users()
-    context = {'users':users, 'curr_module_id':'id_401k_module'}
+    context = {'users':users, 'curr_module_id':'id_401k_module', 'message':message, 'message_color':message_color}
     return render(request, template_name, context)
 
 def update_account(request, id):
@@ -285,56 +288,69 @@ def add_transaction(request, id):
     except Account401K.DoesNotExist:
         return HttpResponseRedirect(reverse('retirement_401k:account-list'))
 
-def edit_transaction(request, id):
+def edit_transaction(request, id, trans_id):
     template_name = 'retirement_401k/add_transaction.html'
-    transaction = Transaction401K.objects.get(id=id)
-    if request.method == 'POST':
-        print(request.POST)
-        trans_date = get_date_or_none_from_string(request.POST['trans_date'])
-        employee_contribution = get_float_or_none_from_string(request.POST['employee_contribution'])
-        employer_contribution = get_float_or_none_from_string(request.POST['employee_contribution'])
-        notes = request.POST['notes']
-        units = get_float_or_none_from_string(request.POST['units'])
-        transaction.trans_date=trans_date
-        transaction.employee_contribution=employee_contribution
-        transaction.employer_contribution=employer_contribution
-        transaction.units = units
-        transaction.notes=notes
-        transaction.save()
-        reconcile_401k()
-        return HttpResponseRedirect(reverse('retirement_401k:transaction-list', args=(transaction.account.id,)))
-    context = {'company':transaction.account.company, 'id':transaction.account.id}
-    context['trans_date'] = transaction.trans_date.strftime("%Y-%m-%d")
-    context['employee_contribution'] = transaction.employee_contribution
-    context['employer_contribution'] = transaction.employer_contribution
-    context['notes'] = transaction.notes
-    context['units'] = transaction.units
-    context['operation'] = 'Edit'
-    context['curr_module_id'] = 'id_401k_module'
-    return render(request, template_name, context)
+    message = ''
+    message_color = 'ignore'
+    try:
+        acc = Account401K.objects.get(id=id)
+        try:
+            transaction = Transaction401K.objects.get(id=trans_id)
+            if request.method == 'POST':
+                try:
+                    print(request.POST)
+                    trans_date = get_date_or_none_from_string(request.POST['trans_date'])
+                    employee_contribution = get_float_or_none_from_string(request.POST['employee_contribution'])
+                    employer_contribution = get_float_or_none_from_string(request.POST['employee_contribution'])
+                    notes = request.POST['notes']
+                    units = get_float_or_none_from_string(request.POST['units'])
+                    transaction.trans_date = trans_date
+                    transaction.employee_contribution = employee_contribution
+                    transaction.employer_contribution = employer_contribution
+                    transaction.units = units
+                    transaction.notes = notes
+                    transaction.save()
+                    reconcile_401k()
+                    message = 'Transaction updated'
+                    message_color = 'green'
+                except Exception as ex:
+                    print(f'exception {ex} when editing transaction {trans_id}')
+                    message = 'Transaction update failed'
+                    message_color = 'red'
+            context = {'company':transaction.account.company, 'id':transaction.account.id}
+            context['trans_date'] = transaction.trans_date.strftime("%Y-%m-%d")
+            context['employee_contribution'] = transaction.employee_contribution
+            context['employer_contribution'] = transaction.employer_contribution
+            context['notes'] = transaction.notes
+            context['units'] = transaction.units
+            context['operation'] = 'Edit'
+            context['curr_module_id'] = 'id_401k_module'
+            context['message'] = message
+            context['message_color'] = message_color
+            return render(request, template_name, context)
+        except Exception as ex:
+            print(f'failed to edit transaction {trans_id} for account {id}')
+        return HttpResponseRedirect(reverse('retirement_401k:transaction-list', args=(id,)))
+    except Account401K.DoesNotExist:
+        print(f'failed to edit transaction {trans_id} for account {id}.  Account doesnt exist')
+        return HttpResponseRedirect(reverse('retirement_401k:account-list'))
 
-#TODO: add post processing call to reconcile_401k
-class TransactionDeleteView(DeleteView):
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Transaction401K, id=id_)
+def delete_transaction(request, id, trans_id):
+    try:
+        acc = Account401K.objects.get(id=id)
+        try:
+            trans = Transaction401K.objects.get(id=trans_id, account=acc)
+            trans.delete()
+        except Exception as ex:
+            print(f'failed to delete transction with id {trans_id} for account with id {id}')
+        return HttpResponseRedirect(reverse('retirement_401k:transaction-list', args=(id,)))
+    except Account401K.DoesNotExist:
+        return HttpResponseRedirect(reverse('retirement_401k:account-list'))
 
-    def get_success_url(self):
-        id_ = self.kwargs.get("id")
-        trans = get_object_or_404(Transaction401K, id=id_)
-        return reverse('retirement_401k:transaction-list', args=(trans.account.id,))
-
-    def get(self, *args, **kwargs):
-        return self.post(*args, **kwargs)
-
-#TODO: add post processing call to reconcile_401k
-class AccountDeleteView(DeleteView):
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Account401K, id=id_)
-
-    def get_success_url(self):
-        return reverse('retirement_401k:account-list')
-    
-    def get(self, *args, **kwargs):
-        return self.post(*args, **kwargs)
+def delete_401k(request, id):
+    try:
+        acc = Account401K.objects.get(id=id)
+        acc.delete()
+    except Exception as ex:
+        print(f'failed to delete account with id {id}')
+    return HttpResponseRedirect(reverse('retirement_401k:account-list'))

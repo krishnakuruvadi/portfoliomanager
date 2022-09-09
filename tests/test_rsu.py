@@ -100,7 +100,6 @@ def add_rsu(driver, rsu):
     driver.find_element(By.ID, "id_symbol").send_keys(rsu["symbol"])
     driver.find_element(By.ID, "id_award_date").send_keys(rsu["award_dt"].strftime('%m/%d/%Y'))
     
-    time.sleep(3)
     select = Select(driver.find_element(By.ID, 'id_user'))
     # select by visible text
     u = get_user(rsu["user"])

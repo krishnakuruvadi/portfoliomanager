@@ -105,7 +105,6 @@ def add_fd(driver, fd):
     driver.find_element(By.ID, "time_period_days").send_keys(fd["time_period"])
     driver.find_element(By.ID, "start_date").send_keys(fd["start_dt"].strftime('%m/%d/%Y'))
     
-    time.sleep(3)
     select = Select(driver.find_element(By.ID, 'id_user'))
     # select by visible text
     u = get_user(fd["user"])

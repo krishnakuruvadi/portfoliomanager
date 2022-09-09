@@ -101,7 +101,7 @@ def add_new_espp(driver, espp):
     select3 = Select(driver.find_element(By.ID, 'id_goal'))
     g = get_goal(espp["goal"])
     print(f'selecting goal {g["name"]}')
-    time.sleep(5)
+    time.sleep(3)
     select3.select_by_visible_text(g["name"])
 
     # select by value 
