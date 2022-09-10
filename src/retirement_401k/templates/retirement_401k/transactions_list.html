@@ -38,8 +38,8 @@
         <td>{{ instance.broker }}</td>
         <td>{{ instance.notes }}</td>
         <td>
-          <a href="{% url 'retirement_401k:transaction-delete' instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Transaction"></i> </a>
-          <a href="{% url 'retirement_401k:transaction-edit' instance.id %}" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Edit Transaction"></i> </a>
+          <a href="{% url 'retirement_401k:transaction-delete' id instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Transaction"></i> </a>
+          <a href="{% url 'retirement_401k:transaction-edit' id instance.id %}" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Edit Transaction"></i> </a>
         </td>
       </tr>
       {% endfor %}

@@ -212,9 +212,10 @@
           }
         }
       }
-      var curr = '{{currency}}'
-      if (curr != '') {
-        set_currency(curr)
+      if (val != '') {
+        set_currency(val)
+      } else {
+        set_currency('{{currency}}')
       }
       setTransPrice();
     }

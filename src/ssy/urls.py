@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import (
     add_ssy,
-    SsyDeleteView,
+    delete_ssy,
     SsyListView,
     SsyDetailView,
     update_ssy,
@@ -19,7 +19,7 @@ urlpatterns = [
     path('create/', add_ssy, name='ssy-create'),
     path('<id>/', SsyDetailView.as_view(), name='ssy-detail'),
     path('<id>/update/', update_ssy, name='ssy-update'),
-    path('<id>/delete/', SsyDeleteView.as_view(), name='ssy-delete'),
+    path('<id>/delete/', delete_ssy, name='ssy-delete'),
     path('<id>/transactions/', SsyEntryListView.as_view(), name='ssy-entry-list'),
     path('<id>/upload-transactions/', upload_ssy_trans, name='ssy-upload-trans'),
     path('<id>/add-transaction/', add_trans, name='ssy-add-trans'),

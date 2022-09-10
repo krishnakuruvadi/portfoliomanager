@@ -7,7 +7,7 @@
 {% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'espps:espp-list' %}">ESPP</a></li>
-    <li><a href="#">Create ESPP</a></li>
+    <li><a href="#">Update ESPP</a></li>
   </ul>
 {% endblock viewname %}
 
@@ -29,11 +29,21 @@
           </button>    <strong>Error!</strong> {{message}}
         </div>
         {% endif %}
+
         <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_purchase_date">Purchase Date <span style="color:red;">*</span></label>
+          <label class="control-label col-sm-2 col-form-label" for="id_user">User</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="date" name="purchase_date" value="{{purchase_date}}" placeholder="Select a date" required="" id="id_purchase_date">
+              <label>{{user_str}}</label> 
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label class="control-label col-sm-2 col-form-label" for="id_purchase_date">Purchase Date</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label> {{purchase_date}} </label>
             </div>
           </div>
         </div>
@@ -42,13 +52,7 @@
           <label class="control-label col-sm-2 col-form-label" for="id_exchange">Exchange <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <select name="exchange" required="" id="id_exchange">
-                <option value="">---------</option>
-                <option value="NASDAQ">NASDAQ</option>
-                <option value="NYSE">NYSE</option>
-                <option value="BSE">BSE</option>
-                <option value="NSE">NSE</option>
-              </select>
+              <label>{{exchange}}</label>
             </div>
           </div>
         </div>
@@ -57,7 +61,7 @@
           <label class="control-label col-sm-2 col-form-label" for="id_symbol">Symbol <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="text" name="symbol" value="{{symbol}}" maxlength="20" required="" id="id_symbol">
+              <label>{{symbol}}</label>
             </div>
           </div>
         </div>
@@ -94,10 +98,11 @@
           <div class="col-sm-3">
             <div class="md-form mt-0">
               <input type="number" name="purchase_conversion_rate" value="{{purchase_conversion_rate}}" step="0.01" required="" id="id_purchase_conversion_rate">
-            <button class="btn" id="id_forex_fetch" disabled=""><i class="fab fa-get-pocket"></i></button></div>
+              <button class="btn" id="id_forex_fetch" disabled=""><i class="fab fa-get-pocket"></i></button>
+            </div>
           </div>
         </div>
-      
+
         <div class="form-group row">
           <label class="control-label col-sm-2 col-form-label" for="id_shares_purchased">Shares Purchased <span style="color:red;">*</span></label>
           <div class="col-sm-3">
@@ -106,18 +111,7 @@
             </div>
           </div>
         </div>
-      
-        <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_user">User <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <select name="user" required="" id="id_user">  
-              </select>
-            </div>
-          </div>
-          
-        </div>
-      
+
         <div class="form-group row">
           <label class="control-label col-sm-2 col-form-label" for="id_goal">Goal</label>
           <div class="col-sm-3">
@@ -137,10 +131,19 @@
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </form>
 {% endblock content %}
+
+{% block ajaxcalls %}
+          {
+            url      : '/goal/get-goals/{{user|safe}}',
+            data     : null,
+            callback : get_goals_and_set_goal
+          },
+{% endblock ajaxcalls %}
 
 {% block javascript %}
   {% load static %}
@@ -182,7 +185,7 @@
         conv_elem.value = 1;
       }
     }
-    set_user_list({{users|safe}}, '{{user|safe}}');
+    //set_user_list({{users|safe}}, '{{user|safe}}');
     function get_goals_and_set_goal(response) {
       set_goals(response, '{{goal|safe}}');
     }

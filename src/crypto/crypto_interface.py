@@ -208,7 +208,8 @@ class CryptoInterface:
                         amt += get_in_preferred_currency(float(hcp.price)*float(qty), 'USD', end_date)
                     except HistoricalCoinPrice.DoesNotExist:
                         pull_and_store_coin_historical_vals(crypto.symbol, end_date)
-                except Coin.DoesNotExist:  
+                except Coin.DoesNotExist:
+                    print(f'couldnt find coin with symbol {crypto.symbol} in common/Coin db')
                     pull_and_store_coin_historical_vals(crypto.symbol, end_date)
         return round(amt, 2)
 

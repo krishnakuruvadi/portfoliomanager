@@ -95,7 +95,6 @@ def add_epf(driver, epf):
     driver.find_element(By.ID, "company").send_keys(epf["company"])
     driver.find_element(By.ID, "start_date").send_keys(epf["start_dt"].strftime('%m/%d/%Y'))
     
-    time.sleep(3)
     select = Select(driver.find_element(By.ID, 'id_user'))
     # select by visible text
     u = get_user(epf["user"])
@@ -110,7 +109,7 @@ def add_epf(driver, epf):
     select2 = Select(driver.find_element(By.ID, 'id_goal'))
     g = get_goal(epf["goal"])
     print(f'selecting goal {g["name"]}')
-    time.sleep(20)
+    time.sleep(3)
     select2.select_by_visible_text(g["name"])
 
     # select by value 

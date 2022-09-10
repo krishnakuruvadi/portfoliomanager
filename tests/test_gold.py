@@ -9,31 +9,29 @@ from .test_user import get_user, add_new_user, delete_user
 from .test_goals import get_goal, add_new_goal
 
 
-def get_rsu(row_id):
-    #user and goal are row_ids
-    rsus = [{
+def get_gold(row_id):
+    golds = [{
         "row_id":1,
         "user": 1,
-        "id": "35200434",
-        "award_dt": datetime.date(day=10, month=12, year=2021),
+        "weight": 250,
+        "buy_dt": datetime.date(day=10, month=12, year=2021),
         "goal": 1,
-        "exchange": "NASDAQ",
-        "symbol": "AAPL",
-        "awarded": 50
+        "buy_type": "Physical",
+        "purity": "22K",
+        "per_gram": 3100
     },
     {
         "row_id":2,
         "user": 2,
-        "id": "54309865",
-        "award_dt": datetime.date(day=13, month=1, year=2021),
+        "weight": 35,
+        "buy_dt": datetime.date(day=13, month=1, year=2021),
         "goal": 2,
-        "exchange": "NASDAQ",
-        "symbol": "CSCO",
-        "awarded": 45
+        "buy_type": "Sovereign Gold Bond Scheme",
+        "per_gram": 3100
     }]
-    for e in rsus:
-        if e["row_id"] == row_id:
-            return e
+    for p in golds:
+        if p["row_id"] == row_id:
+            return p
     return None
 
 
@@ -62,12 +60,12 @@ def set_prerequisites(driver):
             i += 1
         except IndexError:
             break
-    driver.find_element(By.XPATH, "//a[@href='/rsu']").click()
+    driver.find_element(By.XPATH, "//a[@href='/gold']").click()
     time.sleep(3)
     print(f'current url is {driver.current_url}')
 
-def delete_rsu_with_row_id(driver, id):
-    count, rows = get_rows_of_table(driver, 'rsu-table')
+def delete_gold_with_row_id(driver, id):
+    count, rows = get_rows_of_table(driver, 'trans-table')
     for row in rows:
         th = row.find_element(By.TAG_NAME, 'th')
         print(f'text is {th.text}')
@@ -87,37 +85,37 @@ def delete_rsu_with_row_id(driver, id):
             obj.accept()
             break
 
-def add_rsu(driver, rsu):
+def add_gold(driver, gold):
     time.sleep(3)
-    driver.find_element(By.XPATH, "//a[@href='create']").click()
+    driver.find_element(By.XPATH, "//a[@href='add']").click()
 
     time.sleep(3)
-    driver.find_element(By.ID, "id_award_id").click()
-    driver.find_element(By.ID, "id_award_id").send_keys(rsu["id"])
-    driver.find_element(By.ID, "id_shares_awarded").click()
-    driver.find_element(By.ID, "id_shares_awarded").send_keys(rsu["awarded"])
-    driver.find_element(By.ID, "id_symbol").click()
-    driver.find_element(By.ID, "id_symbol").send_keys(rsu["symbol"])
-    driver.find_element(By.ID, "id_award_date").send_keys(rsu["award_dt"].strftime('%m/%d/%Y'))
-    
+    driver.find_element(By.ID, "id_weight").click()
+    driver.find_element(By.ID, "id_weight").send_keys(gold["weight"])
+    driver.find_element(By.ID, "buy_date").send_keys(gold["buy_dt"].strftime('%m/%d/%Y'))
+    driver.find_element(By.ID, "id_per_gram").send_keys(gold["per_gram"])
+    select3 = Select(driver.find_element(By.ID, 'id_buy_type'))
+    # select by visible text
+    select3.select_by_visible_text(gold["buy_type"])
     select = Select(driver.find_element(By.ID, 'id_user'))
     # select by visible text
-    u = get_user(rsu["user"])
+    u = get_user(gold["user"])
     name = u.get("short_name", "")
     if name == "":
         name = u["name"]
-    print(f'selecting user {name}')
     select.select_by_visible_text(name)
-
+    # select by value 
+    #select.select_by_value(str(gold["user"]))
+    time.sleep(3)
     select2 = Select(driver.find_element(By.ID, 'id_goal'))
-    g = get_goal(rsu["goal"])
-    print(f'selecting goal {g["name"]}')
-    time.sleep(5)
+    g = get_goal(gold["goal"])
     select2.select_by_visible_text(g["name"])
 
-    select3 = Select(driver.find_element(By.ID, 'id_exchange'))
-    print(f'selecting exchange {rsu["exchange"]}')
-    select3.select_by_visible_text(rsu["exchange"])
+    if gold["buy_type"] == 'Physical':
+        select4 = Select(driver.find_element(By.ID, 'id_purity'))
+        # select by visible text
+        select4.select_by_visible_text(gold["purity"])
+
 
     driver.find_element(By.NAME, "submit").click()
     time.sleep(5)
@@ -126,48 +124,48 @@ def add_rsu(driver, rsu):
 
 @pytest.mark.usefixtures("driver_init")
 @pytest.mark.django_db
-class Test_Rsu:
+class Test_Gold:
     def test_flow(self, live_server):
         self.driver.get(("%s%s" % (live_server.url, "/user/")))
         self.open_url()
-        self.add_new_rsu()
-        self.add_another_rsu()
-        self.delete_rsus()
+        self.add_new_gold()
+        self.add_another_gold()
+        self.delete_golds()
 
     def open_url(self):
         set_prerequisites(self.driver)
         time.sleep(5)
-        count, _ = get_rows_of_table(self.driver, 'rsu-table')
+        count, _ = get_rows_of_table(self.driver, 'trans-table')
         assert count == 0
     
-    def add_new_rsu(self):
-        e = get_rsu(1)
-        add_rsu(self.driver, e)
-        count, _ = get_rows_of_table(self.driver, 'rsu-table')
+    def add_new_gold(self):
+        e = get_gold(1)
+        add_gold(self.driver,  e)
+        count, _ = get_rows_of_table(self.driver, 'trans-table')
         assert count == 1
     
-    def add_another_rsu(self):
-        e = get_rsu(2)
-        add_rsu(self.driver, e)
-        count, _ = get_rows_of_table(self.driver, 'rsu-table')
+    def add_another_gold(self):
+        e = get_gold(2)
+        add_gold(self.driver,  e)
+        count, _ = get_rows_of_table(self.driver, 'trans-table')
         assert count == 2
     
-    def delete_rsus(self):
+    def delete_golds(self):
         expected_count = 2
-        count, rows = get_rows_of_table(self.driver, 'rsu-table')
+        count, rows = get_rows_of_table(self.driver, 'trans-table')
         assert count == expected_count
-        delete_rsu_with_row_id(self.driver, 1)
-        count, rows = get_rows_of_table(self.driver, 'rsu-table')
+        delete_gold_with_row_id(self.driver, 1)
+        count, rows = get_rows_of_table(self.driver, 'trans-table')
         assert count == expected_count-1
-        # instead of deleting the remaining rsu, delete its user and make sure that the rsu is gone
+        # instead of deleting the remaining gold, delete its user and make sure that the gold is gone
         # when user is deleted
-        remaining_rsu = get_rsu(2)
+        remaining_gold = get_gold(2)
         self.driver.find_element(By.XPATH, "//a[@href='/user']").click()
         time.sleep(3)
-        delete_user(self.driver, remaining_rsu['user'])
+        delete_user(self.driver, remaining_gold['user'])
         time.sleep(3)
-        self.driver.find_element(By.XPATH, "//a[@href='/rsu']").click()
+        self.driver.find_element(By.XPATH, "//a[@href='/gold']").click()
         time.sleep(3)
-        count, rows = get_rows_of_table(self.driver, 'rsu-table')
+        count, rows = get_rows_of_table(self.driver, 'trans-table')
         assert count == 0
         

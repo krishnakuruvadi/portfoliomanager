@@ -28,15 +28,16 @@ def add_ppf(request):
     message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
-        number = request.POST['number']
-        start_date = request.POST['start_date']
-        user = request.POST['user']
-        goal = request.POST.get('goal', '')
-        if goal != '':
-            goal_id = Decimal(goal)
-        else:
-            goal_id = None
         try:
+            number = request.POST['number']
+            start_date = request.POST['start_date']
+            user = request.POST['user']
+            goal = request.POST.get('goal', '')
+            if goal != '':
+                goal_id = Decimal(goal)
+            else:
+                goal_id = None
+
             Ppf.objects.create(
                 number=number,
                 start_date=start_date,
