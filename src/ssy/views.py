@@ -2,8 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import (
     DetailView,
-    ListView,
-    DeleteView
+    ListView
 )
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
@@ -20,29 +19,39 @@ from goal.goal_helper import get_goal_id_name_mapping_for_user
 from django.http import HttpResponseRedirect
 from tasks.tasks import pull_ssy_trans_from_bank
 from common.helper import get_preferred_currency_symbol
+from django.db import IntegrityError
 
 
 def add_ssy(request):
     template_name = 'ssys/ssy_create.html'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
-        number = request.POST['number']
-        start_date = request.POST['start_date']
-        user = request.POST['user']
-        goal = request.POST.get('goal', '')
-        if goal != '':
-            goal_id = Decimal(goal)
-        else:
-            goal_id = None
-        Ssy.objects.create(
-            number=number,
-            start_date=start_date,
-            user=user,
-            goal=goal_id
-        )
+        try:
+            number = request.POST['number']
+            start_date = request.POST['start_date']
+            user = request.POST['user']
+            goal = request.POST.get('goal', '')
+            if goal != '':
+                goal_id = Decimal(goal)
+            else:
+                goal_id = None
+            Ssy.objects.create(
+                number=number,
+                start_date=start_date,
+                user=user,
+                goal=goal_id
+            )
+            message_color = 'green'
+            message = 'New SSY account addition successful'
+        except IntegrityError:
+            print('SSY already exists')
+            message_color = 'red'
+            message = 'SSY account already exists'
 
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add SSY', 'curr_module_id': 'id_ssy_module'}
+    context = {'users':users, 'operation': 'Add SSY', 'curr_module_id': 'id_ssy_module', 'message':message, 'message_color':message_color}
     return render(request, template_name, context)
 
 
@@ -133,15 +142,13 @@ class SsyDetailView(DetailView):
         data['curr_module_id'] = 'id_ssy_module'
         return data
 
-class SsyDeleteView(DeleteView):
-    template_name = 'ssys/ssy_delete.html'
-    
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Ssy, number=id_)
-
-    def get_success_url(self):
-        return reverse('ssys:ssy-list')
+def delete_ssy(request, id):
+    try:
+        s = Ssy.objects.get(number=id)
+        s.delete()
+    except Ssy.DoesNotExist:
+        print(f'SSY with number {id} does not exist')
+    return HttpResponseRedirect(reverse('ssys:ssy-list'))
 
 class SsyEntryListView(ListView):
     template_name = 'ssys/ssy_entry_list.html'

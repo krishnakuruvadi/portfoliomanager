@@ -60,6 +60,9 @@ def add_trans(request):
             buy_value = Decimal(request.POST['buy_value'])
             buy_date = get_date_or_none_from_string(request.POST['buy_date'])
             buy_type = request.POST['buy_type']
+            purity = '24K'
+            if buy_type == 'Physical':
+                purity = request.POST['purity']
             Gold.objects.create(
                 user=user,
                 goal=goal_id,
@@ -69,7 +72,8 @@ def add_trans(request):
                 buy_value=buy_value,
                 buy_date=buy_date,
                 buy_type=buy_type,
-                unsold_weight=weight
+                unsold_weight=weight,
+                purity=purity
             )
             message_color = 'green'
             message = 'Buy Transaction added successfully'

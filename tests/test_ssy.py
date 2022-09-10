@@ -9,28 +9,24 @@ from .test_user import get_user, add_new_user, delete_user
 from .test_goals import get_goal, add_new_goal
 
 
-def get_epf(row_id):
-    #user and goal are row_ids
-    epfs = [{
+def get_ssy(row_id):
+    ssys = [{
         "row_id":1,
         "user": 1,
-        "number": "APL/35/2004/34",
+        "number": "35200434",
         "start_dt": datetime.date(day=10, month=12, year=2021),
-        "goal": 1,
-        "company": "Apostle Ltd"
-
+        "goal": 1
     },
     {
         "row_id":2,
         "user": 2,
-        "number": "TXN/3456/543/09865",
+        "number": "345654309865",
         "start_dt": datetime.date(day=13, month=1, year=2021),
         "goal": 2,
-        "company": "Taxation Inc"
     }]
-    for e in epfs:
-        if e["row_id"] == row_id:
-            return e
+    for p in ssys:
+        if p["row_id"] == row_id:
+            return p
     return None
 
 
@@ -59,12 +55,12 @@ def set_prerequisites(driver):
             i += 1
         except IndexError:
             break
-    driver.find_element(By.XPATH, "//a[@href='/epf']").click()
+    driver.find_element(By.XPATH, "//a[@href='/ssy']").click()
     time.sleep(3)
     print(f'current url is {driver.current_url}')
 
-def delete_epf_with_row_id(driver, id):
-    count, rows = get_rows_of_table(driver, 'epf-table')
+def delete_ssy_with_row_id(driver, id):
+    count, rows = get_rows_of_table(driver, 'ssy-table')
     for row in rows:
         th = row.find_element(By.TAG_NAME, 'th')
         print(f'text is {th.text}')
@@ -84,36 +80,30 @@ def delete_epf_with_row_id(driver, id):
             obj.accept()
             break
 
-def add_epf(driver, epf):
+def add_ssy(driver, ssy):
     time.sleep(3)
     driver.find_element(By.XPATH, "//a[@href='create']").click()
 
     time.sleep(3)
     driver.find_element(By.ID, "number").click()
-    driver.find_element(By.ID, "number").send_keys(epf["number"])
-    driver.find_element(By.ID, "company").click()
-    driver.find_element(By.ID, "company").send_keys(epf["company"])
-    driver.find_element(By.ID, "start_date").send_keys(epf["start_dt"].strftime('%m/%d/%Y'))
+    driver.find_element(By.ID, "number").send_keys(ssy["number"])
+    driver.find_element(By.ID, "start_date").send_keys(ssy["start_dt"].strftime('%m/%d/%Y'))
     
     select = Select(driver.find_element(By.ID, 'id_user'))
     # select by visible text
-    u = get_user(epf["user"])
+    u = get_user(ssy["user"])
     name = u.get("short_name", "")
     if name == "":
         name = u["name"]
-    print(f'selecting user {name}')
     select.select_by_visible_text(name)
     # select by value 
-    #select.select_by_value(str(epf["user"]))
-
-    select2 = Select(driver.find_element(By.ID, 'id_goal'))
-    g = get_goal(epf["goal"])
-    print(f'selecting goal {g["name"]}')
+    #select.select_by_value(str(ssy["user"]))
     time.sleep(3)
+    select2 = Select(driver.find_element(By.ID, 'id_goal'))
+    g = get_goal(ssy["goal"])
     select2.select_by_visible_text(g["name"])
-
     # select by value 
-    #select2.select_by_value(str(epf["goal"]))
+    #select2.select_by_value(str(ssy["goal"]))
     
     driver.find_element(By.NAME, "submit").click()
     time.sleep(5)
@@ -122,48 +112,48 @@ def add_epf(driver, epf):
 
 @pytest.mark.usefixtures("driver_init")
 @pytest.mark.django_db
-class Test_Epf:
+class Test_Ssy:
     def test_flow(self, live_server):
         self.driver.get(("%s%s" % (live_server.url, "/user/")))
         self.open_url()
-        self.add_new_epf()
-        self.add_another_epf()
-        self.delete_epfs()
+        self.add_new_ssy()
+        self.add_another_ssy()
+        self.delete_ssys()
 
     def open_url(self):
         set_prerequisites(self.driver)
         time.sleep(5)
-        count, _ = get_rows_of_table(self.driver, 'epf-table')
+        count, _ = get_rows_of_table(self.driver, 'ssy-table')
         assert count == 0
     
-    def add_new_epf(self):
-        e = get_epf(1)
-        add_epf(self.driver, e)
-        count, _ = get_rows_of_table(self.driver, 'epf-table')
+    def add_new_ssy(self):
+        e = get_ssy(1)
+        add_ssy(self.driver,  e)
+        count, _ = get_rows_of_table(self.driver, 'ssy-table')
         assert count == 1
     
-    def add_another_epf(self):
-        e = get_epf(2)
-        add_epf(self.driver, e)
-        count, _ = get_rows_of_table(self.driver, 'epf-table')
+    def add_another_ssy(self):
+        e = get_ssy(2)
+        add_ssy(self.driver,  e)
+        count, _ = get_rows_of_table(self.driver, 'ssy-table')
         assert count == 2
     
-    def delete_epfs(self):
+    def delete_ssys(self):
         expected_count = 2
-        count, rows = get_rows_of_table(self.driver, 'epf-table')
+        count, rows = get_rows_of_table(self.driver, 'ssy-table')
         assert count == expected_count
-        delete_epf_with_row_id(self.driver, 1)
-        count, rows = get_rows_of_table(self.driver, 'epf-table')
+        delete_ssy_with_row_id(self.driver, 1)
+        count, rows = get_rows_of_table(self.driver, 'ssy-table')
         assert count == expected_count-1
-        # instead of deleting the remaining epf, delete its user and make sure that the epf is gone
+        # instead of deleting the remaining ssy, delete its user and make sure that the ssy is gone
         # when user is deleted
-        remaining_epf = get_epf(2)
+        remaining_ssy = get_ssy(2)
         self.driver.find_element(By.XPATH, "//a[@href='/user']").click()
         time.sleep(3)
-        delete_user(self.driver, remaining_epf['user'])
+        delete_user(self.driver, remaining_ssy['user'])
         time.sleep(3)
-        self.driver.find_element(By.XPATH, "//a[@href='/epf']").click()
+        self.driver.find_element(By.XPATH, "//a[@href='/ssy']").click()
         time.sleep(3)
-        count, rows = get_rows_of_table(self.driver, 'epf-table')
+        count, rows = get_rows_of_table(self.driver, 'ssy-table')
         assert count == 0
         

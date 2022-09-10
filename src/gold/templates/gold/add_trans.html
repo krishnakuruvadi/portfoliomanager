@@ -50,7 +50,7 @@
           </div>
         </div>
 
-        <div class="form-group row">   
+        <div class="form-group row">
           <label class="control-label col-sm-3 col-form-label" for="id_buy_type">Buy Type <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
@@ -59,6 +59,18 @@
                 <option value="Physical">Physical</option>
                 <option value="Sovereign Gold Bond Scheme">Sovereign Gold Bond Scheme</option>
                 <option value="Other">Other</option>
+              </select>
+            </div>
+          </div> 
+        </div>
+
+        <div class="form-group row" id="div_purity">
+          <label class="control-label col-sm-3 col-form-label" for="id_purity">Purity <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="purity" id="id_purity">
+                <option value="24K">24K</option>
+                <option value="22K">22K</option>
               </select>
             </div>
           </div> 
@@ -131,11 +143,15 @@
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script>
     set_user_list({{users|safe}}, '{{user|safe}}');
+    adjust_div_for_purity()
     $("#id_weight").change(function () {
       setTransPrice();
     });
     $("#id_per_gram").change(function () {
       setTransPrice();
+    });
+    $("#id_buy_type").change(function () {
+      adjust_div_for_purity();
     });
     function setTransPrice(){
       var perGramElem = document.getElementById("id_per_gram");
@@ -154,6 +170,14 @@
     function precise(num) {
       //return Number.parseFloat(x).toPrecision(prec);
       return Math.round((num + Number.EPSILON) * 1000000) / 1000000
+    }
+    function adjust_div_for_purity() {
+      var sel = document.getElementById('id_buy_type').value;
+      if (sel == 'Physical') {
+        document.getElementById("div_purity").style.display=null;
+      } else {
+        document.getElementById("div_purity").style.display="none";
+      }
     }
   </script>
 {% endblock %}
