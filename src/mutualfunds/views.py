@@ -309,7 +309,7 @@ def add_transaction(request, id):
             message = f'Transaction addition failed. {msg}'
             message_color = 'red'
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add Transaction', 'folio':folio.folio, 'user':user, 'fund_name':folio.fund.name, 'folio_id':id, 'message':message, 'message_color':message_color}
+    context = {'users':users, 'operation': 'Add Transaction', 'conversion_rate':1, 'folio':folio.folio, 'user':user, 'fund_name':folio.fund.name, 'folio_id':id, 'message':message, 'message_color':message_color}
     context['curr_module_id'] = 'id_mf_module'
     return render(request, template, context)
 
