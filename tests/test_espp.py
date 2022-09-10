@@ -59,13 +59,13 @@ def update_espp(driver, espp):
             driver.find_element(By.ID, "id_purchase_price").clear()
             pp = round(espp["purchase_price"]+0.05, 2)
             driver.find_element(By.ID, "id_purchase_price").send_keys(pp)
-            time.sleep(50)
+            time.sleep(5)
             driver.find_element(By.NAME, "submit").click()
-            time.sleep(15)
+            time.sleep(5)
             driver.find_element(By.LINK_TEXT, "Cancel").click()
-            time.sleep(15)
+            time.sleep(5)
             driver.find_element(By.XPATH, "//a[@href='/espp']").click()
-            time.sleep(10)
+            time.sleep(5)
             print(f'current url is {driver.current_url}')
             break
 

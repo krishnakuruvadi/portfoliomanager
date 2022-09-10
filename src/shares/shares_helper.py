@@ -434,7 +434,7 @@ def reconcile_share(share_obj):
         share_obj.realised_gain = realised_gain
         share_obj.gain = unrealised_gain
         if qty > 0:
-            share_obj.latest_value = share_obj.latest_price * share_obj.quantity*share_obj.conversion_rate
+            share_obj.latest_value = float(share_obj.latest_price) * float(share_obj.quantity) * float(share_obj.conversion_rate)
         else:
             share_obj.latest_value = 0
             share_obj.conversion_rate = 0

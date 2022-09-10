@@ -138,15 +138,13 @@ class ShareTransactionsListView(ListView):
         share = get_object_or_404(Share, id=id_)
         return Transactions.objects.filter(share=share)
 
-class ShareDeleteView(DeleteView):
-    template_name = 'shares/share_delete.html'
-    
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Share, id=id_)
-
-    def get_success_url(self):
-        return reverse('shares:shares-list')
+def delete_share(request, id):
+    try:
+        s = Share.objects.get(id=id)
+        s.delete()
+    except Exception as ex:
+        print(f'exception {ex} when deleting share with id {id}')
+    return HttpResponseRedirect(reverse('shares:shares-list'))
 
 class TransactionDeleteView(DeleteView):
     template_name = 'shares/transaction_delete.html'
@@ -372,6 +370,8 @@ def upload_transactions(request):
 
 def add_transaction(request):
     template = 'shares/add_transaction.html'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         if "submit" in request.POST:
             exchange = request.POST['exchange']
@@ -387,6 +387,8 @@ def add_transaction(request):
             broker = request.POST['broker']
             notes = request.POST['notes']
             insert_trans_entry(exchange, symbol, user, trans_type, quantity, price, trans_date, notes, broker, conversion_rate, trans_price)
+            message_color = 'green'
+            message = f'{trans_type} transaction added successfully'
         else:
             print('fetching exchange price')
             exchange = request.POST['exchange']
@@ -400,13 +402,14 @@ def add_transaction(request):
             trans_type = request.POST['trans_type']
             price = get_float_or_none_from_string(request.POST['price'])
             quantity = get_float_or_none_from_string(request.POST['quantity'])
+            broker = request.POST['broker']
             context = {'users':users, 'operation': 'Add Transaction', 'conversion_rate':exchange_rate, 'curr_module_id': 'id_shares_module',
                         'trans_date':trans_date.strftime("%Y-%m-%d"), 'user':user, 'exchange':exchange, 'symbol':symbol, 'trans_type':trans_type,
-                        'price':price, 'quantity':quantity}
+                        'price':price, 'quantity':quantity, 'broker':broker}
             return render(request, template, context)
 
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add Transaction', 'conversion_rate':1, 'curr_module_id': 'id_shares_module'}
+    context = {'users':users, 'operation': 'Add Transaction', 'conversion_rate':1, 'curr_module_id': 'id_shares_module', 'message': message, 'message_color':message_color}
     return render(request, template, context)
 
 def update_transaction(request,id):
