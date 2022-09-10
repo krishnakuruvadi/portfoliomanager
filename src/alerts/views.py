@@ -75,17 +75,14 @@ class AlertsDetailView(DetailView):
         print(data)
         return data
 
-class AlertsDeleteView(DeleteView):
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(models.Alert, id=id_)
-
-    def get_success_url(self):
-        return reverse('alerts:alerts-list')
+def delete_alert(request, id):
+    try:
+        a = models.Alert.objects.get(id=id)
+        a.delete()
+    except Exception as ex:
+        print(f'exception {ex} when deleting alert id {id}')
+    return HttpResponseRedirect(reverse('alerts:alerts-list'))
     
-    def get(self, *args, **kwargs):
-        return self.post(*args, **kwargs)
-
 def toggle_seen(request, id):
     alert = get_object_or_404(models.Alert, id=id)
     if alert.seen:

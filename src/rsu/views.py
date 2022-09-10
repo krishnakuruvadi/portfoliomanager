@@ -248,13 +248,20 @@ class RsuDetailView(DetailView):
                     aq_price_incl_tax -= float(st.units*rsu.aquisition_price*rsu.conversion_rate)
             q, _,_,_,_ = reconcile_event_based(trans, list(), list())
             if q > 0:
-                lv = get_historical_stock_price_based_on_symbol(rsu.award.symbol, rsu.award.exchange, end_dt+relativedelta(days=-5), end_dt)
+                lv = get_historical_stock_price_based_on_symbol(award.symbol, award.exchange, end_dt+relativedelta(days=-5), end_dt)
                 val = 0
                 if lv:
                     print(lv)
                     conv_rate = 1
-                    if rsu.award.exchange == 'NASDAQ' or rsu.award.exchange == 'NYSE':
+                    if award.exchange == 'NASDAQ' or award.exchange == 'NYSE':
                         conv_val = get_in_preferred_currency(1, 'USD', end_dt)
+                        if conv_val:
+                            conv_rate = conv_val
+                        for k,v in lv.items():
+                            val += float(v)*float(conv_rate)*float(q)
+                            break
+                    elif award.exchange == 'NSE' or award.exchange == 'BSE' or award.exchange == 'NSE/BSE':
+                        conv_val = get_in_preferred_currency(1, 'INR', end_dt)
                         if conv_val:
                             conv_rate = conv_val
                         for k,v in lv.items():
@@ -271,7 +278,7 @@ class RsuDetailView(DetailView):
         
         data['progress_data'] = ret
         try:
-            s = Stock.objects.get(symbol=rsu.award.symbol, exchange=rsu.award.exchange)
+            s = Stock.objects.get(symbol=award.symbol, exchange=award.exchange)
             if st_dt > today:
                 st_dt = datetime.date.today()
             res = get_comp_index_values(s, award.award_date.replace(day=1), st_dt)
@@ -279,7 +286,7 @@ class RsuDetailView(DetailView):
                 for k, v in res.items():
                     data[k] = v 
         except Stock.DoesNotExist:
-            print(f'trying to get stock that does not exist {rsu.award.symbol} {rsu.award.exchange}')
+            print(f'trying to get stock that does not exist {award.symbol} {award.exchange}')
         print(f'returning data {data}')
         return data
 
