@@ -115,7 +115,7 @@ def add_fd(driver, fd):
     select.select_by_visible_text(name)
     # select by value 
     #select.select_by_value(str(fd["user"]))
-    time.sleep(10)
+    time.sleep(3)
     select2 = Select(driver.find_element(By.ID, 'id_goal'))
     g = get_goal(fd["goal"])
     select2.select_by_visible_text(g["name"])

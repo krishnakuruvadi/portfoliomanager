@@ -89,7 +89,6 @@ def add_ssy(driver, ssy):
     driver.find_element(By.ID, "number").send_keys(ssy["number"])
     driver.find_element(By.ID, "start_date").send_keys(ssy["start_dt"].strftime('%m/%d/%Y'))
     
-    time.sleep(3)
     select = Select(driver.find_element(By.ID, 'id_user'))
     # select by visible text
     u = get_user(ssy["user"])
@@ -99,7 +98,7 @@ def add_ssy(driver, ssy):
     select.select_by_visible_text(name)
     # select by value 
     #select.select_by_value(str(ssy["user"]))
-    time.sleep(10)
+    time.sleep(3)
     select2 = Select(driver.find_element(By.ID, 'id_goal'))
     g = get_goal(ssy["goal"])
     select2.select_by_visible_text(g["name"])
