@@ -555,10 +555,10 @@ def add_goal(request):
             users = get_all_users()
             context = {'users':users, 'user':user, 'startdate':start_date, 'name': name, 'notes': notes,
                 'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val,
-                'curr_module_id':'id_goal_module'}
+                'curr_module_id':'id_goal_module', 'operation': 'Add Goal'}
             return render(request, template, context=context)
     users = get_all_users()
-    context = {'users':users, 'curr_module_id': 'id_goal_module', 'message':message, 'message_color':message_color}
+    context = {'users':users, 'curr_module_id': 'id_goal_module', 'message':message, 'message_color':message_color, 'operation': 'Add Goal'}
     return render(request, template, context=context)
 
 def add_retirement_goal(request):

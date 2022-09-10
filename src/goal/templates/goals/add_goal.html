@@ -7,11 +7,7 @@
 {% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'goals:goal-list' %}">Goals</a></li>
-    <li><a href="#">  {% if name %}
-      Update Goal
-    {% else %}
-      Add Goal
-    {% endif %}</a></li>
+    <li><a href="#">{{operation}}</a></li>
   </ul>
 {% endblock viewname %}
 

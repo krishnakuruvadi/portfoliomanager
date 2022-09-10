@@ -3,7 +3,6 @@ from django.urls import path
 from .views import (
     get_folios,
     FolioDetailView,
-    FolioDeleteView,
     FolioTransactionsListView,
     TransactionsListView,
     TransactionDeleteView,
@@ -18,6 +17,7 @@ from .views import (
     fund_returns,
     fund_insights,
     delete_folios,
+    delete_folio,
     sip_list
 )
 
@@ -36,7 +36,7 @@ urlpatterns = [
     path('sip', sip_list, name='sips'),
     path('<id>/', FolioDetailView.as_view(), name='folio-detail'),
     path('<id>/update', update_folio, name='folio-update'),
-    path('<id>/delete', FolioDeleteView.as_view(), name='folio-delete'),
+    path('<id>/delete', delete_folio, name='folio-delete'),
     path('<id>/transactions/', FolioTransactionsListView.as_view(), name='folio-transactions-list'),
     path('<id>/transactions/add', add_transaction, name='folio-add-transaction'),
     path('transaction/<id>', TransactionDetailView.as_view(), name='transaction-detail'),

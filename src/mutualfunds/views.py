@@ -86,6 +86,8 @@ class FolioTransactionsListView(ListView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['folio_id'] = self.kwargs['id']
+        f = Folio.objects.get(id=self.kwargs['id'])
+        data['folio'] = f.folio
         data['curr_module_id'] = 'id_mf_module'
         data['user_name_mapping'] = get_all_users()
         print(data)
@@ -284,6 +286,8 @@ def add_folio(request):
 
 def add_transaction(request, id):
     template = 'mutualfunds/add_transaction.html'
+    message = ''
+    message_color = 'ignore'
     folio = Folio.objects.get(id=id)
     user = get_user_name_from_id(folio.user)
     if request.method == 'POST':
@@ -292,12 +296,20 @@ def add_transaction(request, id):
         price = get_float_or_none_from_string(request.POST['price'])
         units = get_float_or_none_from_string(request.POST['units'])
         conversion_rate = get_float_or_none_from_string(request.POST['conversion_rate'])
+        if not conversion_rate:
+            conversion_rate = 1
         trans_price = get_float_or_none_from_string(request.POST['trans_price'])
         broker = request.POST['broker']
         notes = request.POST['notes']
-        insert_trans_entry(folio.folio, folio.fund.code, folio.user, trans_type, units, price, trans_date, notes, broker, conversion_rate, trans_price)
+        res, msg = insert_trans_entry(folio.folio, folio.fund.code, folio.user, trans_type, units, price, trans_date, notes, broker, conversion_rate, trans_price)
+        if res:
+            message = 'Transaction addition successful'
+            message_color = 'green'
+        else:
+            message = f'Transaction addition failed. {msg}'
+            message_color = 'red'
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add Transaction', 'folio':folio.folio, 'user':user, 'fund_name':folio.fund.name, 'folio_id':id}
+    context = {'users':users, 'operation': 'Add Transaction', 'folio':folio.folio, 'user':user, 'fund_name':folio.fund.name, 'folio_id':id, 'message':message, 'message_color':message_color}
     context['curr_module_id'] = 'id_mf_module'
     return render(request, template, context)
 
@@ -339,7 +351,6 @@ def update_transaction(request, id):
 
 class FolioDetailView(DetailView):
     template_name = 'mutualfunds/folio_detail.html'
-    #queryset = Ppf.objects.all()
 
     def get_object(self):
         id_ = self.kwargs.get("id")
@@ -480,21 +491,13 @@ class FolioDetailView(DetailView):
         data['curr_module_id'] = 'id_mf_module'
         return data
 
-class FolioDeleteView(DeleteView):
-    template_name = 'mutualfunds/folio_delete.html'
-    
-    def get_object(self):
-        id_ = self.kwargs.get("id")
-        return get_object_or_404(Folio, id=id_)
-
-    def get_success_url(self):
-        return reverse('mutualfund:folio-list')
-    
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['folio_id'] = self.kwargs['id']
-        print(data)
-        return data
+def delete_folio(request, id):
+    try:
+        f = Folio.objects.get(id=id)
+        f.delete()
+    except Exception as ex:
+        print(f'exception {ex} when deleting folio with id {id}')
+    return HttpResponseRedirect(reverse('mutualfund:folio-list'))
 
 class TransactionsListView(ListView):
     template_name = 'mutualfunds/transactions_list.html'
@@ -562,6 +565,8 @@ def upload_transactions(request):
 
 def update_folio(request, id):
     template = 'mutualfunds/update_folio.html'
+    message = ''
+    message_color = 'ignore'
     folio = Folio.objects.get(id=id)
     if request.method == 'POST':
         folio.user = int(request.POST['user'])
@@ -573,21 +578,23 @@ def update_folio(request, id):
             folio.goal = None
         folio.notes = request.POST['notes']
         folio.save()
+        message = 'Folio update successful'
+        message_color = 'green'
         
-    else:
-        users = get_all_users()
-
-        context = {'users':users,
+    users = get_all_users()
+    context = {'users':users,
                    'folio':folio.folio,
                    'fund_name':folio.fund.name,
                    'user':folio.user,
                    'goal':folio.goal,
                    'notes':folio.notes,
                    'goals':get_goal_id_name_mapping_for_user(folio.user),
-                   'curr_module_id': 'id_mf_module'}
-        print(context)
-        return render(request, template, context)
-    return HttpResponseRedirect("../")
+                   'curr_module_id': 'id_mf_module',
+                   'message': message,
+                   'message_color': message_color
+                   }
+    print(context)
+    return render(request, template, context)
 
 def mf_refresh(request):
     print("inside mf_refresh")

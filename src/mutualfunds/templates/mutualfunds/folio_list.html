@@ -139,7 +139,7 @@
     <tbody>
       {% for instance in object_list %}
       <tr>
-        <td>{{ instance.id }}</td>
+        <th>{{ forloop.counter }}</td>
         <td><a href="{{ instance.get_absolute_url }}">{{ instance.folio }}</a></td>
         <td>{{ instance.fund.name }}</td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
@@ -153,7 +153,7 @@
         <td>{{ instance.xirr }}</td>
         <!--td>{{ instance.gain }}{% if instance.gain > 0 %}<i class="fa fa-caret-up" aria-hidden="true" style="color:green"></i>{% else %}<i class="fa fa-caret-down" aria-hidden="true" style="color:red"></i>{% endif %}></td!-->
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Folio"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-folio"><i class="fa fa-trash" aria-hidden="true" title="Delete Folio"></i> </a>
           <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Edit Folio"></i> </a>
           <a href="{{ instance.get_absolute_url }}transactions" style="padding-left:10px;"><i class="far fa-file-alt" aria-hidden="true" title="View Transactions"></i> </a>
         </td>
@@ -215,6 +215,9 @@
     }
     $(document).on('click', '.confirm-delete', function(){
       return confirm('Are you sure you want to delete all folios?');
+    })
+    $(document).on('click', '.confirm-delete-folio', function(){
+      return confirm('Are you sure you want to delete the folio?');
     })
 </script>
 {% endblock javascript %}
