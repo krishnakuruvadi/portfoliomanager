@@ -42,7 +42,7 @@
       <tbody>
         {% for instance in actions %}
         <tr>
-          <td><a href="{% url 'alerts:alert-detail' instance.id %}">{{ instance.id }}</a></td>
+          <th><a href="{% url 'alerts:alert-detail' instance.id %}">{{ forloop.counter }}</a></th>
           <td style="text-align:center">
             {% if instance.severity == 0 %}
               <i class="far fa-times-circle" title="critical" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
@@ -88,7 +88,7 @@
       <tbody>
         {% for instance in notifications %}
         <tr>
-          <td><a href="{% url 'alerts:alert-detail' instance.id %}">{{ instance.id }}</a></td>
+          <th><a href="{% url 'alerts:alert-detail' instance.id %}">{{ forloop.counter }}</a></th>
           <td style="text-align:center">
             {% if instance.severity == 0 %}
               <i class="far fa-times-circle" title="critical" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
@@ -134,7 +134,7 @@
       <tbody>
         {% for instance in application %}
         <tr>
-          <td><a href="{% url 'alerts:alert-detail' instance.id %}">{{ instance.id }}</a></td>
+          <th><a href="{% url 'alerts:alert-detail' instance.id %}">{{ forloop.counter }}</a></th>
           <td style="text-align:center">
             {% if instance.severity == 0 %}
               <i class="far fa-times-circle" title="critical" aria-hidden="true" style="color:red" style="font-size: 1.2em;"></i>
@@ -231,13 +231,22 @@
 <script>
   {% block jquery %}
   $('#actions-table').DataTable({
-    "order": [[ 0, "desc" ]]
+    "columnDefs": [
+        { "type": "date", "targets":[3]}
+      ],
+    "order": [[ 3, "desc" ]]
   });
   $('#notifications-table').DataTable({
-    "order": [[ 0, "desc" ]]
+    "columnDefs": [
+        { "type": "date", "targets":[3]}
+      ],
+    "order": [[ 3, "desc" ]]
   });
   $('#application-table').DataTable({
-    "order": [[ 0, "desc" ]]
+    "columnDefs": [
+        { "type": "date", "targets":[3]}
+      ],
+    "order": [[ 3, "desc" ]]
   });
   //$('#marketing-table').DataTable({
   //  "order": [[ 0, "desc" ]]
