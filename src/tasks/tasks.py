@@ -1081,12 +1081,22 @@ def pull_and_store_coin_historical_vals(symbol, dt):
     exists = 0
     today = datetime.date.today()
     if abs((dt-today).days) < 20:
-        val = get_historical_price(symbol, dt)
         try:
-            HistoricalCoinPrice.objects.create(coin=coin, date=dt, price=val)
-            added += 1
-        except IntegrityError:
+            HistoricalCoinPrice.objects.get(coin=coin, date=dt)
+            print(f'Crypto history from {coin} on {dt} was found in the database and will not be created again.')
             exists += 1
+        except HistoricalCoinPrice.DoesNotExist:
+            print(f'Crypto history from {coin} on {dt} was not found in the database. Attempting to retrieve price value.')
+            val = get_historical_price(symbol, dt)
+            try:
+                HistoricalCoinPrice.objects.create(coin=coin, date=dt, price=val) 
+                print(f'Crypto history {coin} {dt} {val} was saved to the database.')       
+                added += 1
+            except Exception as e:
+                print(f'Error {e} occurred when attempting to save {coin} {dt} {val} to the database.')
+        except Exception as e:
+            print(f'Error {e} occured while getting crypto history for {coin} on {dt} from the database.')
+
         if added > 0:
             print(f'added {added}, retained {exists} historical coin price entries for {symbol}')
         elif exists > 0:
@@ -1094,28 +1104,23 @@ def pull_and_store_coin_historical_vals(symbol, dt):
         else:
             print(f'failed to add any historical coin price entries for {symbol} starting {dt}')
         return
-        
-    for yr in range(dt.year, today.year+1):
-        for month in range(1,12):
-            cdt = datetime.date(year=yr, month=month+1, day=1)
-            cdt = cdt+relativedelta(days=-1)
-            if cdt > datetime.date.today():
-                cdt = datetime.date.today()
-            val = get_historical_price(symbol, cdt)
-            try:
-                HistoricalCoinPrice.objects.create(coin=coin, date=cdt, price=val)
-                added += 1
-            except IntegrityError:
-                exists += 1
-        yed = datetime.date(year=yr, month=12, day=31)
-        if yed < datetime.date.today():
-            val = get_historical_price(symbol, yed)
-            try:
-                HistoricalCoinPrice.objects.create(coin=coin, date=yed, price=val)
-                added += 1
-            except IntegrityError:
-                exists += 1
 
+    try:
+        HistoricalCoinPrice.objects.get(coin=coin, date=dt)
+        print(f'Crypto history from {coin} on {dt} was found in the database and will not be created again.')
+        exists += 1
+    except HistoricalCoinPrice.DoesNotExist:
+        print(f'Crypto history from {coin} on {dt} was not found in the database. Attempting to retrieve price value.')
+        val = get_historical_price(symbol, dt)
+        try:
+            HistoricalCoinPrice.objects.create(coin=coin, date=dt, price=val) 
+            print(f'Crypto history {coin} {dt} {val} was saved to the database.')       
+            added += 1
+        except Exception as e:
+            print(f'Error {e} occurred when attempting to save {coin} {dt} {val} to the database.')
+    except Exception as e:
+        print(f'Error {e} occured while getting crypto history for {coin} on {dt} from the database.')
+    
     if added > 0:
         print(f'added {added}, retained {exists} historical coin price entries for {symbol}')
     elif exists > 0:

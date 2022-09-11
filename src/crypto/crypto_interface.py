@@ -206,6 +206,7 @@ class CryptoInterface:
                     try:
                         hcp = HistoricalCoinPrice.objects.get(coin=coin, date=end_date)
                         amt += get_in_preferred_currency(float(hcp.price)*float(qty), 'USD', end_date)
+                        print(f'Successfully retrieved historical crypto data {coin} on {end_date} from the database.')
                     except HistoricalCoinPrice.DoesNotExist:
                         pull_and_store_coin_historical_vals(crypto.symbol, end_date)
                 except Coin.DoesNotExist:
