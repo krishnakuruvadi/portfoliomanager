@@ -19,6 +19,20 @@
     <div class="row">
       <div class='col-sm-6'>
 
+        {% if message_color == 'green' %}
+        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Success!</strong> {{message}}
+        </div>
+        {% elif message_color == 'red' %}
+        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Error!</strong> {{message}}
+         </div>
+        {% endif %}
+
         <div class="form-group row">
           <label for="folio" class="col-sm-3 col-form-label">Folio</label>
           <div class="col-sm-3">
@@ -47,7 +61,7 @@
         </div>
 
         <div class="form-group row">
-          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date</label>
+          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
               <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}">
@@ -56,7 +70,7 @@
         </div>
 
         <div class="form-group row">
-          <label for="trans_type" class="col-sm-3 col-form-label">Transaction Type</label>
+          <label for="trans_type" class="col-sm-3 col-form-label">Transaction Type <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
               <select id="trans_type" name="trans_type" class="form-control">
@@ -68,19 +82,19 @@
         </div>
 
         <div class="form-group row">
-          <label for="price" class="col-sm-3 col-form-label">Price</label>
+          <label for="price" class="col-sm-3 col-form-label">Price <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="price" name="price" value="{{price}}" step="0.0001">
+              <input type="number" id="price" name="price" value="{{price}}" step="0.0001" required="true">
             </div>
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="units" class="col-sm-3 col-form-label">Units</label>
+          <label for="units" class="col-sm-3 col-form-label">Units <span style="color:red;">*</span></label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
-              <input type="number" id="units" name="units" value="{{units}}" step="0.0001">
+              <input type="number" id="units" name="units" value="{{units}}" step="0.0001" required="true">
             </div>
           </div>
         </div>
@@ -125,7 +139,7 @@
           <div class="col-sm-6">
             <div class="md-form mt-0">
               <button type="submit" class="btn btn-primary" name="submit">Submit</button>
-              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+              <a href="{% url 'mutualfund:folio-transactions-list' folio_id %}" class="btn btn-danger" role="button">Cancel</a>
             </div>
           </div>
         </div>

@@ -3,6 +3,9 @@
 {% block viewname %}
   <ul class="breadcrumb">
     <li><a href="{% url 'mutualfund:folio-list' %}">Mutual Funds</a></li>
+    {% if folio_id %}
+    <li><a href="{% url 'mutualfund:folio-detail' folio_id %}">{{folio}}</a></li>
+    {% endif %}
     <li><a href="#">Transactions</a></li>
   </ul>
 {% endblock %} 

@@ -17,3 +17,8 @@ def get_navigation_breadcrumb(driver):
     crumb = driver.find_element(By.CLASS_NAME, "breadcrumb")
     parts = crumb.find_elements(By.TAG_NAME, "li")
     return crumb, parts
+
+
+def click_if_unchecked(driver, id):
+    if not driver.find_element(By.ID, id).is_selected():
+        driver.find_element(By.ID, id).click()

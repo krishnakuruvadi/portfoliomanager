@@ -128,7 +128,7 @@
   <table class="table table-hover dt-responsive" id="shares-table" style="width:100%">
     <thead class="thead-dark">
       <tr>
-        <th scope="col">Id</th>
+        <th scope="col">#</th>
         <th scope="col">Symbol</th>
         <th scope="col">User</th>
         <th scope="col">Goal</th>
@@ -146,7 +146,7 @@
     <tbody>
       {% for instance in object_list %}
       <tr>
-        <td>{{ instance.id }}</td>
+        <th>{{ forloop.counter }}</th>
         <td><a href="{% url 'shares:share-detail' instance.id %}">{{ instance.symbol }}</a></td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
@@ -159,7 +159,7 @@
         <td>{{ instance.gain }}</td>
         <td>{{ instance.roi }}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Share"></i> </a>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-share"><i class="fa fa-trash" aria-hidden="true" title="Delete Share"></i> </a>
           <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Update Share"></i> </a>
           <a href="{{ instance.get_absolute_url }}transactions" style="padding-left:10px;" ><i class="far fa-file-alt" aria-hidden="true" title="View Transactions"></i> </a>
         </td>
@@ -183,6 +183,12 @@
   {% load static %}
   <script src="{% static 'common.js' %}"></script>
   <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all shares and all transactions in all shares?');
+    })
+    $(document).on('click', '.confirm-delete-share', function(){
+      return confirm('Are you sure you want to delete the share and all transactions in that share?');
+    })
     set_user_list({{users|safe}}, '{{user|safe}}');
     e = document.getElementById('show_zero_val');
     var show = "{{show_zero_val|safe}}"

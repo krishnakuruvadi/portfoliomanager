@@ -76,7 +76,7 @@ def add_trans(request):
                 purity=purity
             )
             message_color = 'green'
-            message = 'Buy Transaction added successfully'
+            message = 'Buy transaction added successfully'
             update_gold_vals(user)
         except IntegrityError as ie:
             print(f'exception when adding Gold trans {ie}')

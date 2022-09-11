@@ -85,9 +85,10 @@ def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes,
                                          buy_price=0,
                                          buy_value=0,
                                          gain=0)
-    if not trans_price:
-        trans_price = price*units*conversion_rate
     try:
+        if not trans_price:
+            trans_price = price*units*conversion_rate
+
         trans = MutualFundTransaction.objects.filter(folio=folio_obj,
                                              trans_date=date,
                                              trans_type=trans_type,
@@ -95,7 +96,7 @@ def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes,
                                              units=units)
         if len(trans) > 0:
             print('Transaction exists')
-            return
+            return False, "Transaction exists"
         MutualFundTransaction.objects.create(folio=folio_obj,
                                              trans_date=date,
                                              trans_type=trans_type,
@@ -127,8 +128,11 @@ def insert_trans_entry(folio, fund, user, trans_type, units, price, date, notes,
                 folio_obj.delete()
     except IntegrityError as ex:
         print('Transaction exists', ex)
+        return False, "Transaction exists"
     except Exception as exc:
         print('Exception occured during adding transaction', exc, folio, fund, user, trans_type, units, price, date)
+        return False, "An error occured."
+    return True, ""
 
 def calculate_xirr_all_users():
     folios = Folio.objects.all()

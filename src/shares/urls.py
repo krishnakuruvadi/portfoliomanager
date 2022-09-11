@@ -3,7 +3,7 @@ from django.urls import path
 from .views import (
     get_shares_list,
     ShareDetailView,
-    ShareDeleteView,
+    delete_share,
     ShareTransactionsListView,
     TransactionsListView,
     TransactionDeleteView,
@@ -31,7 +31,7 @@ urlpatterns = [
     path('transaction/<id>/delete', TransactionDeleteView.as_view(), name='transaction-delete'),
     path('<id>/', ShareDetailView.as_view(), name='share-detail'),
     path('<id>/update', update_share, name='share-update'),
-    path('<id>/delete', ShareDeleteView.as_view(), name='share-delete'),
+    path('<id>/delete', delete_share, name='share-delete'),
     path('<id>/transactions/', ShareTransactionsListView.as_view(), name='share-transactions-list'),
     path('transaction/<id>/update', update_transaction, name='transaction-detail'),
     path('transaction/<id>', TransactionDetailView.as_view(), name='transaction-detail'),
