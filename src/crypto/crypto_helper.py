@@ -14,8 +14,65 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 import time
 
+def check_for_valid_coin(symbol):
+    normalized_input = str(symbol).upper()
+    url = f'https://api.coingecko.com/api/v3/search?query={normalized_input}'
 
-def insert_trans_entry(symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate=1, fees=0, currency='USD', trans_price=None):
+    try:
+        print(f'Validating that {normalized_input} is a valid coin symbol.')
+        request = requests.get(url, timeout=30)
+        request.raise_for_status()
+        data = request.json()
+        raw_data = data['coins']
+        if len(raw_data) > 0:
+            for coin in raw_data:
+                if coin['symbol'] == normalized_input:
+                    print(f'{normalized_input} is a valid coin symbol.')
+                    returned_data = {
+                        'crypto_symbol': coin['symbol'],
+                        'crypto_name': coin['name'],
+                        'crypto_id': coin['id'],
+                        'crypto_api_symbol': coin['api_symbol'],
+                        'crypto_verified': True
+                    }
+                    return returned_data
+                else:
+                    crypto_symbol = coin['symbol']
+                    crypto_name = coin['name']
+                    print(f'A match with symbol {crypto_symbol} named {crypto_name} was found but is not an exact match to user input of {normalized_input}.')
+                    returned_data = {
+                        'crypto_verified': False
+                    }
+        else:
+            print(f'{symbol} is not a valid crypto coin.')
+            returned_data = {
+                'crypto_verified': False
+            }
+
+    except requests.exceptions.Timeout:
+        print(f'Connection has timed out attempting to verify that crypto symbol {symbol} is valid.')
+        returned_data = {
+            'crypto_verified': False
+        }
+    except requests.exceptions.HTTPError:
+        print(f'An HTTP error has occurred attempting to verify that crypto symbol {symbol} is valid.')
+        returned_data = {
+            'crypto_verified': False
+        }
+    except requests.exceptions.ConnectionError:
+        print(f'Connection error attempting to verify that crypto symbol {symbol} is valid.')
+        returned_data = {
+            'crypto_verified': False
+        }
+    except requests.exceptions.RequestException:
+        print(f'An error has occurred attempting to verify that crypto symbol {symbol} is valid.')
+        returned_data = {
+            'crypto_verified': False
+        }
+
+    return returned_data
+
+def insert_trans_entry(symbol, name, symbol_id, api_symbol, user, trans_type, quantity, price, date, notes, broker, conversion_rate=1, fees=0, currency='USD', trans_price=None):
     try:
         co = None
         try:
@@ -23,6 +80,9 @@ def insert_trans_entry(symbol, user, trans_type, quantity, price, date, notes, b
         except Crypto.DoesNotExist:
             print(f'creating crypto object {symbol} for user {user}')
             co = Crypto.objects.create(symbol=symbol,
+                                        name=name,
+                                        symbol_id=symbol_id,
+                                        api_symbol=api_symbol,
                                         user=user,
                                         units=0,
                                         buy_price=0,
@@ -283,53 +343,33 @@ def get_crypto_coins():
     return coins
 
 def symbol_to_id(symbol):
-    coin_id = None
-    fp = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    mapping_file = os.path.join(fp, 'media', 'crypto_mapping.json')
-    if os.path.exists(mapping_file):
-        with open(mapping_file) as f:
-            data = json.load(f)
-            for item in data:
-                if item['symbol'] == symbol:
-                    return item['id']
-    try:  # based on API some keys are lower case and some are upper, so handle this with try and except to resolve
-        # KeyError
-        cleaned_symbol = str(symbol).strip().lower()
-        headers = {'Accept': '*/*',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
-            'X-Requested-With': 'XMLHttpRequest'
-            }
-        symbol_url = "https://api.coingecko.com/api/v3/coins/list?include_platform=true"
-        response = requests.get(symbol_url, headers=headers, timeout=15)
-        response.raise_for_status()  # raises exception when not a 2xx response
-        if response.status_code != 204:
-            id_request = response.json()
+    from crypto.models import Crypto
+    from .crypto_helper import check_for_valid_coin
+
+    try:
+        crypto = Crypto.objects.get(symbol=symbol)
+        if crypto.symbol_id:
+            return crypto.symbol_id
         else:
-            id_request = json.loads(response.text)
-        with open(mapping_file, "w") as f:
-            json.dump(id_request, f)
-        find = {y["symbol"]: x for x, y in list(enumerate(id_request))}
-        location = find[cleaned_symbol]
-
-        coin_id = id_request[location]["id"]
-        print("id lower", coin_id)
-
-        return coin_id
-    except Exception as ex:
-        print(f'exception while accessing {symbol_url} {ex}.  Trying alternate url')
-        try:
-            cleaned_symbol = str(symbol).strip().upper()
-            symbol_url = "https://api.coingecko.com/api/v3/coins/list?include_platform=true"
-            id_request = json.loads(requests.get(url=symbol_url).text)
-            find = {y["symbol"]: x for x, y in list(enumerate(id_request))}
-            location = find[cleaned_symbol]
-
-            coin_id = id_request[location]["id"]
-            print("id upper", coin_id)
-        except Exception as ex:
-            print(f'exception while accessing alternate url too {symbol_url} {ex}.')
-        return coin_id
+            print(f'{symbol} ID is empty. Attempting to retrieve it')
+            try:
+                get_id = check_for_valid_coin(symbol)
+                if get_id['crypto_verified'] == True:
+                    symbol_id = get_id['crypto_id']
+                    name = get_id['crypto_name']
+                    api_symbol = get_id['crypto_api_symbol']
+                    crypto.name=name
+                    crypto.symbol_id=symbol_id
+                    crypto.api_symbol=api_symbol
+                    crypto.save()
+                    print(f'Sucesfully retrieved and saved updated data for {symbol} {name}')
+                    return symbol_id
+                else:
+                    print(f'All attempts to retrieve {symbol} ID has been tried but failed.')
+            except Exception as e:
+                print(f'An error has occured tryin to retrieve {symbol} ID')
+    except Exception as e:
+        print(f'Unable to find {symbol} in the database')
 
 def get_historical_price(symbol, date):
     coin_id = symbol_to_id(symbol)

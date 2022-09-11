@@ -10,7 +10,7 @@ from common.currency_helper import supported_currencies_as_list
 from .crypto_interface import CryptoInterface
 from django.http import HttpResponseRedirect
 import json
-from .crypto_helper import insert_trans_entry, get_crypto_coins, reconcile_event_based, get_price
+from .crypto_helper import insert_trans_entry, get_crypto_coins, reconcile_event_based, get_price, check_for_valid_coin
 from common.models import Coin, HistoricalCoinPrice
 from tasks.tasks import pull_and_store_coin_historical_vals, update_crypto_for_user
 from django.conf import settings
@@ -161,26 +161,39 @@ def delete_transaction(request, id, trans_id):
 
 def add_transaction(request):
     template = 'crypto/add_transaction.html'
+    message = ''
+    message_color = 'ignore'
     currencies = supported_currencies_as_list()
     users = get_all_users()
     preferred_currency = get_preferred_currency()
     if request.method == 'POST':
         if "submit" in request.POST:
-            symbol = request.POST['symbol']
-            user = request.POST['user']
-            print('user is of type:',type(user))
-            trans_date = get_datetime_or_none_from_string(request.POST['trans_date'])
-            trans_type = request.POST['trans_type']
-            price = get_float_or_none_from_string(request.POST['price'])
-            quantity = get_float_or_none_from_string(request.POST['quantity'])
-            conversion_rate = get_float_or_none_from_string(request.POST['conversion_rate'])
-            trans_price = get_float_or_none_from_string(request.POST['trans_price'])
-            broker = request.POST['broker']
-            notes = request.POST['notes']
-            chosen_currency = request.POST['currency']
-            charges = get_float_or_zero_from_string(request.POST['charges'])
-            insert_trans_entry(symbol, user, trans_type, quantity, price, trans_date, notes, broker, conversion_rate, charges, chosen_currency, trans_price)
-            update_crypto_for_user(user)
+            unverified_symbol = request.POST['symbol']
+            symbol_check = check_for_valid_coin(unverified_symbol)
+            if symbol_check['crypto_verified'] == True:
+                symbol = symbol_check['crypto_symbol']
+                name = symbol_check['crypto_name']
+                symbol_id = symbol_check['crypto_id']
+                api_symbol = symbol_check['crypto_api_symbol']
+                message_color = 'green'
+                message = f'{name} ({symbol}) transaction was added successfully'
+                user = request.POST['user']
+                print('user is of type:',type(user))
+                trans_date = get_datetime_or_none_from_string(request.POST['trans_date'])
+                trans_type = request.POST['trans_type']
+                price = get_float_or_none_from_string(request.POST['price'])
+                quantity = get_float_or_none_from_string(request.POST['quantity'])
+                conversion_rate = get_float_or_none_from_string(request.POST['conversion_rate'])
+                trans_price = get_float_or_none_from_string(request.POST['trans_price'])
+                broker = request.POST['broker']
+                notes = request.POST['notes']
+                chosen_currency = request.POST['currency']
+                charges = get_float_or_zero_from_string(request.POST['charges'])
+                insert_trans_entry(symbol, name, symbol_id, api_symbol, user, trans_type, quantity, price, trans_date, notes, broker, conversion_rate, charges, chosen_currency, trans_price)
+                update_crypto_for_user(user)
+            else:
+                message_color = 'red'
+                message = f'Failed to add transaction for {unverified_symbol}. Please enter a valid coin symbol.'
         else:
             print('fetching exchange price')
             symbol = request.POST['symbol']
@@ -202,7 +215,7 @@ def add_transaction(request):
             return render(request, template, context)
     coins = get_crypto_coins()
     context = {'users':users, 'currencies':currencies, 'operation': 'Add Transaction', 'conversion_rate':1, 'curr_module_id': CryptoInterface.get_module_id(),
-                'preferred_currency':preferred_currency, 'currency':preferred_currency, 'coins':coins}
+                'preferred_currency':preferred_currency, 'currency':preferred_currency, 'coins':coins, 'message':message, 'message_color':message_color}
     print(f'view context: {context}')
     return render(request, template, context)
 
