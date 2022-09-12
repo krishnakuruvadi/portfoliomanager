@@ -27,6 +27,9 @@ class Crypto(models.Model):
     unrealised_gain = models.DecimalField(_('Unrealised Gain'), max_digits=30, decimal_places=10, default=0)
     realised_gain = models.DecimalField(_('Realised Gain'), max_digits=30, decimal_places=10, default=0)
     xirr = models.DecimalField(_('XIRR'), max_digits=20, decimal_places=2, null=True, blank=True)
+    symbol_id = models.CharField(max_length=20, null=True, blank=True)
+    name = models.CharField(max_length=25, null=True, blank=True)
+    api_symbol = models.CharField(max_length=20, null=True, blank=True)
 
     def get_absolute_url(self):
         return reverse("crypto:crypto-detail", kwargs={'id': self.id})
