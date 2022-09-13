@@ -239,18 +239,23 @@ def update_user(request, id):
             user_obj.name = request.POST['name']
             user_obj.short_name = request.POST['short_name']
             user_obj.email = request.POST['email']
-            user_obj.dob = request.POST['dob']
+            if 'dob' in request.POST:
+                dob = request.POST['dob']
+                if dob:
+                    user_obj.dob = dob
             user_obj.notes = request.POST['notes']
             user_obj.save()
-        else:
-            short_name = user_obj.short_name
-            if not short_name:
-                short_name = ''
-            context = {'curr_module_id': 'id_user_module', 'name': user_obj.name, 'short_name': short_name, 'email':user_obj.email, 'dob':user_obj.dob.strftime("%Y-%m-%d"), 'notes':user_obj.notes}
-            return render(request, template, context=context)
-        return HttpResponseRedirect("../")
+        
+        short_name = user_obj.short_name
+        if not short_name:
+            short_name = ''
+        context = {'curr_module_id': 'id_user_module', 'name': user_obj.name, 'short_name': short_name, 'email':user_obj.email, 'notes':user_obj.notes}
+        if user_obj.dob:
+            context['dob'] = user_obj.dob.strftime("%Y-%m-%d")
+
+        return render(request, template, context=context)
     except User.DoesNotExist:
-        pass
+        return HttpResponseRedirect(reverse('users:user-list'))
 
 class ChartData(APIView):
     authentication_classes = []
