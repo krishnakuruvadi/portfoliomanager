@@ -8,8 +8,9 @@ def get_user(row_id):
     users = [{
         "row_id": 1,
         "name": "Andrew Kal",
+        #"dob": datetime.date(day=2, month=10, year=1993),
         "short_name": "Akal",
-        "dob": datetime.date(day=2, month=10, year=1993)
+        "email": "andrew@akal.com"
     },
     {
         "row_id": 2,
@@ -32,7 +33,8 @@ def add_new_user(driver, user):
     driver.find_element(By.ID, "name").send_keys(user["name"])
     driver.find_element(By.ID, "short-name").send_keys(user["short_name"])
     
-    driver.find_element(By.ID, "dob").send_keys(user["dob"].strftime('%m/%d/%Y'))
+    if 'dob' in user:
+        driver.find_element(By.ID, "dob").send_keys(user["dob"].strftime('%m/%d/%Y'))
     driver.find_element(By.NAME, "submit").click()
     time.sleep(5)
     driver.find_element(By.LINK_TEXT, "Cancel").click()
@@ -91,6 +93,22 @@ class Test_User:
         assert len(parts) == 2
         parts[0].click()
         time.sleep(2)
+    
+    def test_user_edit(self):
+        count, rows = get_rows_of_table(self.driver, 'user-table')
+        u = get_user(1)
+        for row in rows:
+            th = rows[0].find_element(By.TAG_NAME, 'th')
+            if th.text == "1":
+                cols = row.find_elements(By.TAG_NAME, 'td')
+                cols[len(cols)-1].find_element(By.CSS_SELECTOR, "a[href*='update']").click()
+                time.sleep(2)
+                self.driver.find_element(By.ID, "email").send_keys(u["email"])
+                self.driver.find_element(By.NAME, "submit").click()
+                time.sleep(5)
+                self.driver.find_element(By.LINK_TEXT, "Cancel").click()
+                break
+        time.sleep(5)
 
     def test_delete_users(self):
         expected_count = 2
