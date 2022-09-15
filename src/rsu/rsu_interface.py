@@ -103,9 +103,10 @@ class RsuInterface:
                     if year_end_value_vals:
                         conv_rate = 1
                         if aw_obj.exchange in ['NASDAQ', 'NYSE']:
-                            conv_val = get_in_preferred_currency(1, 'USD', end_date)
-                            if conv_val:
-                                conv_rate = conv_val
+                            conv_rate = get_in_preferred_currency(1, 'USD', end_date)
+                        if aw_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                            conv_rate = get_in_preferred_currency(1, 'INR', end_date)
+
                             for k,v in year_end_value_vals.items():
                                 total += float(v)*float(conv_rate)*float(units)
                                 break
@@ -288,13 +289,11 @@ class RsuInterface:
                 if vals:
                     conv_rate = 1
                     if obj.award.exchange in ['NASDAQ', 'NYSE']:
-                        conv_val = get_in_preferred_currency(1, 'USD', start_date)
-                        if conv_val:
-                            conv_rate = conv_val
+                        conv_rate = get_in_preferred_currency(1, 'USD', start_date)
+
                     elif obj.award.exchange in ['BSE', 'NSE', 'NSE/BSE']:
-                        conv_val = get_in_preferred_currency(1, 'INR', start_date)
-                        if conv_val:
-                            conv_rate = conv_val
+                        conv_rate = get_in_preferred_currency(1, 'INR', start_date)
+
                     for k,v in vals.items():
                         start += float(v)*float(conv_rate)*float(start_units)
                         break
@@ -305,13 +304,11 @@ class RsuInterface:
                 if vals:
                     conv_rate = 1
                     if obj.award.exchange in ['NASDAQ', 'NYSE']:
-                        conv_val = get_in_preferred_currency(1, 'USD', end_date)
-                        if conv_val:
-                            conv_rate = conv_val
+                        conv_rate = get_in_preferred_currency(1, 'USD', end_date)
+
                     elif obj.award.exchange in ['BSE', 'NSE', 'NSE/BSE']:
-                        conv_val = get_in_preferred_currency(1, 'INR', start_date)
-                        if conv_val:
-                            conv_rate = conv_val
+                        conv_rate = get_in_preferred_currency(1, 'INR', start_date)
+
                     for k,v in vals.items():
                         amt += float(v)*float(conv_rate)*float(end_units)
                         break

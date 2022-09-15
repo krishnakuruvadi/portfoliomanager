@@ -106,12 +106,13 @@ class ShareInterface:
                 if year_end_value_vals:
                     conv_rate = 1
                     if share_obj.exchange == 'NASDAQ' or share_obj.exchange == 'NYSE':
-                        conv_val = get_in_preferred_currency(1, 'USD', end_date)
-                        if conv_val:
-                            conv_rate = conv_val
-                        for k,v in year_end_value_vals.items():
-                            total += float(v)*float(conv_rate)*float(qty)
-                            break
+                        conv_rate = get_in_preferred_currency(1, 'USD', end_date)
+                    elif share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                        conv_rate = get_in_preferred_currency(1, 'INR', end_date)
+                    for k,v in year_end_value_vals.items():
+                        total += float(v)*float(conv_rate)*float(qty)
+                        break
+                    
                 else:
                     print(f'failed to get year end values for {share_obj.exchange} {share_obj.symbol} {end_date}')
         return cash_flows, contrib, deduct, total
@@ -247,13 +248,10 @@ class ShareInterface:
                 if vals:
                     conv_rate = 1
                     if obj.exchange in ['NYSE', 'NASDAQ']:
-                        conv_val = get_in_preferred_currency(1, 'USD', start_date)
-                        if conv_val:
-                            conv_rate = conv_val
+                        conv_rate = get_in_preferred_currency(1, 'USD', start_date)
                     elif obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
-                        conv_val = get_in_preferred_currency(1, 'INR', start_date)
-                        if conv_val:
-                            conv_rate = conv_val
+                        conv_rate = get_in_preferred_currency(1, 'INR', start_date)
+
                     for k,v in vals.items():
                         start += float(v)*float(conv_rate)*float(qty)
                         break

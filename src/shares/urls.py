@@ -12,7 +12,7 @@ from .views import (
     update_transaction,
     upload_transactions,
     update_share,
-    refresh,
+    #refresh,
     CurrentShares,
     delete_shares,
     shares_insights
@@ -23,7 +23,7 @@ app_name = 'shares'
 urlpatterns = [
     path('', get_shares_list, name='shares-list'),
     path('add/', add_transaction, name='transaction-add'),
-    path('refresh/', refresh, name='refresh'),
+    #path('refresh/', refresh, name='refresh'),
     path('transactions', TransactionsListView.as_view(), name='transactions-list'),
     path('upload/', upload_transactions, name='transaction-upload'),
     path('delete/', delete_shares, name='shares-delete'),

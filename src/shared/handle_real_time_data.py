@@ -186,8 +186,9 @@ def get_in_preferred_currency(amount, from_curr, dt, precision=2):
         return amount
     conv_rate = get_conversion_rate(from_curr, preferred_currency, dt)
     if not conv_rate:
+        #TODO: Raise an alarm
         print(f'failed to get conversion rate between {from_curr} and {preferred_currency} for {dt}')
-        conv_rate = 0
+        conv_rate = 1
     return round(amount * conv_rate, precision)
 
 def get_conversion_rate(from_cur, to_cur, date):

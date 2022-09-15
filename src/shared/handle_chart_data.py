@@ -967,17 +967,16 @@ def get_investment_data(start_date):
                         found = False
                         #print(val)
                         for k,v in val.items():
+                            conv_val = 1
                             if espp_entry.exchange in ['NYSE', 'NASDAQ']:
                                 conv_val = get_in_preferred_currency(1, 'USD', data_end_date)
-                                #print('conversion value', conv_val)
-                                if conv_val:
-                                    espp_val += float(conv_val)*float(v)*float(avail_units)
-                                    found = True
-                                    break
-                            else:
-                                espp_val += float(v)*float(avail_units)
-                                found = True
-                                break
+                        
+                            elif espp_entry.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                                conv_val = get_in_preferred_currency(1, 'INR', data_end_date)
+
+                            espp_val += float(conv_val)*float(v)*float(avail_units)
+                            found = True
+                            break
                         if found:
                             break
                 except Stock.DoesNotExist:
@@ -1008,17 +1007,16 @@ def get_investment_data(start_date):
                         found = False
                         #print(val)
                         for k,v in val.items():
+                            conv_val = 1
                             if stock.exchange in ['NYSE', 'NASDAQ']:
                                 conv_val = get_in_preferred_currency(1, 'USD', data_end_date)
-                                #print('conversion value', conv_val)
-                                if conv_val:
-                                    rsu_val += float(conv_val)*float(v)*unsold_shares
-                                    found = True
-                                    break
-                            else:
-                                rsu_val += float(v)*unsold_shares
-                                found = True
-                                break
+
+                            elif stock.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                                conv_val = get_in_preferred_currency(1, 'INR', data_end_date)
+
+                            rsu_val += float(conv_val)*float(v)*unsold_shares
+                            found = True
+                            break
                         if found:
                             break
                 except Stock.DoesNotExist:
@@ -1056,17 +1054,16 @@ def get_investment_data(start_date):
                         found = False
                         #print(val)
                         for k,v in val.items():
+                            conv_val = 1
                             if stock_obj.exchange in ['NYSE', 'NASDAQ']:
                                 conv_val = get_in_preferred_currency(1, 'USD', data_end_date)
-                                #print('conversion value', conv_val)
-                                if conv_val:
-                                    share_val += float(conv_val)*float(v)*float(q)
-                                    found = True
-                                    break
-                            else:
-                                share_val += float(v)*float(q)
-                                found = True
-                                break
+
+                            elif stock_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                                conv_val = get_in_preferred_currency(1, 'INR', data_end_date)
+
+                            share_val += float(conv_val)*float(v)*float(q)
+                            found = True
+                            break
                         if found:
                             break
                 else:
