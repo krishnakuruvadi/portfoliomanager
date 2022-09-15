@@ -1147,6 +1147,25 @@ def send_monthend_updates_email():
         Email.send(subject='Monthend updates', message=f'This is monthend update for {month.strftime("%b")} {month.year}', html_message=html_message)
 
 
+@db_task()
+def update_components_for_user(components, ext_user=None):
+    from epf.epf_interface import EpfInterface
+    from espp.espp_interface import EsppInterface
+    from fixed_deposit.fd_interface import FdInterface
+    from ppf.ppf_interface import PpfInterface
+    from ssy.ssy_interface import SsyInterface
+    from shares.share_interface import ShareInterface
+    from mutualfunds.mf_interface import MfInterface
+    from retirement_401k.r401k_interface import R401KInterface
+    from rsu.rsu_interface import RsuInterface
+    from insurance.insurance_interface import InsuranceInterface
+    from gold.gold_interface import GoldInterface
+    from bankaccounts.bank_account_interface import BankAccountInterface
+    from crypto.crypto_interface import CryptoInterface
+
+    for interface in [EpfInterface, EsppInterface, FdInterface, PpfInterface, SsyInterface, ShareInterface, MfInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
+        if interface.get_chart_name() in components:
+            interface.update_user(ext_user)
 '''
 @db_task()
 def reconcile_stock(exchange, symbol, etf, only_if_not_exists=True):

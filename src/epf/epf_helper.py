@@ -35,8 +35,12 @@ def get_epf_details(number):
     except Epf.DoesNotExist:
         return None
 
-def update_epf_vals():
-    for epf_obj in Epf.objects.all():
+def update_epf_vals(users=None):
+    if not users:
+        epf_objs = Epf.objects.all()
+    else:
+        epf_objs = Epf.objects.filter(user__in=users)
+    for epf_obj in epf_objs:
         res = get_epf_details(epf_obj.number)
         epf_obj.employee_contribution = res['employee_contrib']
         epf_obj.employer_contribution = res['employer_contrib']

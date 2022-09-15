@@ -127,22 +127,71 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
     context['investment_data'] = dict()
     try:
         investment_data = InvestmentData.objects.get(user='all')
-        context['investment_data']['ppf'] = json.loads(investment_data.ppf_data.replace("\'", "\""))
-        context['investment_data']['epf'] = json.loads(investment_data.epf_data.replace("\'", "\""))
-        context['investment_data']['ssy'] = json.loads(investment_data.ssy_data.replace("\'", "\""))
-        context['investment_data']['fd'] =  json.loads(investment_data.fd_data.replace("\'", "\""))
-        context['investment_data']['espp'] = json.loads(investment_data.espp_data.replace("\'", "\""))
-        context['investment_data']['rsu'] = json.loads(investment_data.rsu_data.replace("\'", "\""))
-        context['investment_data']['shares'] = json.loads(investment_data.shares_data.replace("\'", "\""))
-        context['investment_data']['mf'] = json.loads(investment_data.mf_data.replace("\'", "\""))
-        context['investment_data']['r401k'] = json.loads(investment_data.r401k_data.replace("\'", "\""))
-        context['investment_data']['insurance'] = json.loads(investment_data.insurance_data.replace("\'", "\""))
-        context['investment_data']['gold'] = json.loads(investment_data.gold_data.replace("\'", "\""))
-        context['investment_data']['cash'] = json.loads(investment_data.cash_data.replace("\'", "\""))
-        context['investment_data']['loan'] = json.loads(investment_data.loan_data.replace("\'", "\""))
-        context['investment_data']['crypto'] = json.loads(investment_data.crypto_data.replace("\'", "\""))
-        context['investment_data']['total'] = json.loads(investment_data.total_data.replace("\'", "\""))
-        context['investment_data']['start_date'] =  investment_data.start_day_across_portfolio.strftime("%Y-%b-%d")
+        try:
+            context['investment_data']['ppf'] = json.loads(investment_data.ppf_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard ppf data')
+        try:
+            context['investment_data']['epf'] = json.loads(investment_data.epf_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard epf data')
+        try:
+            context['investment_data']['ssy'] = json.loads(investment_data.ssy_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard ssy data')
+        try:
+            context['investment_data']['fd'] =  json.loads(investment_data.fd_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard fd data')
+        try:
+            context['investment_data']['espp'] = json.loads(investment_data.espp_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard espp data')
+        try:
+            context['investment_data']['rsu'] = json.loads(investment_data.rsu_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard rsu data')
+        try:
+            context['investment_data']['shares'] = json.loads(investment_data.shares_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard shares data')
+        try:
+            context['investment_data']['mf'] = json.loads(investment_data.mf_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard mf data')
+        try:
+            context['investment_data']['r401k'] = json.loads(investment_data.r401k_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard r401k data')
+        try:
+            context['investment_data']['insurance'] = json.loads(investment_data.insurance_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard insurance data')
+        try:
+            context['investment_data']['gold'] = json.loads(investment_data.gold_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard gold data')
+        try:
+            context['investment_data']['cash'] = json.loads(investment_data.cash_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard cash data')
+        try:
+            context['investment_data']['loan'] = json.loads(investment_data.loan_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard loan data')
+        try:
+            context['investment_data']['crypto'] = json.loads(investment_data.crypto_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard crypto data')
+        try:
+            context['investment_data']['total'] = json.loads(investment_data.total_data.replace("\'", "\""))
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard total data')
+        try:
+            context['investment_data']['start_date'] =  investment_data.start_day_across_portfolio.strftime("%Y-%b-%d")
+        except Exception as ex:
+            print(f'exception {ex} when getting dashboard start_date data')
+        
         utc = investment_data.as_on_date
         from_zone = tz.tzutc()
         utc = utc.replace(tzinfo=from_zone)
@@ -153,6 +202,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
 
     except InvestmentData.DoesNotExist:
         pass
+    except Exception as ex:
+        print(f'exception {ex} when getting dashboard data')
     context['curr_module_id'] = 'id_dashboard_module'
     print("context", context)
     return render(request, "home.html", context)

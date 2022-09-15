@@ -133,6 +133,58 @@ class EpfInterface:
         return amt
 
     @classmethod
+    def update_user(self, ext_user=None):
+        from users.user_interface import get_users
+        from pages.helper import get_investment_data
+        from dateutil.relativedelta import relativedelta
+        from .epf_helper import update_epf_vals
+        from shared.utils import get_min
+
+        users = get_users(ext_user)
+        today = datetime.date.today()
+        data_start_date = today
+        for u in users:
+            data_start_date = get_min(self.get_start_day_for_user(u.id), data_start_date)
+        data_start_date = datetime.date(data_start_date.year, data_start_date.month, 1)
+        epf_data = list()
+        total_epf = 0
+        epf_reset_on_zero = False
+        epf_objs = Epf.objects.filter(user__in=users)
+        print(f'epf obj count: {len(epf_objs)}')
+        data_end_date = data_start_date
+        epf_user_start_date = data_start_date
+        while True:
+            if data_end_date == today:
+                break
+
+            #print('Calculating for the month', data_start_date)
+            data_end_date = data_start_date + relativedelta(months=+1)
+            if data_end_date > today:
+                data_end_date = today
+
+            epf_entries = EpfEntry.objects.filter(epf_id__in=epf_objs, trans_date__year=data_start_date.year, trans_date__month=data_start_date.month)
+            print(f'entries: {len(epf_entries)}')
+            for epf_entry in epf_entries:
+                total_epf += int(epf_entry.employee_contribution) + int(epf_entry.employer_contribution) + int(epf_entry.interest_contribution) - int(epf_entry.withdrawl)
+            if total_epf != 0:
+                if not epf_reset_on_zero:
+                    epf_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
+                epf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':total_epf})
+                epf_reset_on_zero = True
+            elif epf_reset_on_zero:
+                epf_reset_on_zero = False
+                epf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+            data_start_date  = data_start_date+relativedelta(months=1)
+        inv_data = get_investment_data(ext_user)
+        print(f'epf_data {epf_data}')
+        inv_data.epf_data = epf_data
+        inv_data.start_day_across_portfolio = get_min(inv_data.start_day_across_portfolio, epf_user_start_date)
+        inv_data.save()
+
+        update_epf_vals(users)
+
+
+    @classmethod
     def get_export_name(self):
         return 'epf'
     

@@ -17,8 +17,44 @@ def get_epf(row_id):
         "number": "APL/35/2004/34",
         "start_dt": datetime.date(day=10, month=12, year=2021),
         "goal": 1,
-        "company": "Apostle Ltd"
-
+        "company": "Apostle Ltd",
+        "contributions": [
+            {
+                "fy": "2021-22",
+                "month": "December",
+                "employee": 880,
+                "employer":800,
+                "interest": 10
+            },
+            {
+                "fy": "2021-22",
+                "month": "January",
+                "employee": 880,
+                "employer":800,
+                "interest": 10.1
+            },
+            {
+                "fy": "2021-22",
+                "month": "February",
+                "employee": 880,
+                "employer":800,
+                "interest": 10.2
+            },
+            {
+                "fy": "2021-22",
+                "month": "March",
+                "employee": 880,
+                "employer":800,
+                "interest": 10.3
+            },
+            {
+                "fy": "2022-23",
+                "month": "April",
+                "employee": 880,
+                "employer":800,
+                "interest": 10.4
+            }
+        ]
     },
     {
         "row_id":2,
@@ -26,7 +62,8 @@ def get_epf(row_id):
         "number": "TXN/3456/543/09865",
         "start_dt": datetime.date(day=13, month=1, year=2021),
         "goal": 2,
-        "company": "Taxation Inc"
+        "company": "Taxation Inc",
+        "contributions": []
     }]
     for e in epfs:
         if e["row_id"] == row_id:
@@ -119,6 +156,38 @@ def add_epf(driver, epf):
     time.sleep(5)
     driver.find_element(By.LINK_TEXT, "Cancel").click()
     time.sleep(5)
+    if len(epf["contributions"]) > 0:
+        for entry in epf["contributions"]:
+            print(f'new entry {entry}')
+            count, rows = get_rows_of_table(driver, 'epf-table')
+            for row in rows:
+                th = row.find_element(By.TAG_NAME, 'th')
+                print(f'text is {th.text}')
+                if th.text == str(epf["row_id"]):
+                    driver.maximize_window()
+                    cols = row.find_elements(By.TAG_NAME, 'td')
+                    cols[len(cols)-1].find_element(By.CSS_SELECTOR, "a[href*='transactions']").click()
+                    time.sleep(2)
+                    driver.find_element(By.CSS_SELECTOR, "a[href*='add-contribution']").click()
+                    time.sleep(3)
+                    sel = Select(driver.find_element(By.NAME, 'fy'))
+                    sel.select_by_visible_text(entry["fy"])
+                    driver.find_element(By.NAME, 'fetch').click()
+                    time.sleep(5)
+                    m = entry['month'].lower()[0:3]
+                    print(f'sending {entry["employee"]} to {m}_em')
+                    driver.find_element(By.ID, f"{m}_em").send_keys(entry["employee"])
+                    driver.find_element(By.ID, f"{m}_er").send_keys(entry["employer"])
+                    driver.find_element(By.ID, f"{m}_int").send_keys(entry["interest"])
+                    driver.find_element(By.NAME, "submit").click()
+                    time.sleep(15)
+                    driver.find_element(By.LINK_TEXT, "Cancel").click()
+                    time.sleep(5)
+                    break
+            driver.find_element(By.XPATH, "//a[@href='/epf']").click()
+            time.sleep(3)
+    driver.find_element(By.XPATH, "//a[@href='/epf']").click()
+    time.sleep(3)
 
 @pytest.mark.usefixtures("driver_init")
 @pytest.mark.django_db
@@ -128,6 +197,7 @@ class Test_Epf:
         self.open_url()
         self.add_new_epf()
         self.add_another_epf()
+        self.check_home_view()
         self.delete_epfs()
 
     def open_url(self):
@@ -148,6 +218,12 @@ class Test_Epf:
         count, _ = get_rows_of_table(self.driver, 'epf-table')
         assert count == 2
     
+    def check_home_view(self):
+        self.driver.find_element(By.XPATH, "//a[@href='/']").click()
+        time.sleep(5)
+        self.driver.find_element(By.XPATH, "//a[@href='/epf']").click()
+        time.sleep(3)
+        
     def delete_epfs(self):
         expected_count = 2
         count, rows = get_rows_of_table(self.driver, 'epf-table')

@@ -16,7 +16,8 @@ from decimal import Decimal
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from goal.goal_helper import get_goal_id_name_mapping_for_user
-from common.helper import get_preferred_currency_symbol
+from common.helper import get_preferred_currency_symbol, get_currency_symbol
+from shared.handle_real_time_data import get_in_preferred_currency
 
 # Create your views here.
 
@@ -84,13 +85,16 @@ class EpfListView(ListView):
             employer_contribution += epf_obj.employer_contribution
             withdrawal += epf_obj.withdrawl
             total_contribution += epf_obj.employee_contribution + epf_obj.employer_contribution
-
-        data['latest_value'] = latest_value
-        data['total_contribution'] = total_contribution
-        data['total_interest'] = total_interest
-        data['employee_contribution'] = employee_contribution
-        data['employer_contribution'] = employer_contribution
-        data['withdrawal'] = withdrawal
+        conv_rate = 1
+        conv_val = get_in_preferred_currency(1, 'INR', datetime.date.today())
+        if conv_val:
+            conv_rate = float(conv_val)
+        data['latest_value'] = float(latest_value)*conv_rate
+        data['total_contribution'] = float(total_contribution)*conv_rate
+        data['total_interest'] = float(total_interest)*conv_rate
+        data['employee_contribution'] = float(employee_contribution)*conv_rate
+        data['employer_contribution'] = float(employer_contribution)*conv_rate
+        data['withdrawal'] = float(withdrawal)*conv_rate
         data['preferred_currency'] = get_preferred_currency_symbol()
         return data
 
@@ -98,6 +102,7 @@ def epf_delete(request, id):
     try:
         e = Epf.objects.get(id=id)
         e.delete()
+        something_changed(request)
     except Epf.DoesNotExist:
         print(f'Epf with id {id} does not exist')
     return HttpResponseRedirect(reverse('epfs:epf-list'))
@@ -116,6 +121,7 @@ class EpfDetailView(DetailView):
         data['goal_str'] = get_goal_name_from_id(data['object'].goal)
         data['user_str'] = get_user_name_from_id(data['object'].user)
         data['curr_module_id'] = 'id_epf_module'
+        data['currency'] = get_currency_symbol('INR')
         contribs = EpfEntry.objects.filter(epf_id=data['object']).order_by('trans_date')
         e = 0
         em = 0
@@ -241,7 +247,8 @@ def show_contributions(request, id, year=None):
     context = {'fy_trans':fy_trans, 
                 'object': {'number':epf_obj.number, 'id':epf_obj.id, 'company':epf_obj.company, 'fy':fy},
                 'start_amount': summ['start_amt'], 'end_amount': summ['end_amount'], 'employee_contribution': summ['employee_contrib'],
-                'employer_contribution': summ['employer_contrib'], 'interest_contribution':summ['interest_contrib'], 'curr_module_id':'id_epf_module'
+                'employer_contribution': summ['employer_contrib'], 'interest_contribution':summ['interest_contrib'], 'curr_module_id':'id_epf_module',
+                'currency': get_currency_symbol('INR')
                 }
     if epf_start_year < year:
         context['prev_link'] = '../transactions/'+str(year-epf_start_year-1)
@@ -286,7 +293,7 @@ def add_contribution(request, id):
                 employee = int(float(employee_str)) if employee_str != '' else 0
                 employer = int(float(employer_str)) if employer_str != '' else 0
                 withdrawl = int(float(withdrawl_str)) if withdrawl_str != '' else 0
-                if (interest + employee + employer) > 0:
+                if (interest + employee + employer) > 0 or interest_str != '' or employee_str != '' or employer_str != '' or withdrawl_str != '':
                     date = datetime_object+relativedelta(months=i)
                     try:
                         contrib = EpfEntry.objects.get(epf_id=epf_obj, trans_date=date)
@@ -302,6 +309,7 @@ def add_contribution(request, id):
                                                 employer_contribution=employer,
                                                 interest_contribution=interest,
                                                 withdrawl=withdrawl)
+            something_changed(request)
         else:
             print("fetch button pressed")
             fy = request.POST.get('fy')
@@ -309,11 +317,12 @@ def add_contribution(request, id):
                 context = get_fy_details(epf_obj, fy[0:4])
                 context['fy_list']=fy_list
                 context['sel_fy'] = fy
+                context['currency'] = get_currency_symbol('INR')
                 context['object'] = {'id':epf_obj.id, 'number':epf_obj.number, 'company':epf_obj.company}
                 print(context)
                 return render(request, template, context)
     
-    context = {'fy_list':fy_list, 'curr_module_id':'id_epf_module', 'object': {'id':epf_obj.id, 'number':epf_obj.number, 'company':epf_obj.company, 'sel_fy':'select'}}
+    context = {'fy_list':fy_list, 'curr_module_id':'id_epf_module', 'object': {'id':epf_obj.id, 'number':epf_obj.number, 'company':epf_obj.company, 'sel_fy':'select'}, 'currency': get_currency_symbol('INR')}
     return render(request, template, context)
 
 def get_contrib_values(epf_id):
@@ -358,3 +367,8 @@ class CurrentEpfs(APIView):
             data['total'] = vals['total']
             epfs.append(data)
         return Response(epfs)
+
+
+def something_changed(request):
+    from tasks.tasks import update_components_for_user
+    update_components_for_user([EpfInterface.get_chart_name()], get_ext_user(request))

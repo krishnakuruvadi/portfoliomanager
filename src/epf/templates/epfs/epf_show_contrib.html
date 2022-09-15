@@ -17,7 +17,7 @@
 {% block content %}
     <table class="table table-borderless">
         <tr>
-            <td style="text-align:right"><b>Start:</b> {{start_amount}} &nbsp;&nbsp;&nbsp;<b>End:</b> {{end_amount}} &nbsp;&nbsp;&nbsp;<b>Employee:</b> {{employee_contribution}} &nbsp;&nbsp;&nbsp;<b>Employer:</b> {{employer_contribution}} &nbsp;&nbsp;&nbsp;<b>Interest:</b> {{interest_contribution}}</td>
+            <td style="text-align:right"><b>Start:</b> {{currency}} {{start_amount}} &nbsp;&nbsp;&nbsp;<b>End:</b> {{currency}} {{end_amount}} &nbsp;&nbsp;&nbsp;<b>Employee:</b> {{currency}} {{employee_contribution}} &nbsp;&nbsp;&nbsp;<b>Employer:</b> {{currency}} {{employer_contribution}} &nbsp;&nbsp;&nbsp;<b>Interest:</b> {{currency}} {{interest_contribution}}</td>
         </tr>
     </table>
 
@@ -25,10 +25,10 @@
         <thead>
             <tr>
                 <th>Period</th>
-                <th>Employee Contribution</th>
-                <th>Employer Contribution</th>
-                <th>Interest</td>
-                <th>Withdrawl</th>
+                <th>Employee Contribution ({{currency}})</th>
+                <th>Employer Contribution ({{currency}})</th>
+                <th>Interest ({{currency}})</td>
+                <th>Withdrawl ({{currency}})</th>
             </tr>
         </thead>
         <tbody>

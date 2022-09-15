@@ -31,40 +31,44 @@ from common.helper import get_preferred_currency_symbol
 
 def goal_list(request):
     template = 'goals/goal_list.html'
-    queryset = Goal.objects.all()
     data = dict()
-    data['user_name_mapping'] = get_all_users()
-    data['total_goals'] = len(queryset)
-    data['target'] = 0
-    data['achieved'] = 0
-    data['object_list'] = list()
-    for g in queryset:
-        data['target'] += g.final_val
-        data['achieved'] += g.achieved_amt
-        data['object_list'].append(
-            {
-                'name': g.name,
-                'start_date':g.start_date,
-                'end_date':g.start_date+relativedelta(months=g.time_period),
-                'time_period':g.time_period,
-                'final_val':g.final_val,
-                'achieved_amt':g.achieved_amt,
-                'achieved_percent':g.achieved_percent,
-                'user':g.user,
-                'notes':g.notes,
-                'id':g.id
-            }
-        )
-    if data['target'] > 0:
-        data['ach_per'] = round(data['achieved']*100/data['target'],2)
-    else:
-        data['ach_per'] = 0
-    data['unalloc'] = get_unallocated_amount()
-    data['remaining'] = data['target'] - data['achieved']
-    if data['remaining'] < 0:
-        data['remaining'] = 0
-    data['curr_module_id'] = 'id_goal_module'
-    data['preferred_currency'] = get_preferred_currency_symbol()
+    try:
+        queryset = Goal.objects.all()
+        
+        data['user_name_mapping'] = get_all_users()
+        data['total_goals'] = len(queryset)
+        data['target'] = 0
+        data['achieved'] = 0
+        data['object_list'] = list()
+        for g in queryset:
+            data['target'] += g.final_val
+            data['achieved'] += g.achieved_amt
+            data['object_list'].append(
+                {
+                    'name': g.name,
+                    'start_date':g.start_date,
+                    'end_date':g.start_date+relativedelta(months=g.time_period),
+                    'time_period':g.time_period,
+                    'final_val':g.final_val,
+                    'achieved_amt':g.achieved_amt,
+                    'achieved_percent':g.achieved_percent,
+                    'user':g.user,
+                    'notes':g.notes,
+                    'id':g.id
+                }
+            )
+        if data['target'] > 0:
+            data['ach_per'] = round(data['achieved']*100/data['target'],2)
+        else:
+            data['ach_per'] = 0
+        data['unalloc'] = get_unallocated_amount()
+        data['remaining'] = data['target'] - data['achieved']
+        if data['remaining'] < 0:
+            data['remaining'] = 0
+        data['curr_module_id'] = 'id_goal_module'
+        data['preferred_currency'] = get_preferred_currency_symbol()
+    except Exception as ex:
+        print(f'exception {ex} when getting goal view')
     print(data)
     return render(request, template, context=data)
 
