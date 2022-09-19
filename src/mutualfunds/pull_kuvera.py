@@ -43,9 +43,9 @@ def pull_kuvera(user, email, passwd, pull_user_name):
     time.sleep(5)
     try:
         email_elem = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "email")))
-        #email_elem = driver.find_element_by_id('email')
+        #email_elem = driver.find_element(By.ID, 'email')
         email_elem.send_keys(email)
-        passwd_elem = driver.find_element_by_id('password')
+        passwd_elem = driver.find_element(By.ID, 'password')
         passwd_elem.send_keys(passwd)
         submit_button = driver.find_element_by_xpath('//button[text()="LOGIN"]')
         submit_button.click()

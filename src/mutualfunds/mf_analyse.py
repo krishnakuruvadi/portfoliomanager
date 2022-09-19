@@ -131,7 +131,7 @@ def get_ms_code(mf_name, isin, isin2, ms_name, ignore_names=None, retry=0):
             pass
         search_element_id = decode(b'\x08\x11\x15G_-\x11\x08-\x1c\x16\x0b\x17\x164\x11\x01\x03>\x07\x0b\x1f\x00&\x03\x17\x06%\x1e\x11\x164\x00\x1f\x14\x07\x00\r\x12')
         WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID, search_element_id)))
-        search_element = driver.find_element_by_id(search_element_id)
+        search_element = driver.find_element(By.ID, search_element_id)
         mf_name_parts = mf_name.split(' ')
         i = 0
         while i< len(mf_name_parts):
@@ -319,7 +319,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
     try:
         search_element_id = decode(b'\x08\x11\x15G_-\x11\x08-\x1c\x16\x0b\x17\x164\x11\x01\x03>\x07\x0b\x1f\x00&\x03\x17\x06%\x1e\x11\x164\x00\x1f\x14\x07\x00\r\x12')
         WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID, search_element_id)))
-        search_element = driver.find_element_by_id(search_element_id)
+        search_element = driver.find_element(By.ID, search_element_id)
         mf_name_parts = mf_name.split(' ')
         for i, part in enumerate(mf_name_parts):
             if i == len(mf_name_parts)-1:
@@ -590,7 +590,7 @@ def pull_category_returns():
                 rows = driver.find_elements_by_xpath("//table/tbody/tr")
                 if not as_on:
                     try:
-                        span_id = driver.find_element_by_id('ctl00_ContentPlaceHolder1_lblDate')
+                        span_id = driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_lblDate')
                         as_on = get_date_or_none_from_string(span_id.text.replace('As on ', ''), '%Y-%m-%d')
                     except NoSuchElementException:
                         print(f'couldnt find element by id ctl00_ContentPlaceHolder1_lblDate')

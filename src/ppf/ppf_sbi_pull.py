@@ -37,30 +37,30 @@ def pull_sbi_transactions(user, password, number, start_date):
         continue_elem = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//a[contains(@class,'login_button')]")))
         continue_elem.click()
         time.sleep(2)
-        #captcha_id = driver.find_element_by_id('refreshImgCaptcha')
+        #captcha_id = driver.find_element(By.ID, 'refreshImgCaptcha')
         #print(captcha_id)        
         #https://retail.onlinesbi.com/retail/simpleCaptchaServ?1625812148436
-        login_id = driver.find_element_by_id('username')
+        login_id = driver.find_element(By.ID, 'username')
         login_id.send_keys(user)
-        passwd_id = driver.find_element_by_id('label2')
+        passwd_id = driver.find_element(By.ID, 'label2')
         passwd_id.send_keys(password)
         for i in range(10):
             time.sleep(2)
-            captcha_id = driver.find_element_by_id('loginCaptchaValue')
+            captcha_id = driver.find_element(By.ID, 'loginCaptchaValue')
             if len(captcha_id.get_attribute("value")) > 4:
                 break
-        login_button = driver.find_element_by_id('Button2')
+        login_button = driver.find_element(By.ID, 'Button2')
         login_button.click()
         time.sleep(5)
         #https://retail.onlinesbi.com/retail/loginsubmit.htm
 
         for i in range(60):
             time.sleep(2)
-            sms_pass = driver.find_element_by_id('smsPassword')
+            sms_pass = driver.find_element(By.ID, 'smsPassword')
             if len(sms_pass.get_attribute("value")) > 7:
                 break
 
-        continue_button = driver.find_element_by_id('btContinue')
+        continue_button = driver.find_element(By.ID, 'btContinue')
         continue_button.click()
         time.sleep(5)
 
@@ -78,7 +78,7 @@ def pull_sbi_transactions(user, password, number, start_date):
                     trans_elem = driver.find_element_by_xpath('//a[text()[contains(.,"Find Transactions")]]')
                     driver.execute_script("arguments[0].click();", trans_elem)
                     time.sleep(5)
-                    tbl = driver.find_element_by_id('tblAcctd')
+                    tbl = driver.find_element(By.ID, 'tblAcctd')
                     rows = tbl.find_elements_by_tag_name("tr")
                     found_col = False
                     for row in rows:
@@ -98,10 +98,10 @@ def pull_sbi_transactions(user, password, number, start_date):
                     from_date_str = convert_date_to_string(from_date, '%d/%m/%Y')
                     to_date_str = convert_date_to_string(to_date, '%d/%m/%Y')
                     print(f'getting transactions between {from_date_str} and {to_date_str}')
-                    from_elem = driver.find_element_by_id('datepicker3')
+                    from_elem = driver.find_element(By.ID, 'datepicker3')
                     from_elem.send_keys(from_date_str)
                     #from_elem.send_keys('01/04/2020')
-                    to_elem = driver.find_element_by_id('datepicker4')
+                    to_elem = driver.find_element(By.ID, 'datepicker4')
                     #to_elem.send_keys('31/03/2021')
                     to_elem.send_keys(to_date_str)
                     get_elem = driver.find_element_by_name('submit')
