@@ -303,6 +303,8 @@ class CryptoInterface:
                 cash_flows.append((end_date, float(amt)))
                 print(f'finding xirr for {cash_flows}')
                 ret['change'] = xirr(cash_flows, 0.1)*100
+            elif changed == 0:
+                ret['change'] = 0
             else:
                 ret['change'] = calc_simple_roi(changed , amt)
         else:

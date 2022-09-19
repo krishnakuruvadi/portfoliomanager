@@ -87,13 +87,15 @@ def get_folios(request):
 class FolioTransactionsListView(ListView):
     template_name = 'mutualfunds/transactions_list.html'
     ordering = ['-trans_date']
+
     def get_queryset(self):
-        #folio = get_object_or_404(Folio, id=self.kwargs['id'])
         return MutualFundTransaction.objects.order_by('-trans_date').filter(folio__id=self.kwargs['id'])
     
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['folio_id'] = self.kwargs['id']
+        f = Folio.objects.get(id=self.kwargs['id'])
+        data['folio'] = f.folio
         data['curr_module_id'] = 'id_mf_module'
         data['user_name_mapping'] = get_all_users()
         print(data)

@@ -302,14 +302,17 @@ def get_mutual_funds(request):
     print(f'Total number of schemes: {len(sc)}')
     i = 0
     for code, details in sc.items():
-        if details['fund_house'] == fund_house and filte in details['name'].lower():
-            data = dict()
-            data['value'] = code
-            data['label'] = details['name']
-            mfs.append(data)
-            i  += 1
-            if i > 10:
-                break
+        if details['fund_house'] == fund_house:
+            if filte.lower() in details['name'].lower():
+                data = dict()
+                data['value'] = code
+                data['label'] = details['name']
+                mfs.append(data)
+                i  += 1
+                if i > 10:
+                    break
+            else:
+                print(f"ignoring {details['name']}")
     #s = json.dumps(mfs)
     print(f'returning {len(mfs)} matching items')
 
