@@ -180,7 +180,7 @@ class CryptoInterface:
                     coin = Coin.objects.get(symbol=cobj.symbol)
                     try:
                         hcp = HistoricalCoinPrice.objects.get(coin=coin, date=end_date)
-                        total += float(hcp.price)*float(tu)*float(get_in_preferred_currency(1, 'USD'))
+                        total += float(hcp.price)*float(tu)*float(get_in_preferred_currency(1, 'USD', end_date))
                     except HistoricalCoinPrice.DoesNotExist:
                         from tasks.tasks import pull_and_store_coin_historical_vals
                         pull_and_store_coin_historical_vals(cobj.symbol, end_date)
