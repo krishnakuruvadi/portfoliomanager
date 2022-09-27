@@ -101,8 +101,10 @@ class EpfListView(ListView):
 def epf_delete(request, id):
     try:
         e = Epf.objects.get(id=id)
+        goal_id = e.goal
+        user_id = e.user
         e.delete()
-        something_changed(request)
+        post_change(request,  user_id, goal_id)
     except Epf.DoesNotExist:
         print(f'Epf with id {id} does not exist')
     return HttpResponseRedirect(reverse('epfs:epf-list'))
@@ -309,7 +311,7 @@ def add_contribution(request, id):
                                                 employer_contribution=employer,
                                                 interest_contribution=interest,
                                                 withdrawl=withdrawl)
-            something_changed(request)
+            post_change(request, epf_obj.user, epf_obj.goal)
         else:
             print("fetch button pressed")
             fy = request.POST.get('fy')
@@ -369,6 +371,6 @@ class CurrentEpfs(APIView):
         return Response(epfs)
 
 
-def something_changed(request):
+def post_change(request, user_id, goal_id):
     from tasks.tasks import update_components_for_user
-    update_components_for_user([EpfInterface.get_chart_name()], get_ext_user(request))
+    update_components_for_user([EpfInterface.get_chart_name()], user_id, goal_id, get_ext_user(request))

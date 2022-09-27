@@ -98,6 +98,8 @@ def goals_insight(request):
             remaining = 0
         remaining_val += remaining
         target_date = goal_obj.start_date+relativedelta(months=goal_obj.time_period)
+        if target_date < today:
+            continue
         months_to_goal = relativedelta(target_date, today)
         mtg = months_to_goal.months + months_to_goal.years*12
         projected = get_fd_final_val(float(goal_obj.achieved_amt), 'fd_compound_yearly', mtg, exp_growth)
@@ -132,90 +134,94 @@ def goals_insight(request):
                     target_dates_and_amts[j] = target_dates_and_amts[i]
                     target_dates_and_amts[i] = temp
     print(f'sorted {target_dates_and_amts}')
-    goal_yrly_inv, goal_monthly_inv, yrly_total = alternate_investment_strategy(target_dates_and_amts, exp_growth)
-
-    last_date = target_dates_and_amts[len(target_dates_and_amts)-1]['date']
-    j = 0 
     cash_flows = list()
-    cash_flows.append((today, -1*context['achieved']))
-    for yr, amt in yrly_total.items():
-        if yr == today.year:
-            for m in range(today.month, 13):
-                cash_flows.append((datetime.date(year=yr, month=m, day=1), -1*int(amt/(13-today.month))))
-                for k in range (j, len(target_dates_and_amts)):
-                    if target_dates_and_amts[k]['date'].year == yr and target_dates_and_amts[k]['date'].month == m:
-                        g = Goal.objects.get(id=target_dates_and_amts[k]['id'])
-                        cash_flows.append((target_dates_and_amts[k]['date'], float(g.final_val)))
-                        j += 1
-        elif yr == last_date.year:
-            for m in range(1, last_date.month+1):
-                cash_flows.append((datetime.date(year=yr, month=m, day=1), -1*int(amt/last_date.month)))
-                for k in range (j, len(target_dates_and_amts)):
-                    if target_dates_and_amts[k]['date'].year == yr and target_dates_and_amts[k]['date'].month == m:
-                        g = Goal.objects.get(id=target_dates_and_amts[k]['id'])
-                        cash_flows.append((target_dates_and_amts[k]['date'], float(g.final_val)))
-                        j += 1
-        else:
-            for m in range(1, 13):
-                cash_flows.append((datetime.date(year=yr, month=m, day=1), -1*int(amt/12)))
-                for k in range (j, len(target_dates_and_amts)):
-                    if target_dates_and_amts[k]['date'].year == yr and target_dates_and_amts[k]['date'].month == m:
-                        g = Goal.objects.get(id=target_dates_and_amts[k]['id'])
-                        cash_flows.append((target_dates_and_amts[k]['date'], float(g.final_val)))
-                        j += 1
+    if len(target_dates_and_amts) > 0:
+        goal_yrly_inv, goal_monthly_inv, yrly_total = alternate_investment_strategy(target_dates_and_amts, exp_growth)
 
-    colors = get_N_HexCol(len(goal_objs)+2)
-    print(f'****** Getting fv for total ***********')
-    print(f'cash_flows: {cash_flows}')
-    fv, fvs = get_fv_from_cashflows(cash_flows=cash_flows, roi=exp_growth)
-    print(f'****** Done fv for total ***********')
-
-    table_goal_yrly_inv = '<thead><tr><th>Investment Required</th><th>Total</th>'
-    for goal_obj in goal_objs:
-        table_goal_yrly_inv += '<th>' + get_user_short_name_or_name_from_id(goal_obj.user) + '/' + goal_obj.name 
-        #target_dates_and_amts.append({'id':goal_obj.id, 'user':goal_obj.user, 'name':goal_obj.name, 'date':target_date, 'achieved':int(goal_obj.achieved_amt), 'target':int(remaining-projected), 'id':goal_obj.id, 'remaining':int(remaining), 'projected':int(projected)})
-        for t in target_dates_and_amts:
-            if t['id'] == goal_obj.id:
-                tip = f"Achieved {t['achieved']}. Projected to grow to {t['projected']} at {exp_growth}%. Target {goal_obj.final_val}"
-                break
-        table_goal_yrly_inv += f' <i class="far fa-question-circle" data-toggle="tooltip" style="font-size:0.8em;" data-placement="top" title="{tip}"></i></th>'
-    table_goal_yrly_inv += '</tr></thead><tbody>' 
-    for yr in range(today.year, last_date.year+1):
-        yr_total = 0
-        table_goal_yrly_inv += '<tr><th>' + str(yr) + '</th>'
-        yr_ind = ''
-        for goal_obj in goal_objs:
-            if yr in goal_yrly_inv[goal_obj.id]:
-                yr_ind += '<td>' + str(goal_yrly_inv[goal_obj.id][yr]) + '</td>'
-                yr_total += goal_yrly_inv[goal_obj.id][yr]
+        last_date = target_dates_and_amts[len(target_dates_and_amts)-1]['date']
+        j = 0 
+        
+        cash_flows.append((today, -1*context['achieved']))
+        for yr, amt in yrly_total.items():
+            if yr == today.year:
+                for m in range(today.month, 13):
+                    cash_flows.append((datetime.date(year=yr, month=m, day=1), -1*int(amt/(13-today.month))))
+                    for k in range (j, len(target_dates_and_amts)):
+                        if target_dates_and_amts[k]['date'].year == yr and target_dates_and_amts[k]['date'].month == m:
+                            g = Goal.objects.get(id=target_dates_and_amts[k]['id'])
+                            cash_flows.append((target_dates_and_amts[k]['date'], float(g.final_val)))
+                            j += 1
+            elif yr == last_date.year:
+                for m in range(1, last_date.month+1):
+                    cash_flows.append((datetime.date(year=yr, month=m, day=1), -1*int(amt/last_date.month)))
+                    for k in range (j, len(target_dates_and_amts)):
+                        if target_dates_and_amts[k]['date'].year == yr and target_dates_and_amts[k]['date'].month == m:
+                            g = Goal.objects.get(id=target_dates_and_amts[k]['id'])
+                            cash_flows.append((target_dates_and_amts[k]['date'], float(g.final_val)))
+                            j += 1
             else:
-                yr_ind += '<td>0</td>'
-        table_goal_yrly_inv += '<td>' + str(round(yr_total,2)) + '</td>' + yr_ind
-        table_goal_yrly_inv += '</tr>'
-    context['table_goal_yrly_inv'] = table_goal_yrly_inv+'</tbody>'
+                for m in range(1, 13):
+                    cash_flows.append((datetime.date(year=yr, month=m, day=1), -1*int(amt/12)))
+                    for k in range (j, len(target_dates_and_amts)):
+                        if target_dates_and_amts[k]['date'].year == yr and target_dates_and_amts[k]['date'].month == m:
+                            g = Goal.objects.get(id=target_dates_and_amts[k]['id'])
+                            cash_flows.append((target_dates_and_amts[k]['date'], float(g.final_val)))
+                            j += 1
 
-    #print(f'fv: {fv}')
-    #print(f'fvs: {fvs}')
-    context['chart_data'] = list()
-    context['chart_data'].append({'label':'Total', 'data':fvs, 'borderColor':colors[0], 'fill':'false'})
-    i = 1
-    for g in goal_objs:
-        print(f'************ Getting chart fv data for {g.name}**************')
-        cash_flows = list()
-        if float(g.achieved_amt) > 0:
-            print(f'achieved amount for goal {g.name}: {g.achieved_amt}')
-            cash_flows.append((today, -1*float(g.achieved_amt)))
-        else:
-            print(f'no achieved amount for goal {g.name}')
-        cash_flows.extend(goal_monthly_inv[g.id])
-        cash_flows.append((g.start_date+relativedelta(months=g.time_period), float(g.final_val)))
-        #if g.id == 2:
-        #    print(f'cash_flows {cash_flows}')
-        fv, fvs = get_fv_from_cashflows(cash_flows=cash_flows, roi=exp_growth, debug=g.id==2)
-        #if g.id == 2:
-        #    print(f'goal2 fvs {fvs}')
-        context['chart_data'].append({'label':g.name, 'data':fvs, 'borderColor':colors[i], 'fill':'false'})
-        i += 1
+        colors = get_N_HexCol(len(goal_objs)+2)
+        print(f'****** Getting fv for total ***********')
+        print(f'cash_flows: {cash_flows}')
+        fv, fvs = get_fv_from_cashflows(cash_flows=cash_flows, roi=exp_growth)
+        print(f'****** Done fv for total ***********')
+
+        table_goal_yrly_inv = '<thead><tr><th>Investment Required</th><th>Total</th>'
+        for goal_obj in goal_objs:
+            table_goal_yrly_inv += '<th>' + get_user_short_name_or_name_from_id(goal_obj.user) + '/' + goal_obj.name 
+            #target_dates_and_amts.append({'id':goal_obj.id, 'user':goal_obj.user, 'name':goal_obj.name, 'date':target_date, 'achieved':int(goal_obj.achieved_amt), 'target':int(remaining-projected), 'id':goal_obj.id, 'remaining':int(remaining), 'projected':int(projected)})
+            tip = None
+            for t in target_dates_and_amts:
+                if t['id'] == goal_obj.id:
+                    tip = f"Achieved {t['achieved']}. Projected to grow to {t['projected']} at {exp_growth}%. Target {goal_obj.final_val}"
+                    break
+            if tip:
+                table_goal_yrly_inv += f' <i class="far fa-question-circle" data-toggle="tooltip" style="font-size:0.8em;" data-placement="top" title="{tip}"></i></th>'
+        table_goal_yrly_inv += '</tr></thead><tbody>' 
+        for yr in range(today.year, last_date.year+1):
+            yr_total = 0
+            table_goal_yrly_inv += '<tr><th>' + str(yr) + '</th>'
+            yr_ind = ''
+            for goal_obj in goal_objs:
+                if yr in goal_yrly_inv[goal_obj.id]:
+                    yr_ind += '<td>' + str(goal_yrly_inv[goal_obj.id][yr]) + '</td>'
+                    yr_total += goal_yrly_inv[goal_obj.id][yr]
+                else:
+                    yr_ind += '<td>0</td>'
+            table_goal_yrly_inv += '<td>' + str(round(yr_total,2)) + '</td>' + yr_ind
+            table_goal_yrly_inv += '</tr>'
+        context['table_goal_yrly_inv'] = table_goal_yrly_inv+'</tbody>'
+
+        #print(f'fv: {fv}')
+        #print(f'fvs: {fvs}')
+        context['chart_data'] = list()
+        context['chart_data'].append({'label':'Total', 'data':fvs, 'borderColor':colors[0], 'fill':'false'})
+        i = 1
+        for g in goal_objs:
+            print(f'************ Getting chart fv data for {g.name}**************')
+            cash_flows = list()
+            if float(g.achieved_amt) > 0:
+                print(f'achieved amount for goal {g.name}: {g.achieved_amt}')
+                cash_flows.append((today, -1*float(g.achieved_amt)))
+            else:
+                print(f'no achieved amount for goal {g.name}')
+            cash_flows.extend(goal_monthly_inv[g.id])
+            cash_flows.append((g.start_date+relativedelta(months=g.time_period), float(g.final_val)))
+            #if g.id == 2:
+            #    print(f'cash_flows {cash_flows}')
+            fv, fvs = get_fv_from_cashflows(cash_flows=cash_flows, roi=exp_growth, debug=g.id==2)
+            #if g.id == 2:
+            #    print(f'goal2 fvs {fvs}')
+            context['chart_data'].append({'label':g.name, 'data':fvs, 'borderColor':colors[i], 'fill':'false'})
+            i += 1
     context['curr_module_id'] = 'id_goal_module'
     print(context)
     return render(request, template, context)

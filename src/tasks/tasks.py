@@ -1148,7 +1148,7 @@ def send_monthend_updates_email():
 
 
 @db_task()
-def update_components_for_user(components, ext_user=None):
+def update_components_for_user(components, user_id, goal_id, ext_user=None):
     from epf.epf_interface import EpfInterface
     from espp.espp_interface import EsppInterface
     from fixed_deposit.fd_interface import FdInterface
@@ -1162,10 +1162,18 @@ def update_components_for_user(components, ext_user=None):
     from gold.gold_interface import GoldInterface
     from bankaccounts.bank_account_interface import BankAccountInterface
     from crypto.crypto_interface import CryptoInterface
+    from users.user_helper import update_user_networth
+    from goal.goal_helper import update_goal_contributions, update_yearly_contrib_and_projections
 
     for interface in [EpfInterface, EsppInterface, FdInterface, PpfInterface, SsyInterface, ShareInterface, MfInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
         if interface.get_chart_name() in components:
             interface.update_user(ext_user)
+    update_user_networth(user_id)
+    update_goal_contributions(goal_id)
+    update_yearly_contrib_and_projections(goal_id)
+    # TODO: Need to recalculate the totals as well
+    
+
 '''
 @db_task()
 def reconcile_stock(exchange, symbol, etf, only_if_not_exists=True):

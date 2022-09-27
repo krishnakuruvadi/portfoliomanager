@@ -431,18 +431,23 @@ def insights_view(request):
         cash_flows.insert(0, (get_date_or_none_from_string(last_dt), -1*float(last)))
         try:
             investment_data = InvestmentData.objects.get(user='all')
-            context['users'][str(i)]['totals'] = json.loads(investment_data.total_data.replace("\'", "\""))
-            last_entry = context['users'][str(i)]['totals'][len(context['users'][str(i)]['totals'])-1]
-            last_dt = get_date_or_none_from_string(last_entry['x'])
-            if last_dt is not None:
-                cash_flows.append((last_dt, last_entry['y']))
-                #print(f'unreasonable returns from cash_flows {cash_flows}')
-                try:
-                    roi = xirr(cash_flows, 0.1)*100
-                    roi = round(roi, 2)
-                    context['users'][str(i)]['roi'] = roi
-                except Exception as ex:
-                    print(f'exception finding xirr {ex}')
+            try:
+                context['users'][str(i)]['totals'] = json.loads(investment_data.total_data.replace("\'", "\""))
+                last_entry = context['users'][str(i)]['totals'][len(context['users'][str(i)]['totals'])-1]
+                last_dt = get_date_or_none_from_string(last_entry['x'])
+                if last_dt is not None:
+                    cash_flows.append((last_dt, last_entry['y']))
+                    #print(f'unreasonable returns from cash_flows {cash_flows}')
+                    try:
+                        roi = xirr(cash_flows, 0.1)*100
+                        roi = round(roi, 2)
+                        context['users'][str(i)]['roi'] = roi
+                    except Exception as ex:
+                        print(f'exception finding xirr {ex}')
+            except Exception as ex:
+                print(f'failed to load user total investment data {ex}')
+                context['users'][str(i)]['totals'] = list()
+
         except InvestmentData.DoesNotExist:
             context['users'][str(i)]['totals'] = list()
         print(context)

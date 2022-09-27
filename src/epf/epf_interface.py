@@ -1,5 +1,7 @@
+from shared.handle_real_time_data import get_in_preferred_currency
 from .models import Epf, EpfEntry
 import datetime
+from dateutil.relativedelta import relativedelta
 
 class EpfInterface:
     @classmethod
@@ -54,6 +56,7 @@ class EpfInterface:
 
     @classmethod
     def get_no_goal_amount(self, user_id=None):
+        today = datetime.date.today()
         amt = 0
         if user_id:
             objs = Epf.objects.filter(user=user_id)
@@ -61,9 +64,10 @@ class EpfInterface:
             objs = Epf.objects.all()
         for obj in objs:
             if not obj.goal:
-                amt += 0 if not obj.total else obj.total
+                amt += 0 if not obj.total else get_in_preferred_currency(obj.total, 'INR', today)
         return amt
 
+    #TODO: preferred currency changes
     @classmethod
     def get_goal_yearly_contrib(self, goal_id, yr):
         st_date = datetime.date(year=yr, day=1, month=1)
@@ -94,6 +98,8 @@ class EpfInterface:
             for epf_trans in EpfEntry.objects.filter(epf_id=epf_obj, trans_date__gte=st_date, trans_date__lte=end_date):
                 contrib += float(epf_trans.employer_contribution + epf_trans.employee_contribution)
                 deduct += -1*float(epf_trans.withdrawl)
+        contrib = get_in_preferred_currency(contrib, 'INR', end_date)
+        deduct = get_in_preferred_currency(deduct, 'INR', end_date)
         return contrib, deduct
     
     @classmethod
@@ -106,6 +112,13 @@ class EpfInterface:
             for epf_trans in EpfEntry.objects.filter(epf_id=epf_obj, trans_date__gte=st_date, trans_date__lte=end_date):
                 contrib[epf_trans.trans_date.month-1] += float(epf_trans.employer_contribution + epf_trans.employee_contribution)
                 deduct[epf_trans.trans_date.month-1] += -1*float(epf_trans.withdrawl)
+        
+        for i in range(12):
+            dt = datetime.date(year=yr, day=1, month=i+2)
+            dt = dt+relativedelta(days=-1)
+            contrib[i] = get_in_preferred_currency(contrib[i], 'INR', dt)
+            deduct[i] = get_in_preferred_currency(deduct[i], 'INR', dt)
+
         print(f'returning {contrib} {deduct}')
         return contrib, deduct
 
@@ -139,6 +152,7 @@ class EpfInterface:
         from dateutil.relativedelta import relativedelta
         from .epf_helper import update_epf_vals
         from shared.utils import get_min
+        from shared.handle_chart_data import get_in_preferred_currency
 
         users = get_users(ext_user)
         today = datetime.date.today()
@@ -169,7 +183,7 @@ class EpfInterface:
             if total_epf != 0:
                 if not epf_reset_on_zero:
                     epf_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
-                epf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':total_epf})
+                epf_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':get_in_preferred_currency(total_epf, 'INR', data_end_date)})
                 epf_reset_on_zero = True
             elif epf_reset_on_zero:
                 epf_reset_on_zero = False
@@ -233,6 +247,7 @@ class EpfInterface:
         print(ret)
         return ret
     
+    # TODO: conversion to preferred currency
     @classmethod
     def updates_summary(self, ext_user, start_date, end_date):
         from users.user_interface import get_users
