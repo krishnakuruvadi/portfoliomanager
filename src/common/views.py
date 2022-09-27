@@ -358,6 +358,43 @@ def get_mutual_funds(request):
 
     return JsonResponse(mfs, safe=False)
 
+class UserPreferenceInvestmentTypesView(APIView):
+    authentication_classes = []
+    permission_classes = []
+    def get(self, request, format=None):
+        its = get_preferences('investment_types')
+        sel_investment_types = list()
+        if its:
+            for inv in its.split('|'):
+                sel_investment_types.append(inv)
+        print(f'{its}')
+        data = dict()
+        data['sel_investment_types'] = list()
+        mapping = {
+            'Fixed Deposits':'id_fd_module',
+            'PPF':'id_ppf_module',
+            'SSY':'id_ssy_module',
+            'EPF':'id_epf_module',
+            'ESPP':'id_espp_module',
+            'Insurance':'id_insurance_module',
+            'RSU':'id_rsu_module',
+            '401K':'id_401k_module',
+            'Shares':'id_shares_module',
+            'Mutual Funds':'id_mf_module',
+            'Gold':'id_gold_module',
+            'Cash':'id_bank_acc_module',
+            'Crypto':'id_crypto_module'
+        }
+        if len(sel_investment_types) > 0:
+            for m, module in mapping.items():
+                if m in sel_investment_types:
+                    data['sel_investment_types'].append(module)
+        else:
+            for m, module in mapping.items():
+                data['sel_investment_types'].append(module)
+        print(f'returning {data}')
+        return Response(data)
+
 class ScrollDataView(APIView):
     authentication_classes = []
     permission_classes = []
@@ -416,6 +453,19 @@ def preferences(request):
             if sel_index_str:
                 print(f'sel_index_str {sel_index_str}')
                 pref_obj.indexes_to_scroll = sel_index_str
+
+        sel_investment_types = request.POST.getlist('investment_types')
+        if sel_investment_types:
+            sel_inv_str = None
+            for sel_inv in sel_investment_types:
+                if not sel_inv_str:
+                    sel_inv_str = sel_inv
+                else:
+                    sel_inv_str = sel_inv_str + '|' + sel_inv
+            if sel_inv_str:
+                print(f'sel_inv_str {sel_inv_str}')
+                pref_obj.investment_types = sel_inv_str
+
         pref_obj.document_backup_locn = request.POST.get('doc_backup')
         pref_obj.show_zero_value_mfs = 'show_zero_val_mfs' in request.POST
         pref_obj.show_zero_value_shares = 'show_zero_val_shares' in request.POST
@@ -438,6 +488,7 @@ def preferences(request):
     tzs = list()
     for i_tz in common_timezones:
         tzs.append(i_tz)
+    avail_investment_types = ['Fixed Deposits', 'PPF', 'SSY', 'EPF', 'ESPP', 'Insurance', 'RSU', '401K', 'Shares', 'Mutual Funds', 'Gold', 'Cash', 'Crypto']
     avail_indexes = list()
     n = Nasdaq('', None)
     index_data = n.get_all_index()
@@ -467,11 +518,21 @@ def preferences(request):
         for index in avail_indexes:
             sel_indexes.append(index)
 
+    sel_investment_types = list()
+    if pref_obj.investment_types:
+        for inv in pref_obj.investment_types.split('|'):
+            sel_investment_types.append(inv)
+    else:
+        for inv in avail_investment_types:
+            sel_investment_types.append(inv)
+
     context = {
-        'tz': pref_obj.timezone, 
+        'tz': pref_obj.timezone,
         'tzs':tzs,
         'indexes':avail_indexes, 
-        'sel_indexes':sel_indexes, 
+        'sel_indexes':sel_indexes,
+        'investment_types': avail_investment_types,
+        'sel_investment_types': sel_investment_types, 
         'document_backup_locn':'' if not pref_obj.document_backup_locn else pref_obj.document_backup_locn,
         'show_zero_val_mfs': pref_obj.show_zero_value_mfs,
         'show_zero_val_shares': pref_obj.show_zero_value_shares,

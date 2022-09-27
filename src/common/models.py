@@ -265,6 +265,7 @@ class Preferences(SingletonModel):
     email_backend = models.CharField(max_length=100, null=True, blank=True, choices=EMAIL_BACKEND_CHOICES)
     email_api_key = models.CharField(max_length=100, null=True, blank=True)
     email_api_secret = models.CharField(max_length=100, null=True, blank=True)
+    investment_types = models.CharField(max_length=20000, null=True, blank=True)
 
 class Passwords(models.Model):
     class Meta:

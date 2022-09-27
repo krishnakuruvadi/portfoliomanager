@@ -87,7 +87,7 @@
             <div class="md-form mt-0">
               <select id="trans_type" name="trans_type" class="form-control" required="true">
                 <option value="Buy">Buy</option>
-                <option value="Buy">Sell</option>
+                <option value="Sell">Sell</option>
               </select>
             </div>
           </div>
@@ -173,6 +173,13 @@
       }
       exchdropdown.appendChild(opt);
     })
+
+    var trans_type = '{{trans_type|safe}}';
+    if (trans_type != '') {
+      console.log('setting trans type to ', trans_type)
+      set_trans_type(trans_type)
+    }
+
     setExchangePrice();
 
     $("#price").change(function () {
@@ -190,6 +197,7 @@
     $("#trans_date").change(function () {
       setExchangePrice();
     });
+
     function setExchangePrice() {
       var exchangeElem = document.getElementById("exchange");
       var exchange = exchangeElem.value
@@ -207,6 +215,22 @@
       }
       setTransPrice();
     }
+
+    function set_trans_type(trans_type) {
+      //var currencies = document.getElementById('id_currencies');
+      Array.from(document.querySelector("#trans_type").options).forEach(function(option_element) {
+        let option_text = option_element.text;
+        let option_value = option_element.value;
+        let is_option_selected = option_element.selected;
+        if (trans_type == option_value) {
+          option_element.selected = true;
+        } else {
+          console.log(option_value)
+          console.log(trans_type)
+        }
+      });
+    }
+    
     function setTransPrice(){
       var priceElem = document.getElementById("price");
       var price = priceElem.value

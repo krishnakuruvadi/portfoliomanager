@@ -47,79 +47,79 @@
           </a>
         </li>
         <div class="dropdown-divider"></div>
-        <li class="nav-item" id="id_fd_module">
+        <li class="nav-item" id="id_fd_module" hidden>
           <a class="nav-link" href="/fixed-deposit" title="Fixed Deposit">
             <span class="icon"><i class="fas fa-money-check fa-fw"></i></span>
             <span class="title">Fixed Deposits</span>
           </a>
         </li>
-        <li class="nav-item" id="id_ppf_module">
+        <li class="nav-item" id="id_ppf_module" hidden>
           <a class="nav-link" href="/ppf" title="Public Provident Fund">
             <span class="icon"><i class="fas fa-piggy-bank fa-fw"></i></span>
             <span class="title">PPF</span>
           </a>
         </li>
-        <li class="nav-item" id="id_ssy_module">
+        <li class="nav-item" id="id_ssy_module" hidden>
           <a class="nav-link" href="/ssy" title="Sukanya Samridhi Yojana">
             <span class="icon"><i class="fas fa-female fa-fw" style="color:pink"></i></span>
             <span class="title">SSY</span>
           </a>
         </li>
-        <li class="nav-item" id="id_epf_module">
+        <li class="nav-item" id="id_epf_module" hidden>
           <a class="nav-link" href="/epf" title="Employee Provident Fund">
             <span class="icon"><img src="{% static 'epf.png' %}" height="20" width="24" class="fas"></span>
             <span class="title">EPF</span>
           </a>
         </li>
-        <li class="nav-item" id="id_espp_module">
+        <li class="nav-item" id="id_espp_module" hidden>
           <a class="nav-link" href="/espp" title="Employee Stock Purchase Plan">
             <span class="icon"><img src="{% static 'espp.png' %}" height="20" width="24" class="fas"></span>
             <span class="title">ESPP</span>
           </a>
         </li>
-        <li class="nav-item" id="id_insurance_module">
+        <li class="nav-item" id="id_insurance_module" hidden>
           <a class="nav-link" href="/insurance" title="Insurance">
             <span class="icon"><i class="fas fa-umbrella fa-fw"></i></span>
             <span class="title">Insurance</span>
           </a>
         </li>
-        <li class="nav-item" id="id_rsu_module">
+        <li class="nav-item" id="id_rsu_module" hidden>
           <a class="nav-link" href="/rsu" title="Restricted Stock Units">
             <span class="icon"><i class="fas fa-trophy fa-fw"></i></span>
             <span class="title">RSU</span>
           </a>
         </li>
-        <li class="nav-item" id="id_401k_module">
+        <li class="nav-item" id="id_401k_module" hidden>
           <a class="nav-link" href="/retirement_401k" title="401K">
             <span class="icon"><img src="{% static '401K.png' %}" height="20" width="24" class="fas"></span>
             <span class="title">401K</span>
           </a>
         </li>
-        <li class="nav-item" id="id_shares_module">
+        <li class="nav-item" id="id_shares_module" hidden>
           <a class="nav-link" href="/shares" title="Shares">
             <span class="icon"><i class="fas fa-chart-line fa-fw"></i></span>
             <span class="title">Shares</span>
           </a>
         </li>
-        <li class="nav-item" id="id_mf_module">
+        <li class="nav-item" id="id_mf_module" hidden>
           <a class="nav-link" href="/mutualfunds" title="Mutual Funds">
             <span class="icon"><img src="{% static 'mutual-fund.png' %}" height="20" width="24" class="fas"></span>
             <span class="title">Mutual Funds</span>
           </a>
         </li>
-        <li class="nav-item" id="id_gold_module">
+        <li class="nav-item" id="id_gold_module" hidden>
           <a class="nav-link" href="/gold" title="Gold">
             <span class="icon"><i class="fas fa-coins fa-fw" style="color:#ffd700"></i></span>
             <span class="title">Gold</span>
           </a>
         </li>
-        <li class="nav-item" id="id_bank_acc_module">
+        <li class="nav-item" id="id_bank_acc_module" hidden>
           <a class="nav-link" href="/bankaccounts" title="Cash">
             <span class="icon"><i class="fas fa-money-bill fa-fw" style="color:#E3CA95"></i></span>
             <span class="title">Cash</span>
           </a>
         </li>
-        <li class="nav-item" id="id_crypto_module">
+        <li class="nav-item" id="id_crypto_module" hidden>
           <a class="nav-link" href="/crypto" title="Crypto">
             <span class="icon"><i class="fab fa-bitcoin fa-2x" style="color:#132486"></i></span>
             <span class="title">Crypto</span>
@@ -349,6 +349,15 @@
         el.innerHTML = sc;
       }
 
+      function show_hide_investment_types(data) {
+        var items = data['sel_investment_types']
+        console.log(items)
+        for(i=0;i<items.length;i++) {
+          let element = document.getElementById(items[i]);
+          element.removeAttribute("hidden");
+        }
+      }
+
       function set_current_module_view(module_id) {
         console.log('module_id ' + module_id);
         if (module_id == '') {
@@ -369,6 +378,11 @@
               url      : '/common/api/get/scrolldata',
               data: null,
               callback : scroll_data_first
+          },
+          {
+              url      : '/common/api/get/inv_types_user_pref',
+              data: null,
+              callback : show_hide_investment_types
           }
         ],
         current = 0;

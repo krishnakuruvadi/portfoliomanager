@@ -41,6 +41,15 @@
                 </div>
 
                 <div class="form-group row">
+                    <label for="investment_types" class="col-sm-3 col-form-label">Investment Types</label>
+
+                    <div class="col-sm-8">
+                        <select class="form-select col-sm-6" multiple data-live-search="true" name="investment_types" id="investment_types">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
                     <label for="indexes" class="col-sm-3 col-form-label">Indexes To Scroll</label>
 
                     <div class="col-sm-8">
@@ -161,6 +170,25 @@
         }
       }
 
+        var investment_types = {{ investment_types|safe }}
+        var sel_investment_types = {{ sel_investment_types|safe }}
+        console.log(investment_types);
+        var ilist = document.getElementById('investment_types');
+        $('#investment_types').empty();
+        for (x in investment_types) {
+            itype = investment_types[x];
+            if (sel_investment_types.includes(itype)) {
+                $('#investment_types')
+                    .append($('<option>', { value : itype })
+                    .text(itype)
+                    .attr('selected',true));
+            } else {
+                $('#investment_types')
+                    .append($('<option>', { value : itype })
+                    .text(itype));
+            }
+        }
+        
     e = document.getElementById('show_zero_val_shares');
     var show = "{{show_zero_val_shares|safe}}"
     console.log(e.checked);
