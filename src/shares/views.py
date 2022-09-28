@@ -434,7 +434,8 @@ def update_transaction(request,id):
         'user':get_user_name_from_id(trans.share.user), 'operation': 'Update Transaction',
         'exchange': trans.share.exchange, 'symbol':trans.share.symbol, 'trans_date':trans.trans_date.strftime("%Y-%m-%d"),
         'price': trans.price, 'quantity':trans.quantity, 'conversion_rate':trans.conversion_rate,
-        'trans_price': trans.trans_price, 'broker':trans.broker, 'notes':trans.notes, 'curr_module_id':'id_shares_module'
+        'trans_price': trans.trans_price, 'broker':trans.broker, 'notes':trans.notes, 'curr_module_id':'id_shares_module',
+        'trans_type': trans.trans_type
     }
     return render(request, template, context)
 

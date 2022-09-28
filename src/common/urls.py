@@ -25,7 +25,8 @@ from .views import (
     update_password,
     IndexListView,
     IndexDetailView,
-    HistoricalIndexPointList
+    HistoricalIndexPointList,
+    UserPreferenceInvestmentTypesView
 )
 # Create your views here.
 
@@ -55,5 +56,6 @@ urlpatterns = [
     path('mf/', MFListView.as_view(), name='mf-list'),
     path('preferences', preferences, name='preference'),
     path('api/get/scrolldata', ScrollDataView.as_view()),
+    path('api/get/inv_types_user_pref', UserPreferenceInvestmentTypesView.as_view()),
     path('api/get-forex/<int:year>/<int:month>/<int:day>/<str:from_currency>/<str:to_currency>', ForexDataView.as_view())
 ]
