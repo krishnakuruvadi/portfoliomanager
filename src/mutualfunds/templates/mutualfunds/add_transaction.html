@@ -75,7 +75,7 @@
             <div class="md-form mt-0">
               <select id="trans_type" name="trans_type" class="form-control">
                 <option value="Buy">Buy</option>
-                <option value="Buy">Sell</option>
+                <option value="Sell">Sell</option>
               </select>
             </div>
           </div>
@@ -175,8 +175,11 @@
         totalPrice = quantity*price*conversionRate
         console.log(totalPrice)
         totalPriceElem = document.getElementById("trans_price")
-        totalPriceElem.value = totalPrice
+        totalPriceElem.value = precise(totalPrice)
       }  
+    }
+    function precise(num) {
+      return Math.round((num + Number.EPSILON) * 100) / 100
     }
   </script>
 {% endblock %}

@@ -55,7 +55,7 @@
         <td>{{ instance.broker }}</td>
         <td>{{ instance.notes|default_if_none:""}}</td>
         <td>
-          <a href="{{ instance.get_absolute_url }}/delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Transaction"></i> </a>
+          <a href="{{ instance.get_absolute_url }}/delete" class="confirm-delete-transaction"><i class="fa fa-trash" aria-hidden="true" title="Delete Transaction"></i> </a>
           <a href="{{ instance.get_absolute_url }}/update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Edit Transaction"></i> </a>
         </td>
       </tr>
@@ -74,3 +74,16 @@
   });
 {% endblock jquery %}
 </script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete-transactions', function(){
+      return confirm('Are you sure you want to delete all transactions?');
+    })
+    $(document).on('click', '.confirm-delete-transaction', function(){
+      return confirm('Are you sure you want to delete the transaction?');
+    })
+  </script>
+{% endblock javascript %}
