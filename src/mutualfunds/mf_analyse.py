@@ -123,7 +123,7 @@ def get_ms_code(mf_name, isin, isin2, ms_name, ignore_names=None, retry=0):
         ignore_names = list()
     try:
         try:
-            continue_elem = driver.find_element_by_xpath('/html/body/form/div[3]/div[2]/div[2]/div[1]/a')
+            continue_elem = driver.find_element(By.XPATH, '/html/body/form/div[3]/div[2]/div[2]/div[1]/a')
             if continue_elem:
                 print(continue_elem)
                 continue_elem.click()
@@ -403,7 +403,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                                         for cat_elem in cat_elems:
                                             print('cat_elem class:', cat_elem.get_attribute('class'))
                                             if 'sal-dp-name ng-binding' in cat_elem.get_attribute('class'):
-                                                parent_cat_elem = cat_elem.find_element_by_xpath('./..')
+                                                parent_cat_elem = cat_elem.find_element(By.XPATH, './..')
                                                 for elem in parent_cat_elem.find_elements_by_tag_name('div'):
                                                     if elem.text != 'Category':
                                                         data['categoryName'] = elem.text
@@ -583,7 +583,7 @@ def pull_category_returns():
     for i, opt in enumerate(['1 Day', '1 Week', '1 Month', '3 Months', '6 Months', '1 Year', '2 Years', '3 Years', '4 Years','5 Years','6 Years','7 Years','8 Years','9 Years', '10 Years', 'YTD', 'Since Inception']):
         for j in range(3):
             try:
-                sel_choice=driver.find_element_by_xpath("//select/option[@value='" + opt + "']")
+                sel_choice=driver.find_element(By.XPATH, "//select/option[@value='" + opt + "']")
                 sel_choice.click()
                 time.sleep(5)
                 WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID, opt_element_id)))
@@ -669,7 +669,7 @@ def pull_blend(codes):
                         count = count+1
                         if id in codes:
                             ret[id] = mf_blend
-            next_elem = driver.find_element_by_xpath("//a[text()='Next']")
+            next_elem = driver.find_element(By.XPATH, "//a[text()='Next']")
             class_exists = next_elem.get_attribute('class')
             if next_elem.is_enabled and not class_exists:
                 next_elem.click()

@@ -165,9 +165,9 @@ def pull_bse():
     try:
         WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID, "ContentPlaceHolder1_ddSegment")))
         print('select element located')
-        driver.find_element_by_xpath("//select[@id='ContentPlaceHolder1_ddSegment']/option[text()='Equity']").click()
+        driver.find_element(By.XPATH, "//select[@id='ContentPlaceHolder1_ddSegment']/option[text()='Equity']").click()
         print('select element clicked')
-        driver.find_element_by_xpath("//input[@id='ContentPlaceHolder1_btnSubmit']").click()
+        driver.find_element(By.XPATH, "//input[@id='ContentPlaceHolder1_btnSubmit']").click()
         print('submit element clicked')
         dload = WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID,'ContentPlaceHolder1_lnkDownload')))
         print('download element located')

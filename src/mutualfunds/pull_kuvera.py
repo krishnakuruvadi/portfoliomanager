@@ -47,13 +47,13 @@ def pull_kuvera(user, email, passwd, pull_user_name):
         email_elem.send_keys(email)
         passwd_elem = driver.find_element(By.ID, 'password')
         passwd_elem.send_keys(passwd)
-        submit_button = driver.find_element_by_xpath('//button[text()="LOGIN"]')
+        submit_button = driver.find_element(By.XPATH, '//button[text()="LOGIN"]')
         submit_button.click()
         time.sleep(10)
         user_cont = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//div[contains(@class,'username-container')]")))
         user_cont.click()
         time.sleep(3)
-        user_name_div = driver.find_element_by_xpath("//div[contains(@class,'b-nav-dropdown__user__name')]")
+        user_name_div = driver.find_element(By.XPATH, "//div[contains(@class,'b-nav-dropdown__user__name')]")
         if user_name_div.text != pull_user_name:
             user_found = False
             span_elems = driver.find_elements_by_xpath("//span[contains(@class,'b-nav-dropdown__account__subtext')]")

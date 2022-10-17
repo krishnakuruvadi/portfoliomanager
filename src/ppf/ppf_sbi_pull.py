@@ -72,10 +72,10 @@ def pull_sbi_transactions(user, password, number, start_date):
                     to_date = datetime.date.today()
 
                 try:
-                    req_elem = driver.find_element_by_xpath('//a[text()[contains(.,"Request & Enquiries")]]')
+                    req_elem = driver.find_element(By.XPATH, '//a[text()[contains(.,"Request & Enquiries")]]')
                     req_elem.click()
                     time.sleep(5)
-                    trans_elem = driver.find_element_by_xpath('//a[text()[contains(.,"Find Transactions")]]')
+                    trans_elem = driver.find_element(By.XPATH, '//a[text()[contains(.,"Find Transactions")]]')
                     driver.execute_script("arguments[0].click();", trans_elem)
                     time.sleep(5)
                     tbl = driver.find_element(By.ID, 'tblAcctd')
@@ -111,7 +111,7 @@ def pull_sbi_transactions(user, password, number, start_date):
                         pass
                     else:
                         print('getting transactions')
-                        trans_table_div = driver.find_element_by_xpath('//div[contains(@class,"table_scrl")]')
+                        trans_table_div = driver.find_element(By.XPATH, '//div[contains(@class,"table_scrl")]')
                         trans_table = trans_table_div.find_element_by_tag_name('table')
                         for tbody in trans_table.find_elements_by_tag_name('tbody'):
                             for tr in tbody.find_elements_by_tag_name('tr'):
@@ -145,12 +145,12 @@ def pull_sbi_transactions(user, password, number, start_date):
         except Exception as ex:
             print(f'Exception during processing {ex}')
         time.sleep(5)
-        logout_elem = driver.find_element_by_xpath("//a[contains(@class,'wpanel_logout')]")
+        logout_elem = driver.find_element(By.XPATH, "//a[contains(@class,'wpanel_logout')]")
         #wpanel_logout hidden-xs
         #logout_elem.click()
         driver.execute_script("arguments[0].click();", logout_elem)
         time.sleep(5)
-        later_elem = driver.find_element_by_xpath('//button[text()[contains(.,"Maybe later")]]')
+        later_elem = driver.find_element(By.XPATH, '//button[text()[contains(.,"Maybe later")]]')
         driver.execute_script("arguments[0].click();", later_elem)
         time.sleep(5)
         driver.close()
