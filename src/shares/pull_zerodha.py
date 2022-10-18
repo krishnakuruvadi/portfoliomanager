@@ -52,16 +52,16 @@ def pull_zerodha(userid, passwd, pin):
     time.sleep(5)
     print(driver.current_url)
     try:
-        user_id_elem = driver.find_element_by_id('userid')
+        user_id_elem = driver.find_element(By.ID, 'userid')
         user_id_elem.send_keys(userid)
-        passwd_elem = driver.find_element_by_id('password')
+        passwd_elem = driver.find_element(By.ID, 'password')
         passwd_elem.send_keys(passwd)
-        submit_button = driver.find_element_by_xpath('//button[text()="Login "]')
+        submit_button = driver.find_element(By.XPATH, '//button[text()="Login "]')
         submit_button.click()
         time.sleep(3)
-        pin_element = driver.find_element_by_id('pin')
+        pin_element = driver.find_element(By.ID, 'pin')
         pin_element.send_keys(pin)
-        submit_button = driver.find_element_by_xpath('//button[text()="Continue "]')
+        submit_button = driver.find_element(By.XPATH, '//button[text()="Continue "]')
         submit_button.click()
         time.sleep(5)
         if driver.current_url != url:
@@ -87,7 +87,7 @@ def pull_zerodha(userid, passwd, pin):
             print(date_string)
             #view_element =  WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[text()[contains(.,"View")]]')))
             view_element =  WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[@type="submit" and @class="btn-blue"]')))
-            date_range = driver.find_element_by_name('date')
+            date_range = driver.find_element(By.NAME, 'date')
             date_range.clear()
             time.sleep(5)
             for _ in range(len(date_string)):
@@ -98,8 +98,8 @@ def pull_zerodha(userid, passwd, pin):
             
             #WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[text()[contains(.,"View")]]')))
             WebDriverWait(driver,60).until(EC.element_to_be_clickable((By.XPATH, '//button[@type="submit" and @class="btn-blue"]')))
-            if len(driver.find_elements_by_xpath("//a[text()[contains(.,'CSV')]]")) > 0:
-                dload_elem = driver.find_element_by_xpath("//a[text()[contains(.,'CSV')]]")
+            if len(driver.find_elements(By.XPATH, "//a[text()[contains(.,'CSV')]]")) > 0:
+                dload_elem = driver.find_element(By.XPATH, "//a[text()[contains(.,'CSV')]]")
                 dload_elem.click()
                 dload_file = os.path.join(dload_path, userid+'_tradebook_'+from_date.strftime("%Y-%m-%d") + "_to_" + to_date.strftime("%Y-%m-%d")+'.csv')
                 file_found = False
@@ -131,10 +131,10 @@ def pull_zerodha(userid, passwd, pin):
                 
             else:
                 print(f'couldnt download any transactions for period {date_string}')
-                if len(driver.find_elements_by_xpath("//h3[@id='mainText' and @text='Something went wrong']")) > 0:
+                if len(driver.find_elements(By.XPATH, "//h3[@id='mainText' and @text='Something went wrong']")) > 0:
                     break
-                if len(driver.find_elements_by_xpath("//h3[@id='mainText']"))>0:
-                    h3_elem = driver.find_element_by_xpath("//h3[@id='mainText']")
+                if len(driver.find_elements(By.XPATH, "//h3[@id='mainText']"))>0:
+                    h3_elem = driver.find_element(By.XPATH, "//h3[@id='mainText']")
                     print(f'h3 element found with text {h3_elem.text}')
                 src = driver.page_source
                 text_found = re.search(r'Something went wrong', src)
@@ -142,9 +142,9 @@ def pull_zerodha(userid, passwd, pin):
                     break
             yr = yr -1
 
-        userid_elem = driver.find_element_by_xpath("//a[@class='dropdown-label user-id']")
+        userid_elem = driver.find_element(By.XPATH, "//a[@class='dropdown-label user-id']")
         userid_elem.click()
-        logout_elem = driver.find_element_by_xpath("//a[text()[contains(.,'Logout')]]")
+        logout_elem = driver.find_element(By.XPATH, "//a[text()[contains(.,'Logout')]]")
         logout_elem.click()
         time.sleep(5)
         driver.close()

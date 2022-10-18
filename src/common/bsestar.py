@@ -63,7 +63,7 @@ def download_bsestar_schemes():
     timeout = 30
     try:
         WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID, "btnText")))
-        submit_element = driver.find_element_by_id("btnText")
+        submit_element = driver.find_element(By.ID, "btnText")
         submit_element.click()
         time.sleep(10)
         driver.close()

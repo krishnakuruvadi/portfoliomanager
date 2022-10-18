@@ -37,20 +37,20 @@ def pull_kuvera(user, email, passwd, pull_user_name):
     time.sleep(5)
     try:
         email_elem = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "email")))
-        #email_elem = driver.find_element_by_id('email')
+        #email_elem = driver.find_element(By.ID, 'email')
         email_elem.send_keys(email)
-        passwd_elem = driver.find_element_by_id('password')
+        passwd_elem = driver.find_element(By.ID, 'password')
         passwd_elem.send_keys(passwd)
-        submit_button = driver.find_element_by_xpath('//button[text()="LOGIN"]')
+        submit_button = driver.find_element(By.XPATH, '//button[text()="LOGIN"]')
         submit_button.click()
         time.sleep(10)
         user_cont = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//div[contains(@class,'username-container')]")))
         user_cont.click()
         time.sleep(3)
-        user_name_div = driver.find_element_by_xpath("//div[contains(@class,'b-nav-dropdown__user__name')]")
+        user_name_div = driver.find_element(By.XPATH, "//div[contains(@class,'b-nav-dropdown__user__name')]")
         if user_name_div.text != pull_user_name:
             user_found = False
-            span_elems = driver.find_elements_by_xpath("//span[contains(@class,'b-nav-dropdown__account__subtext')]")
+            span_elems = driver.find_elements(By.XPATH, "//span[contains(@class,'b-nav-dropdown__account__subtext')]")
             for span_elem in span_elems:
                 if span_elem.text == pull_user_name:
                     span_elem.click()
@@ -116,20 +116,20 @@ def pull_sip(driver):
             except Exception:
                 break
         
-        sip_containers = driver.find_elements_by_xpath("//div[contains(@class,'b-systematic-total-sips__container')]")
+        sip_containers = driver.find_elements(By.XPATH, "//div[contains(@class,'b-systematic-total-sips__container')]")
         for sip_container in sip_containers:
             #print('inside sip_container')
 
-            parent_elems = sip_container.find_elements_by_xpath(".//div[@class='b-collapsible-panel__content__info']")
+            parent_elems = sip_container.find_elements(By.XPATH, ".//div[@class='b-collapsible-panel__content__info']")
             for parent_elem in parent_elems:
                 span_elems = parent_elem.find_elements_by_tag_name('span')
                 name = span_elems[0].text
 
-                active_sips = parent_elem.find_elements_by_xpath(".//div[@class='b-systematic-active-sip-details']")
+                active_sips = parent_elem.find_elements(By.XPATH, ".//div[@class='b-systematic-active-sip-details']")
                 #print(f'len(active_sips) {len(active_sips)}')
 
                 for active_sip in active_sips:
-                    value_details = active_sip.find_elements_by_xpath(".//*[@class='b-systematic-active-sip-details__title--value']")
+                    value_details = active_sip.find_elements(By.XPATH, ".//*[@class='b-systematic-active-sip-details__title--value']")
                     if len(value_details) >= 4:
                         #print(f'have {len(value_details)} title values')
                         date = get_div_content(value_details[0])
