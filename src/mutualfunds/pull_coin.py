@@ -181,7 +181,7 @@ def pull_zerodha(userid, passwd, pin):
 
         time.sleep(5)
         transactions = dict()
-        divs = driver.find_elements_by_xpath("//div[@class='fund-name text-16']")
+        divs = driver.find_elements(By.XPATH, "//div[@class='fund-name text-16']")
         for div in divs:
             folio = None
             isin = None
@@ -363,7 +363,7 @@ def pull_zerodha(userid, passwd, pin):
             
             #WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[text()[contains(.,"View")]]')))
             WebDriverWait(driver,60).until(EC.element_to_be_clickable((By.XPATH, '//button[@type="submit" and @class="btn-blue"]')))
-            if len(driver.find_elements_by_xpath("//a[text()[contains(.,'CSV')]]")) > 0:
+            if len(driver.find_elements(By.XPATH, "//a[text()[contains(.,'CSV')]]")) > 0:
                 dload_elem = driver.find_element(By.XPATH, "//a[text()[contains(.,'CSV')]]")
                 dload_elem.click()
                 dload_file = os.path.join(dload_path, userid+'_tradebook_'+from_date.strftime("%Y-%m-%d") + "_to_" + to_date.strftime("%Y-%m-%d")+'.csv')
@@ -396,9 +396,9 @@ def pull_zerodha(userid, passwd, pin):
                 
             else:
                 print(f'couldnt download any transactions for period {date_string}')
-                if len(driver.find_elements_by_xpath("//h3[@id='mainText' and @text='Something went wrong']")) > 0:
+                if len(driver.find_elements(By.XPATH, "//h3[@id='mainText' and @text='Something went wrong']")) > 0:
                     break
-                if len(driver.find_elements_by_xpath("//h3[@id='mainText']"))>0:
+                if len(driver.find_elements(By.XPATH, "//h3[@id='mainText']"))>0:
                     h3_elem = driver.find_element(By.XPATH, "//h3[@id='mainText']")
                     print(f'h3 element found with text {h3_elem.text}')
                 src = driver.page_source

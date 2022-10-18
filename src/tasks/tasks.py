@@ -673,20 +673,21 @@ def update_scroll_data():
                     elif v['name'] == 'NASDAQ Composite':
                         v['name'] = 'NASDAQ Composite Index'
                     scroll_item = ScrollData.objects.get(scrip=v['name'])
-                    if get_diff(float(scroll_item.val), float(v['lastPrice'])) > 0.1:
-                        print(f"NASDAQ scroll_item.val {scroll_item.val} v['lastPrice'] {v['lastPrice']}")
+                    last_price = float(v['lastPrice'].replace(',',''))
+                    if get_diff(float(scroll_item.val), last_price) > 0.1:
+                        print(f"NASDAQ scroll_item.val {scroll_item.val} v['lastPrice'] {last_price}")
                         if 'last_updated' in v and v['last_updated']:
                             scroll_item.last_updated = v['last_updated']
                         else:
                             scroll_item.last_updated = timezone.now()
-                        scroll_item.val = v['lastPrice']
+                        scroll_item.val = last_price
                         scroll_item.change = v['change']
                         scroll_item.percent = v['pChange']
                         scroll_item.save()
                 except ScrollData.DoesNotExist:
                     scroll_item = ScrollData.objects.create(scrip=v['name'],
                                                             last_updated = v['last_updated'],
-                                                            val = v['lastPrice'],
+                                                            val = last_price,
                                                             change = v['change'],
                                                             percent = v['pChange'])
                 if len(sel_indexes) == 0 or v['name'] in sel_indexes:
