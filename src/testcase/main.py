@@ -50,16 +50,16 @@ class PMFixedDeposit(unittest.TestCase):
     def test_delete(self):
         list_fd_page_url = get_base_page_website()+ 'fixed-deposit/'
         self.driver.get(list_fd_page_url)
-        fd_element = self.driver.find_element_by_xpath("//a[contains(.,'12345678')]")
+        fd_element = self.driver.find_element(By.XPATH, "//a[contains(.,'12345678')]")
         assert(fd_element != None)
         link = fd_element.get_attribute('href')
         print('link', link)
-        delete_elements = self.driver.find_elements_by_xpath("//a[contains(@href,'delete')]")
+        delete_elements = self.driver.find_elements(By.XPATH, "//a[contains(@href,'delete')]")
         for de in delete_elements:
             print(de.get_attribute('href'))
             if link in de.get_attribute('href'):
                 de.click()
-        submit_element = self.driver.find_element_by_xpath("//input[@value='Submit']")
+        submit_element = self.driver.find_element(By.XPATH, "//input[@value='Submit']")
         submit_element.click()
         '''
         print(delete_element.get_attribute('href'))

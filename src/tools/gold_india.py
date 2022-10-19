@@ -151,15 +151,15 @@ def get_historical_price(dt):
     for i in range(3):
         try:
             print(f'{i}: clicking on currency')
-            sel_choice=driver.find_element_by_xpath("//select/option[@value='INR']")
+            sel_choice=driver.find_element(By.XPATH, "//select/option[@value='INR']")
             sel_choice.click()
             time.sleep(5)
             print(f'{i}: clicking on weight metric')
-            sel_choice=driver.find_element_by_xpath("//select/option[@value='g']")
+            sel_choice=driver.find_element(By.XPATH, "//select/option[@value='g']")
             sel_choice.click()
             time.sleep(5)
             print(f'{i}: checking for price')
-            sp_element = driver.find_element_by_id('gpxtickerLeft_price')
+            sp_element = driver.find_element(By.ID, 'gpxtickerLeft_price')
             print(sp_element)
             val = sp_element.text
             break

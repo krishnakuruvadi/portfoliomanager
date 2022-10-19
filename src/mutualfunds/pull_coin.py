@@ -43,14 +43,14 @@ def pull_coin(user, userid, passwd, twofa):
         #login_elem.click()
         user_id_elem = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID,'userid')))
         user_id_elem.send_keys(userid)
-        passwd_elem = driver.find_element_by_id('password')
+        passwd_elem = driver.find_element(By.ID, 'password')
         passwd_elem.send_keys(passwd)
-        submit_button = driver.find_element_by_xpath('//button[text()="Login "]')
+        submit_button = driver.find_element(By.XPATH, '//button[text()="Login "]')
         submit_button.click()
         time.sleep(3)
-        pin_element = driver.find_element_by_id('pin')
+        pin_element = driver.find_element(By.ID, 'pin')
         pin_element.send_keys(twofa)
-        submit_button = driver.find_element_by_xpath('//button[text()="Continue "]')
+        submit_button = driver.find_element(By.XPATH, '//button[text()="Continue "]')
         submit_button.click()
         time.sleep(5)
         '''
@@ -65,10 +65,10 @@ def pull_coin(user, userid, passwd, twofa):
         csv.click()
         time.sleep(10)
         '''
-        #userid_elem = driver.find_element_by_xpath("//span[@class='mobile-show']")
+        #userid_elem = driver.find_element(By.XPATH, "//span[@class='mobile-show']")
         #userid_elem.click()
         #time.sleep(5)
-        #logout_elem = driver.find_element_by_xpath("//a[text()[contains(.,'Logout')]]")
+        #logout_elem = driver.find_element(By.XPATH, "//a[text()[contains(.,'Logout')]]")
         #logout_elem.click()
         sips = pull_sip(driver)
         driver.get('https://coin.zerodha.com/logout')
@@ -99,7 +99,7 @@ def pull_sip(driver):
             print('table not found')
             return None
         table = tables[0]
-        tbody = table.find_element_by_tag_name('tbody')
+        tbody = table.find_element(By.TAG_NAME, 'tbody')
         print('found table body')
 
         for tr in tbody.find_elements_by_tag_name('tr'):
@@ -161,16 +161,16 @@ def pull_zerodha(userid, passwd, pin):
     time.sleep(5)
     print(driver.current_url)
     try:
-        user_id_elem = driver.find_element_by_id('userid')
+        user_id_elem = driver.find_element(By.ID, 'userid')
         user_id_elem.send_keys(userid)
-        passwd_elem = driver.find_element_by_id('password')
+        passwd_elem = driver.find_element(By.ID, 'password')
         passwd_elem.send_keys(passwd)
-        submit_button = driver.find_element_by_xpath('//button[text()="Login "]')
+        submit_button = driver.find_element(By.XPATH, '//button[text()="Login "]')
         submit_button.click()
         time.sleep(3)
-        pin_element = driver.find_element_by_id('pin')
+        pin_element = driver.find_element(By.ID, 'pin')
         pin_element.send_keys(pin)
-        submit_button = driver.find_element_by_xpath('//button[text()="Continue "]')
+        submit_button = driver.find_element(By.XPATH, '//button[text()="Continue "]')
         submit_button.click()
         time.sleep(5)
         mf_url = "https://coin.zerodha.com/dashboard/mf/"
@@ -178,18 +178,18 @@ def pull_zerodha(userid, passwd, pin):
 
         time.sleep(5)
         transactions = dict()
-        divs = driver.find_elements_by_xpath("//div[@class='fund-name text-16']")
+        divs = driver.find_elements(By.XPATH, "//div[@class='fund-name text-16']")
         for div in divs:
             folio = None
             isin = None
             div.click()
             time.sleep(5)
-            header = driver.find_element_by_xpath('//div[@class="fund-header"]')
+            header = driver.find_element(By.XPATH, '//div[@class="fund-header"]')
             for anchor in header.find_elements_by_tag_name("a"):
                 print(f'text: {anchor.text} href: {anchor.get_attribute("href")}')
                 isin = anchor.get_attribute("href").replace('https://coin.zerodha.com/mf/fund/', '')
                 
-            footer = driver.find_element_by_xpath('//div[@class="three columns left"]')
+            footer = driver.find_element(By.XPATH, '//div[@class="three columns left"]')
             for span in footer.find_elements_by_tag_name("span"):
                 if 'folio' in span.text.lower():
                     pass
@@ -199,10 +199,10 @@ def pull_zerodha(userid, passwd, pin):
                         transactions[folio] = dict()
                     if isin not in transactions[folio]:
                         transactions[folio][isin] = list()
-            trans = driver.find_element_by_xpath('//div[text()="View transactions"]')
+            trans = driver.find_element(By.XPATH, '//div[text()="View transactions"]')
             trans.click()
             time.sleep(5)
-            trans_tbl = driver.find_element_by_xpath("//table[@class='holdings-breakdown__table']")
+            trans_tbl = driver.find_element(By.XPATH, "//table[@class='holdings-breakdown__table']")
             for row in trans_tbl.find_elements_by_tag_name("tr"):
                 #print(row)
                 entry = dict()
@@ -233,17 +233,17 @@ def pull_zerodha(userid, passwd, pin):
                     if isin and folio:
                         transactions[folio][isin].append(entry)
             
-            sp = driver.find_element_by_xpath("//span[@class='icon feather-x']")
+            sp = driver.find_element(By.XPATH, "//span[@class='icon feather-x']")
             sp.click()
             time.sleep(3)
-            sp = driver.find_element_by_xpath("//span[@class='icon feather-chevron-up']")
+            sp = driver.find_element(By.XPATH, "//span[@class='icon feather-chevron-up']")
             sp.click()
             time.sleep(3)
 
-        userid_elem = driver.find_element_by_xpath("//span[@class='user-name']")
+        userid_elem = driver.find_element(By.XPATH, "//span[@class='user-name']")
         userid_elem.click()
         time.sleep(5)
-        logout_elem = driver.find_element_by_xpath("//a[text()[contains(.,'Logout')]]")
+        logout_elem = driver.find_element(By.XPATH, "//a[text()[contains(.,'Logout')]]")
         logout_elem.click()
         driver.close()
         time.sleep(5)
@@ -308,16 +308,16 @@ def pull_zerodha(userid, passwd, pin):
     time.sleep(5)
     print(driver.current_url)
     try:
-        user_id_elem = driver.find_element_by_id('userid')
+        user_id_elem = driver.find_element(By.ID, 'userid')
         user_id_elem.send_keys(userid)
-        passwd_elem = driver.find_element_by_id('password')
+        passwd_elem = driver.find_element(By.ID, 'password')
         passwd_elem.send_keys(passwd)
-        submit_button = driver.find_element_by_xpath('//button[text()="Login "]')
+        submit_button = driver.find_element(By.XPATH, '//button[text()="Login "]')
         submit_button.click()
         time.sleep(3)
-        pin_element = driver.find_element_by_id('pin')
+        pin_element = driver.find_element(By.ID, 'pin')
         pin_element.send_keys(pin)
-        submit_button = driver.find_element_by_xpath('//button[text()="Continue "]')
+        submit_button = driver.find_element(By.XPATH, '//button[text()="Continue "]')
         submit_button.click()
         time.sleep(5)
         if driver.current_url != url:
@@ -333,7 +333,7 @@ def pull_zerodha(userid, passwd, pin):
         #selects = driver.find_elements_by_tag_name('select')
         #for s in selects:
         #    print(s)
-        sel_choice=driver.find_element_by_xpath("//select/option[@value='MF']")
+        sel_choice=driver.find_element(By.XPATH, "//select/option[@value='MF']")
         sel_choice.click()
         time.sleep(5)
         #from_date = datetime.date(year=2013,month=4,day=1)
@@ -349,7 +349,7 @@ def pull_zerodha(userid, passwd, pin):
             print(date_string)
             #view_element =  WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[text()[contains(.,"View")]]')))
             view_element =  WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[@type="submit" and @class="btn-blue"]')))
-            date_range = driver.find_element_by_name('date')
+            date_range = driver.find_element(By.NAME, ('date')
             date_range.clear()
             time.sleep(5)
             for _ in range(len(date_string)):
@@ -360,8 +360,8 @@ def pull_zerodha(userid, passwd, pin):
             
             #WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.XPATH, '//button[text()[contains(.,"View")]]')))
             WebDriverWait(driver,60).until(EC.element_to_be_clickable((By.XPATH, '//button[@type="submit" and @class="btn-blue"]')))
-            if len(driver.find_elements_by_xpath("//a[text()[contains(.,'CSV')]]")) > 0:
-                dload_elem = driver.find_element_by_xpath("//a[text()[contains(.,'CSV')]]")
+            if len(driver.find_elements(By.XPATH, "//a[text()[contains(.,'CSV')]]")) > 0:
+                dload_elem = driver.find_element(By.XPATH, "//a[text()[contains(.,'CSV')]]")
                 dload_elem.click()
                 dload_file = os.path.join(dload_path, userid+'_tradebook_'+from_date.strftime("%Y-%m-%d") + "_to_" + to_date.strftime("%Y-%m-%d")+'.csv')
                 file_found = False
@@ -393,10 +393,10 @@ def pull_zerodha(userid, passwd, pin):
                 
             else:
                 print(f'couldnt download any transactions for period {date_string}')
-                if len(driver.find_elements_by_xpath("//h3[@id='mainText' and @text='Something went wrong']")) > 0:
+                if len(driver.find_elements(By.XPATH, "//h3[@id='mainText' and @text='Something went wrong']")) > 0:
                     break
-                if len(driver.find_elements_by_xpath("//h3[@id='mainText']"))>0:
-                    h3_elem = driver.find_element_by_xpath("//h3[@id='mainText']")
+                if len(driver.find_elements(By.XPATH, "//h3[@id='mainText']"))>0:
+                    h3_elem = driver.find_element(By.XPATH, "//h3[@id='mainText']")
                     print(f'h3 element found with text {h3_elem.text}')
                 src = driver.page_source
                 text_found = re.search(r'Something went wrong', src)
@@ -404,9 +404,9 @@ def pull_zerodha(userid, passwd, pin):
                     break
             yr = yr -1
 
-        userid_elem = driver.find_element_by_xpath("//a[@class='dropdown-label user-id']")
+        userid_elem = driver.find_element(By.XPATH, "//a[@class='dropdown-label user-id']")
         userid_elem.click()
-        logout_elem = driver.find_element_by_xpath("//a[text()[contains(.,'Logout')]]")
+        logout_elem = driver.find_element(By.XPATH, "//a[text()[contains(.,'Logout')]]")
         logout_elem.click()
         time.sleep(5)
         driver.close()

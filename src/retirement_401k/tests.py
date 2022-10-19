@@ -1,11 +1,13 @@
 from django.test import TestCase
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from .models import Account401K, Transaction401K
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.urls import reverse
 import time
 from shared.handle_get import get_path_to_chrome_driver
 from users.tests import add_default_user
+
 
 # Create your tests here.
 class Retirement401KTest(StaticLiveServerTestCase):
@@ -30,7 +32,7 @@ class Retirement401KTest(StaticLiveServerTestCase):
 
     def test_no_account(self):
         self.browser.get(self.live_server_url + reverse('retirement_401k:account-list'))
-        ti = self.browser.find_element_by_xpath("//b[text()='Total Investment:']/..")
+        ti = self.browser.find_element(By.XPATH, "//b[text()='Total Investment:']/..")
         self.assertEqual(float(self.get_summary_val(ti.text, 'Total Investment')), 0)
         self.assertEqual(float(self.get_summary_val(ti.text, 'Current Value')), 0)
         self.assertEqual(float(self.get_summary_val(ti.text, 'Gain')), 0)
@@ -41,17 +43,17 @@ class Retirement401KTest(StaticLiveServerTestCase):
     def test_add_account(self):
         user = add_default_user()
         self.browser.get(self.live_server_url + reverse('retirement_401k:account-list'))
-        self.browser.find_element_by_xpath("//i[@title='Add 401K Account']").click()
+        self.browser.find_element(By.XPATH, "//i[@title='Add 401K Account']").click()
         time.sleep(2)
-        self.browser.find_element_by_id('company').send_keys('Personal')
-        self.browser.find_element_by_id('start_date').send_keys('10/04/2010')
-        self.browser.find_element_by_xpath("//select[@id='id_user']/option[text()='" + user.name + "']").click()
+        self.browser.find_element(By.ID, 'company').send_keys('Personal')
+        self.browser.find_element(By.ID, 'start_date').send_keys('10/04/2010')
+        self.browser.find_element(By.XPATH, "//select[@id='id_user']/option[text()='" + user.name + "']").click()
 
         time.sleep(2)
-        self.browser.find_element_by_id('submit').click()
+        self.browser.find_element(By.ID, 'submit').click()
         time.sleep(2)
         self.browser.get(self.live_server_url + reverse('retirement_401k:account-list'))
-        accounts_table = self.browser.find_element_by_id('accounts-table')
+        accounts_table = self.browser.find_element(By.ID, 'accounts-table')
         body = accounts_table.find_elements_by_tag_name('tbody')
 
         rows = body[0].find_elements_by_tag_name('tr')
@@ -70,7 +72,7 @@ class Retirement401KTest(StaticLiveServerTestCase):
         self.assertEquals(columns[8].text, 'None')
         self.assertEquals(columns[9].text, '0.00')
 
-        trans = columns[10].find_element_by_xpath("./a[contains(@href,'transactions')]")
+        trans = columns[10].find_element(By.XPATH, "./a[contains(@href,'transactions')]")
         trans.click()
         time.sleep(5)
         self.assertTrue('No data available in table' in self.browser.page_source)

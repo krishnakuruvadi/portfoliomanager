@@ -123,7 +123,7 @@ def get_ms_code(mf_name, isin, isin2, ms_name, ignore_names=None, retry=0):
         ignore_names = list()
     try:
         try:
-            continue_elem = driver.find_element_by_xpath('/html/body/form/div[3]/div[2]/div[2]/div[1]/a')
+            continue_elem = driver.find_element(By.XPATH, '/html/body/form/div[3]/div[2]/div[2]/div[1]/a')
             if continue_elem:
                 print(continue_elem)
                 continue_elem.click()
@@ -131,7 +131,7 @@ def get_ms_code(mf_name, isin, isin2, ms_name, ignore_names=None, retry=0):
             pass
         search_element_id = decode(b'\x08\x11\x15G_-\x11\x08-\x1c\x16\x0b\x17\x164\x11\x01\x03>\x07\x0b\x1f\x00&\x03\x17\x06%\x1e\x11\x164\x00\x1f\x14\x07\x00\r\x12')
         WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID, search_element_id)))
-        search_element = driver.find_element_by_id(search_element_id)
+        search_element = driver.find_element(By.ID, search_element_id)
         mf_name_parts = mf_name.split(' ')
         i = 0
         while i< len(mf_name_parts):
@@ -160,7 +160,7 @@ def get_ms_code(mf_name, isin, isin2, ms_name, ignore_names=None, retry=0):
                             send_next_key = True
                             i += 1
                             break
-                        li_elems = el.find_elements_by_xpath('.//li')
+                        li_elems = el.find_elements(By.XPATH, './/li')
                         send_next_key = False
                         if len(li_elems)> 10:
                             print('too many results')
@@ -319,7 +319,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
     try:
         search_element_id = decode(b'\x08\x11\x15G_-\x11\x08-\x1c\x16\x0b\x17\x164\x11\x01\x03>\x07\x0b\x1f\x00&\x03\x17\x06%\x1e\x11\x164\x00\x1f\x14\x07\x00\r\x12')
         WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID, search_element_id)))
-        search_element = driver.find_element_by_id(search_element_id)
+        search_element = driver.find_element(By.ID, search_element_id)
         mf_name_parts = mf_name.split(' ')
         for i, part in enumerate(mf_name_parts):
             if i == len(mf_name_parts)-1:
@@ -329,7 +329,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                 print('sending ', part + '<space>')
                 search_element.send_keys(part + ' ')
             time.sleep(2)
-            #els = driver.find_elements_by_xpath("//*[@class='ui-autocomplete' and @class='quote-list']")
+            #els = driver.find_elements(By.XPATH, "//*[@class='ui-autocomplete' and @class='quote-list']")
             els = driver.find_elements_by_class_name('quote-list')
             if len(els) == 0:
                 if not replaceAnd:
@@ -344,7 +344,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                     #print(el.id)
                     if 'more' in el.get_attribute('innerHTML'):
                         continue
-                    li_elems = el.find_elements_by_xpath('.//li')
+                    li_elems = el.find_elements(By.XPATH, './/li')
                     if len(li_elems)> 10:
                         print(f'too many results {len(li_elems)}')
                         continue 
@@ -393,17 +393,17 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                                         for is_elem in is_elems:
                                             if is_elem.tag_name == 'svg':
                                                 print('is_elem', is_elem.get_attribute('innerHTML'))
-                                                data['blend'] = is_elem.find_element_by_tag_name('title').text
+                                                data['blend'] = is_elem.find_element(By.TAG_NAME, 'title').text
                                         blend_xpath = decode(b'DJ\n\x16\x03_\x07\x04\x08\t\x18\x01\x17\n\x1f\x16T\x1a\x0b\x01I\x02\x06\x16\x1942\x05\x0f\x01\x10\x03\x06\x1d\n\n\tT\x14\x03\x13\x17\x18X[\x1e\x01\x04\x01\x18\x11\x14\x12\x01\x06I\x18\x11\x00\x1b\nP9')
-                                        blend_elems = driver.find_elements_by_xpath(blend_xpath)
+                                        blend_elems = driver.find_elements(By.XPATH, blend_xpath)
                                         if len(blend_elems) == 1:
                                             data['blend'] = blend_elems[0].get_attribute("title")
                                         '''
-                                        cat_elems = driver.find_elements_by_xpath("//div[contains(text(),'Category')]")
+                                        cat_elems = driver.find_elements(By.XPATH, "//div[contains(text(),'Category')]")
                                         for cat_elem in cat_elems:
                                             print('cat_elem class:', cat_elem.get_attribute('class'))
                                             if 'sal-dp-name ng-binding' in cat_elem.get_attribute('class'):
-                                                parent_cat_elem = cat_elem.find_element_by_xpath('./..')
+                                                parent_cat_elem = cat_elem.find_element(By.XPATH, './..')
                                                 for elem in parent_cat_elem.find_elements_by_tag_name('div'):
                                                     if elem.text != 'Category':
                                                         data['categoryName'] = elem.text
@@ -478,7 +478,7 @@ def grab_details(driver, data):
             if 'performance' in anchor.get_attribute('href').lower() or 'performance' in anchor.text.lower():
                 anchor.click()
                 time.sleep(5)
-                tables = driver.find_elements_by_xpath("//table[@class='total-table']")
+                tables = driver.find_elements(By.XPATH, "//table[@class='total-table']")
                 print('len of total tables', len(tables))
                 for table in tables:
                     #print('inside table:', table.get_attribute('innerHTML'))
@@ -489,7 +489,7 @@ def grab_details(driver, data):
                             cur_yr = datetime.datetime.today().year
                             cols = rows[1].find_elements_by_tag_name("td")
                             for i,col in enumerate(cols):
-                                txt = col.find_element_by_tag_name('span').text
+                                txt = col.find_element(By.TAG_NAME, 'span').text
                                 print('returns col value', txt)
                                 if i == 10:
                                     data['performance']['YTD'] = txt 
@@ -507,7 +507,7 @@ def grab_details(driver, data):
                                 data['performance'][perfs[i]] = col.text
                                 #print('col innerHTML', col.get_attribute('innerHTML'))
                 
-                tables = driver.find_elements_by_xpath("//table[@class='total-table no-return-rank']")
+                tables = driver.find_elements(By.XPATH, "//table[@class='total-table no-return-rank']")
                 print('len of total tables', len(tables))
                 for table in tables:
                     rows = table.find_elements_by_tag_name("tr")
@@ -583,14 +583,14 @@ def pull_category_returns():
     for i, opt in enumerate(['1 Day', '1 Week', '1 Month', '3 Months', '6 Months', '1 Year', '2 Years', '3 Years', '4 Years','5 Years','6 Years','7 Years','8 Years','9 Years', '10 Years', 'YTD', 'Since Inception']):
         for j in range(3):
             try:
-                sel_choice=driver.find_element_by_xpath("//select/option[@value='" + opt + "']")
+                sel_choice=driver.find_element(By.XPATH, "//select/option[@value='" + opt + "']")
                 sel_choice.click()
                 time.sleep(5)
                 WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((By.ID, opt_element_id)))
-                rows = driver.find_elements_by_xpath("//table/tbody/tr")
+                rows = driver.find_elements(By.XPATH, "//table/tbody/tr")
                 if not as_on:
                     try:
-                        span_id = driver.find_element_by_id('ctl00_ContentPlaceHolder1_lblDate')
+                        span_id = driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_lblDate')
                         as_on = get_date_or_none_from_string(span_id.text.replace('As on ', ''), '%Y-%m-%d')
                     except NoSuchElementException:
                         print(f'couldnt find element by id ctl00_ContentPlaceHolder1_lblDate')
@@ -669,7 +669,7 @@ def pull_blend(codes):
                         count = count+1
                         if id in codes:
                             ret[id] = mf_blend
-            next_elem = driver.find_element_by_xpath("//a[text()='Next']")
+            next_elem = driver.find_element(By.XPATH, "//a[text()='Next']")
             class_exists = next_elem.get_attribute('class')
             if next_elem.is_enabled and not class_exists:
                 next_elem.click()
