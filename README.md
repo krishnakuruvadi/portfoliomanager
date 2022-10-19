@@ -31,6 +31,7 @@ To build a portfolio manager which can track and provide insights into a individ
 - Bank Accounts
 - Gold
 - 401K
+- Crypto
 
 ---
 
