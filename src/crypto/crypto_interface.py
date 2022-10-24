@@ -225,7 +225,10 @@ class CryptoInterface:
         for co in Crypto.objects.filter(user=user_id):
             cod = {
                 'symbol': co.symbol,
-                'goal_name':''
+                'goal_name':'',
+                'symbol_id': co.symbol_id,
+                'name':co.name,
+                'api_symbol': co.api_symbol
             }
             if co.goal:
                 cod['goal_name'] = get_goal_name_from_id(co.goal)
@@ -239,7 +242,9 @@ class CryptoInterface:
                     'conversion_rate': trans.conversion_rate,
                     'trans_price':trans.trans_price,
                     'broker':trans.broker,
-                    'notes':trans.notes
+                    'notes':trans.notes,
+                    'buy_currency':trans.buy_currency,
+                    'fees': trans.fees
                 })
             cod['transactions'] = t
             data.append(cod)
