@@ -128,7 +128,7 @@ def pull_sip(driver):
 
             parent_elems = sip_container.find_elements(By.XPATH, ".//div[@class='b-collapsible-panel__content__info']")
             for parent_elem in parent_elems:
-                span_elems = parent_elem.find_elements_by_tag_name('span')
+                span_elems = parent_elem.find_elements(By.TAG_NAME, 'span')
                 name = span_elems[0].text
 
                 active_sips = parent_elem.find_elements(By.XPATH, ".//div[@class='b-systematic-active-sip-details']")

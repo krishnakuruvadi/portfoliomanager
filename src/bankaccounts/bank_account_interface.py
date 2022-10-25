@@ -272,7 +272,8 @@ class BankAccountInterface:
                     'category': trans.category,
                     'amount':trans.amount,
                     'notes':trans.notes,
-                    'description':trans.description
+                    'description':trans.description,
+                    'tran_id':trans.tran_id
                 })
             bad['transactions'] = t
             data.append(bad)

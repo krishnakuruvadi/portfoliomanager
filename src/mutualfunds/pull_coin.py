@@ -94,7 +94,7 @@ def pull_sip(driver):
         sc.click()
         time.sleep(5)
         print('searching table')
-        tables = driver.find_elements_by_tag_name('table')
+        tables = driver.find_elements(By.TAG_NAME, 'table')
         #table = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[contains(@class,'table-container']")))
         if len(tables) != 0:
             print('found table')
@@ -102,13 +102,13 @@ def pull_sip(driver):
             print('table not found')
             return None
         table = tables[0]
-        tbody = table.find_element_by_tag_name('tbody')
+        tbody = table.find_element(By.TAG_NAME, 'tbody')
         print('found table body')
 
-        for tr in tbody.find_elements_by_tag_name('tr'):
+        for tr in tbody.find_elements(By.TAG_NAME, 'tr'):
             print('inside row')
 
-            tds = tr.find_elements_by_tag_name('td')
+            tds = tr.find_elements(By.TAG_NAME, 'td')
             if len(tds) >= 6:
                 name = get_content(tds[0])
                 amount = get_content(tds[2]).replace('₹','')
@@ -188,12 +188,12 @@ def pull_zerodha(userid, passwd, pin):
             div.click()
             time.sleep(5)
             header = driver.find_element(By.XPATH, '//div[@class="fund-header"]')
-            for anchor in header.find_elements_by_tag_name("a"):
+            for anchor in header.find_elements(By.TAG_NAME, "a"):
                 print(f'text: {anchor.text} href: {anchor.get_attribute("href")}')
                 isin = anchor.get_attribute("href").replace('https://coin.zerodha.com/mf/fund/', '')
                 
             footer = driver.find_element(By.XPATH, '//div[@class="three columns left"]')
-            for span in footer.find_elements_by_tag_name("span"):
+            for span in footer.find_elements(By.TAG_NAME, "span"):
                 if 'folio' in span.text.lower():
                     pass
                 else:
@@ -206,11 +206,11 @@ def pull_zerodha(userid, passwd, pin):
             trans.click()
             time.sleep(5)
             trans_tbl = driver.find_element(By.XPATH, "//table[@class='holdings-breakdown__table']")
-            for row in trans_tbl.find_elements_by_tag_name("tr"):
+            for row in trans_tbl.find_elements(By.TAG_NAME, "tr"):
                 #print(row)
                 entry = dict()
                 found = False
-                for index, col in enumerate(row.find_elements_by_tag_name("td")):
+                for index, col in enumerate(row.find_elements(By.TAG_NAME, "td")):
                     found = True
                     if index == 0:
                         dt = col.text.replace('nd', '').replace('st', '').replace('rd', '').replace('th', '')
@@ -333,7 +333,7 @@ def pull_zerodha(userid, passwd, pin):
 
     try:
         time.sleep(5)
-        #selects = driver.find_elements_by_tag_name('select')
+        #selects = driver.find_elements(By.TAG_NAME,  'select')
         #for s in selects:
         #    print(s)
         sel_choice=driver.find_element(By.XPATH, "//select/option[@value='MF']")

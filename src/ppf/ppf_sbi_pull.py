@@ -79,10 +79,10 @@ def pull_sbi_transactions(user, password, number, start_date):
                     driver.execute_script("arguments[0].click();", trans_elem)
                     time.sleep(5)
                     tbl = driver.find_element(By.ID, 'tblAcctd')
-                    rows = tbl.find_elements_by_tag_name("tr")
+                    rows = tbl.find_elements(By.TAG_NAME, "tr")
                     found_col = False
                     for row in rows:
-                        cols = row.find_elements_by_tag_name("td")
+                        cols = row.find_elements(By.TAG_NAME, "td")
                         for col in cols:
                             if col.text.strip() == number:
                                 print('clicking on col')
@@ -104,7 +104,7 @@ def pull_sbi_transactions(user, password, number, start_date):
                     to_elem = driver.find_element(By.ID, 'datepicker4')
                     #to_elem.send_keys('31/03/2021')
                     to_elem.send_keys(to_date_str)
-                    get_elem = driver.find_element_by_name('submit')
+                    get_elem = driver.find_element(By.NAME, 'submit')
                     get_elem.click()
                     time.sleep(5)
                     if 'There are no financial transactions performed' in driver.page_source:
@@ -112,10 +112,10 @@ def pull_sbi_transactions(user, password, number, start_date):
                     else:
                         print('getting transactions')
                         trans_table_div = driver.find_element(By.XPATH, '//div[contains(@class,"table_scrl")]')
-                        trans_table = trans_table_div.find_element_by_tag_name('table')
-                        for tbody in trans_table.find_elements_by_tag_name('tbody'):
-                            for tr in tbody.find_elements_by_tag_name('tr'):
-                                tds = tr.find_elements_by_tag_name('td')
+                        trans_table = trans_table_div.find_element(By.TAG_NAME, 'table')
+                        for tbody in trans_table.find_elements(By.TAG_NAME, 'tbody'):
+                            for tr in tbody.find_elements(By.TAG_NAME, 'tr'):
+                                tds = tr.find_elements(By.TAG_NAME, 'td')
                                 if len(tds) == 4:
                                     for i in range(4):
                                         print(f'td[{str(i)}] text {tds[i].text} innerHTML {tds[i].get_attribute("innerHTML")}')
