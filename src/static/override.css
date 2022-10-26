@@ -18,11 +18,10 @@ body
 {
     position: fixed;
     width: 250px;
-    height: 100%;
+    height: calc(100vh - 60px);
     background: #593f75;
     transition: 0.5s;
-    overflow: scroll;
-    margin-top: 60px;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
 }
 
 .main
@@ -136,7 +135,6 @@ body
     display: flex;
     justify-content: left;
     align-items: center;
-    padding: 10px;
 }
 .brand-name{
     padding-left: 10px;
@@ -292,6 +290,8 @@ div {
 {
     .navigation {
         left: -100%;
+        height: calc(100vh - 60px);
+        z-index: 90;
     }
     .navigation.active {
         left: 0px;
@@ -301,6 +301,7 @@ div {
         margin-left:0px;
         width:100%;
         padding: 0px 0px 0px 5px;
+        z-index: 80;
     }
     .main.deactive {
         width:0%;
@@ -312,6 +313,9 @@ div {
     }
     .logo {
         left: -60px;
+    }
+    .collapse:not(.show){
+        display: inline-block;
     }
     .toggle{
         position: absolute;
@@ -331,13 +335,13 @@ div {
         height:60px;
         background: #593f75;
         position: sticky;
+        z-index: 100;
     }
     .navbar-brand{
         color: #ffffff;
         display: flex;
         justify-content: left;
         align-items: center;
-        padding: 10px;
     }
     .brand-name{
         padding-left: 10px;
