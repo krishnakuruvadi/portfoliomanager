@@ -22,6 +22,7 @@ body
     background: #593f75;
     transition: 0.5s;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    z-index: 90;
 }
 
 .main
@@ -32,6 +33,7 @@ body
     overflow:scroll;
     scroll-behavior: auto;
     padding: 0px 10px 0px 10px;
+    z-index: 80;
 }
 
 .logo
@@ -128,6 +130,7 @@ body
     height:60px;
     background: #593f75;
     position: sticky;
+    z-index: 100;
 }
 
 .navbar-brand{
