@@ -281,6 +281,8 @@ def crypto_detail(request, id):
         context['symbol'] = crypto.symbol
         context['as_on_date'] = crypto.as_on_date
         context['latest_value'] = crypto.latest_value
+        context['symbol_id'] = crypto.symbol_id
+        context['name'] = crypto.name
         bal_vals = list()
         price_vals = list()
         chart_labels = list()
