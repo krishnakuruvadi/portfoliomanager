@@ -147,7 +147,7 @@ def get_ms_code(mf_name, isin, isin2, ms_name, ignore_names=None, retry=0):
                 search_element.send_keys(part + ' ')
             time.sleep(3)
 
-            els = driver.find_elements_by_class_name('quote-list')
+            els = driver.find_elements(By.CLASS_NAME, 'quote-list')
             if len(els) == 0:
                 print(f'No results found for {form_space_separated_string(mf_name_parts, 0, i)}')
                 return None     
@@ -167,7 +167,7 @@ def get_ms_code(mf_name, isin, isin2, ms_name, ignore_names=None, retry=0):
                             
                             #print(f"{li.get_attribute('innerHTML')}")
                             till_now = form_space_separated_string(mf_name_parts, 0, i, True)
-                            qn_elems = el.find_elements_by_css_selector('div.quote-name')
+                            qn_elems = el.find_elements(By.CSS_SELECTOR, 'div.quote-name')
                             if qn_elems:
                                 if till_now.lower() in qn_elems[0].get_attribute('innerHTML').lower():
                                     i += 1
@@ -206,7 +206,7 @@ def get_ms_code(mf_name, isin, isin2, ms_name, ignore_names=None, retry=0):
                                 print(f'part {part}')
                         print('200')
                         if len(li_elems) and not send_next_key:
-                            qn_elems = el.find_elements_by_css_selector('div.quote-name')
+                            qn_elems = el.find_elements(By.CSS_SELECTOR, 'div.quote-name')
                             if qn_elems:
                                 map_elems = dict()
                                 high_score = 0
@@ -237,7 +237,7 @@ def get_ms_code(mf_name, isin, isin2, ms_name, ignore_names=None, retry=0):
                                         try:
                                             print(f'j {j}')
                                         
-                                            isin_elems = driver.find_elements_by_class_name('sal-mip-quote__symbol')
+                                            isin_elems = driver.find_elements(By.CLASS_NAME, 'sal-mip-quote__symbol')
                                             for isin_elem in isin_elems:
                                                 if isin_elem.text == isin or (isin2 and isin_elem.text == isin2):
                                                     if isin2:
@@ -330,7 +330,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                 search_element.send_keys(part + ' ')
             time.sleep(2)
             #els = driver.find_elements(By.XPATH, "//*[@class='ui-autocomplete' and @class='quote-list']")
-            els = driver.find_elements_by_class_name('quote-list')
+            els = driver.find_elements(By.CLASS_NAME, 'quote-list')
             if len(els) == 0:
                 if not replaceAnd:
                     if mf_name_parts[i] == '&' or mf_name_parts[i].lower() == 'and':
@@ -349,7 +349,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                         print(f'too many results {len(li_elems)}')
                         continue 
                     if len(li_elems):
-                        qn_elems = el.find_elements_by_css_selector('div.quote-name')
+                        qn_elems = el.find_elements(By.CSS_SELECTOR, 'div.quote-name')
                         if qn_elems:
                             map_elems = dict()
                             high_score = 0
@@ -374,7 +374,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                                 best_match_elem.click()
                                 print('done clicking')
                                 time.sleep(5)
-                                isin_elems = driver.find_elements_by_class_name('sal-mip-quote__symbol')
+                                isin_elems = driver.find_elements(By.CLASS_NAME, 'sal-mip-quote__symbol')
                                 for isin_elem in isin_elems:
                                     if isin_elem.text == fund.isin or (fund.isin2 and isin_elem.text == fund.isin2):
                                         if fund.isin2:
@@ -389,7 +389,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                                         else:
                                             print(f'not updated ms_code for {fund.name}')
 
-                                        is_elems = driver.find_elements_by_class_name('investment-style')
+                                        is_elems = driver.find_elements(By.CLASS_NAME, 'investment-style')
                                         for is_elem in is_elems:
                                             if is_elem.tag_name == 'svg':
                                                 print('is_elem', is_elem.get_attribute('innerHTML'))
@@ -404,7 +404,7 @@ def pull_ms(code, ignore_names, replaceAnd=False, token=None):
                                             print('cat_elem class:', cat_elem.get_attribute('class'))
                                             if 'sal-dp-name ng-binding' in cat_elem.get_attribute('class'):
                                                 parent_cat_elem = cat_elem.find_element(By.XPATH, './..')
-                                                for elem in parent_cat_elem.find_elements_by_tag_name('div'):
+                                                for elem in parent_cat_elem.find_elements(By.TAG_NAME, 'div'):
                                                     if elem.text != 'Category':
                                                         data['categoryName'] = elem.text
                                         '''
@@ -471,9 +471,9 @@ def match_score(base, comp):
     return score
 
 def grab_details(driver, data):
-    tab_elems = driver.find_elements_by_class_name('tabon')
+    tab_elems = driver.find_elements(By.CLASS_NAME, 'tabon')
     for te in tab_elems:
-        for anchor in te.parent.find_elements_by_tag_name('a'):
+        for anchor in te.parent.find_elements(By.TAG_NAME, 'a'):
             #print('a href', anchor.get_attribute('href'))
             if 'performance' in anchor.get_attribute('href').lower() or 'performance' in anchor.text.lower():
                 anchor.click()
@@ -483,11 +483,11 @@ def grab_details(driver, data):
                 for table in tables:
                     #print('inside table:', table.get_attribute('innerHTML'))
                     if 'Since Inception' not in table.get_attribute('innerHTML'):
-                        rows = table.find_elements_by_tag_name("tr")
+                        rows = table.find_elements(By.TAG_NAME, "tr")
                         if len(rows)>2:
                             data['performance'] = dict()
                             cur_yr = datetime.datetime.today().year
-                            cols = rows[1].find_elements_by_tag_name("td")
+                            cols = rows[1].find_elements(By.TAG_NAME, "td")
                             for i,col in enumerate(cols):
                                 txt = col.find_element(By.TAG_NAME, 'span').text
                                 print('returns col value', txt)
@@ -496,12 +496,12 @@ def grab_details(driver, data):
                                 else:
                                     data['performance'][str(cur_yr-10+i)] = txt
                     else:
-                        rows = table.find_elements_by_tag_name("tr")
+                        rows = table.find_elements(By.TAG_NAME, "tr")
                         if len(rows)>2:
                             if not 'performance' in data:
                                 data['performance'] = dict()
                             cur_yr = datetime.datetime.today().year
-                            cols = rows[1].find_elements_by_tag_name("td")
+                            cols = rows[1].find_elements(By.TAG_NAME, "td")
                             perfs = ['1D','1W','1M','3M','YTD','1Y','3Y','5Y','10Y','15Y','INCEPTION']
                             for i,col in enumerate(cols):
                                 data['performance'][perfs[i]] = col.text
@@ -510,12 +510,12 @@ def grab_details(driver, data):
                 tables = driver.find_elements(By.XPATH, "//table[@class='total-table no-return-rank']")
                 print('len of total tables', len(tables))
                 for table in tables:
-                    rows = table.find_elements_by_tag_name("tr")
+                    rows = table.find_elements(By.TAG_NAME, "tr")
                     if len(rows)>2:
                         if not 'performance' in data:
                             data['performance'] = dict()
                         cur_yr = datetime.datetime.today().year
-                        cols = rows[1].find_elements_by_tag_name("td")
+                        cols = rows[1].find_elements(By.TAG_NAME, "td")
                         perfs = ['1D','1W','1M','3M','YTD','1Y','3Y','5Y','10Y','15Y','INCEPTION']
                         for i,col in enumerate(cols):
                             data['performance'][perfs[i]] = col.text
@@ -597,7 +597,7 @@ def pull_category_returns():
                 
                 for row in rows:
                     #print(row.text)
-                    cols = row.find_elements_by_tag_name("td")
+                    cols = row.find_elements(By.TAG_NAME, "td")
                     '''
                     for col in cols:
                         print('col text', col.text)
@@ -654,7 +654,7 @@ def pull_blend(codes):
                 cols = row.find_elements(By.TAG_NAME, "td")
                 if len(cols) > 2:
                     #print(cols[2].text)
-                    #cels = cols[2].find_elements_by_css_selector("*")
+                    #cels = cols[2].find_elements(By.CSS_SELECTOR, "*")
                     #for cel in cels:
                     #    print (cel.tag_name)
                     #    print (cel.text)

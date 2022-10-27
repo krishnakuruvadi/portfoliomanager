@@ -213,6 +213,7 @@ class R401KInterface:
                    'nav_date':nh.nav_date,
                    'comparision_nav_value':nh.comparision_nav_value
                 })
+            eod['nav_history'] = nht
             data.append(eod)
         
         ret[self.get_export_name()]['data'] = data

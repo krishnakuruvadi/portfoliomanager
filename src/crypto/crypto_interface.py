@@ -180,7 +180,7 @@ class CryptoInterface:
                     coin = Coin.objects.get(symbol=cobj.symbol)
                     try:
                         hcp = HistoricalCoinPrice.objects.get(coin=coin, date=end_date)
-                        total += float(hcp.price)*float(tu)*float(get_in_preferred_currency(1, 'USD'))
+                        total += float(hcp.price)*float(tu)*float(get_in_preferred_currency(1, 'USD', end_date))
                     except HistoricalCoinPrice.DoesNotExist:
                         from tasks.tasks import pull_and_store_coin_historical_vals
                         pull_and_store_coin_historical_vals(cobj.symbol, end_date)
@@ -227,7 +227,10 @@ class CryptoInterface:
         for co in Crypto.objects.filter(user=user_id):
             cod = {
                 'symbol': co.symbol,
-                'goal_name':''
+                'goal_name':'',
+                'symbol_id': co.symbol_id,
+                'name':co.name,
+                'api_symbol': co.api_symbol
             }
             if co.goal:
                 cod['goal_name'] = get_goal_name_from_id(co.goal)
@@ -241,7 +244,9 @@ class CryptoInterface:
                     'conversion_rate': trans.conversion_rate,
                     'trans_price':trans.trans_price,
                     'broker':trans.broker,
-                    'notes':trans.notes
+                    'notes':trans.notes,
+                    'buy_currency':trans.buy_currency,
+                    'fees': trans.fees
                 })
             cod['transactions'] = t
             data.append(cod)
@@ -305,6 +310,8 @@ class CryptoInterface:
                 cash_flows.append((end_date, float(amt)))
                 print(f'finding xirr for {cash_flows}')
                 ret['change'] = xirr(cash_flows, 0.1)*100
+            elif changed == 0:
+                ret['change'] = 0
             else:
                 ret['change'] = calc_simple_roi(changed , amt)
         else:
