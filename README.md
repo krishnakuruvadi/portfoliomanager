@@ -195,6 +195,7 @@ OR
 ```
 http://localhost:8000/
 ```
+Note: Different charts and data gets updated at different fixed schedules.  If you want to manually update these, go to "Internals" and then "Tasks" and queue the tasks to run once
 
 - **Enjoy Portfolio Manager!**
 
@@ -303,6 +304,7 @@ OR
 ```
 http://localhost/
 ```
+Note: Different charts and data gets updated at different fixed schedules.  If you want to manually update these, go to "Internals" and then "Tasks" and queue the tasks to run once
 
 - **Enjoy Portfolio Manager!**
   
