@@ -118,16 +118,15 @@ def update_fund(policy, fund, summ):
             except Exception as ex:
                 print(f'exception {ex} when updating fund details')
                 
+        nh = NAVHistory.objects.filter(fund=fund).order_by('nav_date')
+        if len(nh) == 0 or nh[0].nav_date < summ['nav_date']:
+            fund.nav_date =  summ['nav_date']
+            fund.nav = summ['nav']
         else:
-            nh = NAVHistory.objects.filter(fund=fund).order_by('nav_date')
-            if len(nh) == 0 or nh[0].nav_date < summ['nav_date']:
-                fund.nav_date =  summ['nav_date']
-                fund.nav = summ['nav']
-            else:
-                fund.nav_date =  nh[0].nav_date
-                fund.nav = nh[0].nav
-            fund.units = summ['units']
-            fund.save()
+            fund.nav_date =  nh[0].nav_date
+            fund.nav = nh[0].nav
+        fund.units = summ['units']
+        fund.save()
     else:
         print(f'unsupported fund update yet for company {policy.company}')
 

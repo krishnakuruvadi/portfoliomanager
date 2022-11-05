@@ -999,7 +999,7 @@ def update_markets():
     today = datetime.date.today()
     update_indexes(today+relativedelta(days=-10), today)
 
-@db_task(crontab(day='*/7',minute='40', hour='*/12'))
+@db_periodic_task(crontab(day='*/7',minute='40', hour='*/12'))
 def update_insurance_policy_vals(policy_num):
     from insurance.insurance_helper import update_policy_val_using_policy_num, update_policies
     if policy_num:
