@@ -1,18 +1,14 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import (
-    ListView,
     DetailView,
     DeleteView
 )
-from django.template import Context
 from django.http import HttpResponseRedirect
 from decimal import Decimal
 from .models import Goal
 from .goal_helper import one_time_pay_final_val, add_goal_entry, get_corpus_to_be_saved, get_depletion_vals, get_unallocated_amount
 from dateutil.relativedelta import relativedelta
-from ppf.models import Ppf, PpfEntry
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import json
@@ -22,12 +18,13 @@ from shared.handle_chart_data import get_goal_contributions, get_goal_yearly_con
 from shared.financial import *
 import colorsys
 from shared.utils import get_int_or_none_from_string
-
+from django.db import IntegrityError
 from bankaccounts.bank_account_interface import BankAccountInterface
 from crypto.crypto_interface import CryptoInterface
 from users.user_interface import get_ext_user, get_users
 from django.conf import settings
 from common.helper import get_preferred_currency_symbol
+
 
 # Create your views here.
 
@@ -365,7 +362,6 @@ def alternate_investment_strategy(target_dates_and_amts, roi):
 
 class GoalDetailView(DetailView):
     template_name = 'goals/goal_detail.html'
-    #queryset = Ppf.objects.all()
 
     def get_object(self):
         id_ = self.kwargs.get("id")
@@ -524,43 +520,69 @@ class GoalDeleteView(DeleteView):
 def add_goal(request):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
     template = 'goals/add_goal.html'
+    context = dict()
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
         if "submit" in request.POST:
-            print("submit button pressed")
-            name = request.POST['name']
-            start_date = request.POST['startdate']
-            user_id = request.POST['user']
-            time_period = Decimal(request.POST['time_period'])
-            curr_val = Decimal(request.POST['curr_val'])
-            inflation = Decimal(request.POST['inflation'])
-            final_val = Decimal(request.POST['final_val'])
-            recurring_pay_goal = False
-            expense_period = 0
-            post_returns = 0
-            notes = request.POST['notes']
-            add_goal_entry(name, start_date, curr_val, time_period, inflation,
-                final_val, user_id, recurring_pay_goal, expense_period,
-                post_returns, notes)
+            try:
+                print("submit button pressed")
+                name = request.POST['name']
+                start_date = request.POST['startdate']
+                user_id = request.POST['user']
+                time_period = Decimal(request.POST['time_period'])
+                curr_val = Decimal(request.POST['curr_val'])
+                inflation = Decimal(request.POST['inflation'])
+                final_val = Decimal(request.POST['final_val'])
+                recurring_pay_goal = False
+                expense_period = 0
+                post_returns = 0
+                notes = request.POST['notes']
+                add_goal_entry(name, start_date, curr_val, time_period, inflation,
+                    final_val, user_id, recurring_pay_goal, expense_period,
+                    post_returns, notes)
+                message = 'New goal created'
+                message_color = 'green'
+            except IntegrityError as ie:
+                print(f'failed to add goal {ie}')
+                message = 'Failed to add goal'
+                message_color = 'red'
+            except Exception as ex:
+                print(f'failed to add goal {ex}')
+                message = 'Failed to add goal'
+                message_color = 'red'
         else:
-            print("calculate button pressed")
-            name = request.POST['name']
-            start_date = request.POST['startdate']
-            user = request.POST['user']
-            time_period = Decimal(request.POST['time_period'])
-            curr_val = Decimal(request.POST['curr_val'])
-            inflation = Decimal(request.POST['inflation'])
-            notes = request.POST['notes']
+            try:
+                print("calculate button pressed")
+                name = request.POST['name']
+                start_date = request.POST['startdate']
+                user = request.POST['user']
+                time_period = Decimal(request.POST['time_period'])
+                curr_val = Decimal(request.POST['curr_val'])
+                inflation = Decimal(request.POST['inflation'])
+                notes = request.POST['notes']
 
-            val = one_time_pay_final_val(curr_val, inflation, time_period)
-            print("calculated value", val)
-            users = get_all_users()
-            context = {'users':users, 'user':user, 'startdate':start_date, 'name': name, 'notes': notes,
-                'time_period': time_period, 'curr_val': curr_val, 'inflation':inflation, 'final_val':val,
-                'curr_module_id':'id_goal_module'}
-            return render(request, template, context=context)
+                val = one_time_pay_final_val(curr_val, inflation, time_period)
+                print("calculated value", val)
+                context['user'] = user 
+                context['startdate'] = start_date
+                context['name'] =  name
+                context['notes'] =  notes
+                context['time_period'] =  time_period
+                context['curr_val'] =  curr_val
+                context['inflation'] = inflation
+                context['final_val'] = val
+            except Exception as ex:
+                print(f'failed to calculate final value {ex}')
+                message = 'Failed to calculate final value'
+                message_color = 'red'
+
     users = get_all_users()
-    context = {'users':users, 'curr_module_id': 'id_goal_module'}
+    context['message'] = message
+    context['message_color'] = message_color
+    context['users'] = users
+    context['curr_module_id'] = 'id_goal_module'
     return render(request, template, context=context)
 
 def add_retirement_goal(request):
