@@ -12,7 +12,7 @@ bsedata==0.4.0
 camelot-py==0.10.1
 casparser==0.4.7
 casparser-isin==2021.6.1
-certifi==2022.6.15
+certifi==2022.12.7
 cffi==1.15.1
 channels==3.0.5
 chardet==3.0.4
