@@ -10,10 +10,10 @@
 
 SECRET_KEY='uuoc10!bp#0bkgq2oyh3s@sd^8%^k3(q8poba@onqv)@9zy(*9'
 
-# Django debug mode. In production off or False is recommended.
-# Value can be set to: on, true, 1, off, false or 0 (on/true/1 will enable debug mode. off/false/0 will disable debug mode.)
+# Django debug mode. In production False (0) is recommended.
+# Value can be set to: 0 or 1 (0 will disable DEBUG. Same as DEBUG=FALSE. 1 will enable DEBUG. Same as DEBUG=TRUE)
 
-DEBUG=on 
+DEBUG=0
 
 # Allow connection from specific hosts or domains. Separate each value with a comma and no space in-between.
 # If using docker, you may need to specify the IP of the container itself or use a wildcard. For example: ALLOWED_HOSTS=*
