@@ -214,6 +214,8 @@ def goals_insight(request):
             i += 1
         context['curr_module_id'] = 'id_goal_module'
         print(context)
+    else:
+        context['chart_data'] = list()
     return render(request, template, context)
 
 def get_N_HexCol(N=5):
