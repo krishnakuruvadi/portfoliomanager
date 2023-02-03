@@ -1,3 +1,5 @@
+Feel free to join the discord - https://discord.gg/NTj7KXEB.  Let us know your feedback - what do you like and what needs improvement.  Let us know any feature requests.  If you want to contribute to the repo and need help, you can reach us on discord as well.
+
 # Portfolio Manager
 
 ## Live Server
