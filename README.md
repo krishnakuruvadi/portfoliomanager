@@ -1,16 +1,16 @@
-Feel free to join the discord - https://discord.gg/NTj7KXEB.  Let us know your feedback - what do you like and what needs improvement.  Let us know any feature requests.  If you want to contribute to the repo and need help, you can reach us on discord as well.
-
 # Portfolio Manager
 
-## Live Server
+## Other hosting options
 
-An sandbox live server is hosted at https://india-portfolio-manager.herokuapp.com/. **Not optimized for mobile. Best viewed on Chrome browser.**
+If you or someone you know is unable to self host this application but would greatly benefit from it, checkout us out at [lukritive.com](https://lukritive.com), our hosted site (with a 15-day trial)!
 
-```diff
-! Please be kind enough and not do any delete operations.
-```
+  - Keep in mind it's still in Beta release! It is free to sign up.
 
----
+## Be part of the community!
+
+Feel free to join our [Discord](https://discord.gg/YknWEN6GAw).  Let us know your feedback - what do you like? what needs improvement? what features would you like to see added?
+
+If you want to contribute to the repo and need help, you can reach us on discord as well.
 
 ## Intent
 
