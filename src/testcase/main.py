@@ -17,7 +17,7 @@ def get_path_to_chrome_driver():
     else:
         found = False
         for ao in avail_options:
-            print(f'ao')
+            print(f'{ao}')
             if ao == "chromedriver":
                 found = True
                 path = os.path.join(path, ao)

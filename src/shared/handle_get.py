@@ -146,14 +146,14 @@ def get_path_to_chrome_driver():
     else:
         found = False
         for ao in avail_options:
-            print(f'ao')
+            print(f'{ao}')
             if ao == "chromedriver":
                 found = True
                 path = os.path.join(path, ao)
                 break
         if not found:
             path = os.path.join(path, avail_options[0])
-    print('path to chrome driver ',path)
+    print(f'found path to chrome driver {path}')
     return path
 
 def get_files_in_dir(dir):

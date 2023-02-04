@@ -12,7 +12,12 @@ from users.tests import add_default_user
 # Create your tests here.
 class Retirement401KTest(StaticLiveServerTestCase):
     def setUp(self):
-        self.browser = webdriver.Chrome(executable_path=get_path_to_chrome_driver())
+        try:
+            print(f'try default chrome launch')
+            self.browser = webdriver.Chrome()
+        except Exception as ex:
+            print(f'exception {ex} with default chrome launch')
+            self.browser = webdriver.Chrome(executable_path=get_path_to_chrome_driver())
     
     def tearDown(self):
         self.browser.close()
