@@ -8,10 +8,22 @@ from selenium.webdriver.common.by import By
 
 def get_path_to_chrome_driver():
     path = pathlib.Path(__file__).parent.parent.parent.absolute()
-    for file in os.listdir(path):
+    avail_options = list()
+    for file in os.listdir(path):    
         if "chromedriver" in file.lower():
-            path = os.path.join(path, file)
-            break
+            avail_options.append(file)
+    if len(avail_options) == 1:
+        path = os.path.join(path, avail_options[0])
+    else:
+        found = False
+        for ao in avail_options:
+            print(f'ao')
+            if ao == "chromedriver":
+                found = True
+                path = os.path.join(path, ao)
+                break
+        if not found:
+            path = os.path.join(path, avail_options[0])
     print('path to chrome driver ',path)
     return path
 
