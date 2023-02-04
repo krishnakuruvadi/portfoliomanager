@@ -7,12 +7,26 @@ from django.urls import reverse
 import time
 from shared.handle_get import get_path_to_chrome_driver
 from users.tests import add_default_user
-
+from selenium.webdriver.chrome.options import Options
 
 # Create your tests here.
 class Retirement401KTest(StaticLiveServerTestCase):
     def setUp(self):
-        self.browser = webdriver.Chrome(executable_path=get_path_to_chrome_driver())
+        
+        options = Options()
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-extensions')
+        options.add_argument("window-size=1920,1080")
+        try:
+            print(f'try default chrome launch with options')
+            self.browser = webdriver.Chrome(options=options)
+        except Exception as ex:
+            print(f'exception {ex} with default chrome launch')
+            options.add_argument("start-maximized")
+            self.browser = webdriver.Chrome(executable_path=get_path_to_chrome_driver(), options=options)
     
     def tearDown(self):
         self.browser.close()
@@ -24,6 +38,8 @@ class Retirement401KTest(StaticLiveServerTestCase):
             if key in s:
                 v = s.replace(key, '')
                 v = v.replace(':', '')
+                v = v.replace('$', '')
+                v = v.replace('₹', '')
                 return v.strip()
         return None
     
@@ -32,9 +48,11 @@ class Retirement401KTest(StaticLiveServerTestCase):
 
     def test_no_account(self):
         self.browser.get(self.live_server_url + reverse('retirement_401k:account-list'))
-        ti = self.browser.find_element(By.XPATH, "//b[text()='Total Investment:']/..")
+        ti = self.browser.find_element(By.XPATH, "//h6[text()='Total Investment']/..")
         self.assertEqual(float(self.get_summary_val(ti.text, 'Total Investment')), 0)
+        ti = self.browser.find_element(By.XPATH, "//h6[text()='Current Value']/..")
         self.assertEqual(float(self.get_summary_val(ti.text, 'Current Value')), 0)
+        ti = self.browser.find_element(By.XPATH, "//h6[text()='Gain']/..")
         self.assertEqual(float(self.get_summary_val(ti.text, 'Gain')), 0)
 
         time.sleep(3)
@@ -62,7 +80,7 @@ class Retirement401KTest(StaticLiveServerTestCase):
         anc = columns[0].find_elements(By.TAG_NAME, 'a')
         self.assertEquals(anc[0].text, 'Personal')
         self.assertEquals(columns[1].text, 'Oct. 4, 2010')
-        time.sleep(2)
+        time.sleep(5)
         self.assertEquals(columns[2].text, 'None')
         self.assertEquals(columns[3].text, user.name)
         self.assertEquals(columns[4].text, '')

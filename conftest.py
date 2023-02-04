@@ -17,15 +17,30 @@ def new_user1(db, user_factory):
 
 def get_path_to_driver(driver):
     path = pathlib.Path(__file__).parent.absolute()
+    avail_options = list()
     for file in os.listdir(path):
         if driver == "firefox":
             if "geckodriver" in file.lower():
-                path = os.path.join(path, file)
-                break
+                avail_options.append(file)
         else:
             if "chromedriver" in file.lower():
-                path = os.path.join(path, file)
+                avail_options.append(file)
+    if len(avail_options) == 1:
+        path = os.path.join(path, avail_options[0])
+    else:
+        found = False
+        for ao in avail_options:
+            print(f'ao')
+            if ao == "geckodriver" and driver == "firefox":
+                path = os.path.join(path, ao)
+                found = True
                 break
+            elif ao == "chromedriver" and driver != "firefox":
+                found = True
+                path = os.path.join(path, ao)
+                break
+        if not found:
+            path = os.path.join(path, avail_options[0])
     print('path to {driver} driver ',path)
     return path
 

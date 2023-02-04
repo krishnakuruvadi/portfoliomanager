@@ -17,6 +17,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - uses: nanasess/setup-chromedriver@v1
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
@@ -27,4 +28,12 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       run: |
+        export DISPLAY=:99
+        chromedriver --url-base=/wd/hub &
+        cp env_files/.pm-env-test env_files/.pm-env
+        cp -r env_files src
+        cd src
+        python manage.py makemigrations
+        python manage.py migrate
+        python manage.py collectstatic --noinput
         python manage.py test
