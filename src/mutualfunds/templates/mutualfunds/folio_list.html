@@ -11,7 +11,8 @@
     <a style="padding-left:25px;" href="transactions"><i class="far fa-file-alt" aria-hidden="true" title="All Transactions" style="font-size: 1.2em;"></i></a>
     <a style="padding-left:25px;" href="upload"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
     <a style="padding-left:25px;" href="add"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
-    <a style="padding-left:25px;padding-right:25px;" href="delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Folios" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Folios" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="#" data-toggle="modal" data-target="#helpModal"><i class="fa fa-sharp fa-solid fa-question" aria-hidden="true" title="Help" style="font-size: 1.2em;"></i></a>
 
 {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
@@ -162,6 +163,55 @@
     </tbody>
   </table>
 {% endblock content %}
+
+<!-- Help Modal -->
+{% block helpmodaltitle %}
+  Mutual Funds
+{% endblock helpmodaltitle %}
+
+{% block helpmodalsummarybody %}
+View, add, edit or delete your mutual fund folios.
+Once you've consolidated them here, keep an eye on the performance and overall health of your folios through our built-in charts.
+{% endblock helpmodalsummarybody %}
+
+{% block helpmodalnavigationbody %}
+  <li>
+    <i class="fa fa-sync"></i> - Refresh page
+  </li>
+  <li>
+    <i class="far fa-file-alt"></i> - View all transactions
+  </li>
+  <li>
+    <i class="fa fa-upload"></i> - Bulk import of transactions
+  </li>
+  <li>
+    <i class="fa fa-plus"></i> - Add new folio
+  </li>
+  <li>
+    <i class="fa fa-trash"></i> - Delete folios
+  </li>
+  <li>
+    <i class="fa fa-bell"></i> - Investment/asset alerts
+  </li>
+{% endblock helpmodalnavigationbody %}
+
+{% block helpmodaltasksbody %}
+<li>
+  From the goals page (<i class="fas fa-bullseye"></i>), configure a goal to track your transactions against. <strong> (Optional) </strong>
+</li>
+<li>
+  Create users through the Users (<i class="fas fa-users"></i>) page. Transactions accross the app are tied to a user. <strong> (Optional) </strong>
+</li>
+<li>
+  Add Mutual Fund folios (<i class="fa fa-plus"></i>) that you want to track.
+</li>
+<li>
+  View and Add transactions (<i class="far fa-file-alt"></i>) for each folio.
+</li>
+<li>
+  Edit folio (<i class="far fa-edit"></i>) details.
+</li>
+{% endblock helpmodaltasksbody %}
 
 <script>
 {% block jquery %}

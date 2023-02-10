@@ -9,6 +9,7 @@
 {% block applicableactions %}
     <a style="padding-right:20px;" href="create"><i class="fa fa-plus" aria-hidden="true" title="Add ESPP" style="font-size: 1.2em;"></i></a>
     <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="#" data-toggle="modal" data-target="#helpModal"><i class="fa fa-sharp fa-solid fa-question" aria-hidden="true" title="Help" style="font-size: 1.2em;"></i></a>
 {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
 
@@ -125,6 +126,47 @@
     </tbody>
   </table>
 {% endblock %}
+
+<!-- Help Modal -->
+{% block helpmodaltitle %}
+  Employee Stock Purchase Plan
+{% endblock helpmodaltitle %}
+
+{% block helpmodalsummarybody %}
+View, add, edit or delete your ESPP buy, then 
+watch for movement on your assets with charts, 
+gains, and losses.
+{% endblock helpmodalsummarybody %}
+
+{% block helpmodalnavigationbody %}
+  <li>
+    <i class="fa fa-plus"></i> - Add transactions
+  </li>
+  <li>
+    <i class="fa fa-sync"></i> - Refresh page
+  </li>
+  <li>
+    <i class="fa fa-bell"></i> - Investment/asset alerts
+  </li>
+{% endblock helpmodalnavigationbody %}
+
+{% block helpmodaltasksbody %}
+<li>
+  From the goals page (<i class="fas fa-bullseye"></i>), configure a goal to track your transactions against. <strong> (Optional) </strong>
+</li>
+<li>
+  Create users through the Users (<i class="fas fa-users"></i>) page. Transactions accross the app are tied to a user. <strong> (Optional) </strong>
+</li>
+<li>
+  Add ESPP buy (<i class="fa fa-plus"></i>) that you want to track.
+</li>
+<li>
+  View and Add sell transactions (<i class="far fa-file-alt"></i>) for each ESPP buy.
+</li>
+<li>
+  Edit ESPP buy (<i class="far fa-edit"></i>) details.
+</li>
+{% endblock helpmodaltasksbody %}
 
 <script>
   {% block jquery %}

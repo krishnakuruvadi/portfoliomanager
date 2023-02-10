@@ -9,8 +9,10 @@
 
 {% block applicableactions %} 
   <a href="add"><i class="fa fa-plus" aria-hidden="true" title="Add Bank Account" style="font-size: 1.2em;"></i></a>
-  <a style="padding-left:25px;padding-right:25px;" href="delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Accounts" style="font-size: 1.2em;"></i></a>
-{% endblock applicableactions %}
+  <a style="padding-left:25px;" href="delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Accounts" style="font-size: 1.2em;"></i></a>
+  <a style="padding-left:25px;" href="#" data-toggle="modal" data-target="#helpModal"><i class="fa fa-sharp fa-solid fa-question" aria-hidden="true" title="Help" style="font-size: 1.2em;"></i></a>
+
+  {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
 
 {% block content %}
@@ -156,6 +158,47 @@
     </tbody>
   </table>
 {% endblock %}
+
+<!-- Help Modal -->
+{% block helpmodaltitle %}
+  Bank Accounts/Loans
+{% endblock helpmodaltitle %}
+
+{% block helpmodalsummarybody %}
+View, add, edit or delete your bank accounts and loans.
+You have the ability to track accounts such as savings, checking, home loans, car loans and more.
+Add as many accounts as you'd like, then utilize our tables and charts to analyse expenses and credits.
+{% endblock helpmodalsummarybody %}
+
+{% block helpmodalnavigationbody %}
+  <li>
+    <i class="fa fa-plus"></i> - Add bank account
+  </li>
+  <li>
+    <i class="fa fa-trash"></i> - Delete bank account and all transactions
+  </li>
+  <li>
+    <i class="fa fa-bell"></i> - Investment/asset alerts
+  </li>
+{% endblock helpmodalnavigationbody %}
+
+{% block helpmodaltasksbody %}
+<li>
+  From the goals page (<i class="fas fa-bullseye"></i>), configure a goal to track your transactions against. <strong> (Optional) </strong>
+</li>
+<li>
+  Create users through the Users (<i class="fas fa-users"></i>) page. Transactions accross the app are tied to a user. <strong> (Optional) </strong>
+</li>
+<li>
+  Add bank accounts/loans (<i class="fa fa-plus"></i>) that you want to track.
+</li>
+<li>
+  View and Add transactions (<i class="far fa-file-alt"></i>) for each account.
+</li>
+<li>
+  Edit account (<i class="far fa-edit"></i>) details.
+</li>
+{% endblock helpmodaltasksbody %}
 
 <script>
   {% block jquery %}

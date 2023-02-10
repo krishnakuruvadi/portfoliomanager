@@ -8,6 +8,7 @@
 
 {% block applicableactions %}
     <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add User" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="#" data-toggle="modal" data-target="#helpModal"><i class="fa fa-sharp fa-solid fa-question" aria-hidden="true" title="Help" style="font-size: 1.2em;"></i></a>
 {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
 
@@ -84,6 +85,35 @@
     </tbody>
   </table>
 {% endblock %}
+
+<!-- Help Modal -->
+{% block helpmodaltitle %}
+  Users
+{% endblock helpmodaltitle %}
+
+{% block helpmodalsummarybody %}
+View, add, edit or delete your family member(s).
+Separating investments and assets by family member allows you to better track networth and keep all relevant information organized.
+
+{% endblock helpmodalsummarybody %}
+
+{% block helpmodalnavigationbody %}
+<li>
+  <i class="fa fa-plus"></i> - Add a family member
+</li>
+<li>
+  <i class="fa fa-trash"></i> - Delete user
+</li>
+<li>
+  <i class="fa fa-bell"></i> - Investment/asset alerts
+</li>
+{% endblock helpmodalnavigationbody %}
+
+{% block helpmodaltasksbody %}
+<li>
+  Edit existing user (<i class="far fa-edit"></i>) details.
+</li>
+{% endblock helpmodaltasksbody %}
 
 <script>
   {% block jquery %}
