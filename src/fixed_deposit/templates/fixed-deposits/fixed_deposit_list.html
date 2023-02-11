@@ -9,6 +9,7 @@
 
 {% block applicableactions %} 
     <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add Fixed Deposit" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="#" data-toggle="modal" data-target="#helpModal"><i class="fa fa-sharp fa-solid fa-question" aria-hidden="true" title="Help" style="font-size: 1.2em;"></i></a>
 {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
 
@@ -89,6 +90,41 @@
     </tbody>
   </table>
 {% endblock %}
+
+<!-- Help Modal -->
+{% block helpmodaltitle %}
+  Fixed Deposits
+{% endblock helpmodaltitle %}
+
+{% block helpmodalsummarybody %}
+  View, add, edit or delete your Fixed Deposits.
+  Once added, keep an eye on the movement of your assets with charts, 
+  gains, losses and the overall health of your investment. 
+{% endblock helpmodalsummarybody %}
+
+{% block helpmodalnavigationbody %}
+  <li>
+    <i class="fa fa-plus"></i> - Add FD
+  </li>
+  <li>
+    <i class="fa fa-bell"></i> - Investment/asset alerts
+  </li>
+{% endblock helpmodalnavigationbody %}
+
+{% block helpmodaltasksbody %}
+<li>
+  From the goals page (<i class="fas fa-bullseye"></i>), configure a goal to track your transactions against. <strong> (Optional) </strong>
+</li>
+<li>
+  Create users through the Users (<i class="fas fa-users"></i>) page. Transactions accross the app are tied to a user. <strong> (Optional) </strong>
+</li>
+<li>
+  Add a Fixed Deposit (<i class="fa fa-plus"></i>) that you want to track.
+</li>
+<li>
+  Edit Fixed Deposit (<i class="far fa-edit"></i>) details.
+</li>
+{% endblock helpmodaltasksbody %}
 
 <script>
   {% block jquery %}

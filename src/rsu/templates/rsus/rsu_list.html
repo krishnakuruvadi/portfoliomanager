@@ -9,6 +9,7 @@
 {% block applicableactions %} 
     <a style="padding-right:20px;" href="create"><i class="fa fa-plus" aria-hidden="true" title="Add RSU Award" style="font-size: 1.2em;"></i></a>
     <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="#" data-toggle="modal" data-target="#helpModal"><i class="fa fa-sharp fa-solid fa-question" aria-hidden="true" title="Help" style="font-size: 1.2em;"></i></a>
 {% endblock applicableactions %}
 {% block canvas %}{% endblock canvas %}
 
@@ -228,6 +229,47 @@
     </tbody>
   </table>
 {% endblock %}
+
+<!-- Help Modal -->
+{% block helpmodaltitle %}
+  Restricted Stock Units
+{% endblock helpmodaltitle %}
+
+{% block helpmodalsummarybody %}
+View, add, edit or delete your RSU awards.
+Once you've consolidated awards, keep an eye on the key metrics, movement, tables and charts.
+{% endblock helpmodalsummarybody %}
+
+{% block helpmodalnavigationbody %}
+  <li>
+    <i class="fa fa-plus"></i> - Add RSU award
+  </li>
+  <li>
+    <i class="fa fa-sync"></i> - Refresh page
+  </li>
+  <li>
+    <i class="fa fa-bell"></i> - Investment/asset alerts
+  </li>
+{% endblock helpmodalnavigationbody %}
+
+{% block helpmodaltasksbody %}
+<li>
+  From the goals page (<i class="fas fa-bullseye"></i>), configure a goal to track your transactions against. <strong> (Optional) </strong>
+</li>
+<li>
+  Create users through the Users (<i class="fas fa-users"></i>) page. Transactions accross the app are tied to a user. <strong> (Optional) </strong>
+</li>
+<li>
+  Add RSU Awards (<i class="fa fa-plus"></i>) that you want to track.
+</li>
+<li>
+  View and add vested transactions (<i class="far fa-file-alt"></i>) for each account.
+</li>
+<li>
+  Edit award (<i class="far fa-edit"></i>) details.
+</li>
+{% endblock helpmodaltasksbody %}
+
 
 <script>
   {% block jquery %}

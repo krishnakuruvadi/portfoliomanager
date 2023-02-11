@@ -236,6 +236,42 @@
       {% endblock canvas %}
       
       {% block content %} replace me {% endblock %}
+
+      {% block helpmodal %} <!-- Accessible from all page when invoked -->
+        <div id="helpModal" class="modal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title"> {% block helpmodaltitle %} {% endblock helpmodaltitle %}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                  <p class="ml-1">
+                    {% block helpmodalsummarybody %} {% endblock helpmodalsummarybody %}
+                  </p>
+                  <h5 class="text-left"> Navigation </h5>
+                  <ul class="ml-4">
+                    {% block helpmodalnavigationbody %} 
+                    
+                    {% endblock helpmodalnavigationbody %} 
+                  </ul>
+                  <h5 class="text-left"> Tasks </h5>
+                  <ol class="ml-4">
+                    {% block helpmodaltasksbody %} 
+                    
+                    {% endblock helpmodaltasksbody %} 
+                  </ol>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>        
+      {% endblock helpmodal%}
+
     </div>
 
     <!-- Optional JavaScript -->

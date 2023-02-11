@@ -60,6 +60,7 @@
         <a class="dropdown-item" href="#" id="action-all">Max</a>
       </div>
     </button>
+    <a style="padding-left:25px;" href="#" data-toggle="modal" data-target="#helpModal"><i class="fa fa-sharp fa-solid fa-question" aria-hidden="true" title="Help" style="font-size: 1.2em;"></i></a>
   </div>
 {% endblock applicableactions %}
 
@@ -107,6 +108,35 @@
     {% endfor %}
   </div>
 {% endblock content %}
+
+<!-- Help Modal -->
+{% block helpmodaltitle %}
+  Welcome to PortfolioManager !!!
+{% endblock helpmodaltitle %}
+
+{% block helpmodalsummarybody %}
+Your consolidated view across all investments and assets. 
+Here, you will also track your goal achievement status and characterization of investments for each of the goals with charts.
+
+{% endblock helpmodalsummarybody %}
+
+{% block helpmodalnavigationbody %}
+<li>
+  <i class="fas fa-tools"></i> - Edit your preferences including currency, desired investment types and timezone.
+</li>
+<li>
+  <i class="fa fa-bell"></i> - Investment/asset alerts
+</li>
+{% endblock helpmodalnavigationbody %}
+
+{% block helpmodaltasksbody %}
+<li>
+  Add family members through the Users (<i class="fas fa-users"></i>) page. Transactions accross the app are tied to a user. <strong> (Optional) </strong>
+</li>
+<li>
+  From the goals page (<i class="fas fa-bullseye"></i>), configure a goal to track your transactions against. <strong> (Optional) </strong>
+</li>
+{% endblock helpmodaltasksbody %}
 
 <script>
   {% block jquery %}
