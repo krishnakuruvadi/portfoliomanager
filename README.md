@@ -20,20 +20,26 @@ To build a portfolio manager which can track and provide insights into a individ
 
 ## What is supported?
 
+- Users
 - Goals
-- PPF (Public Provident Fund)
-- EPF (Employee Provident Fund)
+
 - Fixed Deposit
 - ESPP (Employee Stock Purchase Plan)
-- Users
-- SSY (Sukanya Samridhi Yojana)
 - RSU (Restricted Stock Units)
 - Shares
-- Mutual Funds
-- Bank Accounts
-- Gold
-- 401K
 - Crypto
+- Bank Accounts
+
+INDIA:
+- PPF (Public Provident Fund)
+- EPF (Employee Provident Fund)
+- SSY (Sukanya Samridhi Yojana)
+- Mutual Funds
+- Gold
+
+USA:
+- 401K
+
 
 ---
 
