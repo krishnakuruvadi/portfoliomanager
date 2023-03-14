@@ -43,7 +43,7 @@ def update_latest_vals(espp_obj):
                         else:
                             espp_obj.latest_conversion_rate = 1
                         espp_obj.latest_value = float(espp_obj.latest_price) * float(espp_obj.latest_conversion_rate) * float(espp_obj.shares_avail_for_sale)
-                        espp_obj.unrealised_gain = float(espp_obj.latest_value) - (float(espp_obj.purchase_price) * float(espp_obj.latest_conversion_rate) * float(espp_obj.shares_avail_for_sale))
+                        espp_obj.unrealised_gain = float(espp_obj.latest_value) - (float(espp_obj.purchase_price) * float(espp_obj.purchase_conversion_rate) * float(espp_obj.shares_avail_for_sale))
         if espp_obj.latest_value and espp_obj.latest_value > 0:
             cash_flows.append((datetime.date.today(), float(espp_obj.latest_value)))
             x = xirr(cash_flows, 0.1)*100
