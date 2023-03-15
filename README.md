@@ -88,7 +88,7 @@ apt install ghostscript python3-tk
 
   - Select and install your preferred virtual environment manager (anaconda, virtualenv, etc.)
 
-### 2. Downloading the appliaction
+### 2. Downloading the application
 
 - Clone or download the source code.
 
