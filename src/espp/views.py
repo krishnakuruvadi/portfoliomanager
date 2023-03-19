@@ -198,9 +198,13 @@ class EsppDetailView(DetailView):
                     conv_val = get_in_preferred_currency(1, 'USD', std)
                     if conv_val:
                         conv_rate = conv_val
-                    for k,v in lv.items():
-                        val += float(v)*float(conv_rate)*float(q)
-                        break
+                elif obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                    conv_val = get_in_preferred_currency(1, 'INR', std)
+                    if conv_val:
+                        conv_rate = conv_val
+                for k,v in lv.items():
+                    val += float(v)*float(conv_rate)*float(q)
+                    break
             else:
                 print(f'failed to get value of {obj.exchange}:{obj.symbol} on {std}')
             if val > 0 or reset_to_zero:
@@ -444,15 +448,17 @@ def espp_insights(request):
             if lv:
                 print(lv)
                 conv_rate = 1
-                if espp.exchange == 'NASDAQ' or espp.exchange == 'NYSE':
+                if espp.exchange in ['NASDAQ', 'NYSE']:
                     conv_val = get_in_preferred_currency(1, 'USD', std)
                     if conv_val:
                         conv_rate = conv_val
-                    for k,v in lv.items():
-                        val += float(v)*float(conv_rate)*float(q)
-                        break
-                    else:
-                        print(f'failed to get value of {espp.exchange}:{espp.symbol} on {std}')
+                elif espp.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                    conv_val = get_in_preferred_currency(1, 'INR', std)
+                    if conv_val:
+                        conv_rate = conv_val
+                for k,v in lv.items():
+                    val += float(v)*float(conv_rate)*float(q)
+                    break
                 if val > 0:
                     x = std.strftime('%Y-%m-%d')
                     ret[i]['data'].append({'x': x, 'y':round(val,2)})

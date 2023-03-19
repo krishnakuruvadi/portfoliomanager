@@ -209,13 +209,10 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
     start_day = get_min(GoldInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(BankAccountInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(CryptoInterface.get_start_day_for_goal(goal_id), start_day)
-
-    new_start_day = datetime.date(start_day.year, start_day.month, 1)
     
     contrib = dict()
     total = dict()
     deduct = dict()
-    ret = dict()
     cash_flows = list()
     latest_value = 0
     total_contrib = 0
@@ -223,8 +220,10 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
     total_deduct = 0
 
     curr_yr = datetime.date.today().year
+    print_all = False
 
     for yr in range(start_day.year, curr_yr+1):
+        print(f'*** {yr} ***')
         cf, c, d, t = PpfInterface.get_goal_yearly_contrib(goal_id, yr)
         if len(cf) > 0 or c+d+t != 0:
             add_or_create(yr, 'PPF', contrib, deduct, total, c, d, t)
@@ -232,7 +231,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding Ppf {t} latest_value is {latest_value}')
 
 
@@ -243,7 +242,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding Epf {t} latest_value is {latest_value}')
 
         cf, c, d, t = SsyInterface.get_goal_yearly_contrib(goal_id, yr)
@@ -253,7 +252,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding Ssy {t} latest_value is {latest_value}')
 
         cf, c, d, t = MfInterface.get_goal_yearly_contrib(goal_id, yr)
@@ -263,7 +262,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding Mf {t} latest_value is {latest_value}')
 
         cf, c, d, t = EsppInterface.get_goal_yearly_contrib(goal_id, yr)
@@ -273,7 +272,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding Espp {t} latest_value is {latest_value}')
 
         cf, c, d, t = FdInterface.get_goal_yearly_contrib(goal_id, yr)
@@ -283,7 +282,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding FD {t} latest_value is {latest_value}')
 
         cf, c, d, t = ShareInterface.get_goal_yearly_contrib(goal_id, yr)
@@ -293,7 +292,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding shares {t} latest_value is {latest_value}')
         
         cf, c, d, t = RsuInterface.get_goal_yearly_contrib(goal_id, yr)
@@ -303,7 +302,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding RSU {t} latest_value is {latest_value}')
     
         cf, c, d, t = InsuranceInterface.get_goal_yearly_contrib(goal_id, yr)
@@ -313,7 +312,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding Insurance {t} latest_value is {latest_value}')
 
         cf, c, d, t = R401KInterface.get_goal_yearly_contrib(goal_id, yr)
@@ -323,7 +322,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding 401K {t} latest_value is {latest_value}')
 
         cf, c, d, t = GoldInterface.get_goal_yearly_contrib(goal_id, yr)
@@ -333,7 +332,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding gold {t} latest_value is {latest_value}')
 
         cf, c, d, t = BankAccountInterface.get_goal_yearly_contrib(goal_id, yr)
@@ -343,7 +342,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding cash {t} latest_value is {latest_value}')
         
         cf, c, d, t = CryptoInterface.get_goal_yearly_contrib(goal_id, yr)
@@ -353,8 +352,15 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         latest_value += float(t) if yr == curr_yr else 0
         total_contrib += float(c)
         total_deduct += float(d)
-        if yr == curr_yr:
+        if print_all or yr == curr_yr:
             print(f'after adding crypto {t} latest_value is {latest_value}')
+
+        if yr not in contrib:
+            contrib[yr] = dict()
+        if yr not in deduct:
+            deduct[yr] = dict()
+        if yr not in total:
+            total[yr] = dict()
 
     print(f'total_contrib {total_contrib}  total_deduct {total_deduct}  latest_value {latest_value}')
     if len(cash_flows) > 0  and latest_value != 0:

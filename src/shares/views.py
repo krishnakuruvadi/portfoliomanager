@@ -398,6 +398,8 @@ def add_transaction(request):
             exchange_rate = 1
             if exchange in ['NASDAQ', 'NYSE']:
                 exchange_rate = get_in_preferred_currency(1, 'USD', trans_date)
+            elif exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                exchange_rate = get_in_preferred_currency(1, 'INR', trans_date)
             users = get_all_users()
             trans_type = request.POST['trans_type']
             price = get_float_or_none_from_string(request.POST['price'])
