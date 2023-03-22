@@ -106,9 +106,13 @@ class RsuInterface:
                             conv_val = get_in_preferred_currency(1, 'USD', end_date)
                             if conv_val:
                                 conv_rate = conv_val
-                            for k,v in year_end_value_vals.items():
-                                total += float(v)*float(conv_rate)*float(units)
-                                break
+                        elif aw_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                            conv_val = get_in_preferred_currency(1, 'INR', end_date)
+                            if conv_val:
+                                conv_rate = conv_val
+                        for k,v in year_end_value_vals.items():
+                            total += float(v)*float(conv_rate)*float(units)
+                            break
                     else:
                         print(f'failed to get year end values for {aw_obj.exchange} {aw_obj.symbol} {end_date}')
         return cash_flows, contrib, deduct, total

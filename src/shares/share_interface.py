@@ -105,15 +105,22 @@ class ShareInterface:
                 year_end_value_vals = get_historical_stock_price_based_on_symbol(share_obj.symbol, share_obj.exchange, end_date+relativedelta(days=-5), end_date)
                 if year_end_value_vals:
                     conv_rate = 1
-                    if share_obj.exchange == 'NASDAQ' or share_obj.exchange == 'NYSE':
+                    if share_obj.exchange in ['NASDAQ', 'NYSE']:
                         conv_val = get_in_preferred_currency(1, 'USD', end_date)
                         if conv_val:
                             conv_rate = conv_val
-                        for k,v in year_end_value_vals.items():
-                            total += float(v)*float(conv_rate)*float(qty)
-                            break
+                    elif share_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                        conv_val = get_in_preferred_currency(1, 'INR', end_date)
+                        if conv_val:
+                            conv_rate = conv_val
+                    for k,v in year_end_value_vals.items():
+                        total += float(v)*float(conv_rate)*float(qty)
+                        break
                 else:
                     print(f'failed to get year end values for {share_obj.exchange} {share_obj.symbol} {end_date}')
+            else:
+                print(f'qty =0 for {share_obj.exchange} {share_obj.symbol} {yr} {goal_id}')
+        print(f'for {yr} shares returning {cash_flows}, {contrib}, {deduct}, {total}')
         return cash_flows, contrib, deduct, total
 
     @classmethod

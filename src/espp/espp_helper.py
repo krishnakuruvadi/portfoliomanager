@@ -1,4 +1,3 @@
-import requests
 from dateutil.relativedelta import relativedelta
 import datetime
 from shared.handle_real_time_data import get_latest_vals, get_conversion_rate, get_in_preferred_currency
@@ -40,6 +39,8 @@ def update_latest_vals(espp_obj):
                         espp_obj.latest_price = v
                         if espp_obj.exchange in ['NASDAQ', 'NYSE']:
                             espp_obj.latest_conversion_rate = get_in_preferred_currency(1, 'USD', k)
+                        elif espp_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                            espp_obj.latest_conversion_rate = get_in_preferred_currency(1, 'INR', k)
                         else:
                             espp_obj.latest_conversion_rate = 1
                         espp_obj.latest_value = float(espp_obj.latest_price) * float(espp_obj.latest_conversion_rate) * float(espp_obj.shares_avail_for_sale)

@@ -37,6 +37,8 @@ def update_rsu_latest_vals():
             latest_vals[rsu_award.exchange]['symbols'] = dict()
             if rsu_award.exchange in ['NASDAQ', 'NYSE']:
                 latest_vals[rsu_award.exchange]['latest_conversion_rate'] = get_in_preferred_currency(1, 'USD', today)
+            elif rsu_award.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                latest_vals[rsu_award.exchange]['latest_conversion_rate'] = get_in_preferred_currency(1, 'INR', today)
             else:
                 latest_vals[rsu_award.exchange]['latest_conversion_rate'] = 1
         if rsu_award.symbol not in latest_vals[rsu_award.exchange]['symbols']:

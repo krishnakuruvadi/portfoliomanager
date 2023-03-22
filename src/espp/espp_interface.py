@@ -92,13 +92,17 @@ class EsppInterface:
                 year_end_value_vals = get_historical_stock_price_based_on_symbol(espp_obj.symbol, espp_obj.exchange, end_date+relativedelta(days=-5), end_date)
                 if year_end_value_vals:
                     conv_rate = 1
-                    if espp_obj.exchange == 'NASDAQ' or espp_obj.exchange == 'NYSE':
+                    if espp_obj.exchange in ['NASDAQ', 'NYSE']:
                         conv_val = get_in_preferred_currency(1, 'USD', end_date)
                         if conv_val:
                             conv_rate = conv_val
-                        for k,v in year_end_value_vals.items():
-                            total += float(v)*float(conv_rate)*float(units)
-                            break
+                    elif espp_obj.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                        conv_val = get_in_preferred_currency(1, 'INR', end_date)
+                        if conv_val:
+                            conv_rate = conv_val
+                    for k,v in year_end_value_vals.items():
+                        total += float(v)*float(conv_rate)*float(units)
+                        break
                 else:
                     print(f'failed to get year end values for {espp_obj.exchange} {espp_obj.symbol} {end_date}')
         return cash_flows, contrib, deduct, total

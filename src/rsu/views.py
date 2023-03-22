@@ -248,20 +248,17 @@ class RsuDetailView(DetailView):
                 if lv:
                     print(lv)
                     conv_rate = 1
-                    if award.exchange == 'NASDAQ' or award.exchange == 'NYSE':
+                    if award.exchange in ['NASDAQ', 'NYSE']:
                         conv_val = get_in_preferred_currency(1, 'USD', end_dt)
                         if conv_val:
                             conv_rate = conv_val
-                        for k,v in lv.items():
-                            val += float(v)*float(conv_rate)*float(q)
-                            break
-                    elif award.exchange == 'NSE' or award.exchange == 'BSE' or award.exchange == 'NSE/BSE':
+                    elif award.exchange in ['NSE', 'BSE', 'NSE/BSE']:
                         conv_val = get_in_preferred_currency(1, 'INR', end_dt)
                         if conv_val:
                             conv_rate = conv_val
-                        for k,v in lv.items():
-                            val += float(v)*float(conv_rate)*float(q)
-                            break
+                    for k,v in lv.items():
+                        val += float(v)*float(conv_rate)*float(q)
+                        break
                 else:
                     print(f'failed to get value of {rsu.award.exchange}:{rsu.award.symbol} on {end_dt}')
                 if val > 0:
@@ -331,9 +328,13 @@ class RsuVestDetailView(DetailView):
                     conv_val = get_in_preferred_currency(1, 'USD', std)
                     if conv_val:
                         conv_rate = conv_val
-                    for k,v in lv.items():
-                        val += float(v)*float(conv_rate)*float(q)
-                        break
+                elif rsu.award.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                    conv_val = get_in_preferred_currency(1, 'INR', std)
+                    if conv_val:
+                        conv_rate = conv_val
+                for k,v in lv.items():
+                    val += float(v)*float(conv_rate)*float(q)
+                    break
             else:
                 print(f'failed to get value of {rsu.award.exchange}:{rsu.award.symbol} on {std}')
             if val > 0:
@@ -649,9 +650,13 @@ def rsu_insights(request):
                             conv_val = get_in_preferred_currency(1, 'USD', std)
                             if conv_val:
                                 conv_rate = conv_val
-                            for k,v in lv.items():
-                                val += float(v)*float(conv_rate)*float(q)
-                                break
+                        elif award.exchange in ['NSE', 'BSE', 'NSE/BSE']:
+                            conv_val = get_in_preferred_currency(1, 'INR', std)
+                            if conv_val:
+                                conv_rate = conv_val
+                        for k,v in lv.items():
+                            val += float(v)*float(conv_rate)*float(q)
+                            break
                     else:
                         print(f'failed to get value of {award.award_id} {award.exchange}:{award.symbol} on {std}')
                 if val > 0:
