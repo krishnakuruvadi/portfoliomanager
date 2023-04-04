@@ -10,10 +10,10 @@
 
 SECRET_KEY='uuoc10!bp#0bkgq2oyh3s@sd^8%^k3(q8poba@onqv)@9zy(*9'
 
-# Django debug mode. In production False (0) is recommended.
-# Value can be set to: 0 or 1 (0 will disable DEBUG. Same as DEBUG=FALSE. 1 will enable DEBUG. Same as DEBUG=TRUE)
+# Django debug mode. In production off or False is recommended.
+# Value can be set to: True or False (true enables debug mode. false disables debug mode.)
 
-DEBUG=0
+DEBUG=False
 
 # Allow connection from specific hosts or domains. Separate each value with a comma and no space in-between.
 # If using docker, you may need to specify the IP of the container itself or use a wildcard. For example: ALLOWED_HOSTS=*
@@ -45,3 +45,21 @@ DB_PORT=5432
 DJANGO_SUPERUSER_USERNAME=admin
 DJANGO_SUPERUSER_PASSWORD=secretpassword
 DJANGO_SUPERUSER_EMAIL=admin@example.com
+
+##########################################################################################
+##                                                                                      ##    
+##          All parameters below are specific to the email backend settings.            ##
+##          If not using in-app emails, ignore them but do not delete them.             ##
+##                                                                                      ##                 
+##########################################################################################
+
+# The sample settings below are specific to a MailJet email backend, but it can be modified to Gmail, SendGrid, and others.
+# For MailJet email backend, ensure DEFAULT_FROM_EMAIL is a validated sender in MailJet app settings.
+
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=in-v3.mailjet.com
+EMAIL_USE_TLS=True
+EMAIL_PORT=587
+EMAIL_HOST_USER=MAILJET-API-KEY
+EMAIL_HOST_PASSWORD=MAILJET-SECRET-KEY
+DEFAULT_FROM_EMAIL=info@gmail.com
