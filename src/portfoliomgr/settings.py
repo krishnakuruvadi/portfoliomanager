@@ -1,32 +1,36 @@
 import os
-import environ
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Set casting, default values for environment variables through django-environ
-env = environ.Env(
-    DEBUG=(bool, False)
-)
+# Read environment variables from a file or from OS. Package automatically switches between file and OS to look for variables.
 
-# Read environment variables from a file
+try:
 
-env_file_path = os.path.join(BASE_DIR, 'env_files', '.pm-env')
-env_file_exist = os.path.exists(env_file_path)
+    env_file_path = os.path.join(BASE_DIR, 'env_files', '.pm-env')
+    load_dotenv(env_file_path)
 
-if env_file_exist:
-    environ.Env.read_env(env_file_path)
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+    ALLOWED_HOSTS = str(os.getenv('ALLOWED_HOSTS')).split(',')
+    DB_ENGINE = os.getenv('DB_ENGINE')
+    DB_HOST = os.getenv('DB_HOST')
+    DB_NAME = os.getenv('DB_NAME')
+    DB_USER = os.getenv('DB_USER')
+    DB_PASSWORD = os.getenv('DB_PASSWORD')
+    DB_PORT = os.getenv('DB_PORT')
+    EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+    EMAIL_HOST = os.getenv('EMAIL_HOST')
+    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
+    EMAIL_PORT = os.getenv('EMAIL_PORT')
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
-else:
-    raise Exception(f'Environment file was not found in {env_file_path}')
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = str(env('SECRET_KEY'))
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(env('DEBUG'))
-
-ALLOWED_HOSTS = str(env('ALLOWED_HOSTS')).split(',')
+except Exception as e:
+    print(f'The app was unable to run because environment variables were not loaded properly.')
+    exit()
 
 # Application definition
 
@@ -64,8 +68,9 @@ INSTALLED_APPS = [
     'insurance',
     'gold',
     'bankaccounts',
-    "crypto",
-    "anymail",
+    'crypto',
+    'anymail',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +80,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'login_required.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -106,8 +112,6 @@ ASGI_APPLICATION = "portfoliomgr.routing.application"
 
 # Database configuration based on deployment type. Check environment variables file.
 
-DB_ENGINE = str(env('DB_ENGINE'))
-
 if DB_ENGINE == 'sqlite3':
     DATABASES = {
     'default': {
@@ -117,12 +121,6 @@ if DB_ENGINE == 'sqlite3':
     }
 
 elif DB_ENGINE == 'postgresql':
-
-    DB_HOST = str(env('DB_HOST'))
-    DB_NAME = str(env('DB_NAME'))
-    DB_USER = str(env('DB_USER'))
-    DB_PASSWORD = str(env('DB_PASSWORD'))
-    DB_PORT = int(env('DB_PORT'))
 
     DATABASES = {
     'default': {
@@ -137,6 +135,22 @@ elif DB_ENGINE == 'postgresql':
 
 else:
     raise Exception(f'Unsupported database engine. Check DB_ENGINE parameter in {env_file_path}.')
+
+# Account Authentication
+
+LOGIN_URL = 'account-login'
+
+LOGIN_REDIRECT_URL = 'home'
+
+LOGIN_REQUIRED_IGNORE_PATHS = [
+    #r'/crypto/'
+]
+
+LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
+    'account-login',
+]
+
+LOGOUT_REDIRECT_URL = 'account-login'
 
 # Password validation
 
@@ -155,6 +169,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Session Settings
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_AGE = 900 # 15 minutes in seconds
+SESSION_SAVE_EVERY_REQUEST = True
 
 # Internationalization
 
@@ -262,10 +281,3 @@ LOGGING = {
     }
 }
 '''
-
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_HOST = 'smtp.gmail.com'
-#EMAIL_USE_TLS = True
-#EMAIL_PORT = 587
-#EMAIL_HOST_USER = 'your_account@gmail.com'
-#EMAIL_HOST_PASSWORD = 'your accounts password'

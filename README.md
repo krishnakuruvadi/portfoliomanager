@@ -6,11 +6,15 @@ If you or someone you know is unable to self host this application but would gre
 
   - Keep in mind it's still in Beta release! It is free to sign up.
 
+---
+
 ## Be part of the community!
 
 Feel free to join our [Discord](https://discord.gg/YknWEN6GAw).  Let us know your feedback - what do you like? what needs improvement? what features would you like to see added?
 
 If you want to contribute to the repo and need help, you can reach us on discord as well.
+
+---
 
 ## Intent
 
@@ -39,7 +43,6 @@ INDIA:
 
 USA:
 - 401K
-
 
 ---
 
@@ -159,6 +162,17 @@ python manage.py migrate
 python manage.py collectstatic
 ```
 
+- Create a normal user in django (recommended). Edit the fields below with your desired account details. For more details, please visit [Django's documentation](https://docs.djangoproject.com/en/4.1/topics/auth/default/#creating-users)
+
+  - It is recommended to use a non-admin account for your daily use and only use an admin account for administrative purposes.
+
+```bash
+cd src
+python manage.py shell
+from django.contrib.auth.models import User
+User.objects.create_user('johndoe', 'johndoe@gmail.com', 'johnpassword')
+```
+
 - Create a super user in django (optional).
 
 ```bash
@@ -166,6 +180,8 @@ python manage.py createsuperuser
 ```
 
   - You should be prompted to enter the desired username, email and password for this new admin.
+
+  - You can create additional normal users by logging in as the superuser and going to: Internals > Admin > Authentication and Authorization > Users > Add User.
 
 - Download, extract, and copy the chromedriver to root of the project (portfoliomanager). You can obtain this driver from here: https://chromedriver.chromium.org/downloads. The directory should look as follows:
 
@@ -239,6 +255,8 @@ pip install -r requirements.txt
 
   - [Follow these steps](#launch-portfoliomanager)
 
+---
+
 ## Docker Deployment Method
 
 ### 1. Requirements
@@ -299,6 +317,25 @@ docker compose up -d
 docker compose down
 ```
 
+- Create a normal user in django (recommended). 
+
+  - It is recommended to use a non-admin account for your daily use and only use an admin account for administrative purposes.
+
+  - Edit the fields below with your desired account details. For more details, please visit [Django's documentation](https://docs.djangoproject.com/en/4.1/topics/auth/default/#creating-users)
+
+  - Your Docker container name may vary. Please adjust the below commads to match your exact setup. In this example, I assume your docker container name running the PorfolioManager app is portfolio-manager-app.
+
+```bash
+docker ps
+docker exec -it portfolio-manager-app bash
+python manage.py shell
+from django.contrib.auth.models import User
+User.objects.create_user('johndoe', 'johndoe@gmail.com', 'johnpassword')
+exit()
+```
+
+  - You can create additional normal users by logging in as the superuser and going to: Internals > Admin > Authentication and Authorization > Users > Add User.
+
 ### Browse to Portfolio Manager
 
 - Open your favorite web browser and go to:
@@ -357,8 +394,10 @@ docker compose up -d
 ```bash
 docker image prune
 ```
-  
-### Help us and support our work
+
+---
+
+## Help us and support our work
 
 - Please consider supporting us by contributing/reporting bugs or feeding our coffee addiction. **Click on the link below!**
 

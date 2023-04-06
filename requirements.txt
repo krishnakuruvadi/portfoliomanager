@@ -28,7 +28,7 @@ dateutils==0.6.8
 Deprecated==1.2.13
 Django==4.1.7
 django-anymail==8.6
-django-environ==0.9.0
+django-login-required-middleware==0.9.0
 django-solo==2.0.0
 djangorestframework==3.13.1
 enum34==1.1.10
@@ -78,7 +78,7 @@ pyparsing==2.4.7
 PyPDF2==1.28.4
 PySocks==1.7.1
 python-dateutil==2.8.2
-python-dotenv==0.15.0
+python-dotenv==0.21.0
 pytz==2019.3
 pyxirr==0.7.2
 PyYAML==5.4.1
