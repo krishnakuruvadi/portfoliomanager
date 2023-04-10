@@ -87,7 +87,7 @@ class YahooFinance2(Exchange):
         return None
 
     def get_live_price(self, name, include_crumb=False):
-        ret_v2 = self.get_live_price_v2()
+        ret_v2 = self.get_live_price_v2(name=name)
         if ret_v2:
             return ret_v2
         print('getting live values for symbol ', self.symbol)
@@ -131,7 +131,7 @@ class YahooFinance2(Exchange):
 
         return None
     
-    def get_live_price_v2(self, include_crumb=False):
+    def get_live_price_v2(self, include_crumb=False, name=None):
         print('getting live values (v2) for symbol ', self.symbol)
         for _ in range(self.retries):
             data = None
@@ -146,6 +146,8 @@ class YahooFinance2(Exchange):
                 data = response.json()
                 #print(data)
                 ret = dict()
+                if name:
+                    ret['name'] = name
                 meta_data = data["quoteResponse"]["result"][0]
                 ret['lastPrice'] = round(meta_data['regularMarketPrice'], 2)
                 ret['prevClose'] = round(meta_data['regularMarketPreviousClose'], 2)
@@ -155,8 +157,14 @@ class YahooFinance2(Exchange):
                 ret['52wHigh'] = round(meta_data['fiftyTwoWeekHigh'], 2)
                 ret['52wLow'] = round(meta_data['fiftyTwoWeekLow'], 2)
                 ret['version'] = 'v2'
-                ret['200dAvg'] = round(meta_data['twoHundredDayAverage'], 2)
-                ret['50dAvg'] = round(meta_data['fiftyDayAverage'], 2)
+                if 'twoHundredDayAverage' in meta_data:
+                    ret['200dAvg'] = round(meta_data['twoHundredDayAverage'], 2)
+                else:
+                    ret['200dAvg'] = None
+                if 'fiftyDayAverage' in meta_data:
+                    ret['50dAvg'] = round(meta_data['fiftyDayAverage'], 2)
+                else:
+                    ret['50dAvg'] = None
                 ret['dayHigh'] = round(meta_data['regularMarketDayHigh'], 2)
                 ret['dayLow'] = round(meta_data['regularMarketDayLow'], 2)
                 if 'priceToBook' in meta_data:
