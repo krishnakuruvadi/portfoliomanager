@@ -169,7 +169,10 @@ def add_alerts():
 @pytest.mark.django_db
 class Test_Bankalert:
     def test_flow(self, live_server):
+        from .utils import add_non_admin_account, login_non_admin_account
+        add_non_admin_account()
         self.driver.get(("%s%s" % (live_server.url, "/")))
+        login_non_admin_account(self.driver)
         self.open_url()
         add_alerts()
         self.delete_alerts()
