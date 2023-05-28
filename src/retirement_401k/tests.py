@@ -6,7 +6,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.urls import reverse
 import time
 from shared.handle_get import get_path_to_chrome_driver
-from users.tests import add_default_user
+from users.tests import add_default_user, add_non_admin_account, login_non_admin_account
 from selenium.webdriver.chrome.options import Options
 
 # Create your tests here.
@@ -47,7 +47,11 @@ class Retirement401KTest(StaticLiveServerTestCase):
         self.browser.get(self.live_server_url + reverse('retirement_401k:account-list'))
 
     def test_no_account(self):
+        add_non_admin_account()
         self.browser.get(self.live_server_url + reverse('retirement_401k:account-list'))
+        time.sleep(5)
+        login_non_admin_account(self.browser)
+        time.sleep(5)
         ti = self.browser.find_element(By.XPATH, "//h6[text()='Total Investment']/..")
         self.assertEqual(float(self.get_summary_val(ti.text, 'Total Investment')), 0)
         ti = self.browser.find_element(By.XPATH, "//h6[text()='Current Value']/..")
@@ -59,8 +63,13 @@ class Retirement401KTest(StaticLiveServerTestCase):
     
     #https://stackoverflow.com/questions/2581005/django-testcase-testing-order
     def test_add_account(self):
+        add_non_admin_account()
         user = add_default_user()
         self.browser.get(self.live_server_url + reverse('retirement_401k:account-list'))
+        time.sleep(5)
+        login_non_admin_account(self.browser)
+        time.sleep(5)
+        
         self.browser.find_element(By.XPATH, "//i[@title='Add 401K Account']").click()
         time.sleep(2)
         self.browser.find_element(By.ID, 'company').send_keys('Personal')
