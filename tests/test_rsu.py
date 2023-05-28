@@ -128,7 +128,10 @@ def add_rsu(driver, rsu):
 @pytest.mark.django_db
 class Test_Rsu:
     def test_flow(self, live_server):
+        from .utils import add_non_admin_account, login_non_admin_account
+        add_non_admin_account()
         self.driver.get(("%s%s" % (live_server.url, "/user/")))
+        login_non_admin_account(self.driver)
         self.open_url()
         self.add_new_rsu()
         self.add_another_rsu()

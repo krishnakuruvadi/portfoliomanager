@@ -63,7 +63,10 @@ def delete_user(driver, row_id):
 @pytest.mark.django_db
 class Test_User:
     def test_open_url(self, live_server):
+        from .utils import add_non_admin_account, login_non_admin_account
+        add_non_admin_account()
         self.driver.get(("%s%s" % (live_server.url, "/user/")))
+        login_non_admin_account(self.driver)
         time.sleep(5)
         count, _ = get_rows_of_table(self.driver, 'user-table')
         assert count == 0
