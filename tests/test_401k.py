@@ -172,7 +172,11 @@ def add_401k(driver, a401k):
 @pytest.mark.django_db
 class Test_401k:
     def test_flow(self, live_server):
+        from .utils import add_non_admin_account, login_non_admin_account
+        add_non_admin_account()
         self.driver.get(("%s%s" % (live_server.url, "/user/")))
+        login_non_admin_account(self.driver)
+        time.sleep(5)
         self.open_url()
         self.add_new_401k()
         self.add_another_401k()
