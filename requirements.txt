@@ -21,7 +21,7 @@ click==7.1.2
 colorama==0.4.4
 commonmark==0.9.1
 constantly==15.1.0
-cryptography==39.0.1
+cryptography==41.0.0
 cssselect==1.1.0
 daphne==3.0.1
 dateutils==0.6.8
