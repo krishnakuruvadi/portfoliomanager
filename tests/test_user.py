@@ -70,20 +70,25 @@ class Test_User:
         time.sleep(5)
         count, _ = get_rows_of_table(self.driver, 'user-table')
         assert count == 0
+        self.add_new_user()
+        self.add_another_user()
+        self.new_user_detail()
+        self.user_edit()
+        self.delete_users()    
     
-    def test_add_new_user(self):
+    def add_new_user(self):
         u = get_user(1)
         add_new_user(self.driver,  u)
         count, _ = get_rows_of_table(self.driver, 'user-table')
         assert count == 1
     
-    def test_add_another_user(self):
+    def add_another_user(self):
         u = get_user(2)
         add_new_user(self.driver,  u)
         count, _ = get_rows_of_table(self.driver, 'user-table')
         assert count == 2
 
-    def test_new_user_detail(self):
+    def new_user_detail(self):
         expected_count = 2
         count, rows = get_rows_of_table(self.driver, 'user-table')
         assert count == expected_count
@@ -97,7 +102,7 @@ class Test_User:
         parts[0].click()
         time.sleep(2)
     
-    def test_user_edit(self):
+    def user_edit(self):
         count, rows = get_rows_of_table(self.driver, 'user-table')
         u = get_user(1)
         for row in rows:
@@ -113,7 +118,7 @@ class Test_User:
                 break
         time.sleep(5)
 
-    def test_delete_users(self):
+    def delete_users(self):
         expected_count = 2
         while True:
             count, rows = get_rows_of_table(self.driver, 'user-table')

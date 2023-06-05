@@ -71,6 +71,7 @@ def delete_gold_with_row_id(driver, id):
         print(f'text is {th.text}')
         if th.text == str(id):
             driver.maximize_window()
+            time.sleep(3)
             cols = row.find_elements(By.TAG_NAME, 'td')
             cols[len(cols)-1].find_element(By.CSS_SELECTOR, "a[href*='delete']").click()
             time.sleep(2)

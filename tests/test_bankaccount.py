@@ -118,7 +118,6 @@ def delete_account_with_row_id(driver, id):
         th = row.find_element(By.TAG_NAME, 'th')
         print(f'text is {th.text}')
         if th.text == str(id):
-            driver.maximize_window()
             cols = row.find_elements(By.TAG_NAME, 'td')
             cols[len(cols)-1].find_element(By.CSS_SELECTOR, "a[href*='delete']").click()
             time.sleep(2)
@@ -169,13 +168,12 @@ def add_account(driver, account):
     time.sleep(5)
     driver.find_element(By.LINK_TEXT, "Cancel").click()
     time.sleep(5)
-    driver.maximize_window()
+    
     count, rows = get_rows_of_table(driver, 'bank_accounts')
     for row in rows:
         th = row.find_element(By.TAG_NAME, 'th')
         print(f'text is {th.text}')
         if th.text == str(account["row_id"]):
-            driver.maximize_window()
             cols = row.find_elements(By.TAG_NAME, 'td')
             cols[len(cols)-1].find_element(By.CSS_SELECTOR, "a[href*='transactions']").click()
             time.sleep(2)
@@ -213,6 +211,7 @@ class Test_BankAccount:
         self.driver.get(("%s%s" % (live_server.url, "/user/")))
         login_non_admin_account(self.driver)
         self.open_url()
+        self.driver.maximize_window()
         self.add_new_account()
         self.add_another_account()
         self.delete_accounts()

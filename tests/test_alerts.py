@@ -125,7 +125,7 @@ def check_alert_count(driver, expected_count):
 
 def delete_alert_with_row_id(driver, id):
     time.sleep(3)
-    meta =get_meta()
+    meta = get_meta()
     for alert_tab in meta:
         hr = alert_tab["href"]
         driver.find_element(By.XPATH, f"//a[@href='{hr}']").click()
@@ -134,8 +134,8 @@ def delete_alert_with_row_id(driver, id):
             th = row.find_element(By.TAG_NAME, 'th')
             a = th.find_element(By.TAG_NAME, 'a')
             if a.get_attribute("innerHTML").strip() == str(id):
-                driver.maximize_window()
                 cols = row.find_elements(By.TAG_NAME, 'td')
+                time.sleep(5)
                 cols[len(cols)-1].find_element(By.CSS_SELECTOR, "a[href*='delete']").click()
                 time.sleep(2)
                 obj = driver.switch_to.alert
@@ -174,6 +174,8 @@ class Test_Bankalert:
         self.driver.get(("%s%s" % (live_server.url, "/")))
         login_non_admin_account(self.driver)
         self.open_url()
+        self.driver.maximize_window()
+        time.sleep(2)
         add_alerts()
         self.delete_alerts()
 
