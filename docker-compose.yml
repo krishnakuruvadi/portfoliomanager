@@ -18,14 +18,16 @@ services:
 
   pm-frontend:
     container_name: pm-frontend
-    build: ./nginx
+    image: nginx
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     networks:
       - frontend
     volumes:
       - pm_static_files:/static
+      - ./nginx/config/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - pm-app
 
