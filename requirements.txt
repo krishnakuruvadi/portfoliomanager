@@ -112,7 +112,6 @@ txaio==20.12.1
 typing_extensions==4.4.0
 urllib3==1.26.12
 wcwidth==0.2.5
-whitenoise==5.2.0
 wrapt==1.12.1
 wsproto==1.2.0
 yfinance==0.1.74
