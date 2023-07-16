@@ -114,5 +114,5 @@ urllib3==1.26.12
 wcwidth==0.2.5
 wrapt==1.12.1
 wsproto==1.2.0
-yfinance==0.1.74
+yfinance==0.2.24
 zope.interface==5.2.0
