@@ -1088,7 +1088,7 @@ def pull_and_store_coin_historical_vals(symbol, dt):
             exists += 1
         except HistoricalCoinPrice.DoesNotExist:
             print(f'Crypto history from {coin} on {dt} was not found in the database. Attempting to retrieve price value.')
-            val = get_historical_price(symbol, dt)
+            val = get_historical_price(symbol, coin.name, dt)
             try:
                 HistoricalCoinPrice.objects.create(coin=coin, date=dt, price=val) 
                 print(f'Crypto history {coin} {dt} {val} was saved to the database.')       
@@ -1112,7 +1112,7 @@ def pull_and_store_coin_historical_vals(symbol, dt):
         exists += 1
     except HistoricalCoinPrice.DoesNotExist:
         print(f'Crypto history from {coin} on {dt} was not found in the database. Attempting to retrieve price value.')
-        val = get_historical_price(symbol, dt)
+        val = get_historical_price(symbol, coin.name, dt)
         try:
             HistoricalCoinPrice.objects.create(coin=coin, date=dt, price=val) 
             print(f'Crypto history {coin} {dt} {val} was saved to the database.')       

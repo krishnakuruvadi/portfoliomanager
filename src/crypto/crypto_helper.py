@@ -14,20 +14,21 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 import time
 
-def check_for_valid_coin(symbol):
-    normalized_input = str(symbol).upper()
-    url = f'https://api.coingecko.com/api/v3/search?query={normalized_input}'
+def check_for_valid_coin(symbol, name):
+    normalized_symbol_input = str(symbol).upper()
+    normalized_name_input = str(name).capitalize()
+    url = f'https://api.coingecko.com/api/v3/search?query={normalized_symbol_input}'
 
     try:
-        print(f'Validating that {normalized_input} is a valid coin symbol.')
+        print(f'Validating that {normalized_symbol_input} - {normalized_name_input} is a valid coin symbol.')
         request = requests.get(url, timeout=30)
         request.raise_for_status()
         data = request.json()
         raw_data = data['coins']
-        if len(raw_data) > 0:
+        if raw_data:
             for coin in raw_data:
-                if coin['symbol'] == normalized_input:
-                    print(f'{normalized_input} is a valid coin symbol.')
+                if coin['symbol'] == normalized_symbol_input and coin['name'] == normalized_name_input:
+                    print(f'{normalized_symbol_input} - {normalized_name_input} is a valid coin symbol.')
                     returned_data = {
                         'crypto_symbol': coin['symbol'],
                         'crypto_name': coin['name'],
@@ -37,35 +38,33 @@ def check_for_valid_coin(symbol):
                     }
                     return returned_data
                 else:
-                    crypto_symbol = coin['symbol']
-                    crypto_name = coin['name']
-                    print(f'A match with symbol {crypto_symbol} named {crypto_name} was found but is not an exact match to user input of {normalized_input}.')
+                    print(f'No match with crypto symbol {symbol} and name {name} was found.')
                     returned_data = {
                         'crypto_verified': False
                     }
         else:
-            print(f'{symbol} is not a valid crypto coin.')
+            print(f'{symbol} - {name} is not a valid crypto coin.')
             returned_data = {
                 'crypto_verified': False
             }
 
     except requests.exceptions.Timeout:
-        print(f'Connection has timed out attempting to verify that crypto symbol {symbol} is valid.')
+        print(f'Connection has timed out attempting to verify that crypto {symbol} - {name} is valid.')
         returned_data = {
             'crypto_verified': False
         }
     except requests.exceptions.HTTPError:
-        print(f'An HTTP error has occurred attempting to verify that crypto symbol {symbol} is valid.')
+        print(f'An HTTP error has occurred attempting to verify that crypto {symbol} - {name} is valid.')
         returned_data = {
             'crypto_verified': False
         }
     except requests.exceptions.ConnectionError:
-        print(f'Connection error attempting to verify that crypto symbol {symbol} is valid.')
+        print(f'Connection error attempting to verify that crypto {symbol} - {name} is valid.')
         returned_data = {
             'crypto_verified': False
         }
     except requests.exceptions.RequestException:
-        print(f'An error has occurred attempting to verify that crypto symbol {symbol} is valid.')
+        print(f'An error has occurred attempting to verify that crypto {symbol} - {name} is valid.')
         returned_data = {
             'crypto_verified': False
         }
@@ -271,7 +270,7 @@ def update_crypto(co, latest_prices=None):
             latest_price = latest_prices.get(co.symbol)['price']
             latest_time = latest_prices.get(co.symbol)['time']
     if not latest_price:
-        latest_price, latest_time = get_price(co.symbol)
+        latest_price, latest_time = get_price(co.symbol, co.name)
 
     if latest_price:
         latest_prices[co.symbol] = {'price': latest_price, 'time': latest_time}
@@ -306,10 +305,10 @@ def update_crypto(co, latest_prices=None):
     co.save()
 
 
-def get_price(symbol):
+def get_price(symbol, name):
     versus = "usd"
     try:
-        coin_id = symbol_to_id(symbol)
+        coin_id = symbol_to_id(symbol, name)
         # ex: https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=USD&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true 
         coingecko_price_url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies={versus}&include_market_cap" \
                             "=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true"
@@ -329,20 +328,39 @@ def get_price(symbol):
     '''
     return price, datetime.datetime.fromtimestamp(price_output['last_updated_at'])
 
-def get_crypto_coins():
+def get_all_crypto_info():
     url = 'https://api.coingecko.com/api/v3/coins/list'
+    coin_symbols = []
+    coin_names = []
     print(f'fetching from url {url}')
-    r = requests.get(url, timeout=15)
-    coins = list()
-    if r.status_code == 200:
-        for entry in r.json():
-            coins.append(entry['symbol'])
-    else:
-        coins.append('btc')
-        coins.append('btcb')
-    return coins
 
-def symbol_to_id(symbol):
+    try:
+        request = requests.get(url, timeout=30)
+        request.raise_for_status()
+        data = request.json()
+        for entry in data:
+            coin_symbols.append(entry['symbol'])
+            coin_names.append(entry['name'])
+
+        return coin_names, coin_symbols
+
+    except requests.exceptions.Timeout:
+        print(f'Connection has timed out attempting to get all crypto info from API.')
+        return coin_names, coin_symbols # if failed, return empty list as its not critical.
+
+    except requests.exceptions.HTTPError:
+        print(f'An HTTP error has occurred attempting to get all crypto info from API.')
+        return coin_names, coin_symbols # if failed, return empty list as its not critical.
+
+    except requests.exceptions.ConnectionError:
+        print(f'Connection error attempting to get all crypto info from API.')
+        return coin_names, coin_symbols # if failed, return empty list as its not critical.
+
+    except requests.exceptions.RequestException:
+        print(f'An error has occurred attempting to get all crypto info from API.')
+        return coin_names, coin_symbols # if failed, return empty list as its not critical.
+
+def symbol_to_id(symbol, name):
     from crypto.models import Crypto
     from .crypto_helper import check_for_valid_coin
 
@@ -352,27 +370,22 @@ def symbol_to_id(symbol):
             return crypto.symbol_id
         else:
             print(f'{symbol} ID is empty. Attempting to retrieve it')
-            try:
-                get_id = check_for_valid_coin(symbol)
-                if get_id['crypto_verified'] == True:
-                    symbol_id = get_id['crypto_id']
-                    name = get_id['crypto_name']
-                    api_symbol = get_id['crypto_api_symbol']
-                    crypto.name=name
-                    crypto.symbol_id=symbol_id
-                    crypto.api_symbol=api_symbol
-                    crypto.save()
-                    print(f'Sucesfully retrieved and saved updated data for {symbol} {name}')
-                    return symbol_id
-                else:
-                    print(f'All attempts to retrieve {symbol} ID has been tried but failed.')
-            except Exception as e:
-                print(f'An error has occured tryin to retrieve {symbol} ID')
+    except Crypto.DoesNotExist:
+        try:
+            get_id = check_for_valid_coin(symbol, name)
+            if get_id['crypto_verified'] == True:
+                symbol_id = get_id['crypto_id']
+                print(f'Sucesfully retrieved and saved updated data for {symbol} {name}')
+                return symbol_id
+            else:
+                print(f'All attempts to retrieve {symbol} ID has been tried but failed.')
+        except Exception as e:
+            print(f'An error has occured tryin to retrieve {symbol} ID')
     except Exception as e:
-        print(f'Unable to find {symbol} in the database')
+        print(f'An error occurred when converting a symbol to its ID. Error is {e}')
 
-def get_historical_price(symbol, date):
-    coin_id = symbol_to_id(symbol)
+def get_historical_price(symbol, name, date):
+    coin_id = symbol_to_id(symbol, name)
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/history?date={date.strftime('%d-%m-%Y')}"
 
     try:
@@ -409,74 +422,83 @@ def store_returns():
             data = json.load(f)
             if data['last_updated'] == today.strftime('%d-%b-%Y') or data['reference_dt'] == yesterday.strftime('%d-%b-%Y'):
                 return
-    
-    top_crypto = ['btc', 'eth', 'ltc', 'xrp', 'usdc', 'usdt', 'doge', 'shib', 'bnb', 'bch']
+    top_crypto = {
+            'btc': 'Bitcoin',
+            'eth': 'Ethereum',
+            'ada': 'Cardano',
+            'sol': 'Solana',
+            'doge': 'Dogecoin',
+            'matic': 'Polygon',
+            'ltc': 'Litecoin',
+            'dot': 'Polkadot',
+            'shib': 'Shiba Inu',
+            'xmr': 'Monero'
+        }
     res = dict()
     res['returns'] = list()
-    for symbol in top_crypto:
-        
-        yprice = get_historical_price(symbol, yesterday)
+    for k, v in top_crypto.items():
+        yprice = get_historical_price(k, v, yesterday)
         ret = {
-            'symbol':symbol
+            'symbol':k
         }
         try:
-            dbprice = get_historical_price(symbol, yesterday+relativedelta(days=-1))
+            dbprice = get_historical_price(k, v, yesterday+relativedelta(days=-1))
             c1d = ((yprice-dbprice)/dbprice)*100
             ret['1d'] = round(c1d, 2)
         except Exception as ex:
             print(f'exception getting price change {ex}')
 
         try:
-            wbprice = get_historical_price(symbol, yesterday+relativedelta(days=-7))
+            wbprice = get_historical_price(k, v, yesterday+relativedelta(days=-7))
             c1w = ((yprice-wbprice)/wbprice)*100
             ret['1w'] = round(c1w, 2)
         except Exception as ex:
             print(f'exception getting price change {ex}')
 
         try:
-            mbprice = get_historical_price(symbol, yesterday+relativedelta(months=-1))
+            mbprice = get_historical_price(k, v, yesterday+relativedelta(months=-1))
             c1m = ((yprice-mbprice)/mbprice)*100
             ret['1m'] = round(c1m, 2)
         except Exception as ex:
             print(f'exception getting price change {ex}')
 
         try:
-            mb3price = get_historical_price(symbol, yesterday+relativedelta(months=-3))
+            mb3price = get_historical_price(k, v, yesterday+relativedelta(months=-3))
             c3m = ((yprice-mb3price)/mb3price)*100
             ret['3m'] = round(c3m, 2)
         except Exception as ex:
             print(f'exception getting price change {ex}')
         
         try:
-            mb6price = get_historical_price(symbol, yesterday+relativedelta(months=-6))
+            mb6price = get_historical_price(k, v, yesterday+relativedelta(months=-6))
             c6m = ((yprice-mb6price)/mb6price)*100
             ret['6m'] = round(c6m, 2)
         except Exception as ex:
             print(f'exception getting price change {ex}')
 
         try:
-            ytdprice = get_historical_price(symbol, datetime.date(day=1, month=1, year=today.year))
+            ytdprice = get_historical_price(k, v, datetime.date(day=1, month=1, year=today.year))
             cytd = ((yprice-ytdprice)/ytdprice)*100
             ret['ytd'] = round(cytd, 2)
         except Exception as ex:
             print(f'exception getting price change {ex}')
 
         try:
-            ybprice = get_historical_price(symbol, yesterday+relativedelta(years=-1))
+            ybprice = get_historical_price(k, v, yesterday+relativedelta(years=-1))
             c1y = ((yprice-ybprice)/ybprice)*100
             ret['1y'] = round(c1y, 2)
         except Exception as ex:
             print(f'exception getting price change {ex}')
 
         try:
-            yb2price = get_historical_price(symbol, yesterday+relativedelta(years=-2))
+            yb2price = get_historical_price(k, v, yesterday+relativedelta(years=-2))
             c2y = ((yprice-yb2price)/yb2price)*100
             ret['2y'] = round(c2y, 2)
         except Exception as ex:
             print(f'exception getting price change {ex}')
 
         try:
-            yb3price = get_historical_price(symbol, yesterday+relativedelta(years=-3))
+            yb3price = get_historical_price(k, v, yesterday+relativedelta(years=-3))
             c3y = ((yprice-yb3price)/yb3price)*100
             ret['3y'] = round(c3y, 2)
         except Exception as ex:
