@@ -130,6 +130,7 @@
       <tr>
         <th scope="col">Id</th>
         <th scope="col">Symbol</th>
+        <th scope="col">Name</th>
         <th scope="col">User</th>
         <th scope="col">Goal</th>
         <th scope="col">Units</th>
@@ -148,6 +149,7 @@
       <tr>
         <th>{{ forloop.counter }}</th>
         <td><a href="{% url 'crypto:crypto-detail' instance.id %}">{{ instance.symbol }}</a></td>
+        <td>{{ instance.name }}</td>
         <td>{{ user_name_mapping |lookup:instance.user }}</td>
         <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
         <td>{{ instance.units }}</td>

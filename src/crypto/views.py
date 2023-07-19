@@ -10,7 +10,7 @@ from common.currency_helper import supported_currencies_as_list
 from .crypto_interface import CryptoInterface
 from django.http import HttpResponseRedirect
 import json
-from .crypto_helper import insert_trans_entry, get_crypto_coins, reconcile_event_based, get_price, check_for_valid_coin
+from .crypto_helper import insert_trans_entry, get_all_crypto_info, reconcile_event_based, get_price, check_for_valid_coin
 from common.models import Coin, HistoricalCoinPrice
 from tasks.tasks import pull_and_store_coin_historical_vals, update_crypto_for_user
 from django.conf import settings
@@ -74,6 +74,7 @@ def update_crypto(request, id):
             context = {
                         'users':users,
                         'symbol':cobj.symbol,
+                        'name':cobj.name,
                         'user':cobj.user,
                         'goal':cobj.goal,
                         'notes':cobj.notes,
@@ -94,6 +95,7 @@ def update_transaction(request, id, trans_id):
         except Transaction.DoesNotExist:
             return HttpResponseRedirect(reverse('crypto:crypto-list'))
         symbol = cobj.symbol
+        name = cobj.name
         user = cobj.user
         currencies = supported_currencies_as_list()
         users = get_all_users()
@@ -133,12 +135,12 @@ def update_transaction(request, id, trans_id):
                 broker = request.POST['broker']
                 context = {'users':users, 'operation': 'Update Transaction', 'conversion_rate':exchange_rate, 'curr_module_id': CryptoInterface.get_module_id(),
                             'trans_date':trans_date.strftime("%Y-%m-%d"), 'user':user,
-                            'symbol':symbol, 'currencies':currencies, 'trans_type':trans_type,
+                            'symbol':symbol, 'name':name, 'currencies':currencies, 'trans_type':trans_type,
                             'charges':charges,
                             'price':price, 'quantity':quantity,'preferred_currency':preferred_currency, 'currency':chosen_currency, 'broker':broker, 'symbol':symbol}
                 return render(request, template, context)
         context = {'users':users, 'currencies':currencies, 'operation': 'Update Transaction', 'conversion_rate':trans.conversion_rate, 'curr_module_id': CryptoInterface.get_module_id(),
-                    'preferred_currency':preferred_currency, 'symbol':symbol, 'user':user, 'trans_date':trans.trans_date.strftime("%Y-%m-%d"), 'trans_price':trans.trans_price,
+                    'preferred_currency':preferred_currency, 'symbol':symbol, 'name':name, 'user':user, 'trans_date':trans.trans_date.strftime("%Y-%m-%d"), 'trans_price':trans.trans_price,
                     'price':trans.price, 'quantity':trans.units, 'broker':trans.broker, 'notes':trans.notes, 'charges':trans.fees, 'currency':trans.buy_currency, 'trans_type':trans.trans_type}
         print(f'view context: {context}')
         return render(request, template, context)
@@ -169,7 +171,8 @@ def add_transaction(request):
     if request.method == 'POST':
         if "submit" in request.POST:
             unverified_symbol = request.POST['symbol']
-            symbol_check = check_for_valid_coin(unverified_symbol)
+            unverified_name = request.POST['name']
+            symbol_check = check_for_valid_coin(unverified_symbol, unverified_name)
             if symbol_check['crypto_verified'] == True:
                 symbol = symbol_check['crypto_symbol']
                 name = symbol_check['crypto_name']
@@ -193,7 +196,7 @@ def add_transaction(request):
                 update_crypto_for_user(user)
             else:
                 message_color = 'red'
-                message = f'Failed to add transaction for {unverified_symbol}. Please enter a valid coin symbol.'
+                message = f'Failed to add transaction for {unverified_symbol} - {unverified_name}. Please enter a valid coin symbol or name.'
         else:
             print('fetching exchange price')
             symbol = request.POST['symbol']
@@ -206,18 +209,16 @@ def add_transaction(request):
             chosen_currency = request.POST['currency']
             exchange_rate = get_conversion_rate(chosen_currency, preferred_currency, trans_date)
             broker = request.POST['broker']
-            coins = get_crypto_coins()
+            coin_names, coin_symbols = get_all_crypto_info()
             context = {'users':users, 'operation': 'Add Transaction', 'conversion_rate':exchange_rate, 'curr_module_id': CryptoInterface.get_module_id(),
                         'trans_date':trans_date.strftime("%Y-%m-%d"), 'user':user, 
                         'symbol':symbol, 'currencies':currencies, 'trans_type':trans_type,
                         'charges':charges,
-                        'price':price, 'quantity':quantity,'preferred_currency':preferred_currency, 'currency':chosen_currency, 'broker':broker, 'coins':coins}
+                        'price':price, 'quantity':quantity,'preferred_currency':preferred_currency, 'currency':chosen_currency, 'broker':broker, 'coin_names':coin_names, 'coin_symbols':coin_symbols}
             return render(request, template, context)
-    coins = get_crypto_coins()
+    coin_names, coin_symbols = get_all_crypto_info()
     context = {'users':users, 'currencies':currencies, 'operation': 'Add Transaction', 'conversion_rate':1, 'curr_module_id': CryptoInterface.get_module_id(),
-                'preferred_currency':preferred_currency, 'currency':preferred_currency, 'message':message, 'message_color':message_color}
-    print(f'view context: {context}')
-    context['coins'] = coins
+                'preferred_currency':preferred_currency, 'currency':preferred_currency, 'message':message, 'message_color':message_color, 'coin_names':coin_names, 'coin_symbols':coin_symbols}
     return render(request, template, context)
 
 def all_transactions(request):
