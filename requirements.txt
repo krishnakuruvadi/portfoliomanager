@@ -21,7 +21,7 @@ click==7.1.2
 colorama==0.4.4
 commonmark==0.9.1
 constantly==15.1.0
-cryptography==41.0.0
+cryptography==41.0.2
 cssselect==1.1.0
 daphne==3.0.1
 dateutils==0.6.8
@@ -61,7 +61,7 @@ opencv-python==4.5.5.64
 openpyxl==3.0.10
 outcome==1.2.0
 packaging==20.9
-pandas==1.2.5
+pandas==1.5.2
 pdfminer.six==20220524
 peewee==3.15.1
 Pillow==9.4.0
@@ -79,7 +79,7 @@ PyPDF2==1.28.4
 PySocks==1.7.1
 python-dateutil==2.8.2
 python-dotenv==0.21.0
-pytz==2019.3
+pytz==2022.6
 pyxirr==0.7.2
 PyYAML==5.4.1
 rapidfuzz==2.13.7
@@ -115,5 +115,5 @@ wcwidth==0.2.5
 wheel==0.40.0
 wrapt==1.12.1
 wsproto==1.2.0
-yfinance==0.1.74
+yfinance==0.2.24
 zope.interface==5.2.0

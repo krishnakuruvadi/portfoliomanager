@@ -38,7 +38,7 @@ def upload_transactions(full_file_path, bank_name, file_type, acc_number, accoun
             with open(full_file_path) as fileobj:
                 ofx = OfxParser.parse(fileobj)
                 account = ofx.account
-                if acc_number not in account.number:
+                if acc_number not in account.number and account.number not in acc_number:
                     print(f'mismatch between account number in file.  Expected {acc_number} got {ofx.account.number}')
                     return
                 statement = account.statement
