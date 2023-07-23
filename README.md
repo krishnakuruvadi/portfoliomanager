@@ -68,7 +68,7 @@ USA:
 
 ### 1. Requirements
 
-- Python v3.  Tested with v3.9
+- Python v3.  Tested with v3.9, v3.10
 
 - Libraries
 
