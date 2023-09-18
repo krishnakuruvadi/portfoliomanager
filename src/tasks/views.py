@@ -55,6 +55,15 @@ def get_tasks(request):
         },
         'pull_corporate_actions_shares': {
             'description':'Pull corporate actions of shares'
+        },
+        'initial_setup': {
+            'description':'Pull information needed for initial setup'
+        },
+        'fetch_data': {
+            'description':'Pull all information needed from external sources'
+        },
+        'update_all_investments': {
+            'description':'Update all investments with data fetched from external sources'
         }
     }
     for task in available_tasks.keys():

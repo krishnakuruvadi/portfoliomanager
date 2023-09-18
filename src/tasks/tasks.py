@@ -682,7 +682,7 @@ def update_scroll_data():
                 except ScrollData.DoesNotExist:
                     scroll_item = ScrollData.objects.create(scrip=v['name'],
                                                             last_updated = v['last_updated'],
-                                                            val = last_price,
+                                                            val = float(v['lastPrice'].replace(',','')),
                                                             change = v['change'],
                                                             percent = v['pChange'])
                 if len(sel_indexes) == 0 or v['name'] in sel_indexes:
@@ -1152,6 +1152,26 @@ def send_monthend_updates_email():
         month = today - datetime.timedelta(days=2)
         Email.send(subject='Monthend updates', message=f'This is monthend update for {month.strftime("%b")} {month.year}', html_message=html_message)
 
+@db_task()
+def initial_setup():
+    update_mf_schemes()
+    update_bse_star_schemes()
+    update_sgb_tranches()
+
+@db_task()
+def fetch_data():
+    get_mf_navs()
+    update_shares_status()
+
+@db_task()
+def update_all_investments():
+    update_shares_latest_vals()
+    update_mf()
+    update_espp()
+    update_rsu()
+    handle_crypto()
+    update_latest_vals_epf_ssy_ppf()
+    update_gold_vals()
 
 '''
 @db_task()
