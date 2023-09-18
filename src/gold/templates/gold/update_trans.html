@@ -34,7 +34,7 @@
         {% endif %}
 
         <div class="form-group row">
-          <label for="buy_date" class="col-sm-3 col-form-label">Buy Date <span style="color:red;">*</span></label>
+          <label for="buy_date" class="col-sm-3 col-form-label">Buy Date</label>
           <div class="col-sm-3">
               <div class="md-form mt-0">
                   <label>{{buy_date}}</label>
@@ -43,7 +43,7 @@
         </div>
 
         <div class="form-group row">
-          <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
+          <label for="user" class="col-sm-3 col-form-label">User</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
               <label>{{user}}</label>
@@ -51,14 +51,25 @@
           </div>
         </div>
 
-        <div class="form-group row">   
-          <label class="control-label col-sm-3 col-form-label" for="id_buy_type">Buy Type <span style="color:red;">*</span></label>
+        <div class="form-group row">
+          <label class="control-label col-sm-3 col-form-label" for="id_buy_type">Buy Type</label>
           <div class="col-sm-3">
             <div class="md-form mt-0">
               <label>{{buy_type}}</label> 
             </div>
           </div> 
         </div>
+
+        {% if buy_type == 'Sovereign Gold Bond Scheme' %}
+        <div class="form-group row">
+          <label class="control-label col-sm-3 col-form-label" for="id_tranche">Tranche</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <div class="col"><label>{{tranche}}</label></div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
 
         <div class="form-group row">
           <label for="weight" class="col-sm-3 col-form-label">Weight <span style="color:red;">*</span></label>
@@ -137,6 +148,7 @@
     $("#id_per_gram").change(function () {
       setTransPrice();
     });
+    adjust_divs('{{buy_type}}');
     function setTransPrice(){
       var perGramElem = document.getElementById("id_per_gram");
       var ppg = perGramElem.value
@@ -154,6 +166,11 @@
     function precise(num) {
       //return Number.parseFloat(x).toPrecision(prec);
       return Math.round((num + Number.EPSILON) * 1000000) / 1000000
+    }
+    function adjust_divs(buy_type) {
+      if (buy_type == 'Sovereign Gold Bond Scheme') {
+        document.getElementById("id_per_gram").readOnly = true;
+      }
     }
   </script>
 {% endblock %}

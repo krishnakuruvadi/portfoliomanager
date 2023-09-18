@@ -6,7 +6,7 @@ from django.views.generic import (
     DetailView,
     DeleteView
 )
-from .models import Stock, MutualFund, HistoricalStockPrice, HistoricalMFPrice, ScrollData, Preferences, Passwords, HistoricalIndexPoints, Index
+from .models import Stock, MutualFund, HistoricalStockPrice, HistoricalMFPrice, ScrollData, Preferences, Passwords, HistoricalIndexPoints, Index, SovereignGoldBond
 from .helper import *
 from shared.handle_real_time_data import get_latest_vals, get_historical_mf_nav, get_conversion_rate
 from dateutil.relativedelta import relativedelta
@@ -543,3 +543,26 @@ def preferences(request):
         'email_api_secret': pref_obj.email_api_secret,
     }
     return render(request, template, context)
+
+@api_view(('GET',))
+@renderer_classes((TemplateHTMLRenderer, JSONRenderer))
+def get_sgb_tranches(request):
+    print('inside get_sgb_tranches')
+    filte = request.GET.get('q', '')
+    sgb_data = list()
+    i = 0
+    for sgb in SovereignGoldBond.objects.all():
+        if filte.lower() in sgb.tranche.lower():
+            data = dict()
+            data['value'] = sgb.tranche
+            data['label'] = sgb.tranche
+            data['issue_date'] = sgb.date_issuance.strftime('%Y-%m-%d')
+            data['online_price'] = sgb.issue_price_online
+            data['price'] = sgb.issue_price
+            sgb_data.append(data)
+            i  += 1
+            if i > 10:
+                break    
+    print(f'returning {sgb_data} as matching items')
+
+    return JsonResponse(sgb_data, safe=False)

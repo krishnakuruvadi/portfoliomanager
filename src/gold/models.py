@@ -31,6 +31,7 @@ class Gold(models.Model):
     unrealised_gain = models.DecimalField(max_digits=20, decimal_places=4, null=True, blank=True)
     unsold_weight = models.DecimalField(max_digits=20, decimal_places=10, null=False)
     purity = models.CharField(max_length=10, choices=GOLD_PURITY_CHOICES, default='24K')
+    tranche = models.ForeignKey('common.SovereignGoldBond', null=True, blank=True, on_delete=models.SET_NULL)
 
     def get_absolute_url(self):
         return reverse("gold:gold-detail", kwargs={'id': self.id})

@@ -1012,6 +1012,11 @@ def update_gold_vals(user=None):
     from gold.gold_helper import update_latest_value
     update_latest_value(user)
 
+@db_periodic_task(crontab(minute='50', hour='*/8'))
+def update_sgb_tranches():
+    from gold.gold_helper import pull_and_store_sgb_tranches
+    pull_and_store_sgb_tranches()
+
 @db_periodic_task(crontab(minute='0', hour='*/12'))
 def update_user_networth(user_id=None):
     from users.user_helper import update_user_networth

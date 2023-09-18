@@ -8,9 +8,10 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from tasks.tasks import update_gold_vals
 from goal.goal_helper import get_goal_id_name_mapping_for_user
+from common.models import SovereignGoldBond, SGBDividend
+
 
 # Create your views here.
-
 
 def get_trans(request):
     template = 'gold/trans_list.html'
@@ -61,8 +62,15 @@ def add_trans(request):
             buy_date = get_date_or_none_from_string(request.POST['buy_date'])
             buy_type = request.POST['buy_type']
             purity = '24K'
+            tranche = None
             if buy_type == 'Physical':
                 purity = request.POST['purity']
+            elif buy_type == 'Sovereign Gold Bond Scheme':
+                try:
+                    tranche = SovereignGoldBond.objects.get(tranche=request.POST['tranche'])
+                except SovereignGoldBond.DoesNotExist:
+                    print(f'didnt find tranche {request.POST["tranche"]}')
+
             Gold.objects.create(
                 user=user,
                 goal=goal_id,
@@ -73,7 +81,8 @@ def add_trans(request):
                 buy_date=buy_date,
                 buy_type=buy_type,
                 unsold_weight=weight,
-                purity=purity
+                purity=purity,
+                tranche=tranche
             )
             message_color = 'green'
             message = 'Buy transaction added successfully'
@@ -148,6 +157,10 @@ def update_trans(request, id):
     context['weight'] = g.weight
     context['per_gm'] = g.per_gm
     context['buy_type'] = g.buy_type
+    if g.buy_type == 'Sovereign Gold Bond Scheme' and g.tranche != None:
+        context['tranche'] = g.tranche.tranche
+    else:
+        context['tranche'] = 'Unknown'
     return render(request, template, context)
 
 def trans_detail(request, id):
@@ -169,6 +182,15 @@ def trans_detail(request, id):
         context['unrealised_gain'] = g.unrealised_gain
         context['roi'] = g.roi
         context['latest_value'] = g.latest_value
+        context['dividends'] = list()
+        if g.buy_type == 'Sovereign Gold Bond Scheme' and g.tranche != None:
+            for div in SGBDividend.objects.filter(sgb=g.tranche):
+                units = g.weight
+                for st in SellTransaction.objects.filter(buy_trans=g):
+                    if st.trans_date < div.date:
+                        units = units-st.weight
+                if units > 0:
+                    context['dividends'].append({'date':div.date, 'amount':int(div.amount*units)})
         print(context)
         return render(request, template, context)
     except Gold.DoesNotExist:
