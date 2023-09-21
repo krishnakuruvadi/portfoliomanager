@@ -16,6 +16,10 @@
   <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
     <table class="table table-hover">
       <tr>
+        <th scope="col">Buy Type</th>
+        <td>{{buy_type}}</td>
+      </tr>
+      <tr>
         <th scope="col">Buy Date</th>
         <td>{{buy_date}}</td>
       </tr>
@@ -65,5 +69,21 @@
         </tr>
     </table>
   </div>
+  {% if buy_type == 'Sovereign Gold Bond Scheme' %}
+  <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+    <table class="table table-hover">
+      <tr>
+      <th>Dividend Date</th>
+      <th>Dividend Amount</th>
+    </tr>
+    {% for d in dividends %}
+      <tr>
+        <td>{{d.date}}</td>
+        <td>{{d.amount}}</td>
+      </tr>
+    {% endfor %}
+    </table>
+  </div>
+  {% endif %}
 </div>
 {% endblock content %}

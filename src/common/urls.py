@@ -26,7 +26,8 @@ from .views import (
     IndexListView,
     IndexDetailView,
     HistoricalIndexPointList,
-    UserPreferenceInvestmentTypesView
+    UserPreferenceInvestmentTypesView,
+    get_sgb_tranches
 )
 # Create your views here.
 
@@ -57,5 +58,6 @@ urlpatterns = [
     path('preferences', preferences, name='preference'),
     path('api/get/scrolldata', ScrollDataView.as_view()),
     path('api/get/inv_types_user_pref', UserPreferenceInvestmentTypesView.as_view()),
-    path('api/get-forex/<int:year>/<int:month>/<int:day>/<str:from_currency>/<str:to_currency>', ForexDataView.as_view())
+    path('api/get-forex/<int:year>/<int:month>/<int:day>/<str:from_currency>/<str:to_currency>', ForexDataView.as_view()),
+    path('gold/avail_tranches/', get_sgb_tranches)
 ]

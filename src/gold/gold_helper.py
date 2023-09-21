@@ -1,4 +1,4 @@
-from common.models import HistoricalGoldPrice
+from common.models import HistoricalGoldPrice, SovereignGoldBond, SGBDividend
 from dateutil.relativedelta import relativedelta
 import requests
 from shared.utils import get_date_or_none_from_string
@@ -119,6 +119,66 @@ def update_latest_value(user):
                 print(f'roi: {x}')
                 g.roi = x        
         g.save()
+
+def pull_and_store_sgb_tranches():
+    gold_url = f'https://raw.githubusercontent.com/krishnakuruvadi/portfoliomanager-data/main/India/gold/sgb_tranche.json'
+    try:
+        request = requests.get(gold_url, timeout=30)
+        request.raise_for_status()
+        print(f"got {request.json()}")
+
+        tranches = request.json()['tranches']
+        for name, details in tranches.items():
+            try:
+                subscription_start_dt = get_date_or_none_from_string(details["subscription_start"], "%d/%m/%Y")
+                subscription_end_dt = get_date_or_none_from_string(details["subscription_end"], "%d/%m/%Y")
+                issuance_dt = get_date_or_none_from_string(details["issuance"], "%d/%m/%Y")
+                maturity_dt = get_date_or_none_from_string(details["maturity"], "%d/%m/%Y")
+                price = details["price"]
+                online_price = details["online_price"]
+                min_wt = details["min_wt"]
+                max_wt = details["max_wt"]
+                tranche = add_or_get_tranche(name, subscription_start_dt, subscription_end_dt, issuance_dt, maturity_dt, price, online_price, min_wt,max_wt)
+                st_dt = issuance_dt + relativedelta(months=6)
+                today = datetime.date.today()
+                while st_dt<today and st_dt <= maturity_dt:
+                    coupon = details['coupon_rate']
+                    add_dividend(tranche, st_dt, int(coupon*price/200))
+                    st_dt = st_dt + relativedelta(months=6)
+            except Exception as ex:
+                print(f'exception {ex} when adding {name} {details}')
+    except Exception as e:
+        print(f'exception {e} when loading entries from {gold_url}')
+
+
+def add_or_get_tranche(name, subscription_start_dt, subscription_end_dt, issuance_dt, maturity_dt, price, online_price, min_wt,max_wt):
+    try:
+        tranche = SovereignGoldBond.objects.get(tranche=name)
+        print(f'SovereignGoldBond already being tracked for {name}:{subscription_start_dt} - {subscription_end_dt}, {price}/{online_price}')
+        return tranche
+    except SovereignGoldBond.DoesNotExist:
+        tranche = SovereignGoldBond.objects.create(
+                    tranche=name,
+                    date_subscription=subscription_end_dt,
+                    date_issuance=issuance_dt,
+                    issue_price=price,
+                    issue_price_online=online_price,
+                    date_maturity=maturity_dt,
+                    min_weight_gram=min_wt,
+                    max_weight_gram=max_wt
+                )
+        return tranche
+    except Exception as ex:
+        print(f'SovereignGoldBond add failed {ex}')
+    return None
+
+def add_dividend(tranche, div_date, amount):
+    try:
+        SGBDividend.objects.create(sgb=tranche, amount=amount, date=div_date)
+    except IntegrityError:
+        pass
+    except Exception as ex:
+        print(f'failed to create dividend for {tranche.tranche}, {amount} {div_date} {ex}')
 
 '''
 def add_broker_trans(broker, user, trans):

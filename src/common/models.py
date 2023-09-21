@@ -96,6 +96,26 @@ class Stock(models.Model):
     def __str__(self):
         return str(self.id) + ":" + self.exchange + ":" + self.symbol
 
+class SovereignGoldBond(models.Model):
+    tranche = models.CharField(max_length=30, unique=True)
+    date_subscription = models.DateField(_('Subscription Date'), )
+    date_issuance = models.DateField(_('Issuance Date'), )
+    issue_price = models.DecimalField(_('Price'), max_digits=30, decimal_places=10, null=False)
+    issue_price_online = models.DecimalField(_('Online Price'), max_digits=30, decimal_places=10, null=False)
+    date_maturity = models.DateField(_('Maturity Date'), )
+    min_weight_gram = models.IntegerField()
+    max_weight_gram = models.IntegerField()
+
+class SGBDividend(models.Model):
+    class Meta:
+        unique_together = (('sgb', 'date'),)
+    sgb = models.ForeignKey('SovereignGoldBond', on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=20, decimal_places=2, null=False)
+    date = models.DateField(null=False)
+
+    def __str__(self):
+        return self.sgb.tranche +': ' + str(self.amount) + ' on ' + str(self.date)
+    
 class HistoricalGoldPrice(models.Model):
     class Meta:
         unique_together = (('buy_type', 'purity', 'date'),)
