@@ -2,9 +2,7 @@
 
 ## Other hosting options
 
-If you or someone you know is unable to self host this application but would greatly benefit from it, checkout us out at [lukritive.com](https://lukritive.com), our hosted site (with a 15-day trial)!
-
-  - Keep in mind it's still in Beta release! It is free to sign up.
+If you or someone you know is unable to self host this application but would greatly benefit from it, checkout us out at [lukritive.com](https://lukritive.com), our hosted site (with a 1 year trial for a limited time)!
 
 ---
 
