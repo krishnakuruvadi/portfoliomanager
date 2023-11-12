@@ -403,6 +403,3 @@ docker image prune
 
 ---
 
-##### Disclaimers
-
-##### This software is in its pre-alpha stage.
