@@ -21,7 +21,7 @@ click==7.1.2
 colorama==0.4.4
 commonmark==0.9.1
 constantly==15.1.0
-cryptography==41.0.6
+cryptography==42.0.4
 cssselect==1.1.0
 daphne==3.0.1
 dateutils==0.6.8
@@ -72,7 +72,7 @@ pycparser==2.20
 Pygments==2.15.0
 PyHamcrest==2.0.2
 pylint==2.6.0
-pyOpenSSL==23.2.0
+pyOpenSSL==24.0.0
 pyotp==2.4.1
 pyparsing==2.4.7
 PyPDF2==1.28.4
