@@ -64,7 +64,7 @@ packaging==20.9
 pandas==1.5.2
 pdfminer.six==20220524
 peewee==3.17.0
-Pillow==10.0.1
+Pillow==10.2.0
 psycopg2-binary==2.9.3
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
