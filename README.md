@@ -2,7 +2,8 @@
 
 ## Other hosting options
 
-If you or someone you know is unable to self host this application but would greatly benefit from it, checkout us out at [lukritive.com](https://lukritive.com), our hosted site (with a 1 year trial for a limited time)!
+~~If you or someone you know is unable to self host this application but would greatly benefit from it, checkout us out at [lukritive.com](https://lukritive.com), our hosted site (with a 1 year trial for a limited time)!~~
+We have stopped the service due to lack of demand
 
 ---
 
