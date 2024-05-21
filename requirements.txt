@@ -86,7 +86,7 @@ pyxirr==0.10.3
 PyYAML==6.0.1
 rapidfuzz==2.13.7
 regex==2021.10.8
-requests==2.31.0
+requests==2.32.0
 requests-file==1.5.1
 rfc3986==1.5.0
 rich==12.6.0
