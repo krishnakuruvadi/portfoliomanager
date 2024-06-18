@@ -44,12 +44,13 @@ def update_indexes(start_date, end_date):
                 if (today - k).days <=5 or k.day in [25, 26, 27, 28, 29, 30, 31, 1, 2, 3, 4, 5]:
                     add_hip(index, k, v)
                 elif abs((v-last_val)*100/(last_val+1)) > 1:
-                        add_hip(index, k, v)
+                    add_hip(index, k, v)
                 last_val = v
         except Exception as ex:
             print(f'exception {ex} when updating index {index.country}/{index.name}')
 
 def update_index(exchange, start_date, end_date):
+    today = datetime.date.today()
     symbol, country = get_comp_index(exchange)
     if symbol:
         try:
@@ -65,10 +66,10 @@ def update_index(exchange, start_date, end_date):
         yf.close()
         last_val = 0
         for k,v in response.items():
-            if k.day in [25, 26, 27, 28, 29, 30, 31, 1, 2, 3, 4, 5]:
+            if (today - k).days <=5 or k.day in [25, 26, 27, 28, 29, 30, 31, 1, 2, 3, 4, 5]:
                 add_hip(index, k, v)
             elif abs((v-last_val)*100/(last_val+1)) > 1:
-                    add_hip(index, k, v)
+                add_hip(index, k, v)
             last_val = v
 
 def add_hip(index, date, points):
@@ -128,11 +129,11 @@ def get_comp_index_values(stock, start_date, last_date):
 
         if first_missing and first_found and (first_found - first_missing).days > 15:
             print(f'from get_comp_index_values: first_missing {first_missing} first_found {first_found}')
-            update_index_points(stock.exchange, first_missing, first_found)
+            update_index_points(stock.exchange, first_found, first_missing)
                     
         if last_missing and last_found and (last_missing - last_found).days > 15:
             print(f'from get_comp_index_values: last_missing {last_missing} last_found {last_found}')
-            update_index_points(stock.exchange, last_missing, last_found)
+            update_index_points(stock.exchange, last_found, last_missing)
                     
         if not first_found and not last_found:
             print(f'from get_comp_index_values: first_found {first_found} last_found {last_found}')
