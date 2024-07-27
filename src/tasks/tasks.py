@@ -1165,6 +1165,7 @@ def fetch_data():
 
 @db_task()
 def update_all_investments():
+    set_task_state('update_all_investments', TaskState.Running)
     update_shares_latest_vals()
     update_mf()
     update_espp()
@@ -1172,6 +1173,7 @@ def update_all_investments():
     handle_crypto()
     update_latest_vals_epf_ssy_ppf()
     update_gold_vals()
+    set_task_state('update_all_investments', TaskState.Successful)
 
 '''
 @db_task()
