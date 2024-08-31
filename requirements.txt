@@ -59,7 +59,7 @@ multitasking==0.0.9
 nsetools==1.0.11
 numpy==1.26.4
 ofxparse==0.21
-opencv-python==4.5.5.64
+opencv-python==4.8.1.78
 openpyxl==3.0.10
 outcome==1.2.0
 packaging==20.9
