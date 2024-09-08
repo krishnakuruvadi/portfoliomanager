@@ -74,7 +74,10 @@ USA:
   - macOS:
 
 ```bash
+brew update
+brew upgrade
 brew install ghostscript tcl-tk
+brew cleanup
 ```
   - Ubuntu
 
