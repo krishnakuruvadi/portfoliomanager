@@ -4,13 +4,13 @@ asgiref==3.7.2
 astroid==2.4.2
 async-generator==1.10
 attrs==23.1.0
-autobahn==20.12.3
+autobahn==21.2.1
 Automat==20.2.0
 beautifulsoup4==4.11.1
 bs4==0.0.1
 bsedata==0.4.0
-camelot-py==0.10.1
-casparser==0.5.5
+camelot-py==0.11.0
+casparser==0.3.9
 casparser-isin==2023.1.16
 certifi==2024.7.4
 cffi==1.15.1
@@ -21,7 +21,7 @@ click==7.1.2
 colorama==0.4.4
 commonmark==0.9.1
 constantly==15.1.0
-cryptography==42.0.4
+cryptography==43.0.1
 cssselect==1.1.0
 daphne==3.0.1
 dateutils==0.6.8
@@ -47,7 +47,7 @@ httpx==0.23.0
 huey==2.3.0
 hyperlink==20.0.1
 idna==3.7
-incremental==22.10.0
+incremental==24.7.2
 isort==5.6.4
 jieba3k==0.35.1
 joblib==1.2.0
@@ -64,7 +64,7 @@ openpyxl==3.0.10
 outcome==1.2.0
 packaging==20.9
 pandas==2.2.2
-pdfminer.six==20220524
+pdfminer.six==20240706
 peewee==3.17.0
 pillow==10.3.0
 psycopg2-binary==2.9.9
@@ -74,10 +74,10 @@ pycparser==2.20
 Pygments==2.15.0
 PyHamcrest==2.0.2
 pylint==2.6.0
-pyOpenSSL==24.0.0
+pyOpenSSL==24.2.1
 pyotp==2.4.1
 pyparsing==2.4.7
-PyPDF2==1.28.4
+pypdf==4.3.1
 PySocks==1.7.1
 python-dateutil==2.8.2
 python-dotenv==0.21.0
@@ -110,7 +110,7 @@ toml==0.10.2
 tqdm==4.66.4
 trio==0.21.0
 trio-websocket==0.9.2
-Twisted==23.10.0
+Twisted==24.7.0
 txaio==20.12.1
 typing_extensions==4.11.0
 tzdata==2024.1
