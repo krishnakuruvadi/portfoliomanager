@@ -13,7 +13,7 @@ camelot-py==0.11.0
 casparser==0.3.9
 casparser-isin==2023.1.16
 certifi==2024.7.4
-cffi==1.15.1
+cffi==1.17.1
 channels==4.0.0
 chardet==3.0.4
 charset-normalizer==2.1.1
