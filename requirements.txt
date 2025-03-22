@@ -39,7 +39,7 @@ filelock==3.0.12
 frozendict==2.4.4
 ghostscript==0.7
 google-currency==1.0.9
-gunicorn==22.0.0
+gunicorn==23.0.0
 h11==0.12.0
 html5lib==1.1
 httpcore==0.15.0
