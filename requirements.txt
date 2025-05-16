@@ -41,10 +41,10 @@ frozendict==2.4.4
 ghostscript==0.7
 google-currency==1.0.9
 gunicorn==22.0.0
-h11==0.12.0
+h11==0.16.0
 html5lib==1.1
-httpcore==0.15.0
-httpx==0.23.0
+httpcore==1.0.9
+httpx==0.28.1
 huey==2.3.0
 hyperlink==20.0.1
 idna==3.7
