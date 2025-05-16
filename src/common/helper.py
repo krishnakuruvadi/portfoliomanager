@@ -193,8 +193,20 @@ def get_scheme_codes(mf, as_json=False):
         elif scheme_data.strip() != "":
             fund_house = scheme_data.strip()
 
-    return mf.render_response(scheme_info, as_json)
+    return render_response(scheme_info, as_json)
 
+def render_response(data, as_json=False, as_Dataframe=False):
+    if as_json is True:
+        return json.dumps(data)
+    # parameter 'as_Dataframe' only works with get_scheme_historical_nav()
+    elif as_Dataframe is True:
+        df = pd.DataFrame.from_records(data['data'])
+        df['dayChange'] = df['nav'].astype(float).diff(periods=-1)
+        df = df.set_index('date')
+        return df
+    else:
+        return data
+    
 def update_category_returns(json_input):
     as_on = json_input.get('as_on', None)
     for k,v in json_input.items():

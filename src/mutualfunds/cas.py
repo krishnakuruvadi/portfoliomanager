@@ -1,10 +1,12 @@
 
 from os.path import isfile
-import casparser
+import casparser, json
 from shared.utils import *
 from common.models import MutualFund
 from alerts.alert_helper import create_alert, Severity
 from django.db.models import Q
+from common.helper import get_or_add_mf_obj
+
 
 class CAS:
     def __init__(self, filename, passwd):
@@ -13,7 +15,8 @@ class CAS:
     
     def get_transactions(self):
         if isfile(self.filename):
-            data = casparser.read_cas_pdf(self.filename, self.passwd)
+            json_data = casparser.read_cas_pdf(self.filename, self.passwd, output="json")
+            data = json.loads(json_data)
             print(data)
             if data['cas_type'] != 'DETAILED':
                 print(f'failed to add mutual fund transactions since document is not detailed')
@@ -42,7 +45,7 @@ class CAS:
                     
                     isin = scheme['isin']
                     amfi_code = scheme['amfi']
-                    fund, description  = self._get_fund(isin, folio_num)
+                    fund, description  = self._get_fund(isin, amfi_code, folio_num)
                     if not fund:
                         create_alert(
                             summary='Folio:' + folio_num + ' Failure to add transactions',
@@ -76,7 +79,7 @@ class CAS:
         else:
             print(f'{self.filename} is not a file or doesnt exist')
     
-    def _get_fund(self, isin, folio):
+    def _get_fund(self, isin, amfi_code, folio):
         fund = MutualFund.objects.filter(Q(isin=isin) | Q(isin2=isin))
         if len(fund) == 1:
             return fund[0].code, ''
@@ -84,4 +87,7 @@ class CAS:
             print(f'too many matching values for isin {isin}')
             return None, 'too many matching values for isin '+ isin + ' for folio:'+ folio
         print(f'couldnt find match with isin for fund: {isin}')
+        mf_obj = get_or_add_mf_obj(amfi_code)
+        if mf_obj:
+            return mf_obj.code, ''
         return None, 'couldnt find match with isin ' + isin + ' for folio:'+ folio
