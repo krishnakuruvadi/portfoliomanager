@@ -102,7 +102,7 @@ rope==0.18.0
 selenium==4.4.3
 semver==2.13.0
 service-identity==18.1.0
-setuptools==70.0.0
+setuptools==78.1.1
 sgmllib3k==1.0.0
 six==1.16.0
 sniffio==1.2.0
