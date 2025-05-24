@@ -27,6 +27,7 @@ To build a portfolio manager which can track and provide insights into a individ
 - Goals
 
 - Fixed Deposit
+- Recurring Deposit
 - ESPP (Employee Stock Purchase Plan)
 - RSU (Restricted Stock Units)
 - Shares

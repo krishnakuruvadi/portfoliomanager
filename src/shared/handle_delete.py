@@ -2,6 +2,7 @@ from ppf.models import Ppf
 from ssy.models import Ssy
 from epf.models import Epf
 from fixed_deposit.models import FixedDeposit
+from recurring_deposit.models import RecurringDeposit
 from espp.models import Espp
 from goal.models import Goal
 from users.models import User
@@ -21,6 +22,7 @@ def delete_user(id):
         Ppf.objects.filter(user=id).delete()
         Ssy.objects.filter(user=id).delete()
         FixedDeposit.objects.filter(user=id).delete()
+        RecurringDeposit.objects.filter(user=id).delete()
         Espp.objects.filter(user=id).delete()
         Goal.objects.filter(user=id).delete()
         Share.objects.filter(user=id).delete()
@@ -55,6 +57,10 @@ def delete_goal(id):
         for fixed_deposit_obj in fixed_deposit_objs:
             fixed_deposit_obj.goal = None
             fixed_deposit_obj.save()
+        recurring_deposit_objs = RecurringDeposit.objects.filter(goal=id)
+        for recurring_deposit_obj in recurring_deposit_objs:
+            recurring_deposit_obj.goal = None
+            recurring_deposit_obj.save()
         espp_objs = Espp.objects.filter(goal=id)
         for espp_obj in espp_objs:
             espp_obj.goal = None

@@ -15,6 +15,7 @@ from shared.utils import get_date_or_none_from_string, get_in_preferred_tz
 from epf.epf_interface import EpfInterface
 from espp.espp_interface import EsppInterface
 from fixed_deposit.fd_interface import FdInterface
+from recurring_deposit.rd_interface import RdInterface
 from ppf.ppf_interface import PpfInterface
 from ssy.ssy_interface import SsyInterface
 from shares.share_interface import ShareInterface
@@ -63,7 +64,7 @@ def contrib_deduct_str(c, d):
 
 def get_start_day_for_user(id_):
     start_day = datetime.date.today()
-    for intf in [EpfInterface, EsppInterface, FdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
+    for intf in [EpfInterface, EsppInterface, FdInterface, RdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
         start_day = get_min(intf.get_start_day_for_user(id_), start_day)
     return start_day
 
@@ -166,6 +167,13 @@ class UserDetailView(DetailView):
             total_c += int(c)
             total_d += int(d)
 
+            c, d = RdInterface.get_user_yearly_contrib(id_, yr)
+            if (c != 0 or d !=0) and not 'RD' in investment_types:
+                investment_types.append('RD')
+            yrly[yr]['RD'] = contrib_deduct_str(c, d)
+            total_c += int(c)
+            total_d += int(d)
+
             c, d = ShareInterface.get_user_yearly_contrib(id_, yr)
             if (c != 0 or d !=0) and not 'Shares' in investment_types:
                 investment_types.append('Shares')
@@ -182,7 +190,7 @@ class UserDetailView(DetailView):
 
             yrly[yr]['Total'] = contrib_deduct_str(total_c, total_d)
 
-        for item in ['PPF', '401K', 'RSU', 'EPF', 'ESPP', 'SSY', 'MF', 'FD', 'Shares', 'Insurance', 'Crypto']:
+        for item in ['PPF', '401K', 'RSU', 'EPF', 'ESPP', 'SSY', 'MF', 'FD', 'RD', 'Shares', 'Insurance', 'Crypto']:
             if item not in investment_types:
                 for yr in range(start_day.year, curr_yr+1):
                     del yrly[yr][item]
@@ -330,7 +338,7 @@ class UserMonthlyContribDeduct(APIView):
             data['headers'] = list()
             totalc = [0]*12
             totald = [0]*12
-            for intf in [EpfInterface, EsppInterface, FdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
+            for intf in [EpfInterface, EsppInterface, FdInterface, RdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
                 data['headers'].append(intf.get_chart_name())
                 c,d = intf.get_user_monthly_contrib(id_int, yr)
                 for month in range(0,12):
@@ -370,7 +378,7 @@ def insights_view(request):
             start_day_for_family = get_min(start_day_for_family, start_day)
             for yr in range(start_day.year, end_year):
                 contrib_totals = [0]*12
-                for intf in [EpfInterface, EsppInterface, FdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
+                for intf in [EpfInterface, EsppInterface, FdInterface, RdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
                     c,d = intf.get_user_monthly_contrib(id, yr)
                     for month in range(0,12):
                         contrib_totals[month] += c[month] + d[month]

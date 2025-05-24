@@ -10,6 +10,7 @@ class InvestmentData(models.Model):
     epf_data = models.CharField(max_length=6000, null=True, blank=True)
     ssy_data = models.CharField(max_length=6000, null=True, blank=True)
     fd_data = models.CharField(max_length=6000, null=True, blank=True)
+    rd_data = models.CharField(max_length=6000, null=True, blank=True)
     espp_data = models.CharField(max_length=6000, null=True, blank=True)
     rsu_data = models.CharField(max_length=6000, null=True, blank=True)
     shares_data = models.CharField(max_length=6000, null=True, blank=True)

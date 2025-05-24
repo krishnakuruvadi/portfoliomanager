@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from shared.handle_get import *
-from shared.handle_chart_data import get_user_contributions, get_goal_contributions, get_investment_data
+from shared.handle_chart_data import get_user_contributions, get_investment_data
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import InvestmentData
@@ -40,7 +40,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
     for user in users:
         context['users'][str(i)] = {'name':user}
         id = get_user_id_from_name(user)
-        contrib = get_user_contributions(id)
+        contrib = get_user_contributions(id)            
         debt = contrib.get('debt', 0)
         all_debt += debt
         equity = contrib.get('equity', 0)
@@ -95,6 +95,8 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         i = i + 1
     if all_target > 0:
         all_remaining = all_target - all_achieved
+        if all_remaining < 0:
+            all_remaining = 0
         all_remaining_per = round(all_remaining*100/all_target, 2)
         all_achieve_per = round(all_achieved*100/all_target, 2)
     else:
@@ -131,6 +133,7 @@ def home_view(request, *args, **kwargs): # *args, **kwargs
         context['investment_data']['epf'] = json.loads(investment_data.epf_data.replace("\'", "\""))
         context['investment_data']['ssy'] = json.loads(investment_data.ssy_data.replace("\'", "\""))
         context['investment_data']['fd'] =  json.loads(investment_data.fd_data.replace("\'", "\""))
+        context['investment_data']['rd'] =  json.loads(investment_data.rd_data.replace("\'", "\""))
         context['investment_data']['espp'] = json.loads(investment_data.espp_data.replace("\'", "\""))
         context['investment_data']['rsu'] = json.loads(investment_data.rsu_data.replace("\'", "\""))
         context['investment_data']['shares'] = json.loads(investment_data.shares_data.replace("\'", "\""))
@@ -171,6 +174,7 @@ class GetInvestmentData(APIView):
                 'epf':json.loads(investment_data.epf_data.replace("\'", "\"")),
                 'ssy':json.loads(investment_data.ssy_data.replace("\'", "\"")),
                 'fd': json.loads(investment_data.fd_data.replace("\'", "\"")),
+                'rd': json.loads(investment_data.rd_data.replace("\'", "\"")),
                 'espp': json.loads(investment_data.espp_data.replace("\'", "\"")),
                 'rsu':json.loads(investment_data.rsu_data.replace("\'", "\"")),
                 'shares':json.loads(investment_data.shares_data.replace("\'", "\"")),

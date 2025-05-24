@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'shares',
     'mutualfunds',
     'fixed_deposit',
+    'recurring_deposit',
     'reports',
     'common',
     'calculator',

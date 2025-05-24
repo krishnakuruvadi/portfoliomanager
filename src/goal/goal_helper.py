@@ -104,6 +104,7 @@ def update_goal_contributions(id):
         goal_obj.epf_conitrib = contrib['epf']
         goal_obj.espp_conitrib = contrib['espp']
         goal_obj.fd_conitrib = contrib['fd']
+        goal_obj.rd_contribution = contrib['rd']
         goal_obj.ppf_conitrib = contrib['ppf']
         goal_obj.ssy_conitrib = contrib['ssy']
         goal_obj.rsu_conitrib = contrib['rsu']
@@ -144,6 +145,7 @@ def get_unallocated_amount():
     from epf.epf_interface import EpfInterface
     from espp.espp_interface import EsppInterface
     from fixed_deposit.fd_interface import FdInterface
+    from recurring_deposit.rd_interface import RdInterface
     from mutualfunds.mf_interface import MfInterface
     from ppf.ppf_interface import PpfInterface
     from retirement_401k.r401k_interface import R401KInterface
@@ -160,6 +162,7 @@ def get_unallocated_amount():
     amt += EpfInterface.get_no_goal_amount()
     amt += EsppInterface.get_no_goal_amount()
     amt += FdInterface.get_no_goal_amount()
+    amt += RdInterface.get_no_goal_amount()
     amt += MfInterface.get_no_goal_amount()
     amt += PpfInterface.get_no_goal_amount()
     amt += R401KInterface.get_no_goal_amount()

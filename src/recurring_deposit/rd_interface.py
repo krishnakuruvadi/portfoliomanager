@@ -1,22 +1,22 @@
-from .models import FixedDeposit
+from .models import RecurringDeposit
 import datetime
-from .fixed_deposit_helper import get_maturity_value
+from .recurring_deposit_helper import get_maturity_value
 from dateutil.relativedelta import relativedelta
 from alerts.alert_helper import create_alert_month_if_not_exist, Severity
 
-class FdInterface:
+class RdInterface:
     @classmethod
     def get_chart_name(self):
-        return 'FD'
+        return 'RD'
 
     @classmethod
     def get_start_day(self, user_id=None):
         start_day = None
         try:
             if user_id:
-                objs = FixedDeposit.objects.filter(user=user_id)
+                objs = RecurringDeposit.objects.filter(user=user_id)
             else:
-                objs = FixedDeposit.objects.all()
+                objs = RecurringDeposit.objects.all()
             
             for obj in objs:
                 if not start_day:
@@ -24,51 +24,71 @@ class FdInterface:
                 else:
                     start_day = start_day if start_day < obj.start_date else obj.start_date
         except Exception as ex:
-            print(f'exception finding start day for fd {ex}')
+            print(f'exception finding start day for rd {ex}')
         return start_day
 
     @classmethod
     def get_start_day_for_goal(self, goal_id):
         start_day = None
         try:
-            objs = FixedDeposit.objects.filter(goal=goal_id)
+            objs = RecurringDeposit.objects.filter(goal=goal_id)
             for obj in objs:
                 if not start_day:
                     start_day = obj.start_date
                 else:
                     start_day = start_day if start_day < obj.start_date else obj.start_date
         except Exception as ex:
-            print(f'exception finding start day for goal {goal_id} fd {ex}')
+            print(f'exception finding start day for goal {goal_id} rd {ex}')
         return start_day
 
     @classmethod
     def get_start_day_for_user(self, user_id):
         start_day = None
         try:
-            objs = FixedDeposit.objects.filter(user=user_id)
+            objs = RecurringDeposit.objects.filter(user=user_id)
             for obj in objs:
                 if not start_day:
                     start_day = obj.start_date
                 else:
                     start_day = start_day if start_day < obj.start_date else obj.start_date
         except Exception as ex:
-            print(f'exception finding start day for user {user_id} fd {ex}')
+            print(f'exception finding start day for user {user_id} rd {ex}')
         return start_day
 
     @classmethod
     def get_no_goal_amount(self, user_id=None):
         amt = 0
+        today = datetime.date.today()
         if user_id:
-            objs = FixedDeposit.objects.filter(user=user_id)
+            objs = RecurringDeposit.objects.filter(user=user_id)
         else:
-            objs = FixedDeposit.objects.all()
+            objs = RecurringDeposit.objects.all()
         for obj in objs:
-            if not obj.goal:
-                amt += 0 if not obj.final_val else obj.final_val
+            if not obj.goal and obj.mat_date > today:
+                months = relativedelta(today, obj.start_date).months+1
+                print(f'months between {today} and {obj.start_date} is {months}')
+                _, mat_value = get_maturity_value(float(obj.principal), obj.start_date, float(obj.roi), months)
+                print(f'mat_value {mat_value} months {months}')
+                amt += mat_value
         return amt
-
+    
+    @classmethod
+    def get_amount_for_goal(self, id):
+        rd_objs = RecurringDeposit.objects.filter(goal=id)
+        total_rd = 0
+        today = datetime.date.today()
+        for rd_obj in rd_objs:
+            if rd_obj.mat_date > today:
+                months = relativedelta(today, rd_obj.start_date).months+1
+                print(f'months between {today} and {rd_obj.start_date} is {months}')
+                _, mat_value = get_maturity_value(float(rd_obj.principal), rd_obj.start_date, float(rd_obj.roi), months)
+                print(f'mat_value {mat_value} months {months}')
+                total_rd += mat_value
+        return total_rd
+    
     @classmethod
     def get_goal_yearly_contrib(self, goal_id, yr):
+        print(f'yr {yr}')
         st_date = datetime.date(year=yr, day=1, month=1)
         end_date = datetime.date(year=yr, day=31, month=12)
         today = datetime.date.today()
@@ -78,18 +98,27 @@ class FdInterface:
         contrib = 0
         deduct = 0
         total = 0
-        for obj in FixedDeposit.objects.filter(goal=goal_id):
-            if obj.start_date.year == yr:
-                contrib += float(obj.principal)
-                cash_flows.append((obj.start_date, -1*float(obj.principal)))
+        for obj in RecurringDeposit.objects.filter(goal=goal_id):
+            
+            if obj.start_date.year <= yr:
+                s = datetime.date(month=1, day=obj.start_date.day, year=yr)
+                if s < obj.start_date:
+                    s = obj.start_date
+                while s <= obj.mat_date and s <= end_date:
+                    print(f'contrib s: {s} {float(obj.principal)}')
+                    contrib += float(obj.principal)
+                    cash_flows.append((s, -1*float(obj.principal)))
+                    s = s + relativedelta(months=1)
 
             if obj.mat_date.year == yr:
                 deduct += -1*float(obj.final_val)
                 cash_flows.append((obj.start_date, float(obj.final_val)))
             
             if obj.mat_date.year > yr:
-                days = (end_date - obj.start_date).days
-                _, mat_value = get_maturity_value(float(obj.principal), obj.start_date, float(obj.roi), days)
+                months = relativedelta(end_date, obj.start_date).months+1
+                print(f'months between {end_date} and {obj.start_date} is {months}')
+                _, mat_value = get_maturity_value(float(obj.principal), obj.start_date, float(obj.roi), months)
+                print(f'mat_value {mat_value} months {months}')
                 total += mat_value
         return cash_flows, contrib, deduct, total
 
@@ -99,7 +128,7 @@ class FdInterface:
         end_date = datetime.date(year=yr, day=31, month=12)
         contrib = 0
         deduct = 0
-        for obj in FixedDeposit.objects.filter(user=user_id, start_date__lte=end_date):
+        for obj in RecurringDeposit.objects.filter(user=user_id, start_date__lte=end_date):
             if obj.start_date.year == yr:
                 contrib += float(obj.principal)
             if obj.mat_date.year == yr:
@@ -115,7 +144,7 @@ class FdInterface:
             end_date = today
         contrib = [0]*12
         deduct = [0]*12
-        for obj in FixedDeposit.objects.filter(user=user_id, start_date__lte=end_date):
+        for obj in RecurringDeposit.objects.filter(user=user_id, start_date__lte=end_date):
             if obj.start_date.year == yr:
                 contrib[obj.start_date.month-1] += float(obj.principal)
             if obj.mat_date.year == yr:
@@ -124,11 +153,17 @@ class FdInterface:
 
     @classmethod
     def get_amount_for_user(self, user_id):
-        fd_objs = FixedDeposit.objects.filter(user=user_id)
-        total_fd = 0
-        for fd_obj in fd_objs:
-            total_fd += fd_obj.final_val
-        return total_fd
+        rd_objs = RecurringDeposit.objects.filter(user=user_id)
+        total_rd = 0
+        today = datetime.date.today()
+        for rd_obj in rd_objs:
+            if rd_obj.mat_date > today:
+                months = relativedelta(today, rd_obj.start_date).months+1
+                print(f'months between {today} and {rd_obj.start_date} is {months}')
+                _, mat_value = get_maturity_value(float(rd_obj.principal), rd_obj.start_date, float(rd_obj.roi), months)
+                print(f'mat_value {mat_value} months {months}')
+                total_rd += mat_value
+        return total_rd
 
     @classmethod
     def get_amount_for_all_users(self, ext_user):
@@ -141,9 +176,9 @@ class FdInterface:
     @classmethod
     def raise_alerts(self):
         today = datetime.date.today()
-        fd_objs = FixedDeposit.objects.filter(mat_date__gte=today, mat_date__lte=today+relativedelta(days=15))
-        for fdo in fd_objs:
-            cont = f"FD {fdo.number} will be maturing on {fdo.mat_date}.  Renew and stay invested"
+        rd_objs = RecurringDeposit.objects.filter(mat_date__gte=today, mat_date__lte=today+relativedelta(days=15))
+        for rdo in rd_objs:
+            cont = f"RD {rdo.number} will be maturing on {rdo.mat_date}.  Renew and stay invested"
             print(cont+ ". Raising an alarm")
                             
             create_alert_month_if_not_exist(
@@ -156,7 +191,7 @@ class FdInterface:
 
     @classmethod
     def get_export_name(self):
-        return 'fd'
+        return 'rd'
     
     @classmethod
     def get_current_version(self):
@@ -172,7 +207,7 @@ class FdInterface:
             }
         }
         data = list()
-        for eo in FixedDeposit.objects.filter(user=user_id):
+        for eo in RecurringDeposit.objects.filter(user=user_id):
             eod = {
                 'number': eo.number,
                 'bank_name': eo.bank_name,
@@ -204,7 +239,7 @@ class FdInterface:
         ids = list()
         for u in get_users(ext_user):
             ids.append(u.id)
-        objs = FixedDeposit.objects.filter(user__in=ids)
+        objs = RecurringDeposit.objects.filter(user__in=ids)
         start = 0
         credits = 0
         debits = 0
@@ -252,7 +287,7 @@ class FdInterface:
         else:
             change = f"""<span style="margin-right:15px;font-size:18px;color:#df2028">▼</span>{round(update['change'], 2)}%"""
         values = [update['start'], update['credits'], update['debits'], update['interest'], update['balance'], change]
-        ret['content'] = get_weekly_update_table('Fixed Deposit', col_names, values)
+        ret['content'] = get_weekly_update_table('Recurring Deposit', col_names, values)
         ret['start'] = round(update['start'], 2)
         ret['credits'] = round(update['credits'], 2)
         ret['debits'] = round(update['debits'], 2)

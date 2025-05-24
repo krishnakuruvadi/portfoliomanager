@@ -19,6 +19,7 @@ urlpatterns = [
     path('epf/', include('epf.urls')),
     path('espp/', include('espp.urls')),
     path('fixed-deposit/', include('fixed_deposit.urls')),
+    path('recurring-deposit/', include('recurring_deposit.urls')),
     path('goal/', include('goal.urls')),
     path('gold/', include('gold.urls')),
     path('insurance/', include('insurance.urls')),

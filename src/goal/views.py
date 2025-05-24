@@ -393,6 +393,11 @@ class GoalDetailView(DetailView):
             data['distribution']['vals'].append(float(data['object'].fd_conitrib))
             data['distribution']['colors'].append("#006f75")
             has_data = True
+        if data['object'].rd_contribution > 0:
+            data['distribution']['labels'].append('RD')
+            data['distribution']['vals'].append(float(data['object'].rd_contribution))
+            data['distribution']['colors'].append("#8cca97")
+            has_data = True
         if data['object'].ppf_conitrib > 0:
             data['distribution']['labels'].append('PPF')
             data['distribution']['vals'].append(float(data['object'].ppf_conitrib))
@@ -772,7 +777,7 @@ class ChartData(APIView):
                 "debt": debt,
                 "equity": equity,
                 "gold": gold,
-                "cash":cash,
+                "cash": cash,
                 "distrib_labels": contrib['distrib_labels'],
                 "distrib_vals": contrib['distrib_vals'],
                 "distrib_colors": contrib['distrib_colors'],
@@ -781,10 +786,11 @@ class ChartData(APIView):
                 "remaining_per": remaining_per,
                 "achieve_per": achieve_per,
             }
+            print(f'data in ChartData {data}')
         except Exception as e:
             print(e)
         finally:
-            print(data)
+            
             return Response(data)
 
 class CurrentGoals(APIView):

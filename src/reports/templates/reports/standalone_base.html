@@ -60,6 +60,11 @@
                   callback : get_fd_and_set_report
                 },
                 {
+                  url      : '/recurring-deposit/api/get/current/{{user_id|safe}}',
+                  data     : null,
+                  callback : get_rd_and_set_report
+                },
+                {
                   url      : '/epf/api/get/current/{{user_id|safe}}',
                   data     : null,
                   callback : get_epf_and_set_report

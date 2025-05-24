@@ -4,6 +4,7 @@ import pathlib
 from epf.epf_interface import EpfInterface
 from espp.espp_interface import EsppInterface
 from fixed_deposit.fd_interface import FdInterface
+from recurring_deposit.rd_interface import RdInterface
 from ppf.ppf_interface import PpfInterface
 from ssy.ssy_interface import SsyInterface
 from shares.share_interface import ShareInterface
@@ -120,6 +121,7 @@ def get_start_day_across_portfolio(user_id=None):
     start_day = get_min(EpfInterface.get_start_day(user_id), start_day)
     start_day = get_min(EsppInterface.get_start_day(user_id), start_day)
     start_day = get_min(FdInterface.get_start_day(user_id), start_day)
+    start_day = get_min(RdInterface.get_start_day(user_id), start_day)
     start_day = get_min(MfInterface.get_start_day(user_id), start_day)
     start_day = get_min(PpfInterface.get_start_day(user_id), start_day)
     start_day = get_min(SsyInterface.get_start_day(user_id), start_day)

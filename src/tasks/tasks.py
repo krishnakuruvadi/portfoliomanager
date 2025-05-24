@@ -175,6 +175,7 @@ def update_investment_data():
             all_investment_data.epf_data=investment_data['epf']
             all_investment_data.ssy_data=investment_data['ssy']
             all_investment_data.fd_data=investment_data['fd']
+            all_investment_data.rd_data=investment_data['rd']
             all_investment_data.espp_data=investment_data['espp']
             all_investment_data.rsu_data=investment_data['rsu']
             all_investment_data.shares_data=investment_data['shares']
@@ -196,6 +197,7 @@ def update_investment_data():
                 epf_data=investment_data['epf'],
                 ssy_data=investment_data['ssy'],
                 fd_data=investment_data['fd'],
+                rd_data=investment_data['rd'],
                 espp_data=investment_data['espp'],
                 rsu_data=investment_data['rsu'],
                 shares_data=investment_data['shares'],
@@ -1061,6 +1063,8 @@ def check_for_all_alerts():
     R401KInterface.raise_alerts()
     from fixed_deposit.fd_interface import FdInterface
     FdInterface.raise_alerts()
+    from recurring_deposit.rd_interface import RdInterface
+    RdInterface.raise_alerts()
     from rsu.rsu_interface import RsuInterface
     RsuInterface.raise_alerts()
 

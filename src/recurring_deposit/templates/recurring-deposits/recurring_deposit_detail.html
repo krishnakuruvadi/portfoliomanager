@@ -1,0 +1,132 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'recurring-deposits:recurring-deposit-list' %}">Recurring Deposits</a></li>
+    <li><a href="#">{{ object.number }}</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %} 
+
+  <table class="table table-borderless" style="width:50%">
+    <tr>
+      <td>Id</td>
+      <td>{{ object.id }}</td>
+    </tr>
+    <tr>
+      <td>Number</td>
+      <td>{{ object.number }}</td>
+    </tr>
+    <tr>
+      <td>Bank Name</td>
+      <td>{{ object.bank_name }}</td>
+    </tr>
+    <tr>
+      <td>Principal</td>
+      <td>{{ object.principal }}</td>
+    </tr>
+    <tr>
+      <td>Start Date</td>
+      <td>{{ object.start_date }}</td>
+    </tr>
+    <tr>
+      <td>Maturity Date</td>
+      <td>{{ object.mat_date }}</td>
+    </tr>
+    <tr>
+      <td>Maturity Value</td>
+      <td>{{ object.final_val }}</td>
+    </tr>
+    <tr>
+      <td>ROI</td>
+      <td>{{ object.roi }} %</td>
+    </tr>
+    <tr>
+      <td>Goal</td>
+      <td>{{ goal_str }}</td>
+    </tr>
+    <tr>
+      <td>User</td>
+      <td>{{ user_str }}</td>
+    </tr>
+  </table>
+<br><br><br>
+<div class="col-sm-6 col-lg-4 col-md-6" style="width:100%;height:50vh">
+  <canvas id="myChart"></canvas>
+</div>
+{% endblock content %}
+
+{% block ajaxcalls %}
+          {
+            url      : '/recurring-deposit/api/chart/data/{{ object.id }}',
+            data     : null,
+            callback : setChart
+          },
+{% endblock ajaxcalls %}
+
+{% block javascript %}
+  <script>
+    function setChart(data) {
+      console.log(data)
+      amount_values = data.amount_values
+      exp_amount_values = data.exp_amount_values
+      console.log("amount values")
+      console.log(amount_values)
+      console.log("expected amount values")
+      console.log(exp_amount_values)
+      var ctx = document.getElementById("myChart");
+      var config = {
+        type:    'line',
+        data:    {
+          datasets: [
+            {
+              label: "Amount",
+              data: amount_values,
+              fill: false,
+              borderColor: 'blue'
+            },
+            {
+              label: "Projected Amount",
+              data:  exp_amount_values,
+              fill:  true,
+              borderColor: 'grey'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title:      {
+            display: true,
+            text:    "RD"
+          },
+          scales:     {
+            xAxes: [{
+              type:       "time",
+              time:       {
+                format: 'YYYY-MM-DD',
+                tooltipFormat: 'll'
+              },
+              scaleLabel: {
+                display:     true,
+                labelString: 'Date'
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display:     true,
+                labelString: 'Amount'
+              }
+            }]
+          }
+        }
+      };
+      var myChart = new Chart(ctx,config); 
+    }
+  </script>
+{% endblock javascript %}

@@ -3,6 +3,7 @@ from ssy.ssy_interface import SsyInterface
 from epf.epf_interface import EpfInterface
 from espp.espp_interface import EsppInterface
 from fixed_deposit.fd_interface import FdInterface
+from recurring_deposit.rd_interface import RdInterface
 from mutualfunds.mf_interface import MfInterface
 from ppf.ppf_interface import PpfInterface
 from retirement_401k.r401k_interface import R401KInterface
@@ -37,7 +38,7 @@ def send_monthend_updates(ext_user=None):
     credits = 0
     debits = 0
     total = 0
-    for intf in [SsyInterface, PpfInterface, EpfInterface, EsppInterface, FdInterface, BankAccountInterface, RsuInterface, R401KInterface, MfInterface, ShareInterface, GoldInterface, CryptoInterface]:#   , InsuranceInterface,]:
+    for intf in [SsyInterface, PpfInterface, EpfInterface, EsppInterface, FdInterface, RdInterface, BankAccountInterface, RsuInterface, R401KInterface, MfInterface, ShareInterface, GoldInterface, CryptoInterface]:#   , InsuranceInterface,]:
         data = intf.updates_email(ext_user, start_dt, end_dt)
         print(f'data: {data}')
         if not context['content']:

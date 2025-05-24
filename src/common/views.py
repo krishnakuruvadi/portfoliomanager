@@ -372,6 +372,7 @@ class UserPreferenceInvestmentTypesView(APIView):
         data['sel_investment_types'] = list()
         mapping = {
             'Fixed Deposits':'id_fd_module',
+            'Recurring Deposits':'id_rd_module',
             'PPF':'id_ppf_module',
             'SSY':'id_ssy_module',
             'EPF':'id_epf_module',
@@ -488,7 +489,7 @@ def preferences(request):
     tzs = list()
     for i_tz in common_timezones:
         tzs.append(i_tz)
-    avail_investment_types = ['Fixed Deposits', 'PPF', 'SSY', 'EPF', 'ESPP', 'Insurance', 'RSU', '401K', 'Shares', 'Mutual Funds', 'Gold', 'Cash', 'Crypto']
+    avail_investment_types = ['Fixed Deposits', 'Recurring Deposits', 'PPF', 'SSY', 'EPF', 'ESPP', 'Insurance', 'RSU', '401K', 'Shares', 'Mutual Funds', 'Gold', 'Cash', 'Crypto']
     avail_indexes = list()
     n = Nasdaq('', None)
     index_data = n.get_all_index()

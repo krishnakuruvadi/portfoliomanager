@@ -2,6 +2,8 @@ from ppf.models import Ppf, PpfEntry
 from ssy.models import Ssy, SsyEntry
 from fixed_deposit.models import FixedDeposit
 from fixed_deposit.fixed_deposit_helper import get_maturity_value
+from recurring_deposit.models import RecurringDeposit
+from recurring_deposit.recurring_deposit_helper import get_maturity_value as rd_get_maturity_value
 from espp.models import Espp, EsppSellTransactions
 from rsu.models import RSUAward, RestrictedStockUnits, RSUSellTransactions
 from epf.models import Epf, EpfEntry
@@ -20,6 +22,7 @@ from shared.utils import get_min
 from epf.epf_interface import EpfInterface
 from espp.espp_interface import EsppInterface
 from fixed_deposit.fd_interface import FdInterface
+from recurring_deposit.rd_interface import RdInterface
 from ppf.ppf_interface import PpfInterface
 from ssy.ssy_interface import SsyInterface
 from shares.share_interface import ShareInterface
@@ -129,6 +132,7 @@ def get_goal_contributions(goal_id):
     contrib['epf'] = int(get_epf_amount_for_goal(goal_id))
     contrib['espp'] = int(get_espp_amount_for_goal(goal_id))
     contrib['fd'] = int(get_fd_amount_for_goal(goal_id))
+    contrib['rd'] = int(RdInterface.get_amount_for_goal(goal_id))
     contrib['ppf'] =int(get_ppf_amount_for_goal(goal_id))
     contrib['ssy'] =int(get_ssy_amount_for_goal(goal_id))
     contrib['rsu'] =int(get_rsu_amount_for_goal(goal_id))
@@ -136,10 +140,10 @@ def get_goal_contributions(goal_id):
     contrib['mf'] = int(get_mf_amount_for_goal(goal_id))
     
     contrib['equity'] = contrib['espp']+contrib['rsu']+contrib['shares']+contrib['mf']
-    contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['ppf'] + contrib['ssy']
-    contrib['distrib_labels'] = ['EPF','ESPP','FD','PPF','SSY','RSU','Shares','MutualFunds']
-    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['ppf'],contrib['ssy'],contrib['rsu'],contrib['shares'],contrib['mf']]
-    contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#92993c','#f9c5c6','#AA12E8','#e31219','#bfff00']
+    contrib['debt'] = contrib['epf'] + contrib['fd'] + contrib['rd'] + contrib['ppf'] + contrib['ssy']
+    contrib['distrib_labels'] = ['EPF','ESPP','FD','RD','PPF','SSY','RSU','Shares','MutualFunds']
+    contrib['distrib_vals'] = [contrib['epf'],contrib['espp'],contrib['fd'],contrib['rd'],contrib['ppf'],contrib['ssy'],contrib['rsu'],contrib['shares'],contrib['mf']]
+    contrib['distrib_colors'] = ['#f15664', '#DC7633','#006f75','#8cca97','#92993c','#f9c5c6','#AA12E8','#e31219','#bfff00']
 
     contrib['401k'] = int(get_401k_amount_for_goal(goal_id))
     if contrib['401k'] > 0:
@@ -199,6 +203,7 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
     start_day = get_min(EpfInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(EsppInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(FdInterface.get_start_day_for_goal(goal_id), start_day)
+    start_day = get_min(RdInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(MfInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(PpfInterface.get_start_day_for_goal(goal_id), start_day)
     start_day = get_min(SsyInterface.get_start_day_for_goal(goal_id), start_day)
@@ -284,6 +289,16 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
         total_deduct += float(d)
         if print_all or yr == curr_yr:
             print(f'after adding FD {t} latest_value is {latest_value}')
+        
+        cf, c, d, t = RdInterface.get_goal_yearly_contrib(goal_id, yr)
+        if len(cf) > 0 or c+d+t != 0:
+            add_or_create(yr, 'RD', contrib, deduct, total, c, d, t)
+            cash_flows.extend(cf)
+        latest_value += float(t) if yr == curr_yr else 0
+        total_contrib += float(c)
+        total_deduct += float(d)
+        if print_all or yr == curr_yr:
+            print(f'after adding RD {t} latest_value is {latest_value}')
 
         cf, c, d, t = ShareInterface.get_goal_yearly_contrib(goal_id, yr)
         if len(cf) > 0 or c+d+t != 0:
@@ -364,8 +379,11 @@ def get_goal_yearly_contrib_v2(goal_id, expected_return, format='%Y-%m-%d'):
 
     print(f'total_contrib {total_contrib}  total_deduct {total_deduct}  latest_value {latest_value}')
     if len(cash_flows) > 0  and latest_value != 0:
+        print(f'adding latest value to cash flows {latest_value}')
         cash_flows.append((datetime.date.today(), latest_value))
+        print(f'cash flows {cash_flows}')
     cash_flows = sort_set(cash_flows)
+    print(f'cash flows after sort {cash_flows}')
     return contrib, deduct, total, latest_value, cash_flows
 
 
@@ -582,6 +600,7 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
         #calc_avg_growth = (latest_value-total_contribution)/(total_contribution*total_years)
         calc_avg_growth = None
         try:
+            print(f'cash flows: {cash_flows}')
             calc_avg_growth = xirr(cash_flows, 0.1)
             if calc_avg_growth == 0:
                 print(f'couldnt get valid xirr for cashflows {cash_flows}')
@@ -614,6 +633,10 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                 contrib[yr] = dict()
                 total[yr] = dict()
                 deduct[yr] = dict()
+                if yr == goal_end_date.year:
+                    print(f'avg_contrib: {avg_contrib} month {goal_end_date.month}')
+                    avg_contrib = (avg_contrib*goal_end_date.month)/12
+                    print(f'new avg_contrib: {avg_contrib}')
                 contrib[yr]['Projected'] = avg_contrib
                 if 'Projected' in total[yr-1]:
                     total[yr]['Projected'] = (float(total[yr-1]['Projected'])+float(avg_contrib))*(1+float(avg_growth))
@@ -630,6 +653,7 @@ def get_goal_yearly_contrib(goal_id, expected_return, format='%Y-%m-%d'):
                 'EPF':'#f15664',
                 'ESPP':'#DC7633',
                 'FD':'#006f75',
+                'RD':'#8cca97',
                 'PPF':'#92993c',
                 'SSY':'#f9c5c6',
                 'RSU':'#AA12E8',
@@ -720,9 +744,9 @@ def get_goal_target_for_user(user_id):
 
 def get_user_contributions(user_id):
     print("inside get_user_contributions")
+    contrib = dict()
     try:
         user_obj = User.objects.get(id=user_id)
-        contrib = dict()
         contrib['distrib_colors'] = list()
         contrib['distrib_vals'] = list()
         contrib['distrib_labels'] = list()
@@ -730,6 +754,7 @@ def get_user_contributions(user_id):
         contrib['EPF'] = int(EpfInterface.get_amount_for_user(user_id))
         contrib['ESPP'] = int(EsppInterface.get_amount_for_user(user_id))
         contrib['FD'] = int(FdInterface.get_amount_for_user(user_id))
+        contrib['RD'] = int(RdInterface.get_amount_for_user(user_id))
         contrib['PPF'] =int(PpfInterface.get_amount_for_user(user_id))
         contrib['SSY'] =int(SsyInterface.get_amount_for_user(user_id))
         contrib['RSU'] = int(RsuInterface.get_amount_for_user(user_id))
@@ -741,13 +766,14 @@ def get_user_contributions(user_id):
         contrib['Cash'] = int(BankAccountInterface.get_amount_for_user(user_id))
         contrib['Crypto'] = int(CryptoInterface.get_amount_for_user(user_id))
         contrib['equity'] = contrib['ESPP']+contrib['RSU']+contrib['Shares']+contrib['MutualFunds']+contrib['401K']+contrib['Insurance']
-        contrib['debt'] = contrib['EPF'] + contrib['FD'] + contrib['PPF'] + contrib['SSY']
+        contrib['debt'] = contrib['EPF'] + contrib['FD'] + contrib['RD'] + contrib['PPF'] + contrib['SSY']
         contrib['total'] = contrib['equity'] + contrib['debt'] + contrib['Gold'] + contrib['Cash'] + contrib['Crypto']
         
         item_color_mapping = {
             'EPF': '#f15664',
             'ESPP': '#DC7633',
             'FD': '#006f75',
+            'RD':'#8cca97',
             'PPF':'#92993c',
             'SSY':'#f9c5c6', 
             'RSU': '#AA12E8', 
@@ -766,12 +792,12 @@ def get_user_contributions(user_id):
                 contrib['distrib_labels'].append(k)
 
         print("contrib:", contrib)
-        return contrib
     except User.DoesNotExist:
         print("User with id ", user_id, " does not exist" )
         pass
     except Exception as ex:
         print(f"Exception getting user contribution for user with id: {str(user_id)} {ex}")
+    return contrib
 
 # home chart view
 def get_investment_data(start_date):
@@ -781,6 +807,7 @@ def get_investment_data(start_date):
     ppf_data = list()
     ssy_data = list()
     fd_data = list()
+    rd_data = list()
     espp_data = list()
     rsu_data = list()
     shares_data = list()
@@ -799,6 +826,7 @@ def get_investment_data(start_date):
 
     epf_reset_on_zero = False
     fd_reset_on_zero = False
+    rd_reset_on_zero = False
     r401k_reset_on_zero = False
     ppf_reset_on_zero = False
     ssy_reset_on_zero = False
@@ -888,6 +916,22 @@ def get_investment_data(start_date):
             fd_reset_on_zero = False
             fd_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
         
+        rd_entries = RecurringDeposit.objects.filter(start_date__lte=data_start_date, mat_date__gte=data_end_date)
+        rd_val = 0
+        for rd in rd_entries:
+            time_period = relativedelta(data_end_date, rd.start_date)
+            _, val = rd_get_maturity_value(float(rd.principal), rd.start_date.strftime('%Y-%m-%d'), float(rd.roi), time_period.months)
+            rd_val += val
+        if rd_val != 0:
+            if not rd_reset_on_zero:
+                rd_data.append({'x':data_start_date.strftime('%Y-%m-%d'),'y':0})
+            rd_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':rd_val})
+            total += rd_val
+            rd_reset_on_zero = True
+        elif rd_reset_on_zero:
+            rd_reset_on_zero = False
+            rd_data.append({'x':data_end_date.strftime('%Y-%m-%d'),'y':0})
+
         r401k_val = get_r401k_value_as_on(data_end_date)
         if r401k_val != 0:
             if not r401k_reset_on_zero:
@@ -1152,16 +1196,17 @@ def get_investment_data(start_date):
     print('shares data is:',shares_data)
 
     rv = {
-        'gold':gold_data, 
-        'ppf':ppf_data, 
-        'insurance':insurance_data, 
-        '401K': r401k_data, 
-        'epf':epf_data, 
-        'ssy':ssy_data, 
-        'fd': fd_data, 
-        'espp': espp_data, 
-        'rsu':rsu_data, 
-        'shares':shares_data, 
+        'gold':gold_data,
+        'ppf':ppf_data,
+        'insurance':insurance_data,
+        '401K': r401k_data,
+        'epf':epf_data,
+        'ssy':ssy_data,
+        'fd': fd_data,
+        'rd': rd_data,
+        'espp': espp_data,
+        'rsu':rsu_data,
+        'shares':shares_data,
         'mf':mf_data,
         'cash': cash_data,
         'loan': loan_data,

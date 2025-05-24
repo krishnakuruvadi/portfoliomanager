@@ -2,6 +2,7 @@ from .models import User
 from epf.epf_interface import EpfInterface
 from espp.espp_interface import EsppInterface
 from fixed_deposit.fd_interface import FdInterface
+from recurring_deposit.rd_interface import RdInterface
 from ppf.ppf_interface import PpfInterface
 from ssy.ssy_interface import SsyInterface
 from shares.share_interface import ShareInterface
@@ -54,7 +55,7 @@ class UserInterface:
                 'notes':user.notes,
                 'short_name': user.short_name
             }
-            for intf in [GoalInterface, EpfInterface, EsppInterface, FdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
+            for intf in [GoalInterface, EpfInterface, EsppInterface, FdInterface, RdInterface, MfInterface, PpfInterface, SsyInterface, ShareInterface, R401KInterface, RsuInterface, InsuranceInterface, GoldInterface, BankAccountInterface, CryptoInterface]:
                 ud = {**ud, **intf.export(user.id)}
             data.append(ud)
         ret[self.get_export_name()]['data'] = data

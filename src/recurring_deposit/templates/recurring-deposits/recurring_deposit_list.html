@@ -1,0 +1,152 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Recurring Deposits</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add Recurring Deposit" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="#" data-toggle="modal" data-target="#helpModal"><i class="fa fa-sharp fa-solid fa-question" aria-hidden="true" title="Help" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-borderless">
+    <tr>
+      <td style="text-align:right">
+        <div class="row">
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Principal</h5>
+                  <p class="card-text">{{preferred_currency}} {{total_principal}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Interest</h5>
+                  <p class="card-text">{{preferred_currency}} {{total_interest}} </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Maturity Amount</h5>
+                  <p class="card-text">{{preferred_currency}} {{total_maturity}} </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <table class="table table-hover dt-responsive" id="recurring_deposits" style="width:100%">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Number</th>
+        <th scope="col">Bank Name</th>
+        <th scope="col">Principal</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">Maturity Value</th>
+        <th scope="col">Time Period (days)</th>
+        <th scope="col">Maturity Date</th>
+        <th scope="col">ROI</th>
+        <th scope="col">Goal</th>
+        <th scope="col">User</th>
+        <th scope="col">Notes</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+        <td>
+          <a href="{{ instance.get_absolute_url }}">{{ instance.number }}</a>
+        </td>
+        <td>{{ instance.bank_name }}</td>
+        <td>{{ instance.principal }}</td>
+        <td>{{ instance.start_date }}</td>
+        <td>{{ instance.final_val }}</td>
+        <td>{{ instance.time_period }}</td>
+        <td>{{ instance.mat_date }}</td>
+        <td>{{ instance.roi }}</td>
+        <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
+        <td>{{ user_name_mapping|lookup:instance.user }}</td>
+        <td>{{ instance.notes }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-rd"><i class="fa fa-trash" aria-hidden="true" title="Delete Deposit"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Edit Deposit"></i> </a>
+        </td> 
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+<!-- Help Modal -->
+{% block helpmodaltitle %}
+  Recurring Deposits
+{% endblock helpmodaltitle %}
+
+{% block helpmodalsummarybody %}
+  View, add, edit or delete your Recurring Deposits.
+  Once added, keep an eye on the movement of your assets with charts, 
+  gains, losses and the overall health of your investment. 
+{% endblock helpmodalsummarybody %}
+
+{% block helpmodalnavigationbody %}
+  <li>
+    <i class="fa fa-plus"></i> - Add RD
+  </li>
+  <li>
+    <i class="fa fa-bell"></i> - Investment/asset alerts
+  </li>
+{% endblock helpmodalnavigationbody %}
+
+{% block helpmodaltasksbody %}
+<li>
+  From the goals page (<i class="fas fa-bullseye"></i>), configure a goal to track your transactions against. <strong> (Optional) </strong>
+</li>
+<li>
+  Create users through the Users (<i class="fas fa-users"></i>) page. Transactions accross the app are tied to a user. <strong> (Optional) </strong>
+</li>
+<li>
+  Add a Recurring Deposit (<i class="fa fa-plus"></i>) that you want to track.
+</li>
+<li>
+  Edit Recurring Deposit (<i class="far fa-edit"></i>) details.
+</li>
+{% endblock helpmodaltasksbody %}
+
+<script>
+  {% block jquery %}
+  $('#recurring_deposits').DataTable({
+    "columnDefs": [
+      { "type": "num", "targets": [0,3,5,6,8] },
+      { "type": "date", "targets":[4,7]}
+    ],
+    "order": [[ 7, "asc" ]]
+  });
+  {% endblock jquery %}
+</script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete all deposits?');
+    })
+    $(document).on('click', '.confirm-delete-rd', function(){
+      return confirm('Are you sure you want to delete the deposit?');
+    })
+  </script>
+{% endblock javascript %}

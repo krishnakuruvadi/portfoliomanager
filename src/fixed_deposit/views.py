@@ -3,7 +3,6 @@ from django.urls import reverse
 from django.views.generic import (
     ListView,
     DetailView,
-    DeleteView
 )
 from dateutil.relativedelta import relativedelta
 from django.http import HttpResponseRedirect
