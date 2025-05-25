@@ -584,9 +584,9 @@ class CurrentRsus(APIView):
         rsus = dict()
         total = 0
         if user_id:
-            rsu_objs = RestrictedStockUnits.objects.filter(sell_date__isnull=True).filter(award__user=user_id)
+            rsu_objs = RestrictedStockUnits.objects.filter(latest_value__gt=0).filter(award__user=user_id)
         else:
-            rsu_objs = RestrictedStockUnits.objects.filter(sell_date__isnull=True)
+            rsu_objs = RestrictedStockUnits.objects.filter(latest_value__gt=0)
         for rsu in rsu_objs:
             key = rsu.award.symbol+rsu.award.exchange+str(rsu.award.user)
             if key in rsus:

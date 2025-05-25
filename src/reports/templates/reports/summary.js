@@ -70,6 +70,39 @@
         }
       }
 
+      function get_rd_and_set_report(rd_data){
+        console.log(rd_data)
+        var table = document.getElementById("rd-table")
+        var i;
+        for (i=0;i<rd_data.length;i++) {
+          var row = table.insertRow(-1)
+          rd_entry = rd_data[i]
+          var cell0 = row.insertCell(0)
+          cell0.innerHTML = i+1
+          var cell1 = row.insertCell(1)
+          cell1.innerHTML = rd_entry['number']
+          var cell2 = row.insertCell(2)
+          cell2.innerHTML = rd_entry['bank_name']
+          var cell3 = row.insertCell(3)
+          cell3.innerHTML = rd_entry['start_date']
+          var cell4 = row.insertCell(4)
+          cell4.innerHTML = rd_entry['principal']
+          var cell5 = row.insertCell(5)
+          cell5.innerHTML = rd_entry['roi']
+          var cell6 = row.insertCell(6)
+          cell6.innerHTML = rd_entry['final_val']
+          var cell7 = row.insertCell(7)
+          cell7.innerHTML = rd_entry['user']
+          var cell8 = row.insertCell(8)
+          cell8.innerHTML = rd_entry['notes']
+          var cell9 = row.insertCell(9)
+          cell9.innerHTML = rd_entry['mat_date']
+        }
+        if (rd_data.length == 0) {
+          document.getElementById("rd").style.display="none"
+        }
+      }
+
       function get_epf_and_set_report (epf_data){
         console.log(epf_data)
         var table = document.getElementById("epf-table")

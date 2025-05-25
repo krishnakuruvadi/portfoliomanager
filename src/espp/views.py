@@ -380,9 +380,9 @@ class CurrentEspps(APIView):
         espps = dict()
         total = 0
         if user_id:
-            espp_objs = Espp.objects.filter(sell_date__isnull=True).filter(user=user_id)
+            espp_objs = Espp.objects.filter(latest_value__gt=0).filter(user=user_id)
         else:
-            espp_objs = Espp.objects.filter(sell_date__isnull=True)
+            espp_objs = Espp.objects.filter(latest_value__gt=0)
         for espp in espp_objs:
             key = espp.symbol+espp.exchange+str(espp.user)
             if key in espps:
@@ -390,8 +390,8 @@ class CurrentEspps(APIView):
                 espps[key]['shares_purchased'] += espp.shares_purchased
                 if espp.latest_value:
                     espps[key]['latest_value'] += espp.latest_value
-                if espp.gain:
-                    espps[key]['gain'] += espp.gain
+                if espp.unrealised_gain:
+                    espps[key]['gain'] += espp.unrealised_gain
             else:
                 espps[key] = dict()
                 espps[key]['exchange'] = espp.exchange
@@ -402,8 +402,8 @@ class CurrentEspps(APIView):
                 espps[key]['shares_purchased'] = espp.shares_purchased
                 if espp.latest_value:
                     espps[key]['latest_value'] = espp.latest_value
-                if espp.gain:
-                    espps[key]['gain'] = espp.gain
+                if espp.unrealised_gain:
+                    espps[key]['gain'] = espp.unrealised_gain
             if espp.as_on_date:
                 espps[key]['as_on_date'] = espp.as_on_date
             if espp.latest_value:
