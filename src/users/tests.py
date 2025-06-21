@@ -5,8 +5,28 @@ from django.db import IntegrityError
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
+import random
+import string
 
 # Create your tests here.
+
+def generate_repeatable_password(length=12, seed=12345):
+  """
+  Generates a repeatable password of a given length using a specific seed.
+
+  Args:
+    length: The desired length of the password (integer).
+    seed: The seed value for the random number generator (integer).
+
+  Returns:
+    A string representing the generated password.
+  """
+  random.seed(seed)  # Set the seed for repeatability
+  characters = string.ascii_letters + string.digits + string.punctuation # Define character set
+  password = ''.join(random.choice(characters) for i in range(length)) # Generate password by random selection
+  return password
+
+
 
 def add_default_user():
     return User.objects.create(
@@ -18,7 +38,8 @@ def add_default_user():
 def add_non_admin_account():
     from django.contrib.auth.models import User
     try:
-        User.objects.create_user('johndoe', 'johndoe@gmail.com', 'johnpassword')
+        password = generate_repeatable_password()
+        User.objects.create_user('johndoe', 'johndoe@gmail.com', password)
     except IntegrityError:
         print(f'non admin user account already exists')
     except Exception as ex:
@@ -27,6 +48,7 @@ def add_non_admin_account():
 
 def login_non_admin_account(browser):
     browser.find_element(By.NAME, 'username').send_keys('johndoe')
-    browser.find_element(By.NAME, 'password').send_keys('johnpassword')
+    password = generate_repeatable_password()
+    browser.find_element(By.NAME, 'password').send_keys(password)
     browser.find_element(By.XPATH, '//button[normalize-space()="Login"]').click()
     time.sleep(5)
