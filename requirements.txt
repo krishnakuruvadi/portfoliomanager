@@ -99,7 +99,7 @@ rfc3986==1.5.0
 rich==13.9.4
 robin-stocks==2.1.0
 rope==0.18.0
-selenium==4.4.3
+selenium==4.32.0
 semver==2.13.0
 service-identity==18.1.0
 setuptools==78.1.1
