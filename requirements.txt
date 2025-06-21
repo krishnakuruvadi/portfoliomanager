@@ -99,7 +99,7 @@ rfc3986==1.5.0
 rich==13.9.4
 robin-stocks==2.1.0
 rope==0.18.0
-selenium==4.4.3
+selenium==4.32.0
 semver==2.13.0
 service-identity==18.1.0
 setuptools==78.1.1
@@ -121,7 +121,7 @@ Twisted==24.7.0
 txaio==20.12.1
 typing_extensions==4.11.0
 tzdata==2024.1
-urllib3==1.26.19
+urllib3==2.5.0
 wcwidth==0.2.5
 webencodings==0.5.1
 wheel==0.40.0
