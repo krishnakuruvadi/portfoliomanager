@@ -67,6 +67,8 @@ def delete_fd(request, id):
 def add_fixed_deposit(request):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
     template = 'fixed-deposits/add_fixed_deposit.html'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
         if "submit" in request.POST:
@@ -88,6 +90,8 @@ def add_fixed_deposit(request):
             mat_date = request.POST['mat_date']
             add_fd_entry(number, bank_name, start_date, principal, time_period_days,
                     final_val, user, notes, goal_id, roi, mat_date)
+            message_color = 'green'
+            message = 'Fixed Deposit addition successful'
         else:
             print("calculate button pressed")
             number = request.POST['number']
@@ -108,13 +112,15 @@ def add_fixed_deposit(request):
                 'goal':goal, 'mat_date':mat_date, 'operation': 'Add Fixed Deposit', 'goals':goals, 'curr_module_id': 'id_fd_module'}
             return render(request, template, context=context)
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add Fixed Deposit', 'curr_module_id': 'id_fd_module'}
+    context = {'users':users, 'operation': 'Add Fixed Deposit', 'curr_module_id': 'id_fd_module', 'message':message, 'message_color':message_color}
     return render(request, template, context)
 
 
 def update_fixed_deposit(request, id):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
     template = 'fixed-deposits/add_fixed_deposit.html'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
         if "submit" in request.POST:
@@ -137,6 +143,8 @@ def update_fixed_deposit(request, id):
                 fd_obj.notes = request.POST['notes']
                 fd_obj.mat_date = request.POST['mat_date']
                 fd_obj.save()
+                message_color = 'green'
+                message = 'Fixed Deposit modification successful'
             except FixedDeposit.DoesNotExist:
                 pass
         else:
@@ -158,20 +166,20 @@ def update_fixed_deposit(request, id):
                 'time_period_days': time_period_days, 'principal': principal, 'final_val':val, 'notes': notes,
                 'goal':goal, 'mat_date':mat_date, 'operation': 'Edit Fixed Deposit', 'curr_module_id': 'id_fd_module'}
             return render(request, template, context=context)
-        return HttpResponseRedirect("../")
-    else:
-        try:
-            fd_obj = FixedDeposit.objects.get(id=id)
-            # Always put date in %Y-%m-%d for chrome to show things properly
-            users = get_all_users()
-            goals = get_goal_id_name_mapping_for_user(fd_obj.user)
-            context = {'goals':goals, 'users':users,'user':fd_obj.user, 'number':fd_obj.number, 'start_date':fd_obj.start_date.strftime("%Y-%m-%d"), 'bank_name':fd_obj.bank_name,
-                    'roi':fd_obj.roi, 'time_period_days': fd_obj.time_period, 'principal': fd_obj.principal, 'final_val':fd_obj.final_val,
-                    'notes':fd_obj.notes, 'goal':fd_obj.goal, 'mat_date':fd_obj.mat_date.strftime("%Y-%m-%d"),
-                    'operation': 'Edit Fixed Deposit', 'curr_module_id': 'id_fd_module'}
-        except FixedDeposit.DoesNotExist:
-            context = {'operation': 'Edit Fixed Deposit'}
+
+    try:
+        fd_obj = FixedDeposit.objects.get(id=id)
+        # Always put date in %Y-%m-%d for chrome to show things properly
+        users = get_all_users()
+        goals = get_goal_id_name_mapping_for_user(fd_obj.user)
+        context = {'goals':goals, 'users':users,'user':fd_obj.user, 'number':fd_obj.number, 'start_date':fd_obj.start_date.strftime("%Y-%m-%d"), 'bank_name':fd_obj.bank_name,
+                'roi':fd_obj.roi, 'time_period_days': fd_obj.time_period, 'principal': fd_obj.principal, 'final_val':fd_obj.final_val,
+                'notes':fd_obj.notes, 'goal':fd_obj.goal, 'mat_date':fd_obj.mat_date.strftime("%Y-%m-%d"),
+                'operation': 'Edit Fixed Deposit', 'curr_module_id': 'id_fd_module', 'message':message, 'message_color':message_color}
         return render(request, template, context=context)
+    except FixedDeposit.DoesNotExist:
+        pass        
+    return HttpResponseRedirect(reverse('fixed-deposits:fixed-deposit-list'))
 
 class ChartData(APIView):
     authentication_classes = []
