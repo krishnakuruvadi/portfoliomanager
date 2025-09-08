@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, register_converter
+from common.converts import FloatUrlParameterConverter
 
 from .views import (
     goal_list,
@@ -11,10 +12,15 @@ from .views import (
     ChartData,
     CurrentGoals,
     GoalProgressData,
-    goals_insight
+    goals_insight,
+    CalculateInflationValue
 )
 
 app_name = 'goals'
+
+register_converter(FloatUrlParameterConverter, 'float')
+
+
 
 urlpatterns = [
     path('', goal_list, name='goal-list'),
@@ -29,5 +35,7 @@ urlpatterns = [
     path('api/get/current/<user_id>', CurrentGoals.as_view()),
     path('api/get/current/', CurrentGoals.as_view()),
     path('api/chart/progress/<id>/', GoalProgressData.as_view()),
-    path('api/chart/progress/<id>/<expected_return>', GoalProgressData.as_view())
+    path('api/chart/progress/<id>/<expected_return>', GoalProgressData.as_view()),
+    path('api/get/inflation-value/<float:current_value>/<float:inflation>/<int:time_period_months>/', CalculateInflationValue.as_view())
+
 ]

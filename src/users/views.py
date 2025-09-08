@@ -11,7 +11,7 @@ from django.http import HttpResponseRedirect
 from shared.handle_delete import delete_user
 from shared.handle_chart_data import get_user_contributions
 from .models import User
-from shared.utils import get_date_or_none_from_string, get_in_preferred_tz
+from shared.utils import get_date_or_none_from_string, get_in_preferred_tz, get_float_or_zero_from_string
 from epf.epf_interface import EpfInterface
 from espp.espp_interface import EsppInterface
 from fixed_deposit.fd_interface import FdInterface
@@ -35,6 +35,8 @@ from shared.handle_get import *
 from shared.financial import xirr
 from dateutil.relativedelta import relativedelta
 from pages.models import InvestmentData
+from .user_helper import get_asset_allocation_details_for_user, get_or_create_asset_allocation_for_user
+from tasks.tasks import on_user_add
 import json
 
 
@@ -78,7 +80,7 @@ class UserDetailView(DetailView):
     def get_context_data(self, **kwargs):
         id_ = self.kwargs.get("id")
         data = super().get_context_data(**kwargs)
-
+        user_obj = self.get_object()
         start_day = get_start_day_for_user(id_)
 
         #new_start_day = datetime.date(start_day.year, start_day.month, 1)
@@ -209,6 +211,8 @@ class UserDetailView(DetailView):
             data['last_updated'] = utc.astimezone(timezone(preferred_tz)).strftime("%Y-%m-%d %H:%M:%S")
         else:
             data['last_updated'] = today.strftime("%Y-%m-%d")
+        asset_allocation_details = get_asset_allocation_details_for_user(user_obj)
+        data['asset_allocation'] = asset_allocation_details
         print(f'user detail view data {data}')
         return data
 
@@ -231,9 +235,11 @@ def add_user(request):
         dob = get_date_or_none_from_string(request.POST['dob'])
         email = request.POST['email']
         notes = request.POST['notes']
-        User.objects.create(name=name, dob=dob, notes=notes, email=email, short_name=short_name)
+        risk_profile = request.POST['risk_profile']
+        uobj = User.objects.create(name=name, dob=dob, notes=notes, email=email, short_name=short_name, risk_profile=risk_profile)
         message_color = 'green'
         message = 'New user addition successful'
+        on_user_add(uobj.id)
         #message = f'Failed to add user with name {name}.  User not added.'
         #message_color = 'red'
     context = {'curr_module_id': 'id_user_module', 'message':message, 'message_color':message_color}
@@ -241,23 +247,27 @@ def add_user(request):
 
 def update_user(request, id):
     template = 'users/add_user.html'
+    message = ''
+    message_color = 'ignore'
     try:
         user_obj = User.objects.get(id=id)
         if request.method == 'POST':
             user_obj.name = request.POST['name']
             user_obj.short_name = request.POST['short_name']
             user_obj.email = request.POST['email']
-            if 'dob' in request.POST:
-                dob = request.POST['dob']
-                if dob:
-                    user_obj.dob = dob
+            user_obj.dob = get_date_or_none_from_string(request.POST['dob'])
             user_obj.notes = request.POST['notes']
+            user_obj.risk_profile = request.POST['risk_profile']
             user_obj.save()
+            on_user_add(user_obj.id)
+            message = 'User update successful'
+            message_color = 'green'
         
         short_name = user_obj.short_name
         if not short_name:
             short_name = ''
-        context = {'curr_module_id': 'id_user_module', 'name': user_obj.name, 'short_name': short_name, 'email':user_obj.email, 'notes':user_obj.notes}
+        context = {'curr_module_id': 'id_user_module', 'name': user_obj.name, 'short_name': short_name, 'email':user_obj.email,
+                   'risk_profile':user_obj.risk_profile, 'notes':user_obj.notes, 'message':message, 'message_color':message_color}
         if user_obj.dob:
             context['dob'] = user_obj.dob.strftime("%Y-%m-%d")
 
@@ -457,3 +467,40 @@ def insights_view(request):
         return render(request, template, context=context)
     except User.DoesNotExist:
         return HttpResponseRedirect("../")
+
+def set_preferred_asset_allocation(request, id):
+    template = 'users/set_preferred_asset_allocation.html'
+    message = ''
+    message_color = 'ignore'
+    try:
+        user_obj = User.objects.get(id=id)
+
+        aobj = get_or_create_asset_allocation_for_user(user_obj)
+        if request.method == 'POST':
+            preferred_equity_percentage = get_float_or_zero_from_string(request.POST['preferred_equity_percentage'])
+            preferred_debt_percentage = get_float_or_zero_from_string(request.POST['preferred_debt_percentage'])
+            preferred_gold_percentage = get_float_or_zero_from_string(request.POST['preferred_gold_percentage'])
+            preferred_crypto_percentage = get_float_or_zero_from_string(request.POST['preferred_crypto_percentage'])
+            preferred_cash_percentage = get_float_or_zero_from_string(request.POST['preferred_cash_percentage'])
+            
+            aobj.preferred_equity_percentage = preferred_equity_percentage
+            aobj.preferred_debt_percentage = preferred_debt_percentage
+            aobj.preferred_gold_percentage = preferred_gold_percentage
+            aobj.preferred_crypto_percentage = preferred_crypto_percentage
+            aobj.preferred_cash_percentage = preferred_cash_percentage
+            aobj.as_on_date = datetime.datetime.now()
+            aobj.save()
+
+            message = 'Asset allocation update successful'
+            message_color = 'green'
+        
+        context = {'curr_module_id': 'id_user_module', 'message':message, 'message_color':message_color, 'name':user_obj.get_user_short_name_or_name()}
+        data = get_asset_allocation_details_for_user(user_obj)
+        context.update(data)
+        
+        return render(request, template, context=context)
+    except User.DoesNotExist:
+        print(f"WARNING: User with id {id} does not exist to set asset allocation.")
+    except Exception as ex:
+        print(f"ERROR: Exception {ex} when setting asset allocation for user with id {id}.")
+    return HttpResponseRedirect(reverse('users:user-list'))

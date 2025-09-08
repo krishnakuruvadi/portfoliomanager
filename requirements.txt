@@ -128,5 +128,5 @@ wheel==0.40.0
 whitenoise==6.5.0
 wrapt==1.16.0
 wsproto==1.2.0
-yfinance==0.2.55
+yfinance==0.2.62
 zope.interface==5.2.0

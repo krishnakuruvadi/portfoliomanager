@@ -4,6 +4,9 @@ import re
 from io import StringIO
 import datetime
 import csv
+import yfinance as yf
+from datetime import timezone
+from dateutil.relativedelta import relativedelta
 
 
 class YahooFinance2(Exchange):
@@ -200,3 +203,38 @@ class YahooFinance2(Exchange):
             return self.get_live_price_v2(True)
 
         return None
+
+class YFinance():
+    def __init__(self, symbol):
+        self.symbol = symbol
+
+    def get_live_price_yfinance(self, name):
+        try:
+            t = yf.Ticker(self.symbol)
+            data = t.history(period="5d")
+            info = t.info
+            ret = dict()
+            ret['name'] = info.longName if name == "" else name
+            ret['lastPrice'] = data['Close'].iloc[-1]
+            prev_close = info['previousClose']
+            ret['change'] = round(ret['lastPrice']-prev_close, 2)
+            ret['pChange'] = round(ret['change']*100/prev_close, 2)
+            date_obj = datetime.datetime.now(timezone.utc)
+            ret['last_updated'] = date_obj
+            ret['version'] = 'v1'
+            return ret
+        except Exception as ex:
+            print(f'ERROR: failed to get live price for {name} ({self.symbol}): {ex} using yfinance')
+    
+    def get_historical_price_yfinance(self, start, end):
+        try:
+            t = yf.Ticker(self.symbol)
+            st = start.strftime('%Y-%m-%d')
+            en = end.strftime('%Y-%m-%d')
+            historical = t.history(start=st, end=en, interval="1d", raise_errors=True)
+            response = dict()
+            for index, row in historical.iterrows():
+                response[index.date()] = float(row['Close'])
+            return response
+        except Exception as ex:
+            print(f'ERROR: failed to get historical price for {self.symbol}: {ex} using yfinance')

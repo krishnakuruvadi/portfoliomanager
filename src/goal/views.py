@@ -852,3 +852,14 @@ class GoalProgressData(APIView):
         finally:
             print('returning from finally', data)
             return Response(data)
+
+class CalculateInflationValue(APIView):
+    def get(self, request, current_value, inflation, time_period_months, format=None):
+        data = dict()
+        try:    
+            data['value'] = one_time_pay_final_val(current_value, inflation, time_period_months)
+            return 
+        except Exception as e:
+            print('ERROR: exception in CalculateInflationValue {e}')
+        finally:
+            return Response(data)

@@ -565,62 +565,62 @@ def update_scroll_data_periodic():
 def update_scroll_data_startup():
     update_scroll_data()
 
-def update_scroll_data():
-    pref_obj = Preferences.get_solo()
-    sel_indexes = list()
-    if pref_obj.indexes_to_scroll:
-        for index in pref_obj.indexes_to_scroll.split('|'):
-            sel_indexes.append(index)
 
+def update_scroll_data_nse(sel_indexes):
     nse = NSE(None)
     print('getting index list for nse')
     il = nse.get_index_list()
-    if il:
-        for item in il:
-            print(f'getting data of index {item} from nse')
-            data = nse.get_index_quote(item)
-            if data:
-                print(f"data {data}")
-                scroll_item = None
-                try:
-                    scroll_item = ScrollData.objects.get(scrip=item)
-                    if get_diff(float(scroll_item.val), data['lastPrice']) > 0.1:
-                        print(f"NSE scroll_item.val {scroll_item.val} data['lastPrice'] {data['lastPrice']}")
-                        scroll_item.last_updated = timezone.now()
-                        scroll_item.val = data['lastPrice']
-                        scroll_item.change = data['change']
-                        if not scroll_item.change:
-                            scroll_item.change = 0
-                        scroll_item.percent = data['pChange']
-                        if not scroll_item.percent:
-                            scroll_item.percent = 0
-                        scroll_item.save()
-                except ScrollData.DoesNotExist:
-                    scroll_item = ScrollData.objects.create(scrip=item,
-                                                            last_updated = timezone.now(),
-                                                            val = data['lastPrice'],
-                                                            change = data['change'],
-                                                            percent = data['pChange'])
-                if len(sel_indexes) == 0 or item in sel_indexes:
-                    if scroll_item.display != True:
-                        scroll_item.display = True
-                        scroll_item.save()
-                else:
-                    if scroll_item.display != False:
-                        scroll_item.display = False
-                        scroll_item.save()
-            else:
-                print(f'no data for NSE {item}')
-    else:
-        print('getting using yahoo')
-        indexes = {'NIFTY 50':'^NSEI', 'NIFTY BANK':'^NSEBANK', 'INDIA VIX':'^INDIAVIX', 'NIFTY 100':'^CNX100',
-                    'NIFTY 500':'^CRSLDX', 'NIFTY MIDCAP 100':'NIFTY_MIDCAP_100.NS', 'NIFTY PHARMA':'^CNXPHARMA',
-                    'NIFTY IT':'^CNXIT', 'NIFTY SMLCAP 100':'^CNXSC', 'NIFTY 200':'^CNX200', 'NIFTY AUTO':'^CNXAUTO'}
-        for name,index in indexes.items():
-            from shared.yahoo_finance_2 import YahooFinance2
-            y = YahooFinance2(index)
-            v = y.get_live_price(name)
+    if not il:
+        return
+    for item in il:
+        print(f'getting data of index {item} from nse')
+        data = nse.get_index_quote(item)
+        if data:
+            print(f"data {data}")
+            scroll_item = None
             try:
+                scroll_item = ScrollData.objects.get(scrip=item)
+                if get_diff(float(scroll_item.val), data['lastPrice']) > 0.1:
+                    print(f"NSE scroll_item.val {scroll_item.val} data['lastPrice'] {data['lastPrice']}")
+                    scroll_item.last_updated = timezone.now()
+                    scroll_item.val = data['lastPrice']
+                    scroll_item.change = data['change']
+                    if not scroll_item.change:
+                        scroll_item.change = 0
+                    scroll_item.percent = data['pChange']
+                    if not scroll_item.percent:
+                        scroll_item.percent = 0
+                    scroll_item.save()
+            except ScrollData.DoesNotExist:
+                scroll_item = ScrollData.objects.create(scrip=item,
+                                                        last_updated = timezone.now(),
+                                                        val = data['lastPrice'],
+                                                        change = data['change'],
+                                                        percent = data['pChange'])
+            if len(sel_indexes) == 0 or item in sel_indexes:
+                if scroll_item.display != True:
+                    scroll_item.display = True
+                    scroll_item.save()
+            else:
+                if scroll_item.display != False:
+                    scroll_item.display = False
+                    scroll_item.save()
+        else:
+            print(f'ERROR: no data for NSE {item}')
+
+
+def update_scroll_data_yahoofinance2(sel_indexes):
+    print('getting using yahoo')
+    indexes = {'NIFTY 50':'^NSEI', 'NIFTY BANK':'^NSEBANK', 'INDIA VIX':'^INDIAVIX', 'NIFTY 100':'^CNX100',
+                'NIFTY 500':'^CRSLDX', 'NIFTY MIDCAP 100':'NIFTY_MIDCAP_100.NS', 'NIFTY PHARMA':'^CNXPHARMA',
+                'NIFTY IT':'^CNXIT', 'NIFTY SMLCAP 100':'^CNXSC', 'NIFTY 200':'^CNX200', 'NIFTY AUTO':'^CNXAUTO'}
+    for name,index in indexes.items():
+        from shared.yahoo_finance_2 import YahooFinance2
+        y = YahooFinance2(index, 1)
+        
+        try:
+            v = y.get_live_price(name)
+            if v:
                 scroll_item = None
                 try:
                     scroll_item = ScrollData.objects.get(scrip=v['name'])
@@ -650,9 +650,77 @@ def update_scroll_data():
                     if scroll_item.display != False:
                         scroll_item.display = False
                         scroll_item.save()
-            except Exception as ex:
-                print(f'Exception {ex} adding index with content {v}')
-            y.close()
+                return True
+            else:
+                print(f'ERROR: no data for YahooFinance2 {name}')
+        except Exception as ex:
+            print(f'ERROR: Exception {ex} adding index with content {v}')
+        y.close()
+
+def update_scroll_data_yfinance(sel_indexes):
+    print(f'getting using yfinance')
+    indexes = {'NIFTY 50':'^NSEI', 'NIFTY BANK':'^NSEBANK', 'INDIA VIX':'^INDIAVIX', 'NIFTY 100':'^CNX100',
+                    'NIFTY 500':'^CRSLDX', 'NIFTY MIDCAP 100':'NIFTY_MIDCAP_100.NS', 'NIFTY PHARMA':'^CNXPHARMA',
+                    'NIFTY IT':'^CNXIT', 'NIFTY SMLCAP 100':'^CNXSC', 'NIFTY 200':'^CNX200', 'NIFTY AUTO':'^CNXAUTO',
+                    'NIFTY NEXT 50':'^NSMIDCP', 'NIFTY SMLCAP 250': 'NIFTYSMLCAP250.NS', 'NIFTY MIDSML 400': 'NIFTYMIDSML400.NS',
+                    'NIFTY50 EQL WGT': 'NIFTY50EQUALWEIGHT.NS', 'NIFTY100 EQL WGT': 'NIFTY100_EQL_WGT.NS',
+                    'NIFTY MIDCAP 150': 'NIFTYMIDCAP150.NS', 'NIFTY100 QUALTY30': 'NIFTYQUALITY30.NS', 
+                    'NIFTY100 LOWVOL30': 'NIFTY100LOWVOL30.NS', 'NIFTY50 VALUE 20': 'NV20.NS', 
+                    'NIFTY ALPHA 50': 'NIFTYALPHA50.NS', 'NIFTY FIN SERVICE': 'NIFTY_FIN_SERVICE.NS', 
+                    'Russell 1000': '^RUI', 'Dow Industrials':'^DJI', 'NASDAQ Composite': '^IXIC', 'NASDAQ 100': '^NDX', 
+                    'Nikkei 225': '^N225', 'OMX Stockholm 30': '^OMX'}
+    for index in sel_indexes:
+        print(f'processing index {index}')
+        for k,v in indexes.items():
+            if v == index:
+                name = k
+                break
+        if not name:
+            print(f'index {index} not found in list')
+        from shared.yahoo_finance_2 import YFinance
+        y = YFinance(index)
+        v = y.get_live_price_yfinance(name)
+        try:
+            scroll_item = None
+            try:
+                scroll_item = ScrollData.objects.get(scrip=v['name'])
+                if get_diff(float(scroll_item.val), float(v['lastPrice'])) > 0.1:
+                    if 'last_updated' in v and v['last_updated']:
+                        scroll_item.last_updated = v['last_updated']
+                    else:
+                        scroll_item.last_updated = timezone.now()
+                    scroll_item.val = v['lastPrice']
+                    scroll_item.change = v['change']
+                    scroll_item.percent = v['pChange']
+                    scroll_item.save()
+            except ScrollData.DoesNotExist:
+                scroll_item = ScrollData.objects.create(scrip=v['name'],
+                                                        last_updated = v['last_updated'],
+                                                        val = v['lastPrice'],
+                                                        change = v['change'],
+                                                        percent = v['pChange'])
+        except Exception as ex:
+            print(f'ERROR: Exception {ex} adding index with content {v}')
+
+def update_scroll_data():
+    pref_obj = Preferences.get_solo()
+    sel_indexes = list()
+    if pref_obj.indexes_to_scroll:
+        for index in pref_obj.indexes_to_scroll.split('|'):
+            sel_indexes.append(index)
+    print(f'updating scroll data for selected indexes {sel_indexes}')
+    # hopefully one of these will work
+    update_scroll_data_nse(sel_indexes)
+    update_scroll_data_yahoofinance2(sel_indexes)
+    indexes = ['^NSEI', '^NSEBANK', '^INDIAVIX', '^CNX100',
+                    '^CRSLDX', 'NIFTY_MIDCAP_100.NS', '^CNXPHARMA',
+                    '^CNXIT', '^CNXSC', '^CNX200', '^CNXAUTO',
+                    '^NSMIDCP', 'NIFTYSMLCAP250.NS', 'NIFTYMIDSML400.NS',
+                    'NIFTY50EQUALWEIGHT.NS',  'NIFTY100_EQL_WGT.NS',
+                    'NIFTYMIDCAP150.NS', 'NIFTYQUALITY30.NS', 
+                    'NIFTY100LOWVOL30.NS', 'NV20.NS', 
+                    'NIFTYALPHA50.NS', 'NIFTY_FIN_SERVICE.NS']
+    update_scroll_data_yfinance(indexes)
 
     n = Nasdaq('', None)
     data = n.get_all_index()
@@ -700,7 +768,7 @@ def update_scroll_data():
     else:
         print('getting from yahoo')
         from shared.yahoo_finance_2 import YahooFinance2
-        y = YahooFinance2('^IXIC')
+        y = YahooFinance2('^IXIC', 1)
         v = y.get_live_price('NASDAQ Composite')
         try:
             scroll_item = None
@@ -735,6 +803,9 @@ def update_scroll_data():
         except Exception as ex:
             print(f'Exception {ex} adding index with content {v}')
         y.close()
+    
+    other_indexes = ['^RUI', '^DJI', '^IXIC', '^NDX', '^N225', '^OMX']
+    update_scroll_data_yfinance(other_indexes)
 
 
 @db_periodic_task(crontab(minute='10', hour='1-5', day='1-5'))
@@ -1021,8 +1092,14 @@ def update_sgb_tranches():
 
 @db_periodic_task(crontab(minute='0', hour='*/12'))
 def update_user_networth(user_id=None):
-    from users.user_helper import update_user_networth
+    from users.user_helper import update_user_networth, update_suggested_asset_allocation_for_user
     update_user_networth(user_id)
+    update_suggested_asset_allocation_for_user(user_id)
+
+@db_task()
+def on_user_add(user_id):
+    from users.user_helper import update_suggested_asset_allocation_for_user
+    update_suggested_asset_allocation_for_user(user_id)
 
 @db_periodic_task(crontab(minute='10', hour='*/12'))
 def update_bank_acc_bal(acc_id=None):

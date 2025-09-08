@@ -10,6 +10,7 @@ from .views import (
     Users,
     UserMonthlyContribDeduct,
     insights_view,
+    set_preferred_asset_allocation,
 )
 
 app_name = 'users'
@@ -23,5 +24,6 @@ urlpatterns = [
     path('<id>/update', update_user, name='user-update'),
     path('api/chart/data/<id>', ChartData.as_view()),
     path('api/get/users', Users.as_view()),
-    path('api/get/users_contrib/<id>/<year>', UserMonthlyContribDeduct.as_view())
+    path('api/get/users_contrib/<id>/<year>', UserMonthlyContribDeduct.as_view()),
+    path('<id>/set_preferred_asset_allocation/', set_preferred_asset_allocation, name='set-preferred-asset-allocation'),
 ]
