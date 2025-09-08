@@ -1021,8 +1021,14 @@ def update_sgb_tranches():
 
 @db_periodic_task(crontab(minute='0', hour='*/12'))
 def update_user_networth(user_id=None):
-    from users.user_helper import update_user_networth
+    from users.user_helper import update_user_networth, update_suggested_asset_allocation_for_user
     update_user_networth(user_id)
+    update_suggested_asset_allocation_for_user(user_id)
+
+@db_task()
+def on_user_add(user_id):
+    from users.user_helper import update_suggested_asset_allocation_for_user
+    update_suggested_asset_allocation_for_user(user_id)
 
 @db_periodic_task(crontab(minute='10', hour='*/12'))
 def update_bank_acc_bal(acc_id=None):

@@ -59,6 +59,7 @@
         <th scope="col">Email</th>
         <th scope="col">DOB</th>
         <th scope="col">Networth ({{preferred_currency}})</th>
+        <th scope="col">Risk Profile</th>
         <th scope="col">Notes</th>
         <th scope="col">Actions</th>
       </tr>
@@ -75,6 +76,7 @@
         <td>{{ instance.email }}</td>
         <td>{{ instance.dob }}</td>
         <td>{{ instance.total_networth }}</td>
+        <td>{{ instance.risk_profile|capfirst }}</td>
         <td>{{ instance.notes }}</td>
         <td>
           <a href="{{ instance.get_absolute_url }}delete" class="confirm-delete-user"><i class="fa fa-trash"  aria-hidden="true" title="Delete User"></i> </a>

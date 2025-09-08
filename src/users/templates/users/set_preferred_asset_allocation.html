@@ -1,0 +1,90 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'users:user-list' %}">Users</a></li>
+    <li><a href="#">Set Asset Allocation</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+                
+    <div class="shadow bg-white rounded p-4">
+        <h3>Set Asset Allocation for {{name}}</h3>
+        <p>Set your preferred asset allocation percentages below. Suggested and current allocation percentages are shown for reference.</p>
+        <p><strong>Note:</strong> The sum of all preferred percentages must equal 100%.</p>
+        {% if message_color == 'green' %}
+            <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                </button>    <strong>Success!</strong> {{message}}
+            </div>
+        {% elif message_color == 'red' %}
+            <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                </button>    <strong>Error!</strong> {{message}}
+            </div>
+        {% endif %}
+        <table class="table table-sm table-bordered align-middle" style="width:auto; padding:12px;">
+            <style>
+                .table td, .table th {
+                    padding: 12px !important;
+                }
+            </style>
+            <tr>
+                <td></td>
+                <th>Preferred (%)</th>
+                <th>Suggested (%)</th>
+                <th>Current (%)</th>
+            </tr>
+            <tr>
+                <th>Equity</th>
+                <td><input class="form-control" type="number" id="preferred_equity_percentage" name="preferred_equity_percentage" value="{{preferred_equity_percentage}}" required="true" max="100" min="0" step="1"></td>
+                <td>{{suggested_equity_percentage}}</td>
+                <td>{{current_equity_percentage}}</td>
+            </tr>
+            <tr>
+                <th>Debt</th>
+                <td><input class="form-control" type="number" id="preferred_debt_percentage" name="preferred_debt_percentage" value="{{preferred_debt_percentage}}" required="true" max="100" min="0" step="1"></td>
+                <td>{{suggested_debt_percentage}}</td>
+                <td>{{current_debt_percentage}}</td>
+            </tr>
+            <tr>
+                <th>Gold</th>
+                <td><input class="form-control" type="number" id="preferred_gold_percentage" name="preferred_gold_percentage" value="{{preferred_gold_percentage}}" required="true" max="100" min="0" step="1"></td>
+                <td>{{suggested_gold_percentage}}</td>
+                <td>{{current_gold_percentage}}</td>
+            </tr>
+            <tr>
+                <th>Crypto</th>
+                <td><input class="form-control" type="number" id="preferred_crypto_percentage" name="preferred_crypto_percentage" value="{{preferred_crypto_percentage}}" required="true" max="100" min="0" step="1"></td>
+                <td>{{suggested_crypto_percentage}}</td>
+                <td>{{current_crypto_percentage}}</td>
+            </tr>
+            <tr>
+                <th>Cash</th>
+                <td><input class="form-control" type="number" id="preferred_cash_percentage" name="preferred_cash_percentage" value="{{preferred_cash_percentage}}" required="true" max="100" min="0" step="1"></td>
+                <td>{{suggested_cash_percentage}}</td>
+                <td>{{current_cash_percentage}}</td>
+            </tr>
+        </table>
+
+        <div class="form-floating mb-3">
+            <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+            <a href="../" class="btn btn-danger" role="button">Cancel</a>
+        </div>
+    </div>
+</form>
+
+{% endblock content %}
+
+{% block javascript %}
+
+{% endblock %}

@@ -22,6 +22,7 @@
         <th scope="col">e-mail</th>
         <th scope="col">DOB</th>
         <th scope="col">Total Networth</th>
+        <th scope="col">Risk Profile</th>
         <th scope="col">Notes</th>
       </tr>
     </thead>
@@ -33,15 +34,67 @@
         <td>{{ object.email }}</td>
         <td>{{ object.dob }}</td>
         <td>{{ object.total_networth }} <small>As on {{last_updated}}</small></td>
+        <td>{{ object.risk_profile|capfirst }}</td>
         <td>{{ object.notes }}</td>
       </tr>
     </tbody>
   </table>
 <br><br><br>
-<div class="card-deck">
-  <div style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='card col-sm-12 col-md-6 col-lg-4'>
-    <canvas id="classificationChart"></canvas>
+<div class="shadow p-3 mb-5 bg-white rounded">
+  <h4>Asset Class</h4>
+  <p>Distribution of your investments by asset class</p>
+  <div class="chart-container-1">
+    <div class="chart-1">
+      <canvas id="classificationChart" width="350" height="250" style="display: block;box-sizing: border-box;height: 250px;"></canvas>
+    </div>
+    <div class="chart-legends-1-no-margin">
+      <p>This is how your investments are in various asset classes (<small>as on {{asset_allocation.as_on}}</small>). Hover over chart for details</p>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Asset Class</th>
+            <th>Current</th>
+            <th>Preferred <a href="set_preferred_asset_allocation/" style="padding-left:10px;" ><i class="far fa-edit" aria-hidden="true" title="Update"></i> </a></th>
+            <th>Suggested <i class="far fa-question-circle" data-toggle="tooltip" style="font-size:0.8em;" data-placement="top" title="Set date of birth and risk profile for user to get better suggestions based on 'Rule of 100'"></i></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Debt</td>
+            <td>{{asset_allocation.current_debt_percentage}}</td>
+            <td>{{asset_allocation.preferred_debt_percentage}}</td>
+            <td>{{asset_allocation.suggested_debt_percentage}}</td>
+          </tr>
+          <tr>
+            <td>Equity</td>
+            <td>{{asset_allocation.current_equity_percentage}}</td>
+            <td>{{asset_allocation.preferred_equity_percentage}}</td>
+            <td>{{asset_allocation.suggested_equity_percentage}}</td>
+          </tr>
+          <tr>
+            <td>Gold</td>
+            <td>{{asset_allocation.current_gold_percentage}}</td>
+            <td>{{asset_allocation.preferred_gold_percentage}}</td>
+            <td>{{asset_allocation.suggested_gold_percentage}}</td>
+          </tr>
+          <tr>
+            <td>Crypto</td>
+            <td>{{asset_allocation.current_crypto_percentage}}</td>
+            <td>{{asset_allocation.preferred_crypto_percentage}}</td>
+            <td>{{asset_allocation.suggested_crypto_percentage}}</td>
+          </tr>
+          <tr>
+            <td>Cash</td>
+            <td>{{asset_allocation.current_cash_percentage}}</td>
+            <td>{{asset_allocation.preferred_cash_percentage}}</td>
+            <td>{{asset_allocation.suggested_cash_percentage}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+</div>
+<div class="card-deck">
   <div style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='card col-sm-12 col-md-6 col-lg-4'>
     <canvas id="distributionChart"></canvas>
   </div>
