@@ -35,4 +35,4 @@ class PpfEntry(models.Model):
         unique_together = ('number', 'trans_date','entry_type', 'interest_component')
 
     def get_absolute_url(self):
-        return reverse("ppfentries:ppf-entry-detail", kwargs={"id": self.number})
+        return reverse("ppfs:ppf-entry-detail", kwargs={"id": self.number})

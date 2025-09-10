@@ -12,60 +12,66 @@
 {% endblock viewname %}
 
 {% block content %}
-<form action="." method="POST">
-  {% csrf_token %}
-<div class="row">
-  <div class='col-sm-6'>
+<section class="py-5">
+  <div class="container px-5 ml-3">
+    <div class="rounded-3 py-5 px-4 px-md-5 mb-5">
+      <div class="custom-row gx-5 justify-content-flex-start">
+        <div class="col-lg-8 col-xl-6">
+          <form action="." method="POST">
+            {% csrf_token %}
+            <div class="custom-row">
+              {% if message_color == 'green' %}
+              <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true" style="font-size:20px">×</span>
+                </button>    <strong>Success!</strong> {{message}}
+              </div>
+              {% elif message_color == 'red' %}
+              <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true" style="font-size:20px">×</span>
+                </button>    <strong>Error!</strong> {{message}}
+              </div>
+              {% endif %}
 
-    <div class="form-group row">
-      <label for="number" class="col-sm-3 col-form-label">Number <span style="color:red;">*</span></label>
-      <div class="col-sm-3">
-        <div class="md-form mt-0">
-          {{number}}
+              <div class="form-floating mb-3">
+                <div class="pb-2">
+                  <div class="row">
+                    <div class="col">
+                      <label for="number">Number</label>
+                    </div>
+                    <div class="col">{{number}}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-floating mb-3">
+                <div class="pb-2"><label for="start_date">Start Date <span style="color:red;">*</span></label></div>
+                <input class="form-control" type="date" id="start_date" name="start_date" value="{{start_date}}" required="true">
+              </div>
+
+              <div class="form-floating mb-3">
+                <div class="pb-2"><label for="user">User <span style="color:red;">*</span></label></div>
+                <select class="form-control" id="id_user" name="user" class="form-control" required="true"></select>
+              </div>
+
+              <div class="form-floating mb-3">
+                <div class="pb-2"><label for="goal">Goal</label></div>
+                <select class="form-control" id="id_goal" name="goal" class="form-control"></select>
+              </div>
+
+              <div class="form-floating mb-3">
+                <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                <a href="../" class="btn btn-danger" role="button">Cancel</a>
+              </div>
+
+            </div>
+          </form>
         </div>
       </div>
     </div>
-
-    <div class="form-group row">
-      <label for="start_date" class="col-sm-3 col-form-label">Start Date <span style="color:red;">*</span></label>
-      <div class="col-sm-3">
-        <div class="md-form mt-0">
-          <input type="date" id="start_date" name="start_date" value="{{start_date}}" required="true">
-        </div>
-      </div>
-    </div>
-
-    <div class="form-group row">
-      <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
-      <div class="col-sm-3">
-        <div class="md-form mt-0">
-          <select id="id_user" name="user" class="form-control" required="true"></select>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-group row">
-      <label for="goal" class="col-sm-3 col-form-label">Goal</label>
-      <div class="col-sm-3">
-        <div class="md-form mt-0">
-          <select id="id_goal" name="goal" class="form-control"></select>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-group row">
-      <div class="col-sm-6">
-        <div class="md-form mt-0">
-          <button type="submit" class="btn btn-primary" name="submit">Submit</button>
-          <a href="../" class="btn btn-danger" role="button">Cancel</a>
-        </div>
-      </div>
-    </div>
-
   </div>
-</div>
-</form>
-
+</section>
 {% endblock content %}
 
 {% block ajaxcalls %}

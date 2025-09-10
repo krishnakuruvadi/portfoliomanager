@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from goal.goal_helper import get_goal_id_name_mapping_for_user
 from common.helper import get_preferred_currency_symbol
+from django.db import IntegrityError
 
 # Create your views here.
 
@@ -66,6 +67,8 @@ def delete_rd(request, id):
 
 def add_recurring_deposit(request):
     template = 'recurring-deposits/add_recurring_deposit.html'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
         if "submit" in request.POST:
@@ -85,8 +88,15 @@ def add_recurring_deposit(request):
                 goal_id = None
             notes = request.POST['notes']
             mat_date = request.POST['mat_date']
-            add_rd_entry(number, bank_name, start_date, principal, time_period_months,
+            try:
+                add_rd_entry(number, bank_name, start_date, principal, time_period_months,
                     final_val, user, notes, goal_id, roi, mat_date)
+                message_color = 'green'
+                message = 'Recurring Deposit addition successful'
+            except IntegrityError as e:
+                users = get_all_users()
+                context = {'users':users, 'message_color': 'red', 'message': 'RD with same number already exists', 'operation': 'Add Recurring Deposit', 'curr_module_id': 'id_rd_module'}
+                return render(request, template, context=context)
         else:
             print("calculate button pressed")
             number = request.POST['number']
@@ -107,7 +117,7 @@ def add_recurring_deposit(request):
                 'goal':goal, 'mat_date':mat_date, 'operation': 'Add Recurring Deposit', 'goals':goals, 'curr_module_id': 'id_rd_module'}
             return render(request, template, context=context)
     users = get_all_users()
-    context = {'users':users, 'operation': 'Add Recurring Deposit', 'curr_module_id': 'id_rd_module'}
+    context = {'users':users, 'operation': 'Add Recurring Deposit', 'curr_module_id': 'id_rd_module', 'message_color': message_color, 'message': message}
     return render(request, template, context)
 
 

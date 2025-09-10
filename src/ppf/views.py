@@ -168,6 +168,8 @@ def add_trans(request, id):
     template_name = 'ppfs/ppf_add_trans.html'
     context = dict()
     context['number'] = id
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         try:
             ppf_obj = Ppf.objects.get(number=id)
@@ -185,7 +187,10 @@ def add_trans(request, id):
             else:
                 interest_component = False
             insert_ppf_trans_entry(id, date, trans_type, amount, notes, reference, interest_component)
-            
+            message_color = 'green'
+            message = 'Transaction addition successful'
+            context['message'] = message
+            context['message_color'] = message_color
         except Ppf.DoesNotExist:
             print(f'PPF with number {id} doesnt exist')
     context['curr_module_id'] = 'id_ppf_module'

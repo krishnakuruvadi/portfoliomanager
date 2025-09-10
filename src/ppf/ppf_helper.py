@@ -23,7 +23,8 @@ def insert_ppf_trans_entry(ppf_number, date, trans_type, amount, notes, referenc
         print("Couldnt find ppf object with number ", ppf_number)
     except IntegrityError:
         print('Transaction exists')
-
+    except Exception as ex:
+        print(f'ERROR: exception when adding ppf transaction {ex}')
 
     '''
     number = models.ForeignKey('Ppf', on_delete=models.CASCADE)
