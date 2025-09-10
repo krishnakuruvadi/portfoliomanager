@@ -27,6 +27,9 @@ try:
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
     DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+    EXCHANGE_RATE_HOST_API_ACCESS = os.getenv('EXCHANGE_RATE_HOST_API_ACCESS')
+    OPEN_EXCHANGE_RATES_API_ACCESS = os.getenv('OPEN_EXCHANGE_RATES_API_ACCESS')
+    FIXER_IO_API_ACCESS = os.getenv('FIXER_IO_API_ACCESS')
 
 except Exception as e:
     print(f'The app was unable to run because environment variables were not loaded properly.')

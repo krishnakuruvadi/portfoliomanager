@@ -12,6 +12,8 @@ from .helper import reconcile_401k, get_yearly_contribution
 from dateutil.relativedelta import relativedelta
 from django.db import IntegrityError
 from common.helper import get_preferred_currency_symbol
+from tasks.tasks import update_401k_vals
+
 # Create your views here.
 
 
@@ -204,20 +206,21 @@ def account_detail(request, id):
             yf = YahooFinance2('SPY')
             response = yf.get_historical_value(nav.nav_date, nav.nav_date+relativedelta(days=5))
             yf.close()
-            val_date = None
-            for k,v in response.items():
-                if not val:
-                    val = v
-                    val_date = k
-                else:
-                    if val_date > k:
-                        val_date = k
+            if response:
+                val_date = None
+                for k,v in response.items():
+                    if not val:
                         val = v
-            if val:
-                nav.comparision_nav_value = round(val, 2)
-                nav.save()
-            else:
-                val = 0
+                        val_date = k
+                    else:
+                        if val_date > k:
+                            val_date = k
+                            val = v
+                if val:
+                    nav.comparision_nav_value = round(val, 2)
+                    nav.save()
+                else:
+                    val = 0
         spy_vals.append(val)
     acct['fund_vals'] = fund_vals
     acct['chart_labels'] = chart_labels
@@ -280,7 +283,7 @@ def add_transaction(request, id):
                 message = 'Transaction add failed'
                 message_color = 'red'
                 print(f'Exception {ex} encountered during transaction add')
-            reconcile_401k()
+            update_401k_vals()
 
         context = {'company':account.company, 'id':account.id, 'operation':'Add', 'message':message, 'message_color':message_color}
         context['curr_module_id'] = 'id_401k_module'
@@ -310,7 +313,7 @@ def edit_transaction(request, id, trans_id):
                     transaction.units = units
                     transaction.notes = notes
                     transaction.save()
-                    reconcile_401k()
+                    update_401k_vals()
                     message = 'Transaction updated'
                     message_color = 'green'
                 except Exception as ex:
