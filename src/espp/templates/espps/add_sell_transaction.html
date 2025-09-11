@@ -14,80 +14,78 @@
 
 {% block content %}
 
-  <form method="POST">
-    {% csrf_token %}
-    <div class="row">
-      <div class='col-sm-6 col-md-4 col-lg-4'>
+  <section class="py-5">
+    <div class="container px-5 ml-3">
+      <div class="rounded-3 py-5 px-4 px-md-5 mb-5">
+        <div class="custom-row gx-5 justify-content-flex-start">
+          <div class="col-lg-8 col-xl-6">
+            <form method="POST">
+              {% csrf_token %}
+              <div class="custom-row">
 
-        <div class="form-group row">
-          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}">
-            </div>
+                  {% if message_color == 'green' %}
+                  <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true" style="font-size:20px">×</span>
+                    </button>    <strong>Success!</strong> {{message}}
+                  </div>
+                  {% elif message_color == 'red' %}
+                  <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true" style="font-size:20px">×</span>
+                    </button>    <strong>Error!</strong> {{message}}
+                  </div>
+                  {% endif %}
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="trans_date">Transaction Date <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="date" id="trans_date" name="trans_date" required="" value="{{trans_date}}">
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="price">Price <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="number" id="price" name="price" value="{{price}}" required="" step="0.0001">
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="units">Units <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="number" id="units" name="units" value="{{units}}" required="" step="0.0001">
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="conversion_rate">Conversion Rate <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="number" id="conversion_rate" name="conversion_rate" value="{{conversion_rate}}" required="" step="0.01">
+                    <button class="btn" id="id_forex_fetch" disabled=""><i class="fab fa-get-pocket"></i></button>
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="trans_price">Transaction Price <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="number" id="trans_price" name="trans_price" value="{{trans_price}}" required="" step="0.0001"> 
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="notes">Notes</label></div>
+                    <textarea class="form-control" name="notes">{{notes|default_if_none:""}}</textarea>
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                    <a href="../" class="btn btn-danger" role="button">Cancel</a>
+                  </div>
+
+              </div>
+            </form>
           </div>
         </div>
-
-        <div class="form-group row">
-          <label for="price" class="col-sm-3 col-form-label">Price</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="price" name="price" value="{{price}}" step="0.0001">
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="units" class="col-sm-3 col-form-label">Units</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="units" name="units" value="{{units}}" step="0.0001">
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="conversion_rate" class="col-sm-3 col-form-label">Conversion Rate</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="conversion_rate" name="conversion_rate" value="{{conversion_rate}}" step="0.01">
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="trans_price" class="col-sm-3 col-form-label">Transaction Price</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="trans_price" name="trans_price" value="{{trans_price}}" step="0.01"> 
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <div class="col-sm-6">
-            <div class="md-form mt-0">
-              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
-              <a href="../" class="btn btn-danger" role="button">Cancel</a>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
-  </form>
-  {% endblock content %}
+  </section>
+
+{% endblock content %}
 
   {% block javascript %}
+    {% load static %}
+    <script src="{% static 'common.js' %}"></script>
     <script>
       $("#price").change(function () {
         setTransPrice();
@@ -114,6 +112,50 @@
           totalPriceElem = document.getElementById("trans_price")
           totalPriceElem.value = totalPrice
         }  
+      }
+      btn = document.getElementById('id_forex_fetch');
+      btn.disabled = true;
+      btn.onclick = function(){
+        get_forex_rate_and_populate();
+        return false;
+      };
+      $("#trans_date").change(function () {
+        //console.log( $(this).val() );
+        update_forex_rate_fetch_btn_status();
+      });
+      function update_forex_rate_fetch_btn_status() {
+        //console.log('inside update_forex_rate')
+
+        var dt_elem = document.getElementById("trans_date");
+        //console.log('conv_elem value', dt_elem.value)
+        if (dt_elem.value) {
+          var conv_btn = document.getElementById("id_forex_fetch");
+          conv_btn.disabled = false;
+        } else {
+          var conv_btn = document.getElementById("id_forex_fetch");
+          conv_btn.disabled = true;
+        }
+        setTransPrice();
+      }
+      function get_forex_rate_and_populate() {
+        //console.log('fetch button clicked');
+        dt = document.getElementById("trans_date").value;
+        var parts = dt.split('-');
+        var year = parts[0];
+        var month = parts[1];
+        var day = parts[2];
+        console.log(year, month, day);
+        exch = '{{exchange}}'
+        console.log(exch)
+        if (exch == 'NASDAQ' || exch == 'NYSE') {
+          var val = get_forex_rate(year, month, day, 'USD', 'INR');
+          console.log('received forex rate as ', val)
+          conv_elem = document.getElementById("conversion_rate");
+          conv_elem.value = val;
+        } else {
+          conv_elem = document.getElementById("conversion_rate");
+          conv_elem.value = 1;
+        }
       }
     </script>
   {% endblock %}

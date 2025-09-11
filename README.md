@@ -153,6 +153,8 @@ pip install -r requirements.txt
       - env_files
         - .pm-env OR .CUSTOM-FILE-NAME set above.
 
+- Some environment variables are mandatory for certain components to work properly.  For example, forex conversions.  Some environment variables are optional and will only affect optional behavior.  For example, mail client to send portfolio updates
+
 - Setup the server.
 
 ```bash

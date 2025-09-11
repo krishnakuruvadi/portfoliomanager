@@ -8,106 +8,108 @@
   <ul class="breadcrumb">
     <li><a href="{% url 'insurance:policy-list' %}">Insurance</a></li>
     <li><a href="{% url 'insurance:policy-detail' policy_id %}">{{policy}}</a></li>
-    <li><a href="#">Add Transaction</a></li>
+    <li><a href="#">Add NAV</a></li>
   </ul>
 {% endblock viewname %}
 
 {% block content %}
 
-  <form method="POST">
-    {% csrf_token %}
-    <div class="row">
-      <div class='col-sm-6'>
+<section class="py-5">
+  <div class="container px-5 ml-3">
+    <div class="rounded-3 py-5 px-4 px-md-5 mb-5">
+      <div class="custom-row gx-5 justify-content-flex-start">
+        <div class="col-lg-8 col-xl-6">
+          <form method="POST">
+            {% csrf_token %}
+            <div class="custom-row">
+                {% if message_color == 'green' %}
+                <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                  </button>    <strong>Success!</strong> {{message}}
+                </div>
+                {% elif message_color == 'red' %}
+                <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                  </button>    <strong>Error!</strong> {{message}}
+                </div>
+                {% endif %}
+                
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col"><label for="policy">Policy Number</label></div>
+                      <div class="col"><label>{{policy}}</label></div>
+                    </div>
+                  </div>
+                </div>
 
-        {% if message_color == 'green' %}
-        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-             <span aria-hidden="true" style="font-size:20px">×</span>
-           </button>    <strong>Success!</strong> {{message}}
-        </div>
-        {% elif message_color == 'red' %}
-        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-             <span aria-hidden="true" style="font-size:20px">×</span>
-           </button>    <strong>Error!</strong> {{message}}
-         </div>
-        {% endif %}
-         
-        <div class="form-group row">
-          <label for="policy" class="col-sm-3 col-form-label">Policy Number</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label>{{policy}}</label>
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col"><label for="company">Company</label></div>
+                      <div class="col"><label>{{company}}</label></div>
+                    </div>
+                  </div>
+                </div>
 
-        <div class="form-group row">
-          <label for="company" class="col-sm-3 col-form-label">Company</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label>{{company}}</label>
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col"><label for="fund">Policy Name</label></div>
+                      <div class="col"><label>{{name}}</label></div>
+                    </div>
+                  </div>
+                </div>
 
-        <div class="form-group row">
-          <label for="fund" class="col-sm-3 col-form-label">Policy Name</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label>{{name}}</label>
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col"><label for="id_policy_type">Policy Type</label></div>
+                        <div class="col">
+                        <div class="md-form mt-0"><label> {{policy_type}} </label></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-        <div class="form-group row">   
-          <label class="control-label col-sm-3 col-form-label" for="id_policy_type">Policy Type</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label> {{policy_type}} </label>
-            </div>
-          </div> 
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col">
+                        <label for="id_fund_name">Fund Name</label>
+                      </div>
+                      <div class="col">
+                        <label> {{fund_name}} </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-        <div class="form-group row">   
-          <label class="control-label col-sm-3 col-form-label" for="id_fund_name">Fund Name</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label> {{fund_name}} </label>
-            </div>
-          </div> 
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="trans_date">NAV Date <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="date" id="nav_date" name="nav_date" value="{{nav_date}}" required="true">
+                </div>
 
-        <div class="form-group row">
-          <label for="trans_date" class="col-sm-3 col-form-label">NAV Date <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-              <div class="md-form mt-0">
-                  <input type="date" id="nav_date" name="nav_date" value="{{nav_date}}" required="true">
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="trans_amount">NAV <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="number" step="0.0001" id="nav" name="nav" value="{{nav}}" required="true">
+                </div>
+
+                <div class="form-floating mb-3">
+                  <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                  <a href="{% url 'insurance:nav-history' policy_id fund_id %}" class="btn btn-danger" role="button">Cancel</a>
+                </div>
+
               </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="trans_amount" class="col-sm-3 col-form-label">NAV <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" step="0.0001" id="nav" name="nav" value="{{nav}}" required="true">
             </div>
-          </div>
+          </form>
         </div>
-
-        <div class="form-group row">
-          <div class="col-sm-6">
-            <div class="md-form mt-0">
-              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
-              <a href="{% url 'insurance:nav-history' policy_id fund_id %}" class="btn btn-danger" role="button">Cancel</a>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
-  </form>
+  </div>
+</section>
 
 {% endblock content %}
 

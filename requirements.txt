@@ -52,6 +52,7 @@ incremental==24.7.2
 isort==5.6.4
 jieba3k==0.35.1
 joblib==1.2.0
+jyapyforex==0.1.0
 lazy-object-proxy==1.4.3
 lxml==5.2.1
 markdown-it-py==3.0.0

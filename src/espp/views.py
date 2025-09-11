@@ -34,7 +34,8 @@ def add_espp(request):
     message_color = 'ignore'
     if request.method == 'POST':
         try:
-            purchase_date = request.POST['purchase_date']
+            pdate = request.POST['purchase_date']
+            purchase_date = get_date_or_none_from_string(pdate)
             user = request.POST['user']
             goal = request.POST.get('goal', '')
             if goal != '':
@@ -350,6 +351,8 @@ def add_sell_trans(request, id):
     context = dict()
     context['espp_id'] = id
     context['curr_module_id'] = 'id_espp_module'
+    message = ''
+    message_color = 'ignore'
     try:
         espp_obj = Espp.objects.get(id=id)
         if request.method == 'POST':
@@ -364,8 +367,15 @@ def add_sell_trans(request, id):
                 EsppSellTransactions.objects.create(espp=espp_obj, trans_date=trans_date, price=price, units=units, conversion_rate=conversion_rate,
                     trans_price=trans_price, realised_gain=realised_gain, notes=notes)
                 update_latest_vals(espp_obj)
+                message_color = 'green'
+                message = 'Sell transaction addition successful'
             except IntegrityError:
-                print('transaction already exists')            
+                message_color = 'red'
+                message = 'Sell transaction addition failed.  Transaction already exists'
+                print('transaction already exists')
+        context['exchange'] = espp_obj.exchange
+        context['message'] = message
+        context['message_color'] = message_color
     except Espp.DoesNotExist:
         print(f"ESPP with id {id} does not exist")
         return HttpResponseRedirect(reverse('espps:espp-list'))

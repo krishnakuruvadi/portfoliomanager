@@ -1021,6 +1021,11 @@ def update_401k_month_end_vals():
     from retirement_401k.helper import reconcile_401k
     reconcile_401k()
 
+@db_task()
+def update_401k_vals():
+    from retirement_401k.helper import reconcile_401k
+    reconcile_401k()
+
 @db_periodic_task(crontab(minute='20', hour='*/6'))
 def check_updates_pending():
     update_401k_month_end_vals()
