@@ -20,6 +20,8 @@ CATEGORY_CHOICES = [
     ('Medical', 'Medical'),
     ('Charity', 'Charity'),
     ('Investment', 'Investment'),
+    ('Education', 'Education'),
+    ('Expense Split', 'Expense Split'),
     ('Child Education', 'Child Education'),
     ('Vacation', 'Vacation'),
     ('Entertainment', 'Entertainment'),
@@ -27,7 +29,9 @@ CATEGORY_CHOICES = [
     ('Gift', 'Gift'),
     ('Salary/Payment', 'Salary/Payment'),
     ('Insurance', 'Insurance'),
-    ('Self Transfer', 'Self Transfer')
+    ('Self Transfer', 'Self Transfer'),
+    ('Shares Dividends', 'Shares Dividends'),
+    ('Other Dividends', 'Other Dividends')
 ]
 
 ACCOUNT_TYPE_CHOICES = [

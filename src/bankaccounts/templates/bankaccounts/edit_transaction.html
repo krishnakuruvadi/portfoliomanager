@@ -14,129 +14,156 @@
 
 {% block content %}
 
-  <form method="POST">
-    {% csrf_token %}
-    <div class="row">
-      <div class='col-sm-6'>
+<section class="py-5">
+  <div class="container px-5 ml-3">
+    <div class="rounded-3 py-5 px-4 px-md-5 mb-5">
+      <div class="custom-row gx-5 justify-content-flex-start">
+        <div class="col-lg-8 col-xl-6">
+          <form method="POST">
+            {% csrf_token %}
+            <div class="custom-row">
 
-        {% if message_color == 'green' %}
-        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-             <span aria-hidden="true" style="font-size:20px">×</span>
-           </button>    <strong>Success!</strong> {{message}}
-        </div>
-        {% elif message_color == 'red' %}
-        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-             <span aria-hidden="true" style="font-size:20px">×</span>
-           </button>    <strong>Error!</strong> {{message}}
-         </div>
-        {% endif %}
-         
-        <div class="form-group row">
-          <label for="number" class="col-sm-3 col-form-label">Account Number</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label>{{number}}</label>
-            </div>
-          </div>
-        </div>
+                {% if message_color == 'green' %}
+                <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                  </button>    <strong>Success!</strong> {{message}}
+                </div>
+                {% elif message_color == 'red' %}
+                <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                  </button>    <strong>Error!</strong> {{message}}
+                </div>
+                {% endif %}
+                
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col">
+                        <label for="number">Account Number</label>
+                      </div>
+                      <div class="col">
+                        <label>{{number}}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-        <div class="form-group row">
-          <label for="company" class="col-sm-3 col-form-label">Bank Name</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label>{{bank_name}}</label>
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col">
+                        <label for="company">Bank Name</label>
+                      </div>
+                      <div class="col">
+                        <label>{{bank_name}}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-        <div class="form-group row">
-          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date</label>
-          <div class="col-sm-3">
-              <div class="md-form mt-0">
-                  <label>{{trans_date}}</label>
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col">
+                        <label for="trans_date">Transaction Date</label>
+                      </div>
+                      <div class="col">
+                          <label>{{trans_date}}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col">
+                        <label for="nav">Transaction Type</label>
+                      </div>
+                      <div class="col">
+                        <label>{{tran_type}}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col">
+                        <label for="trans_amount">Transaction Amount</label>
+                      </div>
+                      <div class="col">
+                        <label>{{trans_amount}}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col">
+                        <label for="description">Description</label>
+                      </div>
+                      <div class="col">
+                        <label>{{description}}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="nav">Sub Transaction Type</label></div>
+                    <select name="tran_sub_type" id="id_tran_sub_type" class="form-control">
+                      <option value="">---------</option>
+                      <option value="Card Payment">Card Payment</option>
+                      <option value="Interest">Interest</option>
+                      <option value="Shopping">Shopping</option>
+                      <option value="EMI/Loan Payment">EMI/Loan Payment</option>
+                      <option value="Fuel">Fuel</option>
+                      <option value="Other">Other</option>
+                      <option value="Groceries">Groceries</option>
+                      <option value="Rent">Rent</option>
+                      <option value="Medical">Medical</option>
+                      <option value="Charity">Charity</option>
+                      <option value="Investment">Investment</option>
+                      <option value="Child Education">Child Education</option>
+                      <option value="Vacation">Vacation</option>
+                      <option value="Entertainment">Entertainment</option>
+                      <option value="Utility">Utility</option>
+                      <option value="Gift">Gift</option>
+                      <option value="Salary/Payment">Salary/Payment</option>
+                      <option value="Insurance">Insurance</option>
+                      <option value="Self Transfer">Self Transfer</option>
+                      <option value="Shares Dividends">Shares Dividends</option>
+                      <option value="Other Dividends">Other Dividends</option>
+                      <option value="Education'">Education</option>
+                      <option value="Expense Split">Expense Split</option>
+                      <option value="Vehicle">Vehicle</option>
+                    </select>
+                </div>
               </div>
-          </div>
-        </div>
 
-        <div class="form-group row">
-          <label for="nav" class="col-sm-3 col-form-label">Transaction Type</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label>{{tran_type}}</label>
-            </div>
-          </div>
-        </div>
+              <div class="form-floating mb-3">
+                <div class="pb-2"><label for="notes">Notes</label></div>
+                <textarea class="form-control" name="notes">{{notes|default_if_none:""}}</textarea>
+              </div>
 
-        <div class="form-group row">
-          <label for="trans_amount" class="col-sm-3 col-form-label">Transaction Amount</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label>{{trans_amount}}</label>
+              <div class="form-floating mb-3">
+                <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                <a href="{% url 'bankaccounts:get-transactions' account_id %}" class="btn btn-danger" role="button">Cancel</a>
+              </div>
+                             
             </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="description" class="col-sm-3 col-form-label">Description</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label>{{description}}</label>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="nav" class="col-sm-3 col-form-label">Sub Transaction Type</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <select name="tran_sub_type" id="id_tran_sub_type">
-                <option value="">---------</option>
-                <option value="Card Payment">Card Payment</option>
-                <option value="Interest">Interest</option>
-                <option value="Shopping">Shopping</option>
-                <option value="EMI/Loan Payment">EMI/Loan Payment</option>
-                <option value="Fuel">Fuel</option>
-                <option value="Other">Other</option>
-                <option value="Groceries">Groceries</option>
-                <option value="Rent">Rent</option>
-                <option value="Medical">Medical</option>
-                <option value="Charity">Charity</option>
-                <option value="Investment">Investment</option>
-                <option value="Child Education">Child Education</option>
-                <option value="Vacation">Vacation</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Utility">Utility</option>
-                <option value="Gift">Gift</option>
-                <option value="Salary/Payment">Salary/Payment</option>
-                <option value="Insurance">Insurance</option>
-                <option value="Self Transfer">Self Transfer</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <textarea name="notes" rows="5" cols="20">{{notes|default_if_none:""}}</textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <div class="col-sm-6">
-            <div class="md-form mt-0">
-              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
-              <a href="{% url 'bankaccounts:get-transactions' account_id %}" class="btn btn-danger" role="button">Cancel</a>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
-  </form>
+  </div>
+</section>
 
 {% endblock content %}
 
