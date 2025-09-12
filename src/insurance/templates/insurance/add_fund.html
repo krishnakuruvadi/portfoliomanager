@@ -14,62 +14,56 @@
 
 {% block content %}
 
-  <form method="POST">
-    {% csrf_token %}
-    <div class="row">
-      <div class='col-sm-6'>
+<section class="py-5">
+  <div class="container px-5 ml-3">
+    <div class="rounded-3 py-5 px-4 px-md-5 mb-5">
+      <div class="custom-row gx-5 justify-content-flex-start">
+        <div class="col-lg-8 col-xl-6">
+          <form method="POST">
+            {% csrf_token %}
+            <div class="custom-row">
 
-        {% if message_color == 'green' %}
-        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-             <span aria-hidden="true" style="font-size:20px">×</span>
-           </button>    <strong>Success!</strong> {{message}}
-        </div>
-        {% elif message_color == 'red' %}
-        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-             <span aria-hidden="true" style="font-size:20px">×</span>
-           </button>    <strong>Error!</strong> {{message}}
-         </div>
-        {% endif %}
+                {% if message_color == 'green' %}
+                <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                  </button>    <strong>Success!</strong> {{message}}
+                </div>
+                {% elif message_color == 'red' %}
+                <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                  </button>    <strong>Error!</strong> {{message}}
+                </div>
+                {% endif %}
 
-        <div class="form-group row">
-          <label for="fund_name" class="col-sm-3 col-form-label">Fund Name <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="text" id="id_fund_name" name="fund_name" value="{{fund_name}}" required="true">
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="fund_name">Fund Name <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="text" id="id_fund_name" name="fund_name" value="{{fund_name}}" required="true">
+                </div>
+
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="fund_code">Fund Code <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="text" id="id_fund_code" name="fund_code" value="{{fund_code}}" required="true">
+                </div>
+
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="notes">Notes</label></div>
+                  <textarea class="form-control" name="notes">{{notes|default_if_none:""}}</textarea>
+                </div>
+
+                <div class="form-floating mb-3">
+                  <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                  <a href="../" class="btn btn-danger" role="button">Cancel</a>
+                </div>
+
+              </div>
             </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="fund_code" class="col-sm-3 col-form-label">Fund Code <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="text" id="id_fund_code" name="fund_code" value="{{fund_code}}" required="true">
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <div class="col-sm-6">
-            <div class="md-form mt-0">
-              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
-              <a href="../" class="btn btn-danger" role="button">Cancel</a>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
-  </form>
+  </div>
+</section>
 
 {% endblock content %}

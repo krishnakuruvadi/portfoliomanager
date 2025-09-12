@@ -10,6 +10,9 @@ from mftool import Mftool
 from common.models import Stock
 from django.db import IntegrityError
 import time
+from portfoliomgr.settings import EXCHANGE_RATE_HOST_API_ACCESS, FIXER_IO_API_ACCESS, OPEN_EXCHANGE_RATES_API_ACCESS
+from jyapyforex import ForexConverter
+
 
 
 def get_latest_vals(stock, exchange, start, end, etf=False):
@@ -109,47 +112,76 @@ def get_historical_year_mf_vals(amfi_code, year):
             print(f"exception in getting historial mf vals for {amfi_code} for year {year} {ex}")
             pass
 
-def get_forex_rate(date, from_cur, to_cur):
-    for _ in range(5):
+#################################################################
+#                           Forex                               #
+#################################################################
+
+def get_forex_rate(date, from_cur, to_cur, precision=5):
+    today = datetime.date.today()
+    yesterday = today + relativedelta(days=-1)
+    if date <= yesterday:
+        try:
+            api_keys = dict()
+            if EXCHANGE_RATE_HOST_API_ACCESS:
+                api_keys["EXCHANGE_RATE_HOST_API_KEY"] = EXCHANGE_RATE_HOST_API_ACCESS
+            
+            if OPEN_EXCHANGE_RATES_API_ACCESS:
+                api_keys["OPEN_EXCHANGE_RATES_API_KEY"] = OPEN_EXCHANGE_RATES_API_ACCESS
+            
+            if FIXER_IO_API_ACCESS:
+                api_keys["FIXER_IO_API_KEY"] = FIXER_IO_API_ACCESS
+
+            converter = ForexConverter(api_keys)
+            rate = converter.get_conversion_rate(from_cur, to_cur, date.strftime('%Y-%m-%d'))
+            if rate:
+                return round(rate, precision)
+        except Exception as ex:
+            print(f"ERROR: exception while getting forex rate using jyapyforex {ex}")
+        print("ERROR: failed to get forex rate using jyapyforex")
+    
+    excep = None
+    for _ in range(3):
         try:
             # https://api.ratesapi.io/api/2020-01-31?base=USD&symbols=INR
             #url = "https://api.ratesapi.io/api/" + date.strftime('%Y-%m-%d') + "?base=" + from_cur + "&symbols=" + to_cur
-            url = 'https://api.exchangerate.host/' + date.strftime('%Y-%m-%d') + "?base=" + from_cur + "&symbols=" + to_cur
-            response = requests.get(url, timeout=15) 
-            # print response 
-            print(response) 
-            # print json content 
-            print(response.json())
-            ret = response.json().get('rates').get(to_cur)
-            if not ret:
-                print(f'no result for {date} {from_cur} {to_cur} using {url}')
+            url = f'http://api.exchangerate.host/historical?access_key={EXCHANGE_RATE_HOST_API_ACCESS}&date=' + date.strftime('%Y-%m-%d')
+            response = requests.get(url, timeout=15, verify=False) 
+            if response.status_code == 200:
+                rj = response.json()
+                if 'success' in rj and rj['success'] == True:
+                    source = rj['source']
+                    f = 0
+                    t = 0
+                    if source == from_cur.upper():
+                        f = 1
+                    if source == to_cur.upper():
+                        t = 1
+                    for k,v in rj['quotes'].items():
+                        if k == source+from_cur.upper():
+                            f = v
+                        if k == source+to_cur.upper():
+                            t = v
+                    if f == 1:
+                        ret = round(t,precision)
+                    elif t == 1:
+                        ret = round(1/f, precision)
+                    else:
+                        ret = round(t/f, precision)
+                    return ret
+                else:
+                    print(f'ERROR: received failure from api {rj}')
+                break
             else:
-                return round(ret, 2)
+                print(f'ERROR: received unexpected response code from {url} {response.status_code}')
         except Exception as ex:
-            print(f'exception while getting forex rate for: date {date}, from_cur {from_cur}, to_cur {to_cur} using {url}')
+            excep = ex
             time.sleep(5)
-    if date == datetime.date.today():
-        r = get_forex_goog(from_cur, to_cur)
-        if r:
-            return round(r, 2)
-    r = get_forex_xe(date, from_cur, to_cur)
-    return round(r, 2)
+    if excep:
+        print(f'ERROR: exception {excep} while getting forex rate for: date {date}, from_cur {from_cur}, to_cur {to_cur} using {url}')
 
-def get_forex_goog(from_cur, to_cur):
-    from google_currency import convert
-    for _ in range(5):
-        try:
-            res = json.loads(convert(from_cur, to_cur, 1))
-            print(res)
-            print(type(res))
-            if res['converted']:
-                a = get_float_or_none_from_string(res['amount'])
-                if a:
-                    return a
-        except Exception as ex:
-            print(f'goog exception while getting forex rate for: {from_cur} to {to_cur} {ex}')
-            time.sleep(5)
+    print(f'CRITICAL: failed to get forex rate for: date {date}, from_cur {from_cur}, to_cur {to_cur} using all means')
     return None
+
 
 def get_forex_xe(date, from_cur, to_cur):
     for _ in range(5):

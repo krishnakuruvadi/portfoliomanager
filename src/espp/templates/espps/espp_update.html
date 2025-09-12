@@ -12,129 +12,126 @@
 {% endblock viewname %}
 
 {% block content %}
-  <form action="." method="POST" class="form-horizontal">
-    {% csrf_token %}
-    <div class="row">
-      <div class='col-sm-6'>
-        {% if message_color == 'green' %}
-        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true" style="font-size:20px">×</span>
-          </button>    <strong>Success!</strong> {{message}}
-        </div>
-        {% elif message_color == 'red' %}
-        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true" style="font-size:20px">×</span>
-          </button>    <strong>Error!</strong> {{message}}
-        </div>
-        {% endif %}
 
-        <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_user">User</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label>{{user_str}}</label> 
-            </div>
-          </div>
-        </div>
+<section class="py-5">
+  <div class="container px-5 ml-3">
+    <div class="rounded-3 py-5 px-4 px-md-5 mb-5">
+      <div class="custom-row gx-5 justify-content-flex-start">
+        <div class="col-lg-8 col-xl-6">
+          <form action="." method="POST" class="form-horizontal">
+            {% csrf_token %}
+            <div class="custom-row">
+                {% if message_color == 'green' %}
+                <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                  </button>    <strong>Success!</strong> {{message}}
+                </div>
+                {% elif message_color == 'red' %}
+                <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                  </button>    <strong>Error!</strong> {{message}}
+                </div>
+                {% endif %}
 
-        <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_purchase_date">Purchase Date</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label> {{purchase_date}} </label>
-            </div>
-          </div>
-        </div>
-      
-        <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_exchange">Exchange <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label>{{exchange}}</label>
-            </div>
-          </div>
-        </div>
-      
-        <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_symbol">Symbol <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <label>{{symbol}}</label>
-            </div>
-          </div>
-        </div>
-      
-        <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_subscription_fmv">Subscription FMV <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" name="subscription_fmv" value="{{subscription_fmv}}" step="0.01" required="" id="id_subscription_fmv">
-            </div>
-          </div>
-        </div>
-      
-        <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_purchase_fmv">Purchase FMV <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" name="purchase_fmv" value="{{purchase_fmv}}" step="0.01" required="" id="id_purchase_fmv">
-            </div>
-          </div>
-        </div>
-      
-        <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_purchase_price">Purchase Price <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" name="purchase_price" value="{{purchase_price}}" step="0.01" required="" id="id_purchase_price">
-            </div>
-          </div>
-        </div>
-      
-        <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_purchase_conversion_rate">Purchase Conversion Rate <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" name="purchase_conversion_rate" value="{{purchase_conversion_rate}}" step="0.01" required="" id="id_purchase_conversion_rate">
-              <button class="btn" id="id_forex_fetch" disabled=""><i class="fab fa-get-pocket"></i></button>
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col">
+                        <label for="id_user">User</label>
+                      </div>
+                      <div class="col"><label>{{user_str}}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-        <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_shares_purchased">Shares Purchased <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" name="shares_purchased" value="{{shares_purchased}}" step="1" required="" id="id_shares_purchased">
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col">
+                        <label for="id_purchase_date">Purchase Date</label>
+                      </div>
+                      <div class="col">
+                        <label> {{purchase_date}} </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col">
+                        <label for="id_exchange">Exchange</label>
+                      </div>
+                      <div class="col">
+                        <label>{{exchange}}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              
+                <div class="form-floating mb-3">
+                  <div class="pb-2">
+                    <div class="row">
+                      <div class="col">
+                        <label for="id_symbol">Symbol <span style="color:red;">*</span></label>
+                      </div>
+                      <div class="col">
+                        <label>{{symbol}}</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="id_goal">Goal</label></div>
+                  <select class="form-control" name="goal" id="id_goal">
+                    <option value=""></option>
+                  </select>
+                </div>
 
-        <div class="form-group row">
-          <label class="control-label col-sm-2 col-form-label" for="id_goal">Goal</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <select name="goal" id="id_goal">
-                <option value=""></option>
-              </select>
-            </div>
-          </div>
-        </div>
-      
-        <div class="form-group row">
-          <div class="col-sm-6">
-            <div class="md-form mt-0">
-              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
-              <a href="../" class="btn btn-danger" role="button">Cancel</a>
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="id_subscription_fmv">Subscription FMV <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="number" name="subscription_fmv" value="{{subscription_fmv}}" step="0.01" required="" id="id_subscription_fmv">
+                </div>
+              
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="id_purchase_fmv">Purchase FMV <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="number" name="purchase_fmv" value="{{purchase_fmv}}" step="0.01" required="" id="id_purchase_fmv">
+                </div>
+              
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="id_purchase_price">Purchase Price <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="number" name="purchase_price" value="{{purchase_price}}" step="0.01" required="" id="id_purchase_price">
+                </div>
+              
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="id_purchase_conversion_rate">Purchase Conversion Rate <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="number" name="purchase_conversion_rate" value="{{purchase_conversion_rate}}" step="0.01" required="" id="id_purchase_conversion_rate">
+                  <button class="btn" id="id_forex_fetch"><i class="fab fa-get-pocket"></i></button>
+                </div>
 
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="id_shares_purchased">Shares Purchased <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="number" name="shares_purchased" value="{{shares_purchased}}" step="0.0001" required="" id="id_shares_purchased">
+                </div>
+              
+                <div class="form-floating mb-3">
+                  <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                  <a href="../" class="btn btn-danger" role="button">Cancel</a>
+                </div>
+
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </form>
+  </div>
+</section>
+
 {% endblock content %}
 
 {% block ajaxcalls %}

@@ -50,7 +50,7 @@ DJANGO_SUPERUSER_EMAIL=admin@example.com
 ##                                                                                      ##    
 ##          All parameters below are specific to the email backend settings.            ##
 ##          If not using in-app emails, ignore them but do not delete them.             ##
-##                                                                                      ##                 
+##                                                                                      ##
 ##########################################################################################
 
 # The sample settings below are specific to a MailJet email backend, but it can be modified to Gmail, SendGrid, and others.
@@ -63,3 +63,14 @@ EMAIL_PORT=587
 EMAIL_HOST_USER=MAILJET-API-KEY
 EMAIL_HOST_PASSWORD=MAILJET-SECRET-KEY
 DEFAULT_FROM_EMAIL=info@gmail.com
+
+######################################################################################################
+##                                                                                                  ##    
+##      All parameters below are specific to the forex conversions.    .                            ##
+##      If you have shares in foreign exchanges signup for at least one of the below providers.     ##
+##      Provide the api key corresponding to the provider and delete the others.                    ##
+##                                                                                                  ##
+######################################################################################################
+EXCHANGE_RATE_HOST_API_ACCESS=EXCHANGE-RATE-API-KEY
+OPEN_EXCHANGE_RATES_API_ACCESS=OPEN-EXCHANGE-RATES-API-KEY
+FIXER_IO_API_ACCESS=FIXER-IO-API-KEY

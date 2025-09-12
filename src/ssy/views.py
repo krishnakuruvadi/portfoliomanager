@@ -170,6 +170,8 @@ def add_trans(request, id):
     context = dict()
     context['number'] = id
     context['curr_module_id'] = 'id_ssy_module'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         try:
             ssy_obj = Ssy.objects.get(number=id)
@@ -187,10 +189,16 @@ def add_trans(request, id):
             else:
                 interest_component = False
             insert_ssy_trans_entry(id, date, trans_type, amount, notes, reference, interest_component)
-            
+            message_color = 'green'
+            message = 'New transaction addition successful'
+        except IntegrityError:
+            print('Transaction already exists')
+            message_color = 'red'
+            message = 'Transaction already exists'
         except Ssy.DoesNotExist:
             print(f'SSY with number {id} doesnt exist')
-        
+    context['message'] = message
+    context['message_color'] = message_color
     return render(request, template_name, context)
 
 
