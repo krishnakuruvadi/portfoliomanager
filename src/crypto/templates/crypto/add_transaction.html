@@ -12,161 +12,115 @@
 {% endblock viewname %}
 
 {% block content %}
+<section class="py-5">
+  <div class="container px-5 ml-3">
+    <div class="rounded-3 py-5 px-4 px-md-5 mb-5">
+      <div class="custom-row gx-5 justify-content-flex-start">
+        <div class="col-lg-8 col-xl-6">
+          <form method="POST">
+            {% csrf_token %}
+            <div class="custom-row">
+                {% if message_color == 'green' %}
+                <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                  </button>    <strong>Success!</strong> {{message}}
+                </div>
+                {% elif message_color == 'red' %}
+                <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" style="font-size:20px">×</span>
+                  </button>    <strong>Error!</strong> {{message}}
+                </div>
+                {% endif %}
+                
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="symbol">Coin Symbol <span style="color:red;">*</span></label></div>
+                    <div class="md-form mt-0 autocomplete">
+                      <input class="form-control" type="text" id="symbol" name="symbol" placeholder=" BTC " value="{{symbol}}" required="true">
+                    </div>
+                </div>
 
-  <form method="POST">
-    {% csrf_token %}
-    <div class="row">
-      <div class='col-sm-6'>
-        {% if message_color == 'green' %}
-        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-             <span aria-hidden="true" style="font-size:20px">×</span>
-           </button>    <strong>Success!</strong> {{message}}
-        </div>
-        {% elif message_color == 'red' %}
-        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-             <span aria-hidden="true" style="font-size:20px">×</span>
-           </button>    <strong>Error!</strong> {{message}}
-         </div>
-        {% endif %}
-        <div class="form-group row">
-          <label for="symbol" class="col-sm-3 col-form-label">Coin Symbol <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0 autocomplete">
-              <input type="text" id="symbol" name="symbol" placeholder=" BTC " value="{{symbol}}" required="true">
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="name">Coin Name <span style="color:red;">*</span></label></div>
+                    <div class="md-form mt-0 autocomplete">
+                      <input class="form-control" type="text" id="name" name="name" placeholder=" Bitcoin" value="{{name}}" required="true">
+                    </div>
+                </div>
 
-        <div class="form-group row">
-          <label for="symbol" class="col-sm-3 col-form-label">Coin Name <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0 autocomplete">
-              <input type="text" id="name" name="name" placeholder=" Bitcoin " value="{{name}}" required="true">
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="user">User <span style="color:red;">*</span></label></div>
+                  <select id="id_user" name="user" class="form-control" required="true"></select>
+                </div>
 
-        <div class="form-group row">
-          <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <select id="id_user" name="user" class="form-control" required="true"></select>
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="trans_date">Transaction Date <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="date" id="trans_date" name="trans_date" value="{{trans_date}}" required="true">
+                </div>
 
-        <div class="form-group row">
-          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="date" id="trans_date" name="trans_date" value="{{trans_date}}" required="true">
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="trans_type">Transaction Type <span style="color:red;">*</span></label></div>
+                  <select id="trans_type" name="trans_type" class="form-control" required="true">
+                    <option value="Buy">Buy</option>
+                    <option value="Sell">Sell</option>
+                    <option value="Receive">Receive</option>
+                    <option value="Send">Send</option>
+                  </select>
+                </div>
 
-        <div class="form-group row">
-          <label for="trans_type" class="col-sm-3 col-form-label">Transaction Type <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <select id="trans_type" name="trans_type" class="form-control" required="true">
-                <option value="Buy">Buy</option>
-                <option value="Sell">Sell</option>
-                <option value="Receive">Receive</option>
-                <option value="Send">Send</option>
-              </select>
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="currency">Currency <span style="color:red;">*</span></label></div>
+                  <select id="id_currencies" name="currency" class="form-control" required="true"></select>
+                </div>
 
-        <div class="form-group row">
-          <label for="currency" class="col-sm-3 col-form-label">Currency <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <select id="id_currencies" name="currency" class="form-control" required="true"></select>
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3" id="div_conv_rate">
+                  <div class="pb-2"><label for="conversion_rate">Conversion Rate <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="number" id="conversion_rate" name="conversion_rate" value="{{conversion_rate}}" step="0.001">
+                  <button type="submit" class="btn btn-primary" id="fetch" name="fetch">Fetch</button>  
+                </div>
 
-        <div class="form-group row" id="div_conv_rate">
-          <label for="conversion_rate" class="col-sm-3 col-form-label">Conversion Rate <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="conversion_rate" name="conversion_rate" value="{{conversion_rate}}" step="0.001">
-            </div>
-          </div>
-          <div class="col-sm-3">
-            <button type="submit" class="btn btn-primary" id="fetch" name="fetch">Fetch</button>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="price">Price <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="number" id="price" name="price" value="{{price}}" step="0.0000000001" required="true">
+                </div>
 
-        <div class="form-group row">
-          <label for="price" class="col-sm-3 col-form-label">Price <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="price" name="price" value="{{price}}" step="0.0000000001" required="true">
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="price">Fees/Charges</label></div>
+                  <input class="form-control" type="number" id="charges" name="charges" value="{{charges}}" step="0.0000000001">
+                </div>
 
-        <div class="form-group row">
-          <label for="price" class="col-sm-3 col-form-label">Fees/Charges</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="charges" name="charges" value="{{charges}}" step="0.0000000001">
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="quantity">Quantity <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="number" id="quantity" name="quantity" value="{{quantity}}" step="0.0000000001" required="true">
+                </div>
 
-        <div class="form-group row">
-          <label for="quantity" class="col-sm-3 col-form-label">Quantity <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="quantity" name="quantity" value="{{quantity}}" step="0.0000000001" required="true">
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="trans_price">Transaction Price <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="number" id="trans_price" name="trans_price" value="{{trans_price}}" step="0.0000000001" required="true"> 
+                </div>
 
-        <div class="form-group row">
-          <label for="trans_price" class="col-sm-3 col-form-label">Transaction Price <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="trans_price" name="trans_price" value="{{trans_price}}" step="0.0000000001" required="true"> 
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="broker">Broker <span style="color:red;">*</span></label></div>
+                  <input class="form-control" type="text" id="broker" name="broker" value="{{broker}}" required="true">
+                </div>
 
-        <div class="form-group row">
-          <label for="broker" class="col-sm-3 col-form-label">Broker <span style="color:red;">*</span></label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="text" id="broker" name="broker" value="{{broker}}" required="true">
-            </div>
-          </div>
-        </div>
+                <div class="form-floating mb-3">
+                  <div class="pb-2"><label for="notes">Notes</label></div>
+                  <textarea class="form-control" name="notes">{{notes|default_if_none:""}}</textarea>
+                </div>
+                
+                <div class="form-floating mb-3">
+                  <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                  <a href="{% url 'crypto:crypto-list' %}" class="btn btn-danger" role="button">Cancel</a>
+                </div>
 
-        <div class="form-group row">
-          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
             </div>
-          </div>
-        </div>
-        
-        <div class="form-group row">
-          <div class="col-sm-6">
-            <div class="md-form mt-0">
-              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
-              <a href="../" class="btn btn-danger" role="button">Cancel</a>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
-  </form>
-
+  </div>
+</section>
 {% endblock content %}
 
 {% block javascript %}
