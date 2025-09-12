@@ -29,106 +29,81 @@
 </table>
 <p></p>
 <p></p>
-<form method="POST">
-    {% csrf_token %}
-    <div class="row">
-      <div class='col-sm-7'>
+<section class="py-5">
+  <div class="container px-5 ml-3">
+    <div class="rounded-3 py-5 px-4 px-md-5 mb-5">
+      <div class="custom-row gx-5 justify-content-flex-start">
+        <div class="col-lg-8 col-xl-6">
+          <form method="POST">
+            {% csrf_token %}
+            <div class="custom-row">
 
-        <div class="form-group row">
-          <label for="vest_date" class="col-sm-3 col-form-label">Vest Date</label>
-          <div class="col-sm-3">
-              <div class="md-form mt-0">
-                  <input type="date" id="vest_date" name="vest_date" value="{{vest_date}}">
+                {% if message_color == 'green' %}
+                  <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true" style="font-size:20px">×</span>
+                    </button>    <strong>Success!</strong> {{message}}
+                  </div>
+                  {% elif message_color == 'red' %}
+                  <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true" style="font-size:20px">×</span>
+                    </button>    <strong>Error!</strong> {{message}}
+                  </div>
+                  {% endif %}
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="vest_date">Vest Date <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="date" id="vest_date" name="vest_date" required="" value="{{vest_date}}">
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="fmv">FMV <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="number" step="0.01" id="fmv" name="fmv" required="" value="{{fmv}}">
+                  </div>
+                  
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="aquisition_price">Aquisition Price <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="number" step="0.01" id="aquisition_price" name="aquisition_price" required="" value="{{aquisition_price}}">
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="shares_vested">Shares Vested <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="number" step="0.0001" id="shares_vested" name="shares_vested" required="" value="{{shares_vested}}">
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="shares_for_sale">Shares For Sale <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="number" step="0.0001" id="shares_for_sale" name="shares_for_sale" required="" value="{{shares_for_sale}}">
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="conversion_rate">Conversion Rate <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="number" step="0.01" id="conversion_rate" name="conversion_rate" required="" value="{{conversion_rate}}">
+                    <button class="btn" name="submit" id="id_forex_fetch"><i class="fab fa-get-pocket"></i></button>
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="total_aquisition_price">Total Aquisition Price <span style="color:red;">*</span></label></div>
+                    <input class="form-control" type="number" step="0.0001" id="total_aquisition_price" name="total_aquisition_price" required="" value="{{total_aquisition_price}}">
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <div class="pb-2"><label for="notes">Notes</label></div>
+                    <textarea class="form-control" name="notes">{{notes|default_if_none:""}}</textarea>
+                  </div>
+
+                  <div class="form-floating mb-3">
+                    <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                    <a href="../" class="btn btn-danger" role="button">Cancel</a>
+                  </div>
+
               </div>
-          </div>
-          <div class="col-sm-3"></div>
+          </form>
         </div>
-
-        <div class="form-group row">
-          <label for="fmv" class="col-sm-3 col-form-label">FMV</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" step="0.01" id="fmv" name="fmv" value="{{fmv}}">
-            </div>
-          </div>
-          <div class="col-sm-3"></div>
-        </div>
-        
-        <div class="form-group row">
-          <label for="aquisition_price" class="col-sm-3 col-form-label">Aquisition Price</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" step="0.01" id="aquisition_price" name="aquisition_price" value="{{aquisition_price}}">
-            </div>
-          </div>
-          <div class="col-sm-3"></div>
-        </div>
-
-        <div class="form-group row">
-          <label for="shares_vested" class="col-sm-3 col-form-label">Shares Vested</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="shares_vested" name="shares_vested" value="{{shares_vested}}">
-            </div>
-          </div>
-          <div class="col-sm-3"></div>
-        </div>
-
-        <div class="form-group row">
-          <label for="shares_for_sale" class="col-sm-3 col-form-label">Shares For Sale</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" id="shares_for_sale" name="shares_for_sale" value="{{shares_for_sale}}">
-            </div>
-          </div>
-          <div class="col-sm-3"></div>
-        </div>
-
-        <div class="form-group row">
-          <label for="conversion_rate" class="col-sm-3 col-form-label">Conversion Rate</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" step="0.01" id="conversion_rate" name="conversion_rate" value="{{conversion_rate}}">
-            </div>
-          </div>
-          <div class="col-sm-1">
-            <button class="btn" name="submit" id="id_forex_fetch"><i class="fab fa-get-pocket"></i></button>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="total_aquisition_price" class="col-sm-3 col-form-label">Total Aquisition Price</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <input type="number" step="0.01" id="total_aquisition_price" name="total_aquisition_price" value="{{total_aquisition_price}}">
-            </div>
-          </div>
-          <div class="col-sm-3"></div>
-        </div>
-
-        <div class="form-group row">
-          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
-          <div class="col-sm-3">
-            <div class="md-form mt-0">
-              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
-            </div>
-          </div>
-          <div class="col-sm-3"></div>
-        </div>
-
-        <div class="form-group row">
-          <div class="col-sm-6">
-            <div class="md-form mt-0">
-              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
-              <a href="../" class="btn btn-danger" role="button">Cancel</a>
-            </div>
-          </div>
-          <div class="col-sm-3"></div>
-        </div>
-
       </div>
     </div>
-</form>
+  </div>
+</section>
 {% endblock content %}
 
 {% block javascript %}

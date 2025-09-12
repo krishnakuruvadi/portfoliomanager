@@ -15,7 +15,7 @@
 
 {% block content %}
 <div class="row" style="padding:16px;">
-  <div id="tempChart" style="width:100%;height:100vh;box-shadow: 6px 6px 6px 6px #888888;" class='col-sm-4 col-md-3 col-lg-3'>
+  <div id="tempChart" style="width:100%;height:70vh;box-shadow: 6px 6px 6px 6px #888888;" class='col-sm-4 col-md-3 col-lg-3'>
     <table class="table">
         <tr><th scope="col">Exchange</th><td>{{object.exchange}} </td></tr>
         <tr><th scope="col">Symbol</th><td>{{object.symbol}}</td></tr>
@@ -27,6 +27,11 @@
         <tr><th scope="col">Shares For Sale At Vest</th><td>{{shares_for_sale}}</td></tr>
         <tr><th scope="col">Unvested Shares</th><td>{{unvested_shares}}</td></tr>
         <tr><th scope="col">Total Aquisition Price</th><td>{{preferred_currency}} {{total_aquisition_price}}</td></tr>
+    </table>
+  </div>
+  <div class='col-sm-3 col-md-1 col-lg-1'></div>
+  <div id="tempChart" style="width:100%;height:70vh;box-shadow: 6px 6px 6px 6px #888888;" class='col-sm-4 col-md-3 col-lg-3'>
+    <table class="table">
         <tr><th scope="col">Unsold Quantity</th><td>{{unsold_shares}}</td></tr>
         <tr><th scope="col">Latest Conversion Price</th><td>{{preferred_currency}} {{latest_conversion_rate}}</td></tr>
         <tr><th scope="col">Latest Price</th><td>{{currency}} {{latest_price}}</td></tr>
@@ -37,8 +42,8 @@
         <tr><th scope="col">Tax at Vest</th><td>{{preferred_currency}} {{tax_at_vest}}</td></tr>
     </table>
   </div>
-  <div class='col-sm-3 col-md-1 col-lg-1'></div>
-  <div class='col-sm-4 col-md-6 col-lg-4'>
+</div>
+<div class="row" style="padding:16px;">
     <div class="row">
       <div id="tempChart" style="width:100%;height:46vh;box-shadow: 6px 6px 6px 6px #888888;" >
         <canvas id="myChart"></canvas>
@@ -50,7 +55,6 @@
         <canvas id="compare"></canvas>
       </div>
     </div>
-  </div>
 </div>
 <br>
 

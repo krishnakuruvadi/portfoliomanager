@@ -54,7 +54,8 @@ def create_rsu(request):
 def view_update_rsu(request, id):
     template = "rsus/rsu_update.html"
     obj = RSUAward.objects.get(id=id)
-
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         award_date = get_date_or_none_from_string(request.POST.get('award_date'))
         award_id = request.POST.get('award_id')
@@ -66,7 +67,8 @@ def view_update_rsu(request, id):
         obj.shares_awarded = shares_awarded
         obj.goal = goal
         obj.save()
-        return HttpResponseRedirect(reverse('rsus:rsu-list'))
+        message_color = 'green'
+        message = 'RSU award update successful'
 
     context = {
         'id':obj.id,
@@ -77,7 +79,9 @@ def view_update_rsu(request, id):
         'goal':obj.goal, 
         'shares_awarded':obj.shares_awarded,
         'user':obj.user,
-        'curr_module_id': 'id_rsu_module'
+        'curr_module_id': 'id_rsu_module',
+        'message': message,
+        'message_color':message_color
         }
     print(context)
     return render(request, template, context)
@@ -495,7 +499,7 @@ def add_vest_sell_trans(request, id, vestid):
             update_rsu()
             return HttpResponseRedirect(reverse('rsus:rsu-sell-vest',kwargs={'id':id,'vestid':vestid}))
         else:
-            context = {'award_date':award_obj.award_date, 'symbol':award_obj.symbol, 'award_id':award_obj.award_id,
+            context = {'award_date':award_obj.award_date, 'symbol':award_obj.symbol, 'award_id':award_obj.award_id, 'id_award':award_obj.id,
              'vest_date':rsu_vest.vest_date, 'unsold_shares':rsu_vest.unsold_shares, 'aquisition_price':rsu_vest.aquisition_price, 'exchange':award_obj.exchange}
             context['curr_module_id'] = 'id_rsu_module'
             return render(request, template, context)
