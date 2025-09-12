@@ -143,6 +143,13 @@
 
     handleCurrencyChange();
 
+    btn = document.getElementById('fetch');
+    btn.disabled = true;
+    btn.onclick = function(){
+      get_forex_rate_and_populate();
+      return false;
+    };
+
     $("#price").change(function () {
       setTransPrice();
     });
@@ -160,7 +167,38 @@
     });
     $("#trans_date").change(function () {
       handleCurrencyChange();
+      update_forex_rate_fetch_btn_status();
     });
+
+    function update_forex_rate_fetch_btn_status() {
+      
+      var dt_elem = document.getElementById("trans_date");
+      //console.log('conv_elem value', dt_elem.value)
+      if (dt_elem.value) {
+        var conv_btn = document.getElementById("fetch");
+        conv_btn.disabled = false;
+      } else {
+        var conv_btn = document.getElementById("fetch");
+        conv_btn.disabled = true;
+      }
+      conv_elem = document.getElementById("conversion_rate");
+      conv_elem.value = '';
+    }
+
+    function get_forex_rate_and_populate() {
+      //console.log('fetch button clicked');
+      dt = document.getElementById("trans_date").value;
+      var parts = dt.split('-');
+      var year = parts[0];
+      var month = parts[1];
+      var day = parts[2];
+      console.log(year, month, day);
+      var elem = document.getElementById("id_currencies");
+      var val = get_forex_rate(year, month, day, elem.value, '{{preferred_currency}}');
+      console.log('received forex rate as ', val)
+      conv_elem = document.getElementById("conversion_rate");
+      conv_elem.value = val;
+    }
 
     function handleCurrencyChange() {
       conv_section = document.getElementById("div_conv_rate")
