@@ -5,7 +5,7 @@ asgiref==3.7.2
 astroid==2.4.2
 async-generator==1.10
 attrs==23.1.0
-autobahn==21.2.1
+autobahn==23.6.2
 Automat==20.2.0
 beautifulsoup4==4.11.1
 bs4==0.0.1
@@ -24,7 +24,7 @@ commonmark==0.9.1
 constantly==15.1.0
 cryptography==44.0.1
 cssselect==1.1.0
-daphne==3.0.1
+daphne==4.0.0
 dateutils==0.6.8
 Deprecated==1.2.13
 Django==5.0.11
@@ -46,7 +46,7 @@ html5lib==1.1
 httpcore==1.0.9
 httpx==0.28.1
 huey==2.3.0
-hyperlink==20.0.1
+hyperlink==21.0.0
 idna==3.7
 incremental==24.7.2
 isort==5.6.4
@@ -119,7 +119,7 @@ tqdm==4.66.4
 trio==0.21.0
 trio-websocket==0.9.2
 Twisted==24.7.0
-txaio==20.12.1
+txaio==23.1.1
 typing_extensions==4.11.0
 tzdata==2024.1
 urllib3==2.5.0

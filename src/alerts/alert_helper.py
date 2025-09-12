@@ -2,6 +2,7 @@ from .models import Alert
 import datetime
 import enum
 from dateutil.relativedelta import relativedelta
+from django.utils import timezone
 
 class Severity(enum.Enum):
     critical = 0
@@ -17,7 +18,7 @@ def create_alert(summary, content, severity, alert_type, seen=False, action_url=
         content=content,
         severity=severity.value,
         seen=seen,
-        time=datetime.datetime.now(),
+        time=timezone.now(),
         action_url=action_url,
         alert_type=alert_type,
         json_data=json_data
@@ -42,7 +43,7 @@ def create_alert_today_if_not_exist(search_str, summary, content, severity, aler
         print(f'alert already present {search_str}')
 
 def create_alert_month_if_not_exist(search_str, summary, content, severity, alert_type, seen=False, action_url=None, json_data=None):
-    end_time = datetime.datetime.now()
+    end_time = timezone.now()
     start_time = end_time+relativedelta(months=-1) 
     if not is_alert_raised(search_str, start_time, end_time):
         create_alert(summary, content, severity, alert_type, seen, action_url, json_data)
@@ -50,7 +51,7 @@ def create_alert_month_if_not_exist(search_str, summary, content, severity, aler
         print(f'alert already present {search_str}')
 
 def clean_alerts():
-    today= datetime.date.today()
+    today = timezone.now()
     Alert.objects.filter(alert_type='Notification', time__lte=today+relativedelta(days=-5)).delete()
     Alert.objects.filter(alert_type='Action', time__lte=today+relativedelta(months=-1)).delete()
     Alert.objects.filter(alert_type='Application', time__lte=today+relativedelta(days=-10)).delete()
