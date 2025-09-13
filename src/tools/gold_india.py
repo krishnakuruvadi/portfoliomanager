@@ -1,11 +1,48 @@
 import datetime
 import requests
 import bs4
+from shared.utils import get_float_or_none_from_string, get_date_or_none_from_string
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.chrome.service import Service as ChromeService
+
 
 def get_latest_physical_gold_price():
-    url = 'https://gadgets.ndtv.com/finance/gold-rate-in-india'
-    r = requests.get(url, timeout=15)
+    url = 'https://www.gadgets360.com/finance/gold-rate-in-india'
+    # Initialize the WebDriver
+    chrome_options = webdriver.ChromeOptions()
+
+    driver = webdriver.Chrome(service=ChromeService(), options=chrome_options)
+    driver.get(url)
+    # Wait for the page to load completely (you can adjust the wait time as needed)
+    driver.implicitly_wait(10)  # Wait for up to 10 seconds for elements to be available
+    # Find the element containing the gold price (you may need to adjust the selector)
+    tables = driver.find_elements(By.TAG_NAME, 'table')
     res = dict()
+    for table in tables:
+        try:
+            # get the heading of the table using thead tag
+            thead = table.find_element(By.TAG_NAME, 'thead')
+            # search for 'Date' and 'Pure Gold (24K)' in the rows of thead
+            if 'Date' in thead.text and 'Pure Gold (24K)' in thead.text and '22K' in thead.text:
+                rows = table.find_elements(By.TAG_NAME, 'tr')
+                for i, row in enumerate(rows):
+                    if i == 0:
+                        continue
+                    cols = row.find_elements(By.TAG_NAME, 'td')
+                    dt = get_date_or_none_from_string(cols[0].text.strip(), "%d %B %Y")
+                    val24k = get_float_or_none_from_string(cols[1].text.replace('₹ ', '').replace(',',''))
+                    val22k = get_float_or_none_from_string(cols[2].text.replace('₹ ', '').replace(',',''))
+                    if dt and val22k and val24k:
+                        res[dt] = {"24K": val24k/10, "22K":val22k/10}
+        except NoSuchElementException:
+            continue
+    driver.quit()
+    if res:
+        return res
+    # If the above method fails, fallback to requests and BeautifulSoup
+    r = requests.get(url, timeout=15, allow_redirects=True)
     if r.status_code==200:
         print("Fetched page : "+url)
         # Creating a bs4 object to store the contents of the requested page
@@ -36,8 +73,35 @@ def get_latest_physical_gold_price():
     return None   
 
 def get_last_close_digital_gold_price():
-    url = 'https://gadgets.ndtv.com/finance/digital-gold-price-in-india'
-    r = requests.get(url, timeout=15)
+    url = 'https://www.gadgets360.com/finance/digital-gold-price-in-india'
+    # Initialize the WebDriver
+    chrome_options = webdriver.ChromeOptions()
+    #chrome_options.add_argument("--headless")
+    driver = webdriver.Chrome(service=ChromeService(), options=chrome_options)
+    driver.get(url)
+    # Wait for the page to load completely (you can adjust the wait time as needed)
+    driver.implicitly_wait(10)  # Wait for up to 10 seconds for elements to be available
+    # Find the element containing the gold price (you may need to adjust the selector)
+    tables = driver.find_elements(By.TAG_NAME, 'table')
+    res = dict()
+    for table in tables:
+        # get the heading of the table using thead tag
+        thead = table.find_element(By.TAG_NAME, 'thead')
+        # search for 'Date' and 'Pure Gold (24K)' in the rows of thead
+        if 'Date' in thead.text and 'Price' in thead.text and 'Close' in thead.text:
+            rows = table.find_elements(By.TAG_NAME, 'tr')
+            for i, row in enumerate(rows):
+                if i == 0:
+                    continue
+                cols = row.find_elements(By.TAG_NAME, 'td')
+                dt = get_date_or_none_from_string(cols[0].text.strip(), "%d %B %Y")
+                val24k = get_float_or_none_from_string(cols[1].text.replace('₹ ', '').replace(',',''))
+                if dt and val24k:
+                    res[dt] = val24k
+    driver.quit()
+    if res:
+        return res
+    r = requests.get(url, timeout=15, allow_redirects=True)
     if r.status_code==200:
         print("Fetched page : "+url)
         # Creating a bs4 object to store the contents of the requested page
@@ -56,13 +120,14 @@ def get_last_close_digital_gold_price():
                     dt = get_date_or_none_from_string(cols[0].text.strip(), "%d %B %Y")
                     val24k = get_float_or_none_from_string(cols[1].text.replace('₹ ', '').replace(',',''))
                     if dt and val24k:
-                        return dt, val24k
+                        res[dt] = val24k
+                        return res
     elif r.status_code==404:
         print("Page not found")
     else:
         print("A different status code received : "+str(r.status_code))
     print('failed to get any price for digital gold price last close')
-    return None, None
+    return None
 
 '''
 def get_latest_digital_gold_price():
@@ -99,35 +164,6 @@ def get_latest_digital_gold_price():
     return None, None
 '''
 
-def get_date_or_none_from_string(input, format='%Y-%m-%d', printout=True):
-    if input != None and input != '':
-        try:
-            res = datetime.datetime.strptime(input, format).date()
-            return res
-        except Exception as e:
-            if printout:
-                print('error converting ', input, ' to date. returning none' + str(e))
-    return None
-    
-def get_datetime_or_none_from_string(input, format='%d %B %Y %H:%M', printout=True):
-    if input != None and input != '':
-        try:
-            res = datetime.datetime.strptime(input, format)
-            return res
-        except Exception as e:
-            if printout:
-                print(f'error converting {input} to date using format {format}: {e}. returning none')
-    return None
-
-def get_float_or_none_from_string(input, printout=True):
-    if input != None and input != '':
-        try:
-            res = float(input)
-            return res
-        except Exception as e:
-            if printout:
-                print('error converting ', input, ' to float. returning none')
-    return None
 
 '''
 

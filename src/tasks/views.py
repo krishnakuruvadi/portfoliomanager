@@ -64,7 +64,10 @@ def get_tasks(request):
         },
         'update_all_investments': {
             'description':'Update all investments with data fetched from external sources'
-        }
+        },
+        'pull_store_and_update_gold_vals': {
+            'description': 'pull, store and update gold vals for everyone'
+        },
     }
     for task in available_tasks.keys():
         found = False

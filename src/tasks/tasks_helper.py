@@ -53,3 +53,80 @@ def add_transactions_sbi_ssy(ssy_acc_num, transactions):
         else:
             interest_comp = False
         insert_ssy_trans_entry(ssy_acc_num, date_obj, entry, amount,trans['description'], '', interest_comp)
+
+def update_tasks():
+    available_tasks = {
+        'get_mf_navs': {
+            'description':'Get Mutual Fund latest NAV'
+        },
+        'update_mf': {
+            'description':'Update Mutual Fund investment with latest value'
+        },
+        'update_espp': {
+            'description':'Update ESPP investment with latest value'
+        },
+        'update_mf_schemes': {
+            'description':'Check and update latest mutual schemes from fund houses from AMFII'
+        },
+        'update_bse_star_schemes': {
+            'description':'Check and update latest mutual schemes from fund houses from BSE STaR' 
+        },
+        'update_investment_data':{
+            'description':'Update investment data for home view chart'
+        },
+        'update_mf_mapping': {
+            'description': 'Update any missing mapping info between AMFII, BSE STaR and KUVERA'
+        },
+        'update_goal_contrib': {
+            'description': 'Update different investment data for each goal'
+        },
+        'analyse_mf': {
+            'description': 'Analyse different Mutual Funds where users have active investment'
+        },
+        'update_shares_latest_vals': {
+            'description': 'Reconcile and get latest vals of shares'
+        },
+        'mf_update_blend': {
+            'description': 'Update latest blend of Mutual Funds'
+        },
+        'pull_mf_transactions': {
+            'description': 'Pulls mutual fund transactions from supported broker if passwords are stored'
+        },
+        'update_latest_vals_epf_ssy_ppf': {
+            'description': 'Update latest values in PPF, EPF, SSY'
+        },
+        'update_rsu': {
+            'description':'Update RSU investment with latest value'
+        },
+        'pull_corporate_actions_shares': {
+            'description':'Pull corporate actions of shares'
+        },
+        'initial_setup': {
+            'description':'Pull information needed for initial setup'
+        },
+        'fetch_data': {
+            'description':'Pull all information needed from external sources'
+        },
+        'update_all_investments': {
+            'description':'Update all investments with data fetched from external sources'
+        },
+        'pull_store_and_update_gold_vals': {
+            'description':'pull, store and update gold vals for everyone'
+        },
+    }
+    new_tasks = 0
+    existing = 0
+    for task in available_tasks.keys():
+        found = False
+        for task_obj in Task.objects.all():
+            if task_obj.task_name == task:
+                found = True
+                existing += 1
+                break
+        if not found:
+            Task.objects.create(
+                task_name = task,
+                description = available_tasks[task]['description']
+            )
+            new_tasks += 1
+    print(f"INFO: Created {new_tasks} tasks on startup. {existing} tasks already exist.")
