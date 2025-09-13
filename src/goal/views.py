@@ -574,6 +574,8 @@ def add_retirement_goal(request):
     # https://www.youtube.com/watch?v=Zx09vcYq1oc&list=PLLxk3TkuAYnpm24Ma1XenNeq1oxxRcYFT
     template = 'goals/add_retirement_goal.html'
     operation = 'Create Retirement Goal'
+    message = ''
+    message_color = 'ignore'
     if request.method == 'POST':
         print(request.POST)
         if "submit" in request.POST:
@@ -593,6 +595,8 @@ def add_retirement_goal(request):
             add_goal_entry(name, start_date, curr_val, time_period*12, inflation,
                     final_val, user_id, recurring_pay_goal, expense_period*12,
                     post_returns, notes)
+            message_color = 'green'
+            message = 'New goal addition successful'
         else:
             print("calculate button pressed")
             name = request.POST['name']
@@ -615,7 +619,7 @@ def add_retirement_goal(request):
                         'corpus_vals': corpus_vals, 'expense_vals': expense_vals, 'operation':operation, 'curr_module_id':'id_goal_module'}
             return render(request, template, context=context)
     users = get_all_users()
-    context = {'users':users, "labels":None, "data":None, 'operation':operation, 'curr_module_id': 'id_goal_module'}
+    context = {'users':users, "labels":None, "data":None, 'operation':operation, 'curr_module_id': 'id_goal_module', 'message':message, 'message_color':message_color}
     return render(request, template, context)
 
 def update_goal(request, id):
