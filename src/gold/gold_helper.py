@@ -67,22 +67,43 @@ def get_latest_price(buy_type, purity='24K'):
     dt = None
     price = None
     if buy_type == 'Digital':
-        dt, price = get_last_close_digital_gold_price()
         try:
-            HistoricalGoldPrice.objects.create(date=dt, purity='24K', buy_type=buy_type, price=price)
+            ret = get_last_close_digital_gold_price()
+            if ret:
+                for key, val in ret.items():
+                    HistoricalGoldPrice.objects.create(date=key, purity='24K', buy_type=buy_type, price=val)
+                    dt = key
+                    price = val
         except IntegrityError as ie:
-            print(f'error adding entry to gold {dt}, 24K, {buy_type} {price}: {ie}')
+            pass
+        except Exception as ex:
+            print(f'exception getting latest digital gold price {ret}, {buy_type} : {ex}')
     else:
         res = get_latest_physical_gold_price()
         if res:
             print(res)
-            dt = res['date']
-            try:
-                HistoricalGoldPrice.objects.create(date=dt, purity='24K', buy_type=buy_type, price=res['24K'])
-                HistoricalGoldPrice.objects.create(date=dt, purity='22K', buy_type=buy_type, price=res['22K'])
-            except IntegrityError as ie:
-                print(f'error adding entry to gold {res}, {buy_type} : {ie}')
-            price = res.get(purity, None)
+            if 'date' in res:
+                dt = res['date']
+                try:
+                    HistoricalGoldPrice.objects.create(date=dt, purity='24K', buy_type=buy_type, price=res['24K'])
+                    HistoricalGoldPrice.objects.create(date=dt, purity='22K', buy_type=buy_type, price=res['22K'])
+                except IntegrityError as ie:
+                    print(f'error adding entry to gold {res}, {buy_type} : {ie}')
+                price = res.get(purity, None)
+            else:
+                for key, val in res.items():
+                    print(f'adding {key} {val}')
+                    try:
+                        HistoricalGoldPrice.objects.create(date=key, purity='24K', buy_type=buy_type, price=val['24K'])
+                        HistoricalGoldPrice.objects.create(date=key, purity='22K', buy_type=buy_type, price=val['22K'])
+                        if not dt or dt < key:
+                            dt = key
+                            price = val.get(purity, None)
+                    except IntegrityError as ie:
+                        pass
+                    except Exception as ex:
+                        print(f'error adding entry to gold historical price {key}, {val} : {ex}')
+
     if dt and price:
         #print(f'returning {dt} {price} for gold {buy_type} {purity}')
         return price,dt

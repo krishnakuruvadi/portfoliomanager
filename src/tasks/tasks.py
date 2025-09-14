@@ -44,7 +44,7 @@ def set_task_state(name, state):
         
         if state.value == TaskState.Running.value:
             task.current_state = state.value
-            task.last_run = datetime.datetime.now()
+            task.last_run = timezone.now()
         else:
             task.last_run_status = state.value
             task.current_state = TaskState.Unknown.value
@@ -565,6 +565,9 @@ def update_scroll_data_periodic():
 def update_scroll_data_startup():
     update_scroll_data()
 
+@on_startup()
+def update_tasks_startup():
+    update_tasks()
 
 def update_scroll_data_nse(sel_indexes):
     nse = NSE(None)
@@ -1084,6 +1087,31 @@ def update_insurance_policy_vals(policy_num):
         update_policy_val_using_policy_num(policy_num)
     else:
         update_policies()
+
+@db_periodic_task(crontab(minute='10', hour='*/6'))
+def pull_store_and_update_gold_vals():
+    from gold.gold_helper import get_latest_price, update_latest_value
+
+    set_task_state('pull_store_and_update_gold_vals', TaskState.Running)
+    try:
+        dt, val = get_latest_price('Physical', '22K')
+        if not dt or not val:
+            set_task_state('pull_store_and_update_gold_vals', TaskState.Failed)
+        dt, val = get_latest_price('Physical', '24K')
+        if not dt or not val:
+            set_task_state('pull_store_and_update_gold_vals', TaskState.Failed)
+        dt, val = get_latest_price('Digital', '24K')
+        if not dt or not val:
+            set_task_state('pull_store_and_update_gold_vals', TaskState.Failed)
+    except Exception as ex:
+        print(f"ERROR: An exception occured from get_latest_price(). {ex}.")
+        set_task_state('pull_store_and_update_gold_vals', TaskState.Failed)
+    try:
+        update_latest_value(None)
+        set_task_state('pull_store_and_update_gold_vals', TaskState.Successful)
+    except Exception as ex:
+        print(f"ERROR: An exception occured from pull_store_and_update_gold_vals(). {ex}.")
+        set_task_state('pull_store_and_update_gold_vals', TaskState.Failed)
 
 @db_periodic_task(crontab(minute='40', hour='*/8'))
 def update_gold_vals(user=None):
