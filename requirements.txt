@@ -1,7 +1,7 @@
 annotated-types==0.7.0
 anyio==3.6.1
 appdirs==1.4.4
-asgiref==3.7.2
+asgiref==3.9.0
 astroid==2.4.2
 async-generator==1.10
 attrs==23.1.0
@@ -15,7 +15,7 @@ casparser==0.7.4
 casparser_isin==2025.3.1
 certifi==2024.7.4
 cffi==1.17.1
-channels==4.0.0
+channels==4.3.1
 chardet==3.0.4
 charset-normalizer==2.1.1
 click==7.1.2
@@ -24,10 +24,10 @@ commonmark==0.9.1
 constantly==15.1.0
 cryptography==44.0.1
 cssselect==1.1.0
-daphne==4.0.0
+daphne==4.2.1
 dateutils==0.6.8
 Deprecated==1.2.13
-Django==5.0.11
+Django==5.2.7
 django-anymail==8.6
 django-login-required-middleware==0.9.0
 django-solo==2.0.0
