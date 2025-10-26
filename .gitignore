@@ -8,9 +8,5 @@ src/env_files
 src/collected_files
 venv
 __pycache__
-.env
-.pm-env
-.pm-env-test
-.postgresql-env
 huey.db
 db.sqlite3
