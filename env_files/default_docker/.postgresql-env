@@ -1,0 +1,14 @@
+##########################################################################################
+##                                                                                      ##    
+##          All parameters below are specific to the docker deployment method.          ##
+##        If not using docker for deployment, ignore them but do not delete them.       ##
+##              Edit this file as necessary. Please read the comments.                  ##
+##                                                                                      ##                 
+##########################################################################################
+
+# PostgreSQL Configuration
+# Ensure parameters below (POSTGRES_*) match the .pm-env file parameters (DB_*).
+
+POSTGRES_DB=pmdb
+POSTGRES_PASSWORD=secretpassword1!
+POSTGRES_USER=svc_pm

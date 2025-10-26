@@ -1,0 +1,65 @@
+##########################################################################################
+##                                                                                      ##    
+##                  Edit this file as necessary. Please read the comments.              ##
+##                     Don't forget to follow instructions in README.md                 ##
+##                                                                                      ##                 
+##########################################################################################
+
+# SECURITY WARNING: keep the secret key used in production secret!
+# TIP: You can generate a 50 character random string by using a password generator (BitWarden, KeePass, LastPass, etc.)
+
+SECRET_KEY='uuoc10!bp#0bkgq2oyh3s@sd^8%^k3(q8poba@onqv)@9zy(*9'
+
+# Django debug mode. In production off or False is recommended.
+# Value can be set to: True or False (true enables debug mode. false disables debug mode.)
+
+DEBUG=False
+
+# Allow connection from specific hosts or domains. Separate each value with a comma and no space in-between.
+# If using docker, you may need to specify the IP of the container itself or use a wildcard. For example: ALLOWED_HOSTS=*
+
+ALLOWED_HOSTS=127.0.0.1,localhost,portfoliomanager.com
+
+# Database configuration
+# If using docker, set value to postgresql. Else use sqlite3
+
+DB_ENGINE=postgresql
+
+##########################################################################################
+##                                                                                      ##    
+##          All parameters below are specific to the docker deployment method.          ##
+##        If not using docker for deployment, ignore them but do not delete them.       ##
+##                                                                                      ##                 
+##########################################################################################
+
+# PortfolioManager database configuration
+# Ensure parameters below (DB_*) match the .postgresql.env file parameters (POSTGRES_*).
+
+DB_HOST=pm-db
+DB_NAME=pmdb
+DB_USER=svc_pm
+DB_PASSWORD=secretpassword1!
+DB_PORT=5432
+
+# Automated creation of super user through environment variables for docker deployment method.
+DJANGO_SUPERUSER_USERNAME=admin
+DJANGO_SUPERUSER_PASSWORD=secretpassword
+DJANGO_SUPERUSER_EMAIL=admin@portfoliomanager.com
+
+##########################################################################################
+##                                                                                      ##    
+##          All parameters below are specific to the email backend settings.            ##
+##          If not using in-app emails, ignore them but do not delete them.             ##
+##                                                                                      ##                 
+##########################################################################################
+
+# The sample settings below are specific to a MailJet email backend, but it can be modified to Gmail, SendGrid, and others.
+# For MailJet email backend, ensure DEFAULT_FROM_EMAIL is a validated sender in MailJet app settings.
+
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=in-v3.mailjet.com
+EMAIL_USE_TLS=True
+EMAIL_PORT=587
+EMAIL_HOST_USER=MAILJET-API-KEY
+EMAIL_HOST_PASSWORD=MAILJET-SECRET-KEY
+DEFAULT_FROM_EMAIL=info@gmail.com
