@@ -24,6 +24,8 @@ jobs:
           echo "No env_files directory at $GITHUB_WORKSPACE/env_files. Skipping copy."
           exit 0
         fi
+        ls -la "$GITHUB_WORKSPACE/env_files"
+        ls -la "$GITHUB_WORKSPACE/env_files/default_docker/" || true
         echo "Copying env_files/default_docker/* -> env_files/"
         cp "$GITHUB_WORKSPACE/env_files/default_docker/"* "$GITHUB_WORKSPACE/env_files/"
     - name: Log in to Docker Hub
