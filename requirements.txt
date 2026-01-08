@@ -122,7 +122,7 @@ Twisted==24.7.0
 txaio==23.1.1
 typing_extensions==4.11.0
 tzdata==2024.1
-urllib3==2.6.0
+urllib3==2.6.3
 wcwidth==0.2.5
 webencodings==0.5.1
 wheel==0.40.0
