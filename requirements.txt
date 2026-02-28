@@ -14,7 +14,7 @@ camelot-py==0.11.0
 casparser==0.7.4
 casparser_isin==2025.3.1
 certifi==2024.7.4
-cffi==1.17.1
+cffi==2.0.0
 channels==4.3.1
 chardet==3.0.4
 charset-normalizer==2.1.1
@@ -22,7 +22,7 @@ click==7.1.2
 colorama==0.4.6
 commonmark==0.9.1
 constantly==15.1.0
-cryptography==44.0.1
+cryptography==46.0.5
 cssselect==1.1.0
 daphne==4.2.1
 dateutils==0.6.8
@@ -81,7 +81,7 @@ pydantic_core==2.23.4
 Pygments==2.15.0
 PyHamcrest==2.0.2
 pylint==2.6.0
-pyOpenSSL==25.0.0
+pyOpenSSL==25.3.0
 pyotp==2.4.1
 pyparsing==2.4.7
 pypdf==6.7.4
