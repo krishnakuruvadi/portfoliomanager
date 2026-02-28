@@ -66,7 +66,7 @@ ofxparse==0.21
 opencv-python==4.8.1.78
 openpyxl==3.0.10
 outcome==1.2.0
-packaging==20.9
+packaging==26.0
 pandas==2.2.2
 pdfminer.six==20221105
 peewee==3.17.0
@@ -125,7 +125,7 @@ tzdata==2024.1
 urllib3==2.6.3
 wcwidth==0.2.5
 webencodings==0.5.1
-wheel==0.40.0
+wheel==0.46.2
 whitenoise==6.5.0
 wrapt==1.16.0
 wsproto==1.2.0
