@@ -81,7 +81,7 @@ pydantic_core==2.23.4
 Pygments==2.20.0
 PyHamcrest==2.0.2
 pylint==2.6.0
-pyOpenSSL==25.3.0
+pyOpenSSL==26.0.0
 pyotp==2.4.1
 pyparsing==2.4.7
 pypdf==6.7.4
