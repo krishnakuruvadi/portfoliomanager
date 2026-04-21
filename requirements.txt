@@ -54,7 +54,7 @@ jieba3k==0.35.1
 joblib==1.2.0
 jyapyforex==0.1.0
 lazy-object-proxy==1.4.3
-lxml==5.2.1
+lxml==6.1.0
 markdown-it-py==3.0.0
 mccabe==0.6.1
 mdurl==0.1.2
